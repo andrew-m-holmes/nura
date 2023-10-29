@@ -97,7 +97,9 @@ def main():
 
     # dy/dx = m
 
-    print(w * Parameter(10))
+    p = 10
+    print(
+        f"slope of y = {slope} * x + 4 at point {p}: {w * Parameter(p)}")
 
 
 if __name__ == "__main__":
