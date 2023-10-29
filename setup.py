@@ -6,6 +6,5 @@ setup(
     author="Andrew Holmes",
     author_email="andrewholmes011002@gmail.com",
     url="https://github.com/Andrew011002/Deep-Neural-Networks",
-    packages=find_packages("dnn"),
     python_requires=">=3.6",
 )
