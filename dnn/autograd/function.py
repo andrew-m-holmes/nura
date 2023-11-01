@@ -19,7 +19,7 @@ class BackwardFunction(FunctionCtx):
 class FunctionMeta(type):
 
     def __init__(cls, name, bases, attrs) -> None:
-        backward_fn = type(name, (BackwardFunction, ), {
+        backward_fn = type(f"{name}Backward", (BackwardFunction, ), {
                            "_forward_cls": cls})
         cls._backward_fn = backward_fn
         super().__init__(name, bases, attrs)

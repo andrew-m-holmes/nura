@@ -8,5 +8,6 @@ class MyFunc(Function):
     def forward(ctx, *tensors):
         pass
 
+    @staticmethod
     def backward(ctx, grad):
         pass
