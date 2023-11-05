@@ -8,12 +8,12 @@ class Node:
         self.ctx = ctx
         self.backward_fn = backward_fn
         self.next_functions = self._get_next_functions(ctx)
-        # self._setup_output(output, ctx)
+        self._setup_output(output, ctx)
 
     def backward(self, grad):
         tensor_grads = self.backward_fn(self.ctx, grad)
         for tensor_grad, next_function in zip(tensor_grads, self.next_functions):
-            next_grad = tensor_grad * grad
+            next_grad = Tensor(tensor_grad.data * grad.data)
             next_function.backward(next_grad)
 
     def _get_next_functions(self, ctx):

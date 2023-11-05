@@ -19,9 +19,8 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            grad = self.__init__(np.ones_like(self.data))
-        print(self.grad_fn)
-        self.grad_fn.backward(grad)
+            self.grad = Tensor(np.ones_like(self.data))
+        self.grad_fn.backward(self.grad)
 
 
 if __name__ == "__main__":

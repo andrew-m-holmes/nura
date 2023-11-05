@@ -22,5 +22,7 @@ if __name__ == "__main__":
             return grad_a, grad_b
 
     c = Mul.apply(a, b)
-    print(c.grad_fn)
     c.backward()
+    print(a.grad)
+    print(b.grad)
+    print(c)

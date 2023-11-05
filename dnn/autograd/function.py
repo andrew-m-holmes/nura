@@ -25,5 +25,5 @@ class Function:
     def apply(cls, *tensors):
         ctx = Context()
         output = cls.forward(ctx, *tensors)
-        output.grad_fn = Node(ctx, output, cls.backward)
+        Node(ctx, output, cls.backward)
         return output
