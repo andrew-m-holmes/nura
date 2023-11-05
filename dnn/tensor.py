@@ -17,13 +17,13 @@ class Tensor:
             else f"use_grad={self.use_grad})"
         return rep
 
+    def backward(self, grad=None):
+        if grad is None:
+            grad = self.__init__(np.ones_like(self.data))
+        print(self.grad_fn)
+        self.grad_fn.backward(grad)
 
-t = torch.tensor(1.0, requires_grad=True)
-d = t * 5.0
-print(t)
-print(t.grad_fn)
-d.backward()
-print(t.grad)
+
 if __name__ == "__main__":
     a = [[1, 2, 3,], [4, 5, 6], [7, 8, 9]]
     tensor = Tensor(a)

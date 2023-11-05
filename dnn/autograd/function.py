@@ -1,4 +1,4 @@
-from graph import generate_node
+from graph import Node
 
 
 class Context:
@@ -7,22 +7,23 @@ class Context:
         raise NotImplementedError
 
     def save_for_backward(self, *tensors):
-        self.saved_backward_tensors = tensors
+        assert (isinstance(tensors) for tensor in tensors)
+        self.saved_tensors = tensors
 
 
 class Function:
 
     @staticmethod
     def forward(ctx, *tensors):
-        pass
+        raise NotImplementedError
 
     @staticmethod
     def backward(ctx, grad):
-        pass
+        raise NotImplementedError
 
     @classmethod
     def apply(cls, *tensors):
         ctx = Context()
         output = cls.forward(ctx, *tensors)
-        generate_node(cls.backward, ctx)
+        output.grad_fn = Node(ctx, output, cls.backward)
         return output
