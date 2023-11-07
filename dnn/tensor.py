@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 
 
 class Tensor:
@@ -21,9 +20,3 @@ class Tensor:
         if grad is None:
             self.grad = Tensor(np.ones_like(self.data))
         self.grad_fn.backward(self.grad)
-
-
-if __name__ == "__main__":
-    a = [[1, 2, 3,], [4, 5, 6], [7, 8, 9]]
-    tensor = Tensor(a)
-    print(tensor)
