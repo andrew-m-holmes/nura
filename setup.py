@@ -5,11 +5,11 @@ with open("./requirements.txt", mode="r") as file:
     requirements = [line.strip() for line in lines]
 
 setup(
-    name="dnn",
+    name="deepnet",
     version="0.1.0",
     author="Andrew Holmes",
     author_email="andrewholmes011002@gmail.com",
-    url="https://github.com/Andrew011002/Deep-Neural-Networks",
+    url="https://github.com/Andrew011002/deepent",
     python_requires=">=3.6",
     packages=find_packages(exclude=["*venv*"]),
     install_requires=requirements,
