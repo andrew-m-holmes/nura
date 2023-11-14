@@ -1,5 +1,5 @@
-from deepnet.tensor import Tensor
 from deepnet.autograd.function import Function
+from deepnet.tensor import Tensor
 
 
 class Add(Function):

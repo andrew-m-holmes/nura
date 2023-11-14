@@ -1,5 +1,5 @@
 import numpy as np
-from deepnet.tensor import Tensor
+from deepnet.tensor import tensor
 
 
 class Node:
@@ -34,7 +34,7 @@ class AccumulateGrad:
 
     def apply(self, grad):
         if self._tensor.grad is None:
-            self._tensor.grad = Tensor(
+            self._tensor.grad = tensor(
                 np.zeros_like(self._tensor.data))
         self._tensor.grad.data += grad.data
 
