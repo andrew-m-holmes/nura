@@ -21,6 +21,9 @@ def main():
     print(a.grad, b.grad)
     print(tensor(1, use_grad=1))
 
+    assert a.grad == b.data
+    assert b.grad == a.data
+
 
 if __name__ == "__main__":
     main()
