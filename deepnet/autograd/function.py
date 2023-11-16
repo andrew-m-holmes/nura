@@ -1,4 +1,4 @@
-from deepnet.tensor import Tensor
+from deepnet import Tensor
 from deepnet.autograd.graph import pass_to_graph
 
 

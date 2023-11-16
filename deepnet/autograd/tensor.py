@@ -1,5 +1,4 @@
 import numpy as np
-import deepnet.nn.functional as f
 
 
 def tensor(data, use_grad=False, dtype=None):
@@ -30,6 +29,11 @@ def _list_checker(data, dtypes):
     return type(data) in dtypes
 
 
+def _functional_module():
+    import deepnet.nn.functional as f
+    return f
+
+
 class Tensor:
 
     def __init__(self, data, use_grad=False, dtype=None) -> None:
@@ -51,10 +55,13 @@ class Tensor:
         return rep
 
     def __add__(self, other: "Tensor") -> "Tensor":
+        f = _functional_module()
         return f.add(self, other)
 
     def __sub__(self, other: "Tensor") -> "Tensor":
+        f = _functional_module()
         return f.sub(self, other)
 
     def __mul__(self, other: "Tensor") -> "Tensor":
+        f = _functional_module()
         return f.mul(self, other)

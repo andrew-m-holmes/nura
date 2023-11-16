@@ -1,5 +1,5 @@
 import numpy as np
-from deepnet.tensor import tensor
+from deepnet import tensor
 
 
 class Node:
