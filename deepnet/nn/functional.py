@@ -1,75 +1,40 @@
+import numpy as np
 from deepnet import Tensor
-from deepnet.autograd.function import Function
+from deepnet.autograd.primitives import *
 
 
-class Add(Function):
-
-    @staticmethod
-    def forward(*tensors: Tensor):
-        a, b = tensors
-        out = a.data + b.data
-        return Tensor(out)
-
-    @staticmethod
-    def create_context(context, *tensors):
-        context.save_for_backward(*tensors)
-        return context
-
-    @staticmethod
-    def backward(context, grad):
-        grad_a = 1 * grad.data
-        grad_b = 1 * grad.data
-        return Tensor(grad_a), Tensor(grad_b)
+def add(a, b):
+    out = Add.apply(a, b)
+    return out
 
 
-def add(a: Tensor, b: Tensor) -> Tensor:
-    return Add.apply(a, b)
+def sub(a, b):
+    out = Sub.apply(a, b)
+    return out
 
 
-class Sub(Function):
-
-    @staticmethod
-    def forward(*tensors: Tensor):
-        a, b = tensors
-        out = a.data - b.data
-        return Tensor(out)
-
-    @staticmethod
-    def create_context(context, *tensors):
-        context.save_for_backward(*tensors)
-        return context
-
-    @staticmethod
-    def backward(context, grad):
-        grad_a = 1 * grad.data
-        grad_b = 1 * grad.data
-        return Tensor(grad_a), Tensor(grad_b)
+def mul(a, b):
+    out = Mul.apply(a, b)
+    return out
 
 
-def sub(a: Tensor, b: Tensor) -> Tensor:
-    return Sub.apply(a, b)
+def div(a, b):
+    out = Div.apply(a, b)
+    return out
 
 
-class Mul(Function):
-
-    @staticmethod
-    def forward(*tensors: Tensor):
-        a, b = tensors
-        out = a.data * b.data
-        return Tensor(out)
-
-    @staticmethod
-    def create_context(context, *tensors):
-        context.save_for_backward(*tensors)
-        return context
-
-    @staticmethod
-    def backward(context, grad):
-        a, b = context.saved_tensors()
-        grad_a = b.data * grad.data
-        grad_b = a.data * grad.data
-        return Tensor(grad_a), Tensor(grad_b)
+def matmul(a, b):
+    out = Matmul.apply(a, b)
+    return out
 
 
-def mul(a: Tensor, b: Tensor):
-    return Mul.apply(a, b)
+def pow(a, b):
+    if not isinstance(b, Tensor):
+        b = Tensor(b)
+    out = Pow.apply(a, b)
+    return out
+
+
+def tranpose(tensor: Tensor, dim_0, dim_1):
+    out = Tranpose.apply(tensor, dim_0, dim_1)
+    return out

@@ -1,28 +1,15 @@
 import deepnet
 import deepnet.nn.functional as f
-
-
-def test_add():
-    pass
-
-
-def test_mul():
-    pass
+import numpy as np
 
 
 def main():
-
-    a = deepnet.tensor(3, use_grad=True)
-    b = deepnet.tensor(4, use_grad=True)
-    c = a * b
-
-    print(c)
+    da = np.ones((2, 3, 5))
+    db = np.ones((2, 5, 6))
+    a, b = deepnet.tensor(da, use_grad=True), \
+        deepnet.tensor(db, use_grad=True)
+    c = a @ b
     c.backward()
-    print(a.grad, b.grad)
-    print(deepnet.tensor(1, use_grad=1))
-
-    assert a.grad.data == b.data
-    assert b.grad.data == a.data
 
 
 if __name__ == "__main__":

@@ -38,7 +38,8 @@ class FunctionMeta(type):
 class Function(metaclass=FunctionMeta):
 
     @staticmethod
-    def forward(*tensors):
+    def forward(*args, **kwargs):
+        # TODO move context to prevent repeated operations from being computed
         raise NotImplementedError
 
     @staticmethod
@@ -46,12 +47,12 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @staticmethod
-    def create_context(context, *tensors):
+    def create_context(context, *args):
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *tensors):
-        context = cls.create_context(cls._backward_cls(), *tensors)
-        output = cls.forward(*tensors)
+    def apply(cls, *args, **kwargs):
+        context = cls.create_context(cls._backward_cls(), *args)
+        output = cls.forward(*args, **kwargs)
         pass_to_graph(context, output)
         return output
