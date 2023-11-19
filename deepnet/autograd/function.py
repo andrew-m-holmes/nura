@@ -40,7 +40,6 @@ class Function(metaclass=FunctionMeta):
 
     @staticmethod
     def forward(context, *args, **kwargs):
-        # TODO move context to prevent repeated operations from being computed
         raise NotImplementedError
 
     @staticmethod

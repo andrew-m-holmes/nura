@@ -3,9 +3,6 @@ import numpy as np
 from deepnet import Tensor
 from deepnet.autograd.function import Function, Context
 
-# TODO update functions with new context and add type inference
-# also don't use tensor operations (that modify state) on forward or backward pass (prevent side effects)
-
 
 class Add(Function):
 
@@ -92,15 +89,15 @@ class Pow(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
-        out = np.power(a.data, b.data)
+        out = Tensor(np.power(a.data, b.data))
         context.save_for_backward(a, b, out)
-        return Tensor(out)
+        return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b, out = context.saved_tensors()
         grad_a = Tensor(b.data * np.power(a.data, b.data - 1) * grad.data)
-        grad_b = Tensor(out.data, * np.log(a.data) * grad.data)
+        grad_b = Tensor(out.data * np.log(a.data) * grad.data)
         return grad_a, grad_b
 
 

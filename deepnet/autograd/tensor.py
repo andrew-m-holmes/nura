@@ -11,6 +11,8 @@ class Tensor:
         self.is_leaf = True
 
     def backward(self, grad=None):
+        assert self.grad_fn is not None, \
+            "Cannot differentiate a non-differentiable Tensor"
         if grad is None:
             grad = Tensor(np.ones_like(self.data))
         self.grad_fn.apply(grad)
@@ -26,6 +28,11 @@ class Tensor:
 
     def detach(self):
         return Tensor(self.data, use_grad=False)
+
+    def zero(self):
+        assert self.grad is not None, \
+            "cannot zero a grad that does not exist"
+        self.grad.data = np.zeros_like(self.grad.data)
 
     def tranpose(self, dim_0, dim_1):
         f = _functional_module()
