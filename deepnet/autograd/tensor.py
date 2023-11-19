@@ -15,7 +15,7 @@ class Tensor:
             grad = Tensor(np.ones_like(self.data))
         self.grad_fn.apply(grad)
 
-    def size(self):
+    def dim(self):
         return self.data.shape
 
     def ndim(self):

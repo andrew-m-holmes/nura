@@ -1,5 +1,6 @@
 from deepnet import Tensor
 from deepnet.autograd.graph import pass_to_graph
+from typing import Tuple
 
 
 class Context:
@@ -15,7 +16,7 @@ class Context:
             "Function Context only accepts Tensors"
         self._saved_tensors = tensors
 
-    def saved_tensors(self):
+    def saved_tensors(self) -> Tuple[Tensor, ...]:
         return self._saved_tensors
 
 
@@ -38,7 +39,7 @@ class FunctionMeta(type):
 class Function(metaclass=FunctionMeta):
 
     @staticmethod
-    def forward(*args, **kwargs):
+    def forward(context, *args, **kwargs):
         # TODO move context to prevent repeated operations from being computed
         raise NotImplementedError
 
@@ -46,13 +47,9 @@ class Function(metaclass=FunctionMeta):
     def backward(context, grad):
         raise NotImplementedError
 
-    @staticmethod
-    def create_context(context, *args):
-        raise NotImplementedError
-
     @classmethod
     def apply(cls, *args, **kwargs):
-        context = cls.create_context(cls._backward_cls(), *args)
-        output = cls.forward(*args, **kwargs)
+        context = cls._backward_cls()
+        output = cls.forward(context, *args, **kwargs)
         pass_to_graph(context, output)
         return output
