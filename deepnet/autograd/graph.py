@@ -1,5 +1,6 @@
 import numpy as np
-from deepnet import tensor
+import deepnet
+from deepnet.autograd.mode import Grad
 
 
 class Node:
@@ -34,7 +35,7 @@ class AccumulateGrad:
 
     def apply(self, grad):
         if self._tensor.grad is None:
-            self._tensor.grad = tensor(
+            self._tensor.grad = deepnet.tensor(
                 np.zeros_like(self._tensor.data))
         self._tensor.grad.data += grad.data
 
@@ -47,11 +48,11 @@ class AccumulateGrad:
 
 
 def pass_to_graph(context, output):
-    if any(tensor.use_grad for tensor in context.saved_tensors()):
+    if Grad.enabled() and any(
+            tensor.use_grad for tensor in context.saved_tensors()):
         next_functions = _get_next_functions(context)
-        output.grad_fn = Node(context, next_functions)
-        output.use_grad = True
-        output.is_leaf = False
+        node = Node.with_context(context, next_functions)
+        _set_tensor_grad_state(output, True, node, False)
 
 
 def _get_next_functions(context):
@@ -65,9 +66,13 @@ def _get_next_functions(context):
 
 
 def _get_next_functions_helper(tensor):
-    if tensor.use_grad and tensor.is_leaf:
+    if tensor.is_leaf and tensor.use_grad:
         context = AccumulateGrad.with_tensor(tensor)
         return Node.with_context(context, next_functions=None)
-    if tensor.use_grad:
-        return tensor.grad_fn
-    return None
+    return tensor.grad_fn
+
+
+def _set_tensor_grad_state(tensor, use_grad, grad_fn, is_leaf):
+    tensor.use_grad = use_grad
+    tensor.grad_fn = grad_fn
+    tensor.is_leaf = is_leaf

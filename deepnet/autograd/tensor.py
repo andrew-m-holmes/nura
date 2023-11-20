@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 
 
 class Tensor:
@@ -17,16 +18,16 @@ class Tensor:
             grad = Tensor(np.ones_like(self.data))
         self.grad_fn.apply(grad)
 
-    def dim(self):
+    def dim(self) -> Tuple[int, ...]:
         return self.data.shape
 
-    def ndim(self):
+    def ndim(self) -> int:
         return self.data.ndim
 
     def dtype(self):
         return self.data.dtype
 
-    def detach(self):
+    def detach(self) -> "Tensor":
         return Tensor(self.data, use_grad=False)
 
     def zero(self):
@@ -34,7 +35,7 @@ class Tensor:
             "cannot zero a grad that does not exist"
         self.grad.data = np.zeros_like(self.grad.data)
 
-    def tranpose(self, dim_0, dim_1):
+    def tranpose(self, dim_0, dim_1) -> "Tensor":
         f = _functional_module()
         return f.tranpose(self, dim_0, dim_1)
 
@@ -82,13 +83,17 @@ def tensor(data, use_grad=False, dtype=None):
     if dtype is not None:
         assert dtype in dtypes, \
             f"Invalid dtype passed to tensor(): {dtype}"
+    if use_grad:
+        dtype = np.float32 if dtype is None else dtype
+        assert dtype in [float, np.float16, np.float32, np.float64, np.float128], \
+            "Can only compute grads for float dtypes"
     if isinstance(data, list):
         assert _list_checker(data, dtypes), \
             "Invalid data found in list, tensor() can only handle numeric dtypes"
     if isinstance(data, np.ndarray):
         assert data.dtype in dtypes, \
             "Invalid data found in numpy.ndarray, tensor() can only handle numeric dtypes"
-    return Tensor(data, bool(use_grad), dtype)
+    return Tensor(data, use_grad, dtype)
 
 
 def _list_checker(data, dtypes):

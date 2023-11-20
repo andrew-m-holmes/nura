@@ -1,6 +1,5 @@
 import deepnet
 import deepnet.nn.functional as f
-import numpy as np
 
 
 def main():

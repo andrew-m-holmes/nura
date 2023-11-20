@@ -1,4 +1,4 @@
-from deepnet import Tensor
+import deepnet
 from deepnet.autograd.primitives import *
 
 
@@ -48,7 +48,7 @@ def _format_to_tensor(*args):
     tensors = []
     for arg in args:
         if not isinstance(arg, Tensor):
-            tensors.append(Tensor(arg))
+            tensors.append(deepnet.tensor(arg))
         else:
             tensors.append(arg)
     return tensors

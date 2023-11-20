@@ -1,5 +1,5 @@
-from typing import Any
 import numpy as np
+from typing import Any
 from deepnet import Tensor
 from deepnet.autograd.function import Function, Context
 
