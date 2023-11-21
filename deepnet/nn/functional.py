@@ -44,11 +44,17 @@ def tranpose(a, dim_0, dim_1):
     return out
 
 
-def _format_to_tensor(*args):
+def clone(a):
+    a = _format_to_tensor(a)[0]
+    out = Clone.apply(a)
+    return out
+
+
+def _format_to_tensor(*inputs):
     tensors = []
-    for arg in args:
-        if not isinstance(arg, Tensor):
-            tensors.append(deepnet.tensor(arg))
+    for input in inputs:
+        if not isinstance(input, Tensor):
+            tensors.append(deepnet.tensor(input))
         else:
-            tensors.append(arg)
+            tensors.append(input)
     return tensors

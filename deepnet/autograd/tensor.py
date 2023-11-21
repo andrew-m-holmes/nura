@@ -30,6 +30,10 @@ class Tensor:
     def detach(self) -> "Tensor":
         return Tensor(self.data, use_grad=False)
 
+    def clone(self) -> "Tensor":
+        f = _functional_module()
+        return f.clone(self)
+
     def zero(self):
         assert self.grad is not None, \
             "cannot zero a grad that does not exist"

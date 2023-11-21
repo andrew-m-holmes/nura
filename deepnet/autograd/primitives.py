@@ -117,3 +117,16 @@ class Tranpose(Function):
         size = context.size
         grad_data = Tensor(grad.data.transpose(size))
         return (grad_data,)
+
+
+class Clone(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save_for_backward(a)
+        out = Tensor(a.data.copy(), use_grad=a.use_grad, dtype=a.dtype())
+        return out
+
+    @staticmethod
+    def backward(context: Any, grad: Tensor):
+        return (grad,)

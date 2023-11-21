@@ -3,6 +3,7 @@ from contextlib import contextmanager
 
 class Grad:
 
+    _reverse = True
     _use_grad = True
 
     @classmethod
