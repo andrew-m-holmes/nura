@@ -73,6 +73,11 @@ class Tensor:
         f = _functional_module()
         return f.pow(self, other)
 
+    def _set_grad_state(self, use_grad, grad_fn, is_leaf):
+        self.use_grad = use_grad
+        self.grad_fn = grad_fn
+        self.is_leaf = is_leaf
+
 
 def tensor(data, use_grad=False, dtype=None):
     dtypes = [

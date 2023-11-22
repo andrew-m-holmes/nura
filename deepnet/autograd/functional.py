@@ -1,6 +1,6 @@
+import numpy as np
 import deepnet
 from collections import deque
-from deepnet.autograd.graph import AccumulateGrad, Node
 
 
 def jacobian(input, func):
@@ -10,51 +10,65 @@ def jacobian(input, func):
     pass
 
 
-def vjp(inputs, vector, func, keep_graph=False):
-    inputs = _vjp_setup_inputs(inputs, keep_graph)
+def vjp(primals, cotangent, func, use_graph=False):
+    assert _is_differentiable(*primals, cotangent), \
+        "Can only differentiate Tensors of float dtypes"
+    primals, cotangent = _vjp_pre_process(primals, cotangent, use_graph)
     with deepnet.use_grad():
-        output = func(*inputs)
+        output = func(*primals)
 
-    node = output.grad_fn
-    queue = deque([(node, vector)])
     cotangents = []
-    while queue:
-        node, grad = queue.pop()
-        next_nodes, grads = _vjp_next_grads_helper(node, grad)
-        queue.extend(next_nodes)
-        cotangents.extend(reversed(grads))
-
-    output, cotangents = _vjp_post_process(output, cotangents, keep_graph)
-    return output, cotangents
-
-
-def _vjp_next_grads_helper(node, grad):
-    next_grads, vectors, = [], []
-    grads = _node_hijack_apply(node, grad)
-    for node, grad, in zip(node.next_functions, grads):
-        if node is not None and not isinstance(node.context, AccumulateGrad):
-            next_grads.append((node, grad))
-        elif node is not None and isinstance(node.context, AccumulateGrad):
-            vectors.append(grad)
-    return next_grads, vectors
+    stack = [(output.grad_fn, cotangent)]
+    while stack:
+        node, cotangent = stack.pop()
+        if _is_leaf_node(node):
+            cotangents.append(cotangent)
+        elif _is_intermediate_node(node):
+            next_nodes, next_cotangents = _process_node(node, cotangent)
+            for node, cotangent in zip(next_nodes, next_cotangents):
+                if _is_leaf_node(node) or _is_intermediate_node(node):
+                    stack.append((node, cotangent))
+    return _vjp_post_process(output, cotangents, use_graph)
 
 
-def _vjp_post_process(output, vectors, keep_graph):
-    if not keep_graph:
-        output = output.clone().detach()
-    vectors = tuple(reversed(vectors)) if len(vectors) > 1 else vectors[0]
-    return output, vectors
+def _process_node(node, cotangent):
+    next_cotangents = node.context.apply(cotangent)
+    return node.next_functions, next_cotangents
 
 
-def _vjp_setup_inputs(inputs, keep_graph):
-    temp = inputs
-    inputs = []
-    for input in temp:
-        if not keep_graph:
-            input = input.clone().detach()
-        input.use_grad = True
-        inputs.append(input)
-    return inputs
+def _vjp_post_process(output, cotangents, use_graph):
+    if not use_graph:
+        del output.grad_fn
+        output._set_grad_state(False, None, False)
+    return output, tuple(reversed(cotangents))
+
+
+def _vjp_pre_process(primals, cotangent, use_graph):
+    temp = primals
+    primals = []
+    for primal in temp:
+        if not use_graph:
+            primal = primal.clone().detach()
+        primal.use_grad = True
+        primals.append(primal)
+    cotangent.use_grad = True
+    return primals, cotangent
+
+
+def _is_differentiable(*tensors):
+    dtypes = [float, np.float16, np.float32, np.float64, np.float128]
+    return all(tensor.dtype() in dtypes for tensor in tensors)
+
+
+def _is_leaf_node(node):
+    if node is not None:
+        return hasattr(node.context, "tensor")
+    return False
+
+
+def _is_intermediate_node(node):
+    if node is not None:
+        return not hasattr(node.context, "tensor")
 
 
 def jvp(input, vector, func):
@@ -70,23 +84,3 @@ def grad(inputs, outputs):
     # gradients for every input passed
     # will not accumulate them
     pass
-
-
-def _node_hijack_apply(node, grad):
-    backward_fn = node.context.apply
-    grad = backward_fn(grad)
-    return grad
-
-
-def _create_reverse_graph(output, root_descending=False):
-    stack = [output.grad_fn]
-    graph_nodes = []
-    while stack:
-        node = stack.pop()
-        if node is not None and not isinstance(node.context, AccumulateGrad):
-            graph_nodes.append(node)
-            for child_node in node.next_functions:
-                stack.append(child_node)
-    if root_descending:
-        graph_nodes.reverse()
-    return graph_nodes

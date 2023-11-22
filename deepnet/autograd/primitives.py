@@ -96,7 +96,7 @@ class Pow(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b, out = context.saved_tensors()
-        grad_a = Tensor(b.data * np.power(a.data, b.data - 1) * grad.data)
+        grad_a = Tensor(b.data * np.power(a.data, b.data - 1.) * grad.data)
         grad_b = Tensor(out.data * np.log(a.data) * grad.data)
         return grad_a, grad_b
 

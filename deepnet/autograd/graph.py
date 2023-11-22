@@ -52,7 +52,7 @@ def pass_to_graph(context, output):
             tensor.use_grad for tensor in context.saved_tensors()):
         next_functions = _get_next_functions(context)
         node = Node.with_context(context, next_functions)
-        _set_tensor_grad_state(output, True, node, False)
+        output._set_grad_state(use_grad=True, grad_fn=node, is_leaf=False)
 
 
 def _get_next_functions(context):
@@ -70,9 +70,3 @@ def _get_next_functions_helper(tensor):
         context = AccumulateGrad.with_tensor(tensor)
         return Node.with_context(context, next_functions=None)
     return tensor.grad_fn
-
-
-def _set_tensor_grad_state(tensor, use_grad, grad_fn, is_leaf):
-    tensor.use_grad = use_grad
-    tensor.grad_fn = grad_fn
-    tensor.is_leaf = is_leaf
