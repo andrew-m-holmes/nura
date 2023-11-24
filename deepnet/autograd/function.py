@@ -1,5 +1,5 @@
 from deepnet import Tensor
-from deepnet.autograd.graph import pass_to_graph
+from deepnet.autograd.graph import Grad, pass_to_graph
 from typing import Tuple
 
 
@@ -46,9 +46,17 @@ class Function(metaclass=FunctionMeta):
     def backward(context, grad):
         raise NotImplementedError
 
+    @staticmethod
+    def jvp(context, grad):
+        raise NotImplementedError
+
     @classmethod
     def apply(cls, *args, **kwargs):
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)
         pass_to_graph(context, output)
         return output
+
+
+def cast_data_to_tensor(data):
+    pass

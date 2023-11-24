@@ -49,6 +49,13 @@ class Mul(Function):
         grad_b = Tensor(a.data * grad.data)
         return grad_a, grad_b
 
+    @staticmethod
+    def jvp(context: Context, tangent: Tensor):
+        a, b = context.saved_tensors()
+        tangent_a = Tensor(tangent.data * b.data)
+        tangent_b = Tensor(tangent.data * a.data)
+        return tangent_a, tangent_b
+
 
 class Div(Function):
 
