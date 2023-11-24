@@ -1,6 +1,5 @@
 import numpy as np
 import deepnet
-from collections import deque
 
 
 def jacobian(input, func):
@@ -48,7 +47,7 @@ def _vjp_pre_process(primals, cotangent, use_graph):
     primals = []
     for primal in temp:
         if not use_graph:
-            primal = primal.clone().detach()
+            primal = primal.detach().clone()
         primal.use_grad = True
         primals.append(primal)
     cotangent.use_grad = True
@@ -71,7 +70,7 @@ def _is_intermediate_node(node):
         return not hasattr(node.context, "tensor")
 
 
-def jvp(input, vector, func):
+def jvp(primals, tangents, func):
     # evaluates the function at a particular input
     # (in forward mode) and returns the dot product
     # between the vector of interest and the computed

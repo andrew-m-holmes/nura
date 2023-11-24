@@ -1,22 +1,19 @@
 import deepnet
 import deepnet.nn.functional as f
-import numpy as np
 from deepnet.autograd.functional import vjp
 
 
 def main():
 
-    def func(a, b, c):
-        d = a + b * c / 1000
-        return d
+    def func(x, w, b):
+        return f.matmul(x, w) + b
 
-    a = deepnet.tensor(1.)
-    b = deepnet.tensor(2.)
-    c = deepnet.tensor(3.)
-
-    v = deepnet.tensor(2.)
-    output, cotangents = vjp((a, b, c), v, func, use_graph=True)
-    print(output, cotangents)
+    primals = (deepnet.tensor([[1., 2., 3.]]), deepnet.tensor(
+        [[1., 1.], [2., 2.], [3., 3.]]), deepnet.tensor(.5))
+    cotangent = deepnet.tensor([[1., 1.]])
+    output, cotangents = vjp(primals, cotangent, func)
+    print(output)
+    print(cotangents)
 
 
 if __name__ == "__main__":
