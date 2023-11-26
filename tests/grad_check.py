@@ -1,19 +1,18 @@
 import deepnet
 import deepnet.nn.functional as f
-from deepnet.autograd.functional import vjp
+from deepnet.autograd.forward_autograd import make_dual
 
 
 def main():
 
-    def func(x, w, b):
-        return f.matmul(x, w) + b
-
-    primals = (deepnet.tensor([[1., 2., 3.]]), deepnet.tensor(
-        [[1., 1.], [2., 2.], [3., 3.]]), deepnet.tensor(.5))
-    cotangent = deepnet.tensor([[1., 1.]])
-    output, cotangents = vjp(primals, cotangent, func)
-    print(output)
-    print(cotangents)
+    a = deepnet.tensor(3., use_grad=True)
+    b = deepnet.tensor(4., use_grad=True)
+    a = make_dual(a, deepnet.tensor(1.))
+    b = make_dual(b, deepnet.tensor(1.))
+    with deepnet.forward_autograd():
+        c = f.mul(a, b)
+        d = f.mul(c, a)
+        print(d)
 
 
 if __name__ == "__main__":

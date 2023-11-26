@@ -1,6 +1,5 @@
-import numpy as np
 import deepnet
-from deepnet.autograd.mode import Grad
+import numpy as np
 
 
 class Node:
@@ -52,6 +51,7 @@ def _pass_to_graph(context, output):
         next_functions = _get_next_functions(context)
         node = Node.with_context(context, next_functions)
         output._set_grad_state(use_grad=True, grad_fn=node, is_leaf=False)
+        return output
 
 
 def _get_next_functions(context):
