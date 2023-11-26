@@ -44,9 +44,11 @@ class Tensor:
         return f.tranpose(self, dim_0, dim_1)
 
     def __repr__(self) -> str:
-        rep = f"({self.data}, "
-        rep += f"grad_fn={self.grad_fn})" if self.use_grad \
-            else f"use_grad={self.use_grad})"
+        rep = f"tensor({self.data}, "
+        rep += f"use_grad={self.use_grad}"
+        if self.use_grad:
+            rep += f", grad_fn={self.grad_fn}"
+        rep += ")"
         return rep
 
     def __add__(self, other: "Tensor") -> "Tensor":
@@ -114,8 +116,3 @@ def _list_checker(data, dtypes):
 def _functional_module():
     import deepnet.nn.functional as f
     return f
-
-
-def _utils_module():
-    import deepnet.utils as utils
-    return utils
