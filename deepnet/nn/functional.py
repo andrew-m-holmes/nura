@@ -1,5 +1,5 @@
 import deepnet
-from deepnet.autograd.primitives import *
+from .primitives import *
 
 
 def add(a, b):
