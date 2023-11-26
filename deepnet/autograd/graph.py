@@ -1,4 +1,5 @@
 import deepnet
+from deepnet import Tensor
 import numpy as np
 
 
@@ -15,6 +16,7 @@ class Node:
                 self.next_functions, next_grads)
 
     def _apply_next_functions(self, next_functions, next_grads):
+        next_grads = _preprocess_grad_output(next_grads)
         for next_function, grad in zip(next_functions, next_grads):
             if next_function is not None:
                 next_function.apply(grad)
@@ -51,7 +53,7 @@ def _pass_to_graph(context, output):
         next_functions = _get_next_functions(context)
         node = Node.with_context(context, next_functions)
         output._set_grad_state(use_grad=True, grad_fn=node, is_leaf=False)
-        return output
+    return output
 
 
 def _get_next_functions(context):
@@ -69,3 +71,11 @@ def _get_next_functions_helper(tensor):
         context = AccumulateGrad.with_tensor(tensor)
         return Node.with_context(context, next_functions=None)
     return tensor.grad_fn
+
+
+def _preprocess_grad_output(grad):
+    assert isinstance(grad, Tensor) or isinstance(grad, tuple), \
+        f"Grad pre-processor received an invalid argument: {grad}"
+    if isinstance(grad, Tensor):
+        grad = (grad,)
+    return grad

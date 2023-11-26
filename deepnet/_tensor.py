@@ -39,6 +39,10 @@ class Tensor:
             "cannot zero a grad that does not exist"
         self.grad.data = np.zeros_like(self.grad.data)
 
+    def squeeze(self, dim=None) -> "Tensor":
+        f = _functional_module()
+        return f.squeeze(self, dim)
+
     def tranpose(self, dim_0, dim_1) -> "Tensor":
         f = _functional_module()
         return f.tranpose(self, dim_0, dim_1)

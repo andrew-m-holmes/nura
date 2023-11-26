@@ -110,6 +110,59 @@ class Pow(Function):
         return grad_a, grad_b
 
 
+class Sine(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save_tensors(a)
+        out = deepnet.tensor(np.sin(a.data))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.saved_tensors()[0]
+        grad_a = deepnet.tensor(grad.data * np.cos(a.data))
+        return grad_a
+
+
+class Cosine(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save_tensors(a)
+        out = deepnet.tensor(np.cos(a.data))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.saved_tensors()[0]
+        grad_a = deepnet.tensor(grad.data * -1 * np.sin(a.data))
+        return grad_a
+
+
+class Squeeze(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dim: int):
+        # TODO this needs to be fixed
+        a_dim = a.dim()
+        context.save_tensors(a)
+        context.a_dim = a_dim
+        out_dim = []
+        for i, d in enumerate(a_dim):
+            if d != 1 or i not in dim:
+                out_dim.append(d)
+        out_dim = tuple(out_dim)
+        out = deepnet.tensor(a.data.reshape(out_dim))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a_dim = context.a_dim
+        grad_data = deepnet.tensor(grad.data.reshape(a_dim))
+        return grad_data
+
+
 class Tranpose(Function):
 
     @staticmethod
@@ -125,7 +178,7 @@ class Tranpose(Function):
     def backward(context: Context, grad: Tensor):
         size = context.size
         grad_data = deepnet.tensor(grad.data.transpose(size))
-        return (grad_data,)
+        return grad_data
 
 
 class Clone(Function):
@@ -139,4 +192,4 @@ class Clone(Function):
 
     @staticmethod
     def backward(context: Any, grad: Tensor):
-        return (grad,)
+        return grad

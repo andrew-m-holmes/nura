@@ -31,8 +31,25 @@ def pow(a, b):
     return out
 
 
+def sin(a):
+    out = Sine.apply(a)
+    return out
+
+
+def cos(a):
+    out = Cosine.apply(a)
+    return out
+
+
+def squeeze(a, dim=None):
+    if dim is None:
+        dim = np.arange(a.ndim())
+    out = Squeeze.apply(a, dim=dim)
+    return out
+
+
 def tranpose(a, dim_0, dim_1):
-    out = Tranpose.apply(a, dim_0, dim_1)
+    out = Tranpose.apply(a, dim_0=dim_0, dim_1=dim_1)
     return out
 
 

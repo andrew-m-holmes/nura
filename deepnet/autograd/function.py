@@ -50,7 +50,7 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @staticmethod
-    def jvp(context, grad):
+    def jvp(context, *tangents):
         raise NotImplementedError
 
     @classmethod
