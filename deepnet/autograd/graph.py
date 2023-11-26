@@ -47,9 +47,8 @@ class AccumulateGrad:
         return cls(tensor)
 
 
-def pass_to_graph(context, output):
-    if Grad.enabled() and any(
-            tensor.use_grad for tensor in context.saved_tensors()):
+def _pass_to_graph(context, output):
+    if any(tensor.use_grad for tensor in context.saved_tensors()):
         next_functions = _get_next_functions(context)
         node = Node.with_context(context, next_functions)
         output._set_grad_state(use_grad=True, grad_fn=node, is_leaf=False)
