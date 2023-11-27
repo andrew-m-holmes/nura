@@ -19,6 +19,11 @@ class Add(Function):
         grad_b = deepnet.tensor(1 * grad.data)
         return grad_a, grad_b
 
+    @staticmethod
+    def jvp(context: Any, tangent_a: Tensor, tangent_b: Tensor):
+        tangent_out = deepnet.tensor(tangent_a.data + tangent_b.data)
+        return tangent_out
+
 
 class Sub(Function):
 
@@ -33,6 +38,11 @@ class Sub(Function):
         grad_a = grad
         grad_b = deepnet.tensor(grad.data * -1)
         return grad_a, grad_b
+
+    @staticmethod
+    def jvp(context: Any, tangent_a: Tensor, tangent_b: Tensor):
+        tangent_out = deepnet.tensor(tangent_a.data - tangent_b.data)
+        return tangent_out
 
 
 class Mul(Function):

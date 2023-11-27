@@ -42,6 +42,7 @@ def cos(a):
 
 
 def squeeze(a, dim=None):
+    # TODO handle different arguments for squeeze(None, int, tuple i.e.)
     if dim is None:
         dim = np.arange(a.ndim())
     out = Squeeze.apply(a, dim=dim)
