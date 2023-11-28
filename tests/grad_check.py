@@ -4,12 +4,11 @@ import deepnet.nn.functional as f
 
 def main():
 
-    a = deepnet.tensor(1, use_grad=False)
-    b = deepnet.tensor(2., use_grad=True)
-    c = b * a
-    print(c)
-    c.backward()
-    print(a.grad, b.grad)
+    with deepnet.forward_autograd():
+        a = deepnet.tensor(5., use_grad=True)
+        b = deepnet.tensor(6., use_grad=True)
+        c = a * b
+        print(c.tangent)
 
 
 if __name__ == "__main__":

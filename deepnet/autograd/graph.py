@@ -92,17 +92,17 @@ def _preprocess_grad_output(grad):
 
 def _pass_for_forward_ag(context, output):
     if any(tensor.use_grad for tensor in context.saved_tensors()):
-        dual_tensors = _make_tensors_dual(*context.saved_tensors())
-        tangent_out = context.apply(*dual_tensors)
+        tangents = _get_tangents(*context.saved_tensors())
+        tangent_out = context.apply_jvp(*tangents)
         output.tangent = tangent_out
-        output.set_grad_state(use_grad=True, grad_fn=None, is_leaf=False)
+        output._set_grad_state(use_grad=True, grad_fn=None, is_leaf=False)
     return output
 
 
-def _make_tensors_dual(*tensors):
-    dual_tensors = []
-    for tensor in dual_tensors:
-        tangent = deepnet.ones_like(tensor)
-        tensor.tangent = tangent
-        dual_tensors.append(tensor)
-    return dual_tensors
+def _get_tangents(*tensors):
+    tangents = []
+    for tensor in tensors:
+        if not hasattr(tensor, "tangent"):
+            setattr(tensor, "tangent", deepnet.ones_like(tensor))
+        tangents.append(tensor.tangent)
+    return tangents

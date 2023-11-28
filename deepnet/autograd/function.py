@@ -1,5 +1,4 @@
 from deepnet import Tensor
-from .mode import Autograd
 from .graph import _pass_to_graph
 from typing import Tuple
 
@@ -23,9 +22,12 @@ class Context:
 class BackwardFunction(Context):
 
     def apply(self, *args):
-        backward_fn = self._forward_cls.backward \
-            if Autograd.in_reverse_mode() else self._forward_cls.jvp
+        backward_fn = self._forward_cls.backward
         return backward_fn(self, *args)
+
+    def apply_jvp(self, *args):
+        jvp_fn = self._forward_cls.jvp
+        return jvp_fn(self, *args)
 
 
 class FunctionMeta(type):
