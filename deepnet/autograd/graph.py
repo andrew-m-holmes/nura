@@ -1,6 +1,7 @@
-import deepnet
-from deepnet import Tensor
 import numpy as np
+import deepnet
+from .mode import Autograd
+from deepnet import Tensor
 
 
 class Node:
@@ -49,6 +50,14 @@ class AccumulateGrad:
 
 
 def _pass_to_graph(context, output):
+    if Autograd.enabled() and Autograd.in_reverse_mode():
+        output = _pass_for_reverse_ag(context, output)
+    elif Autograd.enabled() and Autograd.in_forward_mode():
+        output = _pass_for_forward_ag(context, output)
+    return output
+
+
+def _pass_for_reverse_ag(context, output):
     if any(tensor.use_grad for tensor in context.saved_tensors()):
         next_functions = _get_next_functions(context)
         node = Node.with_context(context, next_functions)
@@ -79,3 +88,21 @@ def _preprocess_grad_output(grad):
     if isinstance(grad, Tensor):
         grad = (grad,)
     return grad
+
+
+def _pass_for_forward_ag(context, output):
+    if any(tensor.use_grad for tensor in context.saved_tensors()):
+        dual_tensors = _make_tensors_dual(*context.saved_tensors())
+        tangent_out = context.apply(*dual_tensors)
+        output.tangent = tangent_out
+        output.set_grad_state(use_grad=True, grad_fn=None, is_leaf=False)
+    return output
+
+
+def _make_tensors_dual(*tensors):
+    dual_tensors = []
+    for tensor in dual_tensors:
+        tangent = deepnet.ones_like(tensor)
+        tensor.tangent = tangent
+        dual_tensors.append(tensor)
+    return dual_tensors

@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
 
-class Grad:
+class Autograd:
 
     _reverse = True
     _use_grad = True
@@ -21,42 +21,55 @@ class Grad:
 
 @contextmanager
 def no_grad():
-    prev = Grad._use_grad
-    Grad._use_grad = False
+    prev = Autograd._use_grad
+    Autograd._use_grad = False
     try:
         yield
     finally:
-        Grad._use_grad = prev
+        Autograd._use_grad = prev
 
 
 @contextmanager
 def use_grad():
-    prev = Grad._use_grad
-    Grad._use_grad = True
+    prev = Autograd._use_grad
+    Autograd._use_grad = True
     try:
         yield
     finally:
-        Grad._use_grad = prev
+        Autograd._use_grad = prev
 
 
 @contextmanager
 def set_grad(value):
-    prev = Grad._use_grad
-    Grad._use_grad = value
+    prev = Autograd._use_grad
+    Autograd._use_grad = value
     try:
         yield
     finally:
-        Grad._use_grad = prev
+        Autograd._use_grad = prev
 
 
 @contextmanager
 def forward_autograd():
-    prev = Grad._use_grad
-    prev_mode = Grad._reverse
-    Grad._use_grad = True
-    Grad._reverse = False
+    prev = Autograd._use_grad
+    prev_mode = Autograd._reverse
+    Autograd._use_grad = True
+    Autograd._reverse = False
     try:
         yield
     finally:
-        Grad._use_grad = prev
-        Grad._reverse = prev_mode
+        Autograd._use_grad = prev
+        Autograd._reverse = prev_mode
+
+
+@contextmanager
+def reverse_autograd():
+    prev = Autograd._use_grad
+    prev_mode = Autograd._reverse
+    Autograd._use_grad = True
+    Autograd._reverse = True
+    try:
+        yield
+    finally:
+        Autograd._use_grad = prev
+        Autograd._reverse = prev_mode

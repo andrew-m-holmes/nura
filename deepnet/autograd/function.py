@@ -1,6 +1,5 @@
 from deepnet import Tensor
-from .mode import Grad
-from .forward_autograd import DualTensor, _pass_for_forward_autograd
+from .mode import Autograd
 from .graph import _pass_to_graph
 from typing import Tuple
 
@@ -13,8 +12,7 @@ class Context:
     def save_tensors(self, *tensors):
         assert self._saved_tensors is None, \
             "Function Context is already storing Tensors"
-        assert all(isinstance(tensor, Tensor) or isinstance(tensor, DualTensor)
-                   for tensor in tensors), \
+        assert all(isinstance(tensor, Tensor) for tensor in tensors), \
             "Function Context only accepts Tensors or DualTensors"
         self._saved_tensors = tensors
 
@@ -26,7 +24,7 @@ class BackwardFunction(Context):
 
     def apply(self, *args):
         backward_fn = self._forward_cls.backward \
-            if Grad.in_reverse_mode() else self._forward_cls.jvp
+            if Autograd.in_reverse_mode() else self._forward_cls.jvp
         return backward_fn(self, *args)
 
 
@@ -55,23 +53,9 @@ class Function(metaclass=FunctionMeta):
 
     @classmethod
     def apply(cls, *args, **kwargs):
-        args = _cast_args_for_forward(*args)
+        assert all(isinstance(arg, Tensor) for arg in args), \
+            f"Invalid argument(s): {args}, Function.apply() only accepts Tensors"
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)
-        if Grad.enabled():
-            if Grad.in_reverse_mode():
-                output = _pass_to_graph(context, output)
-            else:
-                output = _pass_for_forward_autograd(context, output, *args)
+        output = _pass_to_graph(context, output)
         return output
-
-
-def _cast_args_for_forward(*args):
-    t_cls = Tensor if Grad.in_reverse_mode() else DualTensor
-    casted = []
-    for arg in args:
-        if not isinstance(arg, t_cls):
-            casted.append(t_cls(arg))
-        else:
-            casted.append(arg)
-    return tuple(casted)

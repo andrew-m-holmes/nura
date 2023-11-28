@@ -5,7 +5,7 @@ from typing import Tuple
 class Tensor:
 
     def __init__(self, data, use_grad=False, dtype=None) -> None:
-        self.data = np.array(data, dtype=dtype)
+        self.data = _preprocess_tensor_init(data, use_grad, dtype)
         self.grad = None
         self.grad_fn = None
         self.use_grad = use_grad
@@ -85,29 +85,34 @@ class Tensor:
         self.is_leaf = is_leaf
 
 
-def tensor(data, use_grad=False, dtype=None):
+def _preprocess_tensor_init(data, use_grad, dtype):
     dtypes = [
         int, float, list, np.ndarray, np.int8, np.int16, np.int32,
         np.int64, np.uint8, np.uint16, np.uint32, np.uint64,
         np.float16, np.float32, np.float64, np.float128,
     ]
-    assert use_grad in [True, False], \
-        f"use_grad only accepts bools not: {use_grad}"
     assert type(data) in dtypes, \
-        f"Invalid object passed to tensor(): {type(data)}"
-    if dtype is not None:
-        assert dtype in dtypes, \
-            f"Invalid dtype passed to tensor(): {dtype}"
-    if use_grad:
-        dtype = np.float32 if dtype is None else dtype
-        assert dtype in [float, np.float16, np.float32, np.float64, np.float128], \
-            "Can only compute grads for float dtypes"
-    if isinstance(data, list):
-        assert _list_checker(data, dtypes), \
-            "Invalid data found in list, tensor() can only handle numeric dtypes"
+        f"Invalid data passed to Tensor.__init__(): {type(data)}"
     if isinstance(data, np.ndarray):
         assert data.dtype in dtypes, \
-            "Invalid data found in numpy.ndarray, tensor() can only handle numeric dtypes"
+            "Invalid data found in numpy.ndarray, Tensor.__init__() can only handle numeric dtypes"
+    if isinstance(data, list):
+        assert _list_checker(data, dtypes), \
+            "Invalid data found in list, Tensor.__init__() can only handle numeric dtypes"
+    if dtype is not None:
+        assert dtype in dtypes, \
+            f"Invalid dtype passed to Tenosr.__init__(): {dtype}"
+    data = np.array(data, dtype)
+    dtype = data.dtype
+    assert use_grad in [True, False], \
+        f"use_grad only accepts bools not: {use_grad}"
+    if use_grad:
+        assert dtype in [float, np.float16, np.float32, np.float64], \
+            "Can only compute grads for float dtypes"
+    return data
+
+
+def tensor(data, use_grad=False, dtype=None):
     return Tensor(data, use_grad, dtype)
 
 

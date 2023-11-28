@@ -15,7 +15,6 @@ class TriMul(torch.autograd.Function):
 
 
 trimul = TriMul.apply
-
 a = torch.tensor(3., requires_grad=True)
 b = torch.tensor(4., requires_grad=True)
 c = torch.tensor(5., requires_grad=True)
@@ -24,6 +23,9 @@ ta = torch.tensor(1.)
 tb = torch.tensor(1.)
 tc = torch.tensor(1.)
 
+e = torch.tensor(5, requires_grad=True)
+f = e * 2
+f.backward()
 with fwAD.dual_level():
     dual_a = fwAD.make_dual(a, ta)
     dual_b = fwAD.make_dual(b, tb)
