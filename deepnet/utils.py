@@ -2,36 +2,36 @@ import deepnet
 import numpy as np
 
 
-def zeros(dim, dtype=None):
+def zeros(dim, use_grad=False, dtype=None):
     zero_arr = np.zeros(dim, dtype)
-    return deepnet.tensor(zero_arr)
+    return deepnet.tensor(zero_arr, use_grad)
 
 
-def zeros_like(tensor):
+def zeros_like(tensor, use_grad=False, dtype=None):
     data = tensor.data
-    zero_arr = np.zeros_like(data)
-    return deepnet.tensor(zero_arr)
+    zero_arr = np.zeros_like(data, dtype)
+    return deepnet.tensor(zero_arr, use_grad)
 
 
-def ones(dim, dtype=None):
+def ones(dim, use_grad=False, dtype=None):
     ones_arr = np.ones(dim, dtype)
-    return deepnet.tensor(ones_arr)
+    return deepnet.tensor(ones_arr, use_grad)
 
 
-def ones_like(tensor, dtype=None):
+def ones_like(tensor, use_grad=False, dtype=None):
     data = tensor.data
     ones_arr = np.ones_like(data, dtype)
-    return deepnet.tensor(ones_arr)
+    return deepnet.tensor(ones_arr, use_grad)
 
 
-def randn(dim):
+def randn(dim, use_grad=False):
     randn_arr = np.random.randn(*dim)
-    return deepnet.tensor(randn_arr)
+    return deepnet.tensor(randn_arr, use_grad)
 
 
-def rand(dim):
+def rand(dim, use_grad=False):
     rand_arr = np.random.rand(*dim)
-    return deepnet.tensor(rand_arr)
+    return deepnet.tensor(rand_arr, use_grad)
 
 
 def randint(low, high, dim):
