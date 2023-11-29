@@ -56,7 +56,7 @@ def _vjp_pre_process(primals, cotangent, use_graph):
 
 def _is_differentiable(*tensors):
     dtypes = [float, np.float16, np.float32, np.float64, np.float128]
-    return all(tensor.dtype() in dtypes for tensor in tensors)
+    return all(tensor.dtype in dtypes for tensor in tensors)
 
 
 def _is_leaf_node(node):
