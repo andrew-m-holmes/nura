@@ -138,6 +138,9 @@ class DualTensor:
     def dtype(self):
         return self.primal.dtype
 
+    def unpack(self) -> Tuple[Tensor, Tensor]:
+        return self.primal, self.tangent
+
     def clone(self) -> "DualTensor":
         f = _functional_module()
         primal = f.clone(self.primal)

@@ -58,7 +58,7 @@ class Function(metaclass=FunctionMeta):
     def apply(cls, *args, **kwargs):
         assert all(isinstance(arg, Tensor) or isinstance(arg, DualTensor)
                    for arg in args), \
-            f"Invalid argument(s): {args}, Function.apply() only accepts Tensors"
+            f"Invalid argument(s): {args}, Function.apply() only accepts Tensor and DualTensor objects"
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)
         output = _pass_to_graph(context, output)

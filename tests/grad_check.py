@@ -1,18 +1,20 @@
 import deepnet
 import deepnet.nn.functional as f
+import deepnet.autograd.functional as af
 
 
 def main():
 
-    with deepnet.forward_autograd():
-        a = deepnet.tensor(5.)
-        b = deepnet.tensor(7.)
-        a = deepnet.dual_tensor(a)
-        b = deepnet.dual_tensor(b)
-        print(a)
-        print(b)
-        c = a + b
-        print(c)
+    a = deepnet.tensor(5.)
+    b = deepnet.tensor(7.)
+    tan_a = deepnet.tensor(1.)
+    tan_b = deepnet.tensor(1.)
+
+    def func(a, b):
+        return a * b
+
+    output = af.jvp((a, b), (tan_a, tan_b), func)
+    print(output)
 
 
 if __name__ == "__main__":

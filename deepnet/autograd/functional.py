@@ -1,5 +1,6 @@
 import numpy as np
 import deepnet
+from deepnet import Tensor
 
 
 def jacobian(input, func):
@@ -71,11 +72,30 @@ def _is_intermediate_node(node):
 
 
 def jvp(primals, tangents, func):
-    # evaluates the function at a particular input
-    # (in forward mode) and returns the dot product
-    # between the vector of interest and the computed
-    # jacobian from the input
-    pass
+    dual_tensors = _jvp_pre_process(primals, tangents)
+    with deepnet.forward_autograd():
+        output = func(*dual_tensors)
+    return _jvp_post_process(output)
+
+
+def _jvp_post_process(output):
+    if isinstance(output, tuple):
+        return tuple(dual_tensor.unpack() for dual_tensor in output)
+    return output.unpack()
+
+
+def _jvp_pre_process(primals, tangents):
+    assert all(isinstance(primal, Tensor) for primal in primals), \
+        f"invalid argument passed to primals: {primals}, primals must be a tuple of tensor(s)"
+    assert all(isinstance(tangent, Tensor) for tangent in tangents), \
+        f"invalid argument passed to primals: {tangents}, primals must be a tuple of tensor(s)"
+    assert len(primals) == len(tangents), \
+        f"The number of tangents must match the number of primals len(primals) = {len(primals)} != len(tangents) = {len(tangents)}"
+    assert all(primal.dim() == tangent.dim() for primal, tangent in zip(primals, tangents)), \
+        "The dimension of each primal in primals must match the dimension of its tangent pair from tangents"
+    dual_tensors = [deepnet.dual_tensor(primal.detach().clone(
+    ), tangent.detach().clone()) for primal, tangent in zip(primals, tangents)]
+    return dual_tensors
 
 
 def grad(inputs, outputs):
