@@ -55,9 +55,9 @@ def _pass_to_graph(context, output):
         assert all(isinstance(tensor, Tensor) for tensor in saved_tensors), \
             f"Graph received a non-Tensor in reverse-mode autograd: {saved_tensors}"
         output = _pass_for_reverse_ag(context, output)
-        assert all(isinstance(dual_tensor, DualTensor) for dual_tensor in saved_tensors), \
-            f"Graph received a non-DualTensor in reverse-mode autograd: {saved_tensors}"
     elif Autograd.enabled() and Autograd.in_forward_mode():
+        assert all(isinstance(dual_tensor, DualTensor) for dual_tensor in saved_tensors), \
+            f"Graph received a non-DualTensor in forward-mode autograd: {saved_tensors}"
         output = _pass_for_forward_ag(context, output)
     return output
 

@@ -11,7 +11,7 @@ def main():
         b = deepnet.dual_tensor(b)
         print(a)
         print(b)
-        c = a * b
+        c = a + b
         print(c)
 
 
