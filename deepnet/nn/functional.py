@@ -247,7 +247,7 @@ class Clone(Function):
     def forward(context: Context, a: Tensor):
         context.save_tensors(a)
         out = deepnet.tensor(
-            a.data.copy(), use_grad=a.use_grad, dtype=a.dtype())
+            a.data.copy(), use_grad=a.use_grad, dtype=a.dtype)
         return out
 
     @staticmethod

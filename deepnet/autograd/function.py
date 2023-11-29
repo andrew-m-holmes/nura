@@ -1,6 +1,6 @@
-from deepnet import Tensor
+from deepnet import Tensor, DualTensor
 from .graph import _pass_to_graph
-from typing import Tuple
+from typing import Tuple, Union
 
 
 class Context:
@@ -11,11 +11,12 @@ class Context:
     def save_tensors(self, *tensors):
         assert self._saved_tensors is None, \
             "Function Context is already storing Tensors"
-        assert all(isinstance(tensor, Tensor) for tensor in tensors), \
+        assert all(isinstance(tensor, Tensor) or isinstance(tensor, DualTensor)
+                   for tensor in tensors), \
             "Function Context only accepts Tensors or DualTensors"
         self._saved_tensors = tensors
 
-    def saved_tensors(self) -> Tuple[Tensor, ...]:
+    def saved_tensors(self) -> Tuple[Union[Tensor, DualTensor], ...]:
         return self._saved_tensors
 
 
@@ -55,7 +56,8 @@ class Function(metaclass=FunctionMeta):
 
     @classmethod
     def apply(cls, *args, **kwargs):
-        assert all(isinstance(arg, Tensor) for arg in args), \
+        assert all(isinstance(arg, Tensor) or isinstance(arg, DualTensor)
+                   for arg in args), \
             f"Invalid argument(s): {args}, Function.apply() only accepts Tensors"
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)

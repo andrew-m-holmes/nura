@@ -1,7 +1,7 @@
 import numpy as np
 import deepnet
+from deepnet import Tensor, DualTensor
 from .mode import Autograd
-from deepnet import Tensor
 
 
 class Node:
@@ -50,8 +50,13 @@ class AccumulateGrad:
 
 
 def _pass_to_graph(context, output):
+    saved_tensors = context.saved_tensors()
     if Autograd.enabled() and Autograd.in_reverse_mode():
+        assert all(isinstance(tensor, Tensor) for tensor in saved_tensors), \
+            f"Graph received a non-Tensor in reverse-mode autograd: {saved_tensors}"
         output = _pass_for_reverse_ag(context, output)
+        assert all(isinstance(dual_tensor, DualTensor) for dual_tensor in saved_tensors), \
+            f"Graph received a non-DualTensor in reverse-mode autograd: {saved_tensors}"
     elif Autograd.enabled() and Autograd.in_forward_mode():
         output = _pass_for_forward_ag(context, output)
     return output
@@ -91,18 +96,8 @@ def _preprocess_grad_output(grad):
 
 
 def _pass_for_forward_ag(context, output):
-    if any(tensor.use_grad for tensor in context.saved_tensors()):
-        tangents = _get_tangents(*context.saved_tensors())
-        tangent_out = context.apply_jvp(*tangents)
-        output.tangent = tangent_out
-        output._set_grad_state(use_grad=True, grad_fn=None, is_leaf=False)
+    tangents = [dual_tensor.tangent for dual_tensor in context.saved_tensors()]
+    tangent_out = context.apply_jvp(*tangents)
+    output._set_grad_state(use_grad=False, grad_fn=None, is_leaf=False)
+    output = deepnet.dual_tensor(output, tangent_out)
     return output
-
-
-def _get_tangents(*tensors):
-    tangents = []
-    for tensor in tensors:
-        if not hasattr(tensor, "tangent"):
-            setattr(tensor, "tangent", deepnet.ones_like(tensor))
-        tangents.append(tensor.tangent)
-    return tangents
