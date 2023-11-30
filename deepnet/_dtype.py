@@ -18,6 +18,12 @@ class _dtype:
         return casted
 
     @classmethod
+    def numpy_cast(cls, data):
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return data.astype(cls._wrapping)
+
+    @classmethod
     def name(cls):
         return cls.__name__
 

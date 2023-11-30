@@ -5,17 +5,10 @@ import deepnet.autograd.functional as af
 
 def main():
 
-    a = deepnet.tensor(5.)
+    a = deepnet.tensor(5., dtype=deepnet.double)
     b = deepnet.tensor(7.)
-    tan_a = deepnet.tensor(1.)
-    tan_b = deepnet.tensor(1.)
-
-    def func(a, b):
-        return a * b
-
-    output, tangent = af.jvp((a, b), (tan_a, tan_b), func)
-    print(output)
-    print(tangent)
+    print(a)
+    print(b)
 
 
 if __name__ == "__main__":

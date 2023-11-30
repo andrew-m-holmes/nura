@@ -5,12 +5,13 @@ from typing import Tuple
 
 class Tensor:
 
-    def __init__(self, data, use_grad=False, dtype=None) -> None:
-        self.data = _preprocess_tensor_init(data, use_grad, dtype)
+    def __init__(self, data, use_grad, dtype) -> None:
+        self.data = data
         self.grad = None
         self.grad_fn = None
         self.use_grad = use_grad
         self.is_leaf = True
+        self.dtype = dtype
 
     def backward(self, grad=None):
         assert self.grad_fn is not None, \
@@ -20,10 +21,6 @@ class Tensor:
             grad = utils.ones_like(self, use_grad=False)
         self.grad_fn.apply(grad)
 
-    @property
-    def dtype(self):
-        return self.data.dtype
-
     def dim(self) -> Tuple[int, ...]:
         return self.data.shape
 
@@ -31,7 +28,7 @@ class Tensor:
         return self.data.ndim
 
     def detach(self) -> "Tensor":
-        return Tensor(self.data, use_grad=False)
+        return tensor(self, False, self.dtype)
 
     def clone(self) -> "Tensor":
         f = _import_module("deepnet.nn.functional")
@@ -56,6 +53,7 @@ class Tensor:
         rep += f"use_grad={self.use_grad}"
         if self.use_grad:
             rep += f", grad_fn={self.grad_fn}"
+        rep += f", dtype={self.dtype.name()}"
         rep += ")"
         return rep
 
@@ -87,20 +85,6 @@ class Tensor:
         self.use_grad = use_grad
         self.grad_fn = grad_fn
         self.is_leaf = is_leaf
-
-
-def tensor(data, use_grad=False, dtype=None):
-    return Tensor(data, use_grad, dtype)
-
-
-def _preprocess_tensor_init(data, use_grad, dtype=None):
-    return np.array(data)
-
-
-def _list_checker(data, dtypes):
-    if isinstance(data, list):
-        return all(_list_checker(d, dtypes) for d in data)
-    return type(data) in dtypes
 
 
 class DualTensor:
@@ -161,8 +145,47 @@ class DualTensor:
         self.is_leaf = is_leaf
 
 
+def tensor(data, use_grad=False, dtype=None):
+    data, dtype = _preprocess_tensor_init(data, use_grad, dtype)
+    return Tensor(data, use_grad, dtype)
+
+
 def dual_tensor(primal, tangent=None):
     return DualTensor(primal, tangent)
+
+
+def _import_module(name):
+    try:
+        module = importlib.import_module(name)
+        return module
+    except:
+        raise ValueError(f"Unknown module name: {name}")
+
+
+def _preprocess_tensor_init(data, use_grad, dtype=None):
+    if dtype is None:
+        dtype = _infer_dtype(data)
+    if use_grad:
+        assert dtype.differentiable()
+    data = dtype.numpy_cast(data)
+    return data, dtype
+
+
+def _infer_dtype(data):
+    if isinstance(data, list):
+        return _infer_dtype(data[0])
+    if isinstance(data, np.ndarray):
+        _dtype = _import_module("deepnet._dtype")
+        dtype = data.dtype
+        return _dtype.dtype_map[dtype]
+    deepnet = _import_module("deepnet")
+    dtype = type(data)
+    if dtype == int:
+        return deepnet.int
+    elif dtype == float:
+        return deepnet.float
+    elif dtype == bool:
+        return deepnet.bool
 
 
 def _preprocess_dual_tensor_init(primal, tangent):
@@ -176,28 +199,3 @@ def _preprocess_dual_tensor_init(primal, tangent):
     assert primal.dim() == tangent.dim(), \
         f"Dimension mismatch between primal and tangent: {primal.dim()} != {tangent.dim()}"
     return tangent
-
-
-def _import_module(name):
-    try:
-        module = importlib.import_module(name)
-        return module
-    except:
-        raise ValueError(f"Unknown module name: {name}")
-
-
-def _infer_dtype(data):
-    if isinstance(data, list):
-        return _infer_dtype(data[0])
-    if isinstance(data, np.ndarray):
-        _dtype = _import_module("deepnet._dtype")
-        dtype = data.dtype
-        return _dtype.dtype_map[dtype]
-    deepnet = _import_module("deepnet")
-    dtype = type(data)
-    if dtype is int:
-        return deepnet.int
-    elif dtype is float:
-        return deepnet.float
-    elif dtype is bool:
-        return deepnet.bool
