@@ -11,8 +11,6 @@ def jacobian(input, func):
 
 
 def vjp(primals, cotangent, func, use_graph=False):
-    assert _is_differentiable(*primals, cotangent), \
-        "Can only differentiate Tensors of float dtypes"
     primals, cotangent = _vjp_pre_process(primals, cotangent, use_graph)
     with deepnet.use_grad():
         output = func(*primals)
@@ -44,6 +42,15 @@ def _vjp_post_process(output, cotangents, use_graph):
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
+    assert all(isinstance(primal, Tensor) for primal in primals), \
+        f"Invalid argument passed to primals: {primals}, primals must be a tuple of Tensor(s)"
+    assert isinstance(cotangent, Tensor), \
+        f"Invalid argument passed to cotangent: {cotangent}, cotangent must be a tuple of Tensor(s)"
+    assert _is_differentiable(*primals), \
+        "primals are a non-differentiable dtype, only floats are differentiable"
+    assert _is_differentiable(cotangent), \
+        "cotangent is non-differentiable dtype, only floats are differentiable"
+
     temp = primals
     primals = []
     for primal in temp:
@@ -53,11 +60,6 @@ def _vjp_pre_process(primals, cotangent, use_graph):
         primals.append(primal)
     cotangent.use_grad = True
     return primals, cotangent
-
-
-def _is_differentiable(*tensors):
-    dtypes = [float, np.float16, np.float32, np.float64, np.float128]
-    return all(tensor.dtype in dtypes for tensor in tensors)
 
 
 def _is_leaf_node(node):
@@ -86,13 +88,18 @@ def _jvp_post_process(output):
 
 def _jvp_pre_process(primals, tangents):
     assert all(isinstance(primal, Tensor) for primal in primals), \
-        f"invalid argument passed to primals: {primals}, primals must be a tuple of tensor(s)"
+        f"Invalid argument passed to primals: {primals}, primals must be a tuple of Tensor(s)"
     assert all(isinstance(tangent, Tensor) for tangent in tangents), \
-        f"invalid argument passed to primals: {tangents}, primals must be a tuple of tensor(s)"
+        f"Invalid argument passed to primals: {tangents}, tangents must be a tuple of Tensor(s)"
+    assert _is_differentiable(*primals), \
+        "primals are a non-differentiable dtype, only floats are differentiable"
+    assert _is_differentiable(*tangents), \
+        "cotangents are a non-differentiable dtype, only floats are differentiable"
     assert len(primals) == len(tangents), \
         f"The number of tangents must match the number of primals len(primals) = {len(primals)} != len(tangents) = {len(tangents)}"
     assert all(primal.dim() == tangent.dim() for primal, tangent in zip(primals, tangents)), \
         "The dimension of each primal in primals must match the dimension of its tangent pair from tangents"
+
     dual_tensors = [deepnet.dual_tensor(primal.detach().clone(
     ), tangent.detach().clone()) for primal, tangent in zip(primals, tangents)]
     return dual_tensors
@@ -103,3 +110,8 @@ def grad(inputs, outputs):
     # gradients for every input passed
     # will not accumulate them
     pass
+
+
+def _is_differentiable(*tensors):
+    dtypes = [float, np.float16, np.float32, np.float64, np.float128]
+    return all(tensor.dtype in dtypes for tensor in tensors)

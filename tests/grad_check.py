@@ -13,8 +13,9 @@ def main():
     def func(a, b):
         return a * b
 
-    output = af.jvp((a, b), (tan_a, tan_b), func)
+    output, tangent = af.jvp((a, b), (tan_a, tan_b), func)
     print(output)
+    print(tangent)
 
 
 if __name__ == "__main__":
