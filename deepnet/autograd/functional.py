@@ -79,18 +79,6 @@ def _jvp_post_process(output):
 
 
 def _jvp_pre_process(primals, tangents):
-    assert all(isinstance(primal, Tensor) for primal in primals), \
-        f"Invalid argument passed to primals: {primals}, primals must be a tuple of Tensor(s)"
-    assert all(isinstance(tangent, Tensor) for tangent in tangents), \
-        f"Invalid argument passed to primals: {tangents}, tangents must be a tuple of Tensor(s)"
-    assert _is_differentiable(*primals), \
-        "primals are a non-differentiable dtype, only floats are differentiable"
-    assert _is_differentiable(*tangents), \
-        "cotangents are a non-differentiable dtype, only floats are differentiable"
-    assert len(primals) == len(tangents), \
-        f"The number of tangents must match the number of primals len(primals) = {len(primals)} != len(tangents) = {len(tangents)}"
-    assert all(primal.dim() == tangent.dim() for primal, tangent in zip(primals, tangents)), \
-        "The dimension of each primal in primals must match the dimension of its tangent pair from tangents"
 
     dual_tensors = [deepnet.dual_tensor(primal.detach().clone(
     ), tangent.detach().clone()) for primal, tangent in zip(primals, tangents)]
