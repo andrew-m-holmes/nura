@@ -50,15 +50,7 @@ class AccumulateGrad:
 
 
 def _pass_to_graph(context, output):
-    saved_tensors = context.saved_tensors()
-    if Autograd.enabled() and Autograd.in_reverse_mode():
-        assert all(isinstance(tensor, Tensor) for tensor in saved_tensors), \
-            f"Graph received a non-Tensor in reverse-mode autograd: {saved_tensors}"
-        output = _pass_for_reverse_ag(context, output)
-    elif Autograd.enabled() and Autograd.in_forward_mode():
-        assert all(isinstance(dual_tensor, DualTensor) for dual_tensor in saved_tensors), \
-            f"Graph received a non-DualTensor in forward-mode autograd: {saved_tensors}"
-        output = _pass_for_forward_ag(context, output)
+    output = _pass_for_forward_ag(context, output)
     return output
 
 
@@ -88,8 +80,6 @@ def _get_next_functions_helper(tensor):
 
 
 def _preprocess_grad_output(grad):
-    assert isinstance(grad, Tensor) or isinstance(grad, tuple), \
-        f"Grad pre-processor received an invalid argument: {grad}"
     if isinstance(grad, Tensor):
         grad = (grad,)
     return grad

@@ -42,14 +42,6 @@ def _vjp_post_process(output, cotangents, use_graph):
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
-    assert all(isinstance(primal, Tensor) for primal in primals), \
-        f"Invalid argument passed to primals: {primals}, primals must be a tuple of Tensor(s)"
-    assert isinstance(cotangent, Tensor), \
-        f"Invalid argument passed to cotangent: {cotangent}, cotangent must be a tuple of Tensor(s)"
-    assert _is_differentiable(*primals), \
-        "primals are a non-differentiable dtype, only floats are differentiable"
-    assert _is_differentiable(cotangent), \
-        "cotangent is non-differentiable dtype, only floats are differentiable"
 
     temp = primals
     primals = []

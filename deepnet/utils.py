@@ -1,6 +1,8 @@
 import deepnet
 import numpy as np
 
+# TODO these functions want a deepnet.dtype and not np.dtype
+
 
 def zeros(dim, use_grad=False, dtype=None):
     zero_arr = np.zeros(dim, dtype)
