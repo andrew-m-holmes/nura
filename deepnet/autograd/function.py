@@ -9,11 +9,6 @@ class Context:
         self._saved_tensors = None
 
     def save_tensors(self, *tensors):
-        assert self._saved_tensors is None, \
-            "Function Context is already storing Tensors"
-        assert all(isinstance(tensor, Tensor) or isinstance(tensor, DualTensor)
-                   for tensor in tensors), \
-            "Function Context only accepts Tensors or DualTensors"
         self._saved_tensors = tensors
 
     def saved_tensors(self) -> Tuple[Union[Tensor, DualTensor], ...]:
