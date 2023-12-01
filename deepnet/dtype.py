@@ -2,7 +2,7 @@ import numpy as np
 import deepnet
 
 
-class _dtype:
+class dtype:
 
     _differentiable = None
     _wrapping = None
@@ -14,69 +14,64 @@ class _dtype:
     @classmethod
     def cast(cls, tensor):
         data = tensor.data.astype(cls._wrapping)
-        casted = deepnet.tensor(data, use_grad=tensor.use_grad, dtype=cls)
-        return casted
-
-    @classmethod
-    def numpy_cast(cls, data):
-        if not isinstance(data, np.ndarray):
-            data = np.array(data)
-        return data.astype(cls._wrapping)
+        new_tensor = deepnet.tensor(
+            data, tensor.use_grad, tensor.dtype)
+        return new_tensor
 
     @classmethod
     def name(cls):
         return cls.__name__
 
 
-class byte(_dtype):
+class byte(dtype):
 
     _differentiable = False
     _wrapping = np.uint8
 
 
-class char(_dtype):
+class char(dtype):
 
     _differentiable = False
     _wrapping = np.int8
 
 
-class short(_dtype):
+class short(dtype):
 
     _differentiable = False
     _wrapping = np.int16
 
 
-class int(_dtype):
+class int(dtype):
 
     _differentiable = False
     _wrapping = np.int32
 
 
-class long(_dtype):
+class long(dtype):
 
     _differentiable = False
     _wrapping = np.int64
 
 
-class half(_dtype):
+class half(dtype):
 
     _differentiable = True
     _wrapping = np.float16
 
 
-class float(_dtype):
+class float(dtype):
 
     _differentiable = True
     _wrapping = np.float32
 
 
-class double(_dtype):
+class double(dtype):
 
     _differentiable = True
     _wrapping = np.float64
 
 
-class bool(_dtype):
+class bool(dtype):
 
     _differentiable = False
     _wrapping = np.bool_
@@ -93,3 +88,21 @@ dtype_map = {
     np.float64: double,
     np.bool_: bool
 }
+
+
+def infer_dtype(data):
+    if isinstance(data, np.ndarray):
+        return dtype_map.get(data.dtype)
+    elif isinstance(data, list):
+        return _infer_dtype_from_list(data)
+    return dtype_map.get(type(data))
+
+
+def _infer_dtype_from_list(data):
+    for item in data:
+        if isinstance(item, list):
+            nested_type = _infer_dtype_from_list(item)
+            if nested_type is not None:
+                return nested_type
+        return infer_dtype(item)
+    return None

@@ -1,8 +1,8 @@
 import numpy as np
 import importlib
-import deepnet
 import deepnet.utils as utils
 from typing import Tuple
+from .dtype import infer_dtype
 
 _nn_func = "deepnet.nn.functional"
 

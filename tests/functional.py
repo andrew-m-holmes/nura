@@ -44,8 +44,8 @@ def test_add_forward_matrix():
 
 
 def main():
-
-    test_add_forward_scalar()
+    print(type(np.array(4.)))
+    # test_add_forward_scalar()
 
 
 if __name__ == "__main__":
