@@ -1,8 +1,6 @@
 import deepnet
 import numpy as np
 
-# TODO these functions want a deepnet.dtype and not np.dtype
-
 
 def zeros(dim, use_grad=False, dtype=None):
     zero_arr = np.zeros(dim, dtype)
@@ -11,31 +9,31 @@ def zeros(dim, use_grad=False, dtype=None):
 
 def zeros_like(tensor, use_grad=False, dtype=None):
     data = tensor.data
-    zero_arr = np.zeros_like(data, dtype)
-    return deepnet.tensor(zero_arr, use_grad)
+    zero_arr = np.zeros_like(data)
+    return deepnet.tensor(zero_arr, use_grad, dtype)
 
 
 def ones(dim, use_grad=False, dtype=None):
-    ones_arr = np.ones(dim, dtype)
-    return deepnet.tensor(ones_arr, use_grad)
+    ones_arr = np.ones(dim)
+    return deepnet.tensor(ones_arr, use_grad, dtype)
 
 
 def ones_like(tensor, use_grad=False, dtype=None):
     data = tensor.data
-    ones_arr = np.ones_like(data, dtype)
-    return deepnet.tensor(ones_arr, use_grad)
+    ones_arr = np.ones_like(data)
+    return deepnet.tensor(ones_arr, use_grad, dtype)
 
 
-def randn(dim, use_grad=False):
+def randn(dim, use_grad=False, dtype=None):
     randn_arr = np.random.randn(*dim)
-    return deepnet.tensor(randn_arr, use_grad)
+    return deepnet.tensor(randn_arr, use_grad, dtype)
 
 
-def rand(dim, use_grad=False):
+def rand(dim, use_grad=False, dtype=None):
     rand_arr = np.random.rand(*dim)
-    return deepnet.tensor(rand_arr, use_grad)
+    return deepnet.tensor(rand_arr, use_grad, dtype)
 
 
-def randint(low, high, dim):
-    randint_arr = np.random.randint(low, high, dim)
+def randint(low, high, dim, dtype=None):
+    randint_arr = np.random.randint(low, high, dim, dtype)
     return deepnet.tensor(randint_arr)

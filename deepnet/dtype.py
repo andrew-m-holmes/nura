@@ -1,6 +1,10 @@
 import numpy as np
 import deepnet
 
+_py_int = int
+_py_float = float
+_py_bool = bool
+
 
 class dtype:
 
@@ -26,7 +30,7 @@ class dtype:
 
     @classmethod
     def name(cls):
-        return cls.__name__
+        return "deepnet." + cls.__name__
 
 
 class byte(dtype):
@@ -83,25 +87,37 @@ class bool(dtype):
     _wrapping = np.bool_
 
 
-dtype_map = {
+_dtype_map = {
     np.uint8: byte,
     np.int8: char,
     np.int16: short,
     np.int32: int,
+    _py_int: int,
     np.int64: long,
     np.float16: half,
     np.float32: float,
+    _py_float: float,
     np.float64: double,
-    np.bool_: bool
+    np.bool_: bool,
+    _py_bool: bool,
+    np.dtype(np.uint8): byte,
+    np.dtype(np.int8): char,
+    np.dtype(np.int16): short,
+    np.dtype(np.int32): int,
+    np.dtype(np.int64): long,
+    np.dtype(np.float16): half,
+    np.dtype(np.float32): float,
+    np.dtype(np.float64): double,
+    np.dtype(np.bool_): bool,
 }
 
 
-def infer_dtype(data):
+def _infer_dtype(data):
     if isinstance(data, np.ndarray):
-        return dtype_map.get(data.dtype)
-    elif isinstance(data, list):
-        return dtype_map.get(_infer_dtype_from_list(data))
-    return dtype_map.get(type(data))
+        return _dtype_map.get(data.dtype)
+    if isinstance(data, list):
+        return _dtype_map.get(_infer_dtype_from_list(data))
+    return _dtype_map.get(type(data))
 
 
 def _infer_dtype_from_list(data):

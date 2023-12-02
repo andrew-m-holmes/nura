@@ -1,6 +1,6 @@
 import importlib
 import deepnet
-from .dtype import infer_dtype
+from .dtype import _infer_dtype
 from .utils import zeros_like, ones_like
 from typing import Tuple
 
@@ -173,7 +173,7 @@ def _get_dtype(data, use_grad, dtype):
     if dtype is None and use_grad:
         return deepnet.float
     elif dtype is None:
-        return infer_dtype(data)
+        return _infer_dtype(data)
     return dtype
 
 

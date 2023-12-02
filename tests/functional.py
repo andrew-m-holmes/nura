@@ -44,6 +44,13 @@ def test_add_forward_matrix():
 def main():
 
     test_add_forward_scalar()
+    a = deepnet.tensor(1., use_grad=True)
+    b = deepnet.tensor(5., use_grad=False)
+    c = f.mul(a, b)
+    print(c)
+    c.backward()
+    print(a.grad)
+    print(b.grad)
 
 
 if __name__ == "__main__":
