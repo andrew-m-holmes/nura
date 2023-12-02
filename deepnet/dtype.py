@@ -19,6 +19,12 @@ class dtype:
         return new_tensor
 
     @classmethod
+    def numpy(cls, data):
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return data.astype(cls._wrapping)
+
+    @classmethod
     def name(cls):
         return cls.__name__
 
@@ -94,15 +100,11 @@ def infer_dtype(data):
     if isinstance(data, np.ndarray):
         return dtype_map.get(data.dtype)
     elif isinstance(data, list):
-        return _infer_dtype_from_list(data)
+        return dtype_map.get(_infer_dtype_from_list(data))
     return dtype_map.get(type(data))
 
 
 def _infer_dtype_from_list(data):
-    for item in data:
-        if isinstance(item, list):
-            nested_type = _infer_dtype_from_list(item)
-            if nested_type is not None:
-                return nested_type
-        return infer_dtype(item)
-    return None
+    if isinstance(data, list):
+        return _infer_dtype_from_list(data[0])
+    return type(data)

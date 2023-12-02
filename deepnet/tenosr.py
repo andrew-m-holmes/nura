@@ -1,8 +1,8 @@
-import numpy as np
 import importlib
-import deepnet.utils as utils
-from typing import Tuple
+import deepnet
 from .dtype import infer_dtype
+from .utils import zeros_like, ones_like
+from typing import Tuple
 
 _nn_func = "deepnet.nn.functional"
 
@@ -19,7 +19,7 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            grad = utils.ones_like(self, use_grad=False)
+            grad = ones_like(self, use_grad=False)
         self.grad_fn.apply(grad)
 
     def dim(self) -> Tuple[int, ...]:
@@ -36,7 +36,7 @@ class Tensor:
         return f.clone(self)
 
     def zero(self):
-        self.grad = utils.zeros_like(self, use_grad=False)
+        self.grad = zeros_like(self, use_grad=False)
 
     def squeeze(self, dim=None) -> "Tensor":
         f = _import_module(_nn_func)
@@ -121,41 +121,60 @@ class DualTensor:
         rep = f"dual_tensor(primal: {self.primal}, tangent: {self.tangent})"
         return rep
 
-    def __add__(self, other: "Tensor") -> "Tensor":
+    def __add__(self, other: "DualTensor") -> "DualTensor":
         f = _import_module(_nn_func)
         return f.add(self, other)
 
-    def __sub__(self, other: "Tensor") -> "Tensor":
+    def __sub__(self, other: "DualTensor") -> "DualTensor":
         f = _import_module(_nn_func)
         return f.sub(self, other)
 
-    def __mul__(self, other: "Tensor") -> "Tensor":
+    def __mul__(self, other: "DualTensor") -> "DualTensor":
         f = _import_module(_nn_func)
         return f.mul(self, other)
 
-    def __truediv__(self, other: "Tensor") -> "Tensor":
+    def __truediv__(self, other: "DualTensor") -> "DualTensor":
         f = _import_module(_nn_func)
         return f.div(self, other)
 
-    def __matmul__(self, other: "Tensor") -> "Tensor":
+    def __matmul__(self, other: "DualTensor") -> "DualTensor":
         f = _import_module(_nn_func)
         return f.matmul(self, other)
 
-    def __pow__(self, other: "Tensor") -> "Tensor":
+    def __pow__(self, other: "DualTensor") -> "DualTensor":
         f = _import_module(_nn_func)
         return f.pow(self, other)
 
 
 def tensor(data, use_grad=False, dtype=None):
-    # TODO implement preprocess
-    # data, dtype = _preprocess_tensor_init(data, use_grad, dtype)
+    data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
     return Tensor(data, use_grad, dtype)
 
 
 def dual_tensor(primal, tangent=None):
     # TODO implement preprocess
-    # tangent = _preprocess_dual_tensor_init(primal, tangent)
+    tangent = _preprocess_dual_tensor_args(primal, tangent)
     return DualTensor(primal, tangent)
+
+
+def _preprocess_tensor_args(data, use_grad, dtype):
+    dtype = _get_dtype(data, use_grad, dtype)
+    if use_grad:
+        assert dtype.differentiable()
+    data = dtype.numpy(data)
+    return data, dtype
+
+
+def _preprocess_dual_tensor_args(primal, tangent):
+    pass
+
+
+def _get_dtype(data, use_grad, dtype):
+    if dtype is None and use_grad:
+        return deepnet.float
+    elif dtype is None:
+        return infer_dtype(data)
+    return dtype
 
 
 def _import_module(name):
