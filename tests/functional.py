@@ -2,8 +2,6 @@ import numpy as np
 import deepnet
 import deepnet.nn.functional as f
 
-# Writing test functions for the 'add' operation using deepnet.tensor
-
 
 def test_add_forward_scalar():
     a = np.random.rand()
@@ -44,8 +42,8 @@ def test_add_forward_matrix():
 
 
 def main():
-    print(type(np.array(4.)))
-    # test_add_forward_scalar()
+
+    test_add_forward_scalar()
 
 
 if __name__ == "__main__":
