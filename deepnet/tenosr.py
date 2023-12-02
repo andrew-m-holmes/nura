@@ -99,6 +99,10 @@ class DualTensor:
     def dtype(self):
         return self.primal.dtype
 
+    @property
+    def use_grad(self):
+        return self.primal.use_grad
+
     def unpack(self) -> Tuple[Tensor, Tensor]:
         return self.primal, self.tangent
 

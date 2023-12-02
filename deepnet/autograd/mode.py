@@ -3,30 +3,16 @@ from contextlib import contextmanager
 
 class Autograd:
 
-    _reverse = True
     _use_grad = True
+    _forward_mode = False
 
     @classmethod
-    def enabled(cls):
+    def grad_enabled(cls):
         return cls._use_grad
 
     @classmethod
-    def in_forward_mode(cls):
-        return not cls._reverse
-
-    @classmethod
-    def in_reverse_mode(cls):
-        return cls._reverse
-
-
-@contextmanager
-def no_grad():
-    prev = Autograd._use_grad
-    Autograd._use_grad = False
-    try:
-        yield
-    finally:
-        Autograd._use_grad = prev
+    def forward_ad_enabled(cls):
+        return cls._forward_mode
 
 
 @contextmanager
@@ -40,9 +26,9 @@ def use_grad():
 
 
 @contextmanager
-def set_grad(value):
+def no_grad():
     prev = Autograd._use_grad
-    Autograd._use_grad = value
+    Autograd._use_grad = False
     try:
         yield
     finally:
@@ -50,26 +36,19 @@ def set_grad(value):
 
 
 @contextmanager
-def forward_autograd():
+def set_grad(mode):
     prev = Autograd._use_grad
-    prev_mode = Autograd._reverse
-    Autograd._use_grad = True
-    Autograd._reverse = False
+    Autograd._use_grad = mode
     try:
         yield
     finally:
         Autograd._use_grad = prev
-        Autograd._reverse = prev_mode
 
 
 @contextmanager
-def reverse_autograd():
-    prev = Autograd._use_grad
-    prev_mode = Autograd._reverse
-    Autograd._use_grad = True
-    Autograd._reverse = True
+def forward_ad():
+    Autograd._forward_mode = True
     try:
         yield
     finally:
-        Autograd._use_grad = prev
-        Autograd._reverse = prev_mode
+        Autograd._forward_mode = False
