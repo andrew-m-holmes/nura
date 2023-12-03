@@ -37,3 +37,10 @@ def rand(dim, use_grad=False, dtype=None):
 def randint(low, high, dim, dtype=None):
     randint_arr = np.random.randint(low, high, dim, dtype)
     return deepnet.tensor(randint_arr)
+
+
+def is_tensor(item):
+    return isinstance(item, deepnet.Tensor)
+
+def is_dual_tensor(item):
+    return isinstance(item, deepnet.DualTensor)

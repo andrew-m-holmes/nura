@@ -1,7 +1,6 @@
 import importlib
 import deepnet
 from .dtype import _infer_dtype
-from .utils import zeros_like, ones_like
 from typing import Tuple
 
 _nn_func = "deepnet.nn.functional"
@@ -19,7 +18,7 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            grad = ones_like(self, use_grad=False)
+            grad = deepnet.ones_like(self, use_grad=False)
         self.grad_fn.apply(grad)
 
     def dim(self) -> Tuple[int, ...]:
@@ -36,7 +35,7 @@ class Tensor:
         return f.clone(self)
 
     def zero(self):
-        self.grad = zeros_like(self, use_grad=False)
+        self.grad = deepnet.zeros_like(self, use_grad=False)
 
     def squeeze(self, dim=None) -> "Tensor":
         f = _import_module(_nn_func)
@@ -166,7 +165,12 @@ def _preprocess_tensor_args(data, use_grad, dtype):
 
 
 def _preprocess_dual_tensor_args(primal, tangent):
-    pass
+    assert deepnet.is_tensor(primal)
+    if tangent is None:
+        tangent = deepnet.ones_like(
+            primal, use_grad=False, dtype=primal.dtype)
+    assert deepnet.is_tensor(primal)
+    assert primal.dtype == tangent.dtype
 
 
 def _get_dtype(data, use_grad, dtype):

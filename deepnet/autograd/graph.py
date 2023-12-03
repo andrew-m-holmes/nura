@@ -1,6 +1,4 @@
-import numpy as np
 import deepnet
-from deepnet import Tensor, DualTensor
 from .mode import Autograd
 
 
@@ -58,15 +56,18 @@ def _pass_to_graph(context, output):
 
 def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):
-        saved_tensors = _preprocess_for_reverse_ad(context.saved_tensors())
+        saved_tensors = _preprocess_for_reverse_ad(
+            context.saved_tensors())
         next_functions = _get_next_functions(saved_tensors)
         node = Node.with_context(context, next_functions)
-        output._set_grad_state(use_grad=True, grad_fn=node, is_leaf=False)
+        output._set_grad_state(
+            use_grad=True, grad_fn=node, is_leaf=False)
     return output
 
 
 def _pass_for_forward_ad(context, output):
-    tangents = [dual_tensor.tangent for dual_tensor in context.saved_tensors()]
+    tangents = [dual_tensor.tangent
+                for dual_tensor in context.saved_tensors()]
     tangent_out = context.apply_jvp(*tangents)
     output = deepnet.dual_tensor(output, tangent_out)
     return output
@@ -74,7 +75,8 @@ def _pass_for_forward_ad(context, output):
 
 def _context_has_grad_tensors(context):
     if context.saved_tensors():
-        return any(tensor.use_grad for tensor in context.saved_tensors())
+        return any(tensor.use_grad
+                   for tensor in context.saved_tensors())
     return False
 
 
@@ -97,7 +99,7 @@ def _get_next_functions_helper(tensor):
 def _preprocess_for_reverse_ad(saved_tensors):
     processed_tensors = []
     for tensor in saved_tensors:
-        if isinstance(tensor, DualTensor):
+        if deepnet.is_dual_tensor(tensor):
             processed_tensors.append(tensor.primal)
         else:
             processed_tensors.append(tensor)
@@ -105,6 +107,6 @@ def _preprocess_for_reverse_ad(saved_tensors):
 
 
 def _preprocess_grad_output(grad):
-    if isinstance(grad, Tensor):
+    if deepnet.is_tensor(grad):
         grad = (grad,)
     return grad
