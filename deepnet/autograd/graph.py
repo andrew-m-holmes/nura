@@ -31,15 +31,12 @@ class Node:
 class AccumulateGrad:
 
     def __init__(self, tensor) -> None:
-        self._tensor = tensor
+        self.tensor = tensor
 
     def apply(self, grad):
-        if self._tensor.grad is None:
-            self._tensor.grad = deepnet.zeros_like(self._tensor)
-        self._tensor.grad.data += grad.data
-
-    def tensor(self):
-        return self._tensor
+        if self.tensor.grad is None:
+            self.tensor.grad = deepnet.zeros_like(self.tensor)
+        self.tensor.grad.data += grad.data
 
     @classmethod
     def with_tensor(cls, tensor):
