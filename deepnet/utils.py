@@ -25,11 +25,15 @@ def ones_like(tensor, use_grad=False, dtype=None):
 
 
 def randn(dim=None, use_grad=False, dtype=None):
+    if dim is None:
+        dim = ()
     randn_arr = np.random.randn(*dim)
     return deepnet.tensor(randn_arr, use_grad, dtype)
 
 
 def rand(dim=None, use_grad=False, dtype=None):
+    if dim is None:
+        dim = ()
     rand_arr = np.random.rand(*dim)
     return deepnet.tensor(rand_arr, use_grad, dtype)
 
