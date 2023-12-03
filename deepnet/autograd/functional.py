@@ -43,6 +43,7 @@ def _vjp_post_process(output, cotangents, use_graph):
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
+    # TODO assert diff
     assert all(deepnet.is_tensor(primal) for primal in primals)
     assert deepnet.is_tensor(cotangent)
 
@@ -86,6 +87,7 @@ def _jvp_post_process(output):
 
 
 def _jvp_pre_process(primals, tangents, use_graph):
+    # TODO assert diff
     assert all(deepnet.is_tensor(primal) for primal in primals)
     assert all(deepnet.is_tensor(tangent) for tangent in tangents)
     assert len(primals) == len(tangents)
