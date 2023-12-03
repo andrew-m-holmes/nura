@@ -165,6 +165,7 @@ def _preprocess_dual_tensor_args(primal, tangent):
             primal, use_grad=False, dtype=primal.dtype)
     assert deepnet.is_tensor(primal)
     assert primal.dtype == tangent.dtype
+    return tangent
 
 
 def _get_dtype(data, use_grad, dtype):

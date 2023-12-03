@@ -24,12 +24,12 @@ def ones_like(tensor, use_grad=False, dtype=None):
     return deepnet.tensor(ones_arr, use_grad, dtype)
 
 
-def randn(dim, use_grad=False, dtype=None):
+def randn(dim=None, use_grad=False, dtype=None):
     randn_arr = np.random.randn(*dim)
     return deepnet.tensor(randn_arr, use_grad, dtype)
 
 
-def rand(dim, use_grad=False, dtype=None):
+def rand(dim=None, use_grad=False, dtype=None):
     rand_arr = np.random.rand(*dim)
     return deepnet.tensor(rand_arr, use_grad, dtype)
 

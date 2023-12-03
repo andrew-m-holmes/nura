@@ -30,7 +30,7 @@ class dtype:
 
     @classmethod
     def name(cls):
-        return "deepnet." + cls.__name__
+        return cls.__name__
 
 
 class byte(dtype):
