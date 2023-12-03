@@ -95,7 +95,8 @@ class Div(Function):
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
         grad_a = deepnet.tensor(1. / b.data * grad.data)
-        grad_b = deepnet.tensor(-1. * a.data / b.data ** 2. * grad.data)
+        grad_b = deepnet.tensor(-1. * a.data / b.data **
+                                2. * grad.data)
         return grad_a, grad_b
 
 

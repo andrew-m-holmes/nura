@@ -1,6 +1,5 @@
 import numpy as np
 import deepnet
-from deepnet import Tensor
 
 
 def jacobian(input, func):
@@ -11,7 +10,8 @@ def jacobian(input, func):
 
 
 def vjp(primals, cotangent, func, use_graph=False):
-    primals, cotangent = _vjp_pre_process(primals, cotangent, use_graph)
+    primals, cotangent = _vjp_pre_process(
+        primals, cotangent, use_graph)
     with deepnet.use_grad():
         output = func(*primals)
 
@@ -22,7 +22,8 @@ def vjp(primals, cotangent, func, use_graph=False):
         if _is_leaf_node(node):
             cotangents.append(cotangent)
         elif _is_intermediate_node(node):
-            next_nodes, next_cotangents = _process_node(node, cotangent)
+            next_nodes, next_cotangents = _process_node(
+                node, cotangent)
             for node, cotangent in zip(next_nodes, next_cotangents):
                 if _is_leaf_node(node) or _is_intermediate_node(node):
                     stack.append((node, cotangent))
@@ -36,39 +37,45 @@ def _process_node(node, cotangent):
 
 def _vjp_post_process(output, cotangents, use_graph):
     if not use_graph:
-        del output.grad_fn
-        output._set_grad_state(False, None, False)
+        output._set_grad_state(
+            use_grad=False, grad_fn=None, is_leaf=False)
     return output, tuple(reversed(cotangents))
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
+    assert all(deepnet.is_tensor(primal) for primal in primals)
+    assert deepnet.is_tensor(cotangent)
 
     temp = primals
     primals = []
     for primal in temp:
         if not use_graph:
             primal = primal.detach().clone()
-        primal.use_grad = True
+        primal._set_grad_state(
+            use_grad=True, grad_fn=None, is_leaf=True)
         primals.append(primal)
-    cotangent.use_grad = True
+    cotangent._set_grad_state(
+        use_grad=True, grad_fn=None, is_leaf=True)
     return primals, cotangent
 
 
 def _is_leaf_node(node):
     if node is not None:
-        return hasattr(node.context, "tensor")
+        return repr(node) == "AccumulateGrad"
     return False
 
 
 def _is_intermediate_node(node):
     if node is not None:
-        return not hasattr(node.context, "tensor")
+        return "Backward" in repr(node)
+    return False
 
 
-def jvp(primals, tangents, func):
-    dual_tensors = _jvp_pre_process(primals, tangents)
+def jvp(primals, tangents, func, use_graph=False):
+    dual_tensors = _jvp_pre_process(primals, tangents, use_graph)
     with deepnet.forward_autograd():
-        output = func(*dual_tensors)
+        with deepnet.set_grad(use_graph):
+            output = func(*dual_tensors)
     return _jvp_post_process(output)
 
 
@@ -78,10 +85,18 @@ def _jvp_post_process(output):
     return output.unpack()
 
 
-def _jvp_pre_process(primals, tangents):
+def _jvp_pre_process(primals, tangents, use_graph):
+    assert all(deepnet.is_tensor(primal) for primal in primals)
+    assert all(deepnet.is_tensor(tangent) for tangent in tangents)
+    assert len(primals) == len(tangents)
 
-    dual_tensors = [deepnet.dual_tensor(primal.detach().clone(
-    ), tangent.detach().clone()) for primal, tangent in zip(primals, tangents)]
+    dual_tensors = []
+    for primal, tangent in zip(primals, tangents):
+        if use_graph:
+            primal = primal._set_grad_state(
+                use_grad=True, grad_fn=None, is_leaf=False)
+            dual_tensor = deepnet.dual_tensor(primal, tangent)
+            dual_tensors.append(dual_tensor)
     return dual_tensors
 
 
@@ -90,8 +105,3 @@ def grad(inputs, outputs):
     # gradients for every input passed
     # will not accumulate them
     pass
-
-
-def _is_differentiable(*tensors):
-    dtypes = [float, np.float16, np.float32, np.float64, np.float128]
-    return all(tensor.dtype in dtypes for tensor in tensors)

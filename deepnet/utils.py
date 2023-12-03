@@ -42,5 +42,6 @@ def randint(low, high, dim, dtype=None):
 def is_tensor(item):
     return isinstance(item, deepnet.Tensor)
 
+
 def is_dual_tensor(item):
     return isinstance(item, deepnet.DualTensor)

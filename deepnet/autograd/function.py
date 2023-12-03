@@ -29,8 +29,9 @@ class BackwardFunction(Context):
 class FunctionMeta(type):
 
     def __init__(cls, name, bases, attrs):
-        backward_cls = type(name + "Backward",
-                            (BackwardFunction, ), {"_forward_cls": cls})
+        backward_cls = type(
+            name + "Backward", (BackwardFunction,),
+            {"_forward_cls": cls})
         cls._backward_cls = backward_cls
         super().__init__(name, bases, attrs)
 

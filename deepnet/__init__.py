@@ -5,8 +5,8 @@ from .dtype import dtype, byte, char, short, int, long, half, float, double, boo
 
 
 __all__ = [
-    "tensors", "Tensor", "DualTensor", "dual_tensor", "no_grad",
-    "use_grad", "set_grad", "forward_ad", "zeros", "zeros_like",
-    "ones", "ones_like", "randn", "rand", "randint", "is_tensor",
-    "is_dual_tensor", "dtype", "byte", "char", "short", "int", "long",
-    "half", "float", "double", "bool"]
+    "tensor", "Tensor", "DualTensor", "tensor", "dual_tensor",
+    "no_grad", "use_grad", "set_grad", "forward_ad", "zeros",
+    "zeros_like", "ones", "ones_like", "randn", "rand", "randint",
+    "is_tensor", "is_dual_tensor", "dtype", "byte", "char", "short",
+    "int", "long", "half", "float", "double", "bool"]
