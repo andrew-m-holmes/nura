@@ -28,7 +28,7 @@ class Tensor:
         return self.data.ndim
 
     def detach(self) -> "Tensor":
-        return tensor(self, False, self.dtype)
+        return tensor(self.data, False, self.dtype)
 
     def clone(self) -> "Tensor":
         f = _import_module(_nn_func)
@@ -108,7 +108,7 @@ class DualTensor:
         f = _import_module(_nn_func)
         primal = f.clone(self.primal)
         tangent = f.clone(self.tangent)
-        return DualTensor(primal, tangent)
+        return dual_tensor(primal, tangent)
 
     def __repr__(self) -> str:
         rep = f"dual_tensor(primal: {self.primal}, tangent: {self.tangent})"
