@@ -74,7 +74,7 @@ def _is_intermediate_node(node):
 
 def jvp(primals, tangents, func, use_graph=False):
     dual_tensors = _jvp_pre_process(primals, tangents, use_graph)
-    with deepnet.forward_autograd():
+    with deepnet.forward_ad():
         with deepnet.set_grad(use_graph):
             output = func(*dual_tensors)
     return _jvp_post_process(output)
@@ -95,10 +95,10 @@ def _jvp_pre_process(primals, tangents, use_graph):
     dual_tensors = []
     for primal, tangent in zip(primals, tangents):
         if use_graph:
-            primal = primal._set_grad_state(
+            primal._set_grad_state(
                 use_grad=True, grad_fn=None, is_leaf=False)
-            dual_tensor = deepnet.dual_tensor(primal, tangent)
-            dual_tensors.append(dual_tensor)
+        dual_tensor = deepnet.dual_tensor(primal, tangent)
+        dual_tensors.append(dual_tensor)
     return dual_tensors
 
 
