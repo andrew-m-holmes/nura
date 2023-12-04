@@ -146,7 +146,7 @@ class Pow(Function):
         return grad_a, grad_b
 
 
-def power(a, b):
+def pow(a, b):
     out = Pow.apply(a, b)
     return out
 
