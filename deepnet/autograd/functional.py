@@ -96,7 +96,7 @@ def _jvp_pre_process(primals, tangents, use_graph):
     for primal, tangent in zip(primals, tangents):
         if use_graph:
             primal._set_grad_state(
-                use_grad=True, grad_fn=None, is_leaf=False)
+                use_grad=True, grad_fn=None, is_leaf=True)
         dual_tensor = deepnet.dual_tensor(primal, tangent)
         dual_tensors.append(dual_tensor)
     return dual_tensors
