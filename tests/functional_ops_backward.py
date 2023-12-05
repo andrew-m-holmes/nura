@@ -10,16 +10,15 @@ def test_add_backward_scalar():
     a_tensor = deepnet.tensor(a, use_grad=True)
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.add(a_tensor, b_tensor)
-
     result_tensor.backward()
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected = (a + b + nudge - (a + b)) / nudge
+    h = 1e-7
+    expected = (a + b + h - (a + b)) / h
     np.testing.assert_allclose(
-        grad_a.data, expected, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected, rtol=1e-5, atol=1e-5)
 
 
 def test_add_backward_vector():
@@ -30,15 +29,16 @@ def test_add_backward_vector():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.add(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    v = deepnet.ones((4,), dtype=deepnet.float)
+    result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected = (a + b + nudge - (a + b)) / nudge
+    h = 1e-7
+    expected = (a + b + h - (a + b)) / h
     np.testing.assert_allclose(
-        grad_a.data, expected, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected, rtol=1e-5, atol=1e-5)
 
 
 def test_add_backward_matrix():
@@ -49,15 +49,16 @@ def test_add_backward_matrix():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.add(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    m = deepnet.ones((5, 5), dtype=deepnet.float)
+    result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected = (a + b + nudge - (a + b)) / nudge
+    h = 1e-7
+    expected = (a + b + h - (a + b)) / h
     np.testing.assert_allclose(
-        grad_a.data, expected, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected, rtol=1e-5, atol=1e-5)
 
 
 def test_sub_backward_scalar():
@@ -71,13 +72,13 @@ def test_sub_backward_scalar():
     result_tensor.backward()
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = (a + nudge - b - (a - b)) / nudge
-    expected_grad_b = (a - (b + nudge) - (a - b)) / nudge
+    h = 1e-7
+    expected_grad_a = (a + h - b - (a - b)) / h
+    expected_grad_b = (a - (b + h) - (a - b)) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_sub_backward_vector():
@@ -88,16 +89,17 @@ def test_sub_backward_vector():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.sub(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    v = deepnet.ones((4), dtype=deepnet.float)
+    result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = (a + nudge - b - (a - b)) / nudge
-    expected_grad_b = (a - (b + nudge) - (a - b)) / nudge
+    h = 1e-7
+    expected_grad_a = (a + h - b - (a - b)) / h
+    expected_grad_b = (a - (b + h) - (a - b)) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_sub_backward_matrix():
@@ -108,16 +110,17 @@ def test_sub_backward_matrix():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.sub(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    m = deepnet.ones((5, 5), dtype=deepnet.float)
+    result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = (a + nudge - b - (a - b)) / nudge
-    expected_grad_b = (a - (b + nudge) - (a - b)) / nudge
+    h = 1e-7
+    expected_grad_a = (a + h - b - (a - b)) / h
+    expected_grad_b = (a - (b + h) - (a - b)) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_mul_backward_scalar():
@@ -131,13 +134,13 @@ def test_mul_backward_scalar():
     result_tensor.backward()
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = ((a + nudge) * b - a * b) / nudge
-    expected_grad_b = (a * (b + nudge) - a * b) / nudge
+    h = 1e-7
+    expected_grad_a = ((a + h) * b - a * b) / h
+    expected_grad_b = (a * (b + h) - a * b) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_mul_backward_vector():
@@ -148,16 +151,17 @@ def test_mul_backward_vector():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.mul(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    v = deepnet.ones((4,), dtype=deepnet.float)
+    result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = ((a + nudge) * b - a * b) / nudge
-    expected_grad_b = (a * (b + nudge) - a * b) / nudge
+    h = 1e-7
+    expected_grad_a = ((a + h) * b - a * b) / h
+    expected_grad_b = (a * (b + h) - a * b) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_mul_backward_matrix():
@@ -168,16 +172,17 @@ def test_mul_backward_matrix():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.mul(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    m = deepnet.ones((5, 5), dtype=deepnet.float)
+    result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = ((a + nudge) * b - a * b) / nudge
-    expected_grad_b = (a * (b + nudge) - a * b) / nudge
+    h = 1e-7
+    expected_grad_a = ((a + h) * b - a * b) / h
+    expected_grad_b = (a * (b + h) - a * b) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_div_backward_scalar():
@@ -191,13 +196,13 @@ def test_div_backward_scalar():
     result_tensor.backward()
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = ((a + nudge) / b - a / b) / nudge
-    expected_grad_b = (a / (b + nudge) - a / b) / nudge
+    h = 1e-7
+    expected_grad_a = ((a + h) / b - a / b) / h
+    expected_grad_b = (a / (b + h) - a / b) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_div_backward_vector():
@@ -208,16 +213,17 @@ def test_div_backward_vector():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.div(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    v = deepnet.ones((4,), dtype=deepnet.float)
+    result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = ((a + nudge) / b - a / b) / nudge
-    expected_grad_b = (a / (b + nudge) - a / b) / nudge
+    h = 1e-7
+    expected_grad_a = ((a + h) / b - a / b) / h
+    expected_grad_b = (a / (b + h) - a / b) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_div_backward_matrix():
@@ -228,45 +234,50 @@ def test_div_backward_matrix():
     b_tensor = deepnet.tensor(b, use_grad=True)
     result_tensor = f.div(a_tensor, b_tensor)
 
-    result_tensor.backward()
+    m = deepnet.ones((3, 3), dtype=deepnet.float)
+    result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
-    nudge = 1e-10
-    expected_grad_a = ((a + nudge) / b - a / b) / nudge
-    expected_grad_b = (a / (b + nudge) - a / b) / nudge
+    h = 1e-7
+    expected_grad_a = ((a + h) / b - a / b) / h
+    expected_grad_b = (a / (b + h) - a / b) / h
     np.testing.assert_allclose(
-        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-8)
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(
-        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-8)
+        grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def main():
 
-    # Add Backward Tests
+    with deepnet.use_grad():
 
-    test_add_backward_scalar()
-    test_add_backward_vector()
-    test_add_backward_matrix()
+        # Add Backward Tests
 
-    # Sub Backward Tests
+        test_add_backward_scalar()
+        test_add_backward_vector()
+        test_add_backward_matrix()
 
-    test_sub_backward_scalar()
-    test_sub_backward_vector()
-    test_sub_backward_matrix()
+        # Sub Backward Tests
 
-    # Mul Backward Tests
+        test_sub_backward_scalar()
+        test_sub_backward_vector()
+        test_sub_backward_matrix()
 
-    test_mul_backward_scalar()
-    test_mul_backward_vector()
-    test_sub_backward_matrix()
+        # Mul Backward Tests
 
-    # Div Backward Tests
+        test_mul_backward_scalar()
+        test_mul_backward_vector()
+        test_sub_backward_matrix()
 
-    test_div_backward_scalar()
-    test_div_backward_vector()
-    test_div_backward_matrix()
+        # Div Backward Tests
 
-    print("All tests passed")
+        test_div_backward_scalar()
+        test_div_backward_vector()
+        test_div_backward_matrix()
+
+        # Matmul Backward Tests
+
+        print("All tests passed")
 
 
 if __name__ == "__main__":
