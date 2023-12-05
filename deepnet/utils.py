@@ -43,6 +43,11 @@ def randint(low, high, dim, dtype=None):
     return deepnet.tensor(randint_arr)
 
 
+def identity(n, use_grad=False, dtype=None):
+    data = np.identity(n)
+    return deepnet.tensor(data, use_grad, dtype)
+
+
 def is_tensor(item):
     return isinstance(item, deepnet.Tensor)
 
