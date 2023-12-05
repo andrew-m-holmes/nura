@@ -18,7 +18,8 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            grad = deepnet.ones_like(self, use_grad=False)
+            assert self.nelem() == 1
+            grad = deepnet.ones_like(self, dtype=self.dtype)
         self.grad_fn.apply(grad)
 
     def dim(self) -> Tuple[int, ...]:
@@ -26,6 +27,9 @@ class Tensor:
 
     def ndim(self) -> int:
         return self.data.ndim
+
+    def nelem(self):
+        return self.data.size
 
     def detach(self) -> "Tensor":
         return tensor(self.data, False, self.dtype)
@@ -151,7 +155,7 @@ def dual_tensor(primal, tangent=None):
 
 
 def _preprocess_tensor_args(data, use_grad, dtype):
-    dtype = _infer_dtype(data)
+    dtype = _infer_dtype(data) if dtype is None else dtype
     if use_grad:
         assert dtype.differentiable()
     data = dtype.numpy(data)
