@@ -1,4 +1,5 @@
 import deepnet
+import deepnet.nn.functional as f
 from .mode import Autograd
 
 
@@ -36,6 +37,10 @@ class AccumulateGrad:
     def apply(self, grad):
         if self.tensor.grad is None:
             self.tensor.grad = deepnet.zeros_like(self.tensor)
+        # TODO validate this reduce sum HACK
+        if grad.dim() != self.tensor.dim():
+            indices = tuple(range(grad.ndim()))
+            grad = f.reduce(grad, dim=indices)
         self.tensor.grad.data += grad.data
 
     @classmethod
