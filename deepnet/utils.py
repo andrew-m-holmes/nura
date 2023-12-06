@@ -3,8 +3,8 @@ import numpy as np
 
 
 def zeros(dim, use_grad=False, dtype=None):
-    zero_arr = np.zeros(dim, dtype)
-    return deepnet.tensor(zero_arr, use_grad)
+    zero_arr = np.zeros(dim)
+    return deepnet.tensor(zero_arr, use_grad, dtype)
 
 
 def zeros_like(tensor, use_grad=False, dtype=None):
