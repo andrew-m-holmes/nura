@@ -191,6 +191,32 @@ def cosine(a):
     return out
 
 
+class Reduce(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dim=0):
+        a_dim = a.dim()
+        context.a_dim = a_dim
+        context.save_tensors(a)
+        out = deepnet.tensor(np.add.reduce(a.data, dim))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a_dim = context.a_dim
+        out = deepnet.tensor(grad.data.reshape(a_dim))
+        return out
+
+    @staticmethod
+    def jvp(context, *tangents):
+        return super().jvp(context, *tangents)
+
+
+def reduce(a, dim=0):
+    out = Reduce.apply(a, dim)
+    return out
+
+
 class Squeeze(Function):
 
     @staticmethod
