@@ -191,20 +191,20 @@ def cosine(a):
     return out
 
 
-class Reduce(Function):
+class Sum(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim=0):
+    def forward(context: Context, a: Tensor, dims=None,
+                keepdims=False):
         a_dim = a.dim()
-        context.a_dim = a_dim
         context.save_tensors(a)
-        out = deepnet.tensor(np.add.reduce(a.data, dim))
+        out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        a_dim = context.a_dim
-        out = deepnet.tensor(grad.data.reshape(a_dim))
+        a = context.saved_tensors()
+        out = deepnet.tensor(grad.data * a)
         return out
 
     @staticmethod
@@ -212,8 +212,8 @@ class Reduce(Function):
         return super().jvp(context, *tangents)
 
 
-def reduce(a, dim=0):
-    out = Reduce.apply(a, dim)
+def sum(a, dims=None, keepdims=False):
+    out = Sum.apply(a, dims, keepdims=keepdims)
     return out
 
 
