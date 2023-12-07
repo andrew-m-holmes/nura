@@ -37,15 +37,39 @@ class AccumulateGrad:
     def apply(self, grad):
         if self.tensor.grad is None:
             self.tensor.grad = deepnet.zeros_like(self.tensor)
-        # TODO validate this reduce sum HACK
-        if grad.dim() != self.tensor.dim():
-            indices = tuple(range(grad.ndim()))
-            grad = f.reduce(grad, dim=indices)
+        grad = self._preprocess_for_grad_accumulation(grad)
         self.tensor.grad.data += grad.data
+
+    def _preprocess_for_grad_accumulation(self, grad):
+        if grad.dim() != self.tensor.dim():
+            if _is_scalar(self.tensor):
+                grad = f.sum(grad)
+            else:
+                dims = _get_dims_to_sum(self.tensor.dim(), grad.dim())
+                grad = f.sum(grad, dims, keepdims=True)
+                print(grad.dim())
+        return grad
 
     @classmethod
     def with_tensor(cls, tensor):
         return cls(tensor)
+
+
+def _is_scalar(tensor):
+    return tensor.ndim() == 0
+
+
+def _get_dims_to_sum(dim_1, dim_2):
+    dim_1 = _pad_dim(dim_1, dim_2)
+    dims_to_sum = [i for i in range(
+        len(dim_2)) if dim_2[i] > dim_1[i]]
+    print(dim_1, dim_2, dims_to_sum)
+    return tuple(dims_to_sum)
+
+
+def _pad_dim(dim_1, dim_2):
+    length = len(dim_2) - len(dim_1)
+    return [1] * length + list(dim_1)
 
 
 def _pass_to_graph(context, output):
