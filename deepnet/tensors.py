@@ -41,9 +41,12 @@ class Tensor:
     def zero(self):
         self.grad = deepnet.zeros_like(self, use_grad=False)
 
-    def squeeze(self, dim=None) -> "Tensor":
+    def sum(self, dims):
+        raise NotImplementedError
+
+    def squeeze(self, dims=None) -> "Tensor":
         f = _import_module(_nn_func)
-        return f.squeeze(self, dim)
+        return f.squeeze(self, dims=dims)
 
     def tranpose(self, dim_0, dim_1) -> "Tensor":
         f = _import_module(_nn_func)
