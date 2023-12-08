@@ -216,29 +216,56 @@ def sum(a, dims=None, keepdims=False):
 class Squeeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: int):
-        # TODO this needs to be fixed
-        a_dim = a.dim()
+    def forward(context: Context, a: Tensor, dims: int):
         context.save_tensors(a)
-        context.a_dim = a_dim
-        out_dim = []
-        for i, d in enumerate(a_dim):
-            if d != 1 or i not in dim:
-                out_dim.append(d)
-        out_dim = tuple(out_dim)
-        out = deepnet.tensor(a.data.reshape(out_dim))
+        context.dims = dims
+        out = deepnet.tensor(a.data.squeeze(axis=dims))
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        a_dim = context.a_dim
-        grad_data = deepnet.tensor(grad.data.reshape(a_dim))
+        dims = context.dims
+        grad_data = deepnet.tensor(
+            np.expand_dims(grad.data, axis=dims))
         return grad_data
 
 
-def squeeze(a, dim):
-    out = Squeeze.apply(a, dim=dim)
+def squeeze(a, dims=None):
+    if dims is None:
+        a_dim = a.dim()
+        dims = tuple(i for i in range(len(a_dim)) if a_dim[i] == 1)
+    out = Squeeze.apply(a, dims=dims)
     return out
+
+
+class Unsqueeze(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dims: int):
+        pass
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        pass
+
+
+def unsqueeze(a, dims=None):
+    pass
+
+
+class Reshape(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dims: int):
+        pass
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        pass
+
+
+def reshape(a, dims=None):
+    pass
 
 
 class Tranpose(Function):
