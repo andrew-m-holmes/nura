@@ -37,39 +37,33 @@ class AccumulateGrad:
     def apply(self, grad):
         if self.tensor.grad is None:
             self.tensor.grad = deepnet.zeros_like(self.tensor)
-        grad = self._preprocess_for_grad_accumulation(grad)
+        grad = _process_grad_for_accumulate(self.tensor, grad)
         self.tensor.grad.data += grad.data
-
-    def _preprocess_for_grad_accumulation(self, grad):
-        if grad.dim() != self.tensor.dim():
-            if _is_scalar(self.tensor):
-                grad = f.sum(grad)
-            else:
-                dims = _get_dims_to_sum(self.tensor.dim(), grad.dim())
-                grad = f.sum(grad, dims, keepdims=True)
-                print(grad.dim())
-        return grad
 
     @classmethod
     def with_tensor(cls, tensor):
         return cls(tensor)
 
 
+def _process_grad_for_accumulate(tensor, grad):
+    if tensor.dim() != grad.dim():
+        if _is_scalar(tensor):
+            return f.sum(grad, dims=grad.dim())
+        dims = _get_dims_to_sum(tensor.dim(), grad.dim())
+        keepdims = tensor.ndim() == grad.ndim()
+        return f.sum(grad, dims, keepdims)
+    return grad
+
+
 def _is_scalar(tensor):
-    return tensor.ndim() == 0
+    return tensor.dim() == 0
 
 
 def _get_dims_to_sum(dim_1, dim_2):
-    dim_1 = _pad_dim(dim_1, dim_2)
-    dims_to_sum = [i for i in range(
-        len(dim_2)) if dim_2[i] > dim_1[i]]
-    print(dim_1, dim_2, dims_to_sum)
-    return tuple(dims_to_sum)
-
-
-def _pad_dim(dim_1, dim_2):
-    length = len(dim_2) - len(dim_1)
-    return [1] * length + list(dim_1)
+    diff = len(dim_2) - len(dim_1)
+    padded_dim_1 = [1] * diff + list(dim_1)
+    return tuple([i for i in range(len(dim_2))
+                  if dim_2[i] != padded_dim_1[i]])
 
 
 def _pass_to_graph(context, output):
