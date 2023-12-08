@@ -48,6 +48,11 @@ def identity(n, use_grad=False, dtype=None):
     return deepnet.tensor(data, use_grad, dtype)
 
 
+def full(dim, num, use_grad=False, dtype=None):
+    data = np.full(dim, num)
+    return deepnet.tensor(data, use_grad, dtype)
+
+
 def is_tensor(item):
     return isinstance(item, deepnet.Tensor)
 
