@@ -149,7 +149,6 @@ def tensor(data, use_grad=False, dtype=None):
 
 
 def dual_tensor(primal, tangent=None):
-    # TODO implement preprocess
     tangent = _preprocess_dual_tensor_args(primal, tangent)
     return DualTensor(primal, tangent)
 
@@ -167,7 +166,7 @@ def _preprocess_dual_tensor_args(primal, tangent):
     if tangent is None:
         tangent = deepnet.ones_like(
             primal, use_grad=False, dtype=primal.dtype)
-    assert deepnet.is_tensor(primal)
+    assert deepnet.is_tensor(tangent)
     assert primal.dtype == tangent.dtype
     return tangent
 
