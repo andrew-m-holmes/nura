@@ -196,20 +196,16 @@ class Sum(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, dims=None,
                 keepdims=False):
-        a_dim = a.dim()
         context.save_tensors(a)
         out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
+        out_dim = out.dim()
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        a = context.saved_tensors()
-        out = deepnet.tensor(grad.data * a)
-        return out
-
-    @staticmethod
-    def jvp(context, *tangents):
-        return super().jvp(context, *tangents)
+        # TODO figure out how to make the grad repeat to match the dims of input
+        grad = deepnet.fill(grad.data)
+        raise NotImplementedError
 
 
 def sum(a, dims=None, keepdims=False):
