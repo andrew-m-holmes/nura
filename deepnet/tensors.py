@@ -90,6 +90,60 @@ class Tensor:
         return f.pow(self, other)
 
 
+class DoubleTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.double)
+
+
+class FloatTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.float)
+
+
+class HalfTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.half)
+
+
+class LongTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.long)
+
+
+class IntTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.int)
+
+
+class ShortTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.short)
+
+
+class CharTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.char)
+
+
+class ByteTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.byte)
+
+
+class BoolTensor(Tensor):
+
+    def __init__(self, data, use_grad) -> None:
+        super().__init__(data, use_grad, dtype=deepnet.bool)
+
+
 class DualTensor:
 
     def __init__(self, primal, tangent=None) -> None:
