@@ -112,12 +112,20 @@ _dtype_map = {
 }
 
 
+def typename(obj):
+    assert hasattr(obj, "dtype")
+    obj_dtype = obj.dtype
+    return obj_dtype.name().capitalize() + str(obj.__class__.__name__)
+
+
 def _infer_dtype(data):
     if isinstance(data, np.ndarray):
-        return _dtype_map.get(data.dtype)
+        return _dtype_map.get(data.dtype, TypeError())
     if isinstance(data, list):
-        return _dtype_map.get(_infer_dtype_from_list(data))
-    return _dtype_map.get(type(data))
+        return _dtype_map.get(
+            _infer_dtype_from_list(data),
+            TypeError())
+    return _dtype_map.get(type(data), TypeError())
 
 
 def _infer_dtype_from_list(data):
