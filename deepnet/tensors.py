@@ -178,17 +178,17 @@ def tensor(data, use_grad=False, dtype=None):
     return Tensor(data, use_grad, dtype)
 
 
-def dual_tensor(primal, tangent=None):
-    tangent = _preprocess_dual_tensor_args(primal, tangent)
-    return DualTensor(primal, tangent)
-
-
 def _preprocess_tensor_args(data, use_grad, dtype):
     dtype = _infer_dtype(data) if dtype is None else dtype
     if use_grad:
         assert dtype.differentiable()
     data = dtype.numpy(data)
     return data, dtype
+
+
+def dual_tensor(primal, tangent=None):
+    tangent = _preprocess_dual_tensor_args(primal, tangent)
+    return DualTensor(primal, tangent)
 
 
 def _preprocess_dual_tensor_args(primal, tangent):
