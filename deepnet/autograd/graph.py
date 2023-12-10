@@ -1,6 +1,5 @@
 import deepnet
 import deepnet.nn.functional as f
-from .mode import Autograd
 
 
 class Node:
@@ -67,9 +66,9 @@ def _get_dims_to_sum(dim_1, dim_2):
 
 
 def _pass_to_graph(context, output):
-    if Autograd.grad_enabled():
+    if deepnet.grad_enabled():
         output = _pass_for_reverse_ad(context, output)
-    if Autograd.forward_ad_enabled():
+    if deepnet.forward_ad_enabled():
         output = _pass_for_forward_ad(context, output)
     return output
 
