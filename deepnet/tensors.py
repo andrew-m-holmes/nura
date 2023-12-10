@@ -93,28 +93,22 @@ class Tensor:
         return rep
 
     def __add__(self, other):
-        f = _import_module(_nn_func)
-        return f.add(self, other)
+        return deepnet.add(self, other)
 
     def __sub__(self, other):
-        f = _import_module(_nn_func)
-        return f.sub(self, other)
+        return deepnet.sub(self, other)
 
     def __mul__(self, other):
-        f = _import_module(_nn_func)
-        return f.mul(self, other)
+        return deepnet.mul(self, other)
 
     def __truediv__(self, other):
-        f = _import_module(_nn_func)
-        return f.div(self, other)
+        return deepnet.div(self, other)
 
     def __matmul__(self, other):
-        f = _import_module(_nn_func)
-        return f.matmul(self, other)
+        return deepnet.matmul(self, other)
 
     def __pow__(self, other):
-        f = _import_module(_nn_func)
-        return f.pow(self, other)
+        return deepnet.pow(self, other)
 
 
 class DualTensor:
@@ -147,30 +141,6 @@ class DualTensor:
     def __repr__(self) -> str:
         rep = f"dual_tensor(primal: {self.primal}, tangent: {self.tangent})"
         return rep
-
-    def __add__(self, other):
-        f = _import_module(_nn_func)
-        return f.add(self, other)
-
-    def __sub__(self, other):
-        f = _import_module(_nn_func)
-        return f.sub(self, other)
-
-    def __mul__(self, other):
-        f = _import_module(_nn_func)
-        return f.mul(self, other)
-
-    def __truediv__(self, other):
-        f = _import_module(_nn_func)
-        return f.div(self, other)
-
-    def __matmul__(self, other):
-        f = _import_module(_nn_func)
-        return f.matmul(self, other)
-
-    def __pow__(self, other):
-        f = _import_module(_nn_func)
-        return f.pow(self, other)
 
 
 def tensor(data, use_grad=False, dtype=None):
