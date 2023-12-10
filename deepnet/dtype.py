@@ -120,12 +120,11 @@ def typename(obj):
 
 def _infer_dtype(data):
     if isinstance(data, np.ndarray):
-        return _dtype_map.get(data.dtype, TypeError())
+        return _dtype_map.get(data.dtype)
     if isinstance(data, list):
         return _dtype_map.get(
-            _infer_dtype_from_list(data),
-            TypeError())
-    return _dtype_map.get(type(data), TypeError())
+            _infer_dtype_from_list(data))
+    return _dtype_map.get(type(data))
 
 
 def _infer_dtype_from_list(data):
