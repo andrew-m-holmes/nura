@@ -34,6 +34,33 @@ class Tensor:
     def detach(self):
         return tensor(self.data, False, self.dtype)
 
+    def byte(self):
+        return tensor(self.data, False, dtype=deepnet.byte)
+
+    def char(self):
+        return tensor(self.data, False, dtype=deepnet.char)
+
+    def short(self):
+        return tensor(self.data, False, dtype=deepnet.short)
+
+    def int(self):
+        return tensor(self.data, False, dtype=deepnet.int)
+
+    def long(self):
+        return tensor(self.data, False, dtype=deepnet.long)
+
+    def half(self):
+        return tensor(self.data, self.use_grad, dtype=deepnet.half)
+
+    def float(self):
+        return tensor(self.data, self.use_grad, dtype=deepnet.float)
+
+    def double(self):
+        return tensor(self.data, self.use_grad, dtype=deepnet.double)
+
+    def bool(self):
+        return tensor(self.data, False, dtype=deepnet.bool)
+
     def clone(self):
         f = _import_module(_nn_func)
         return f.clone(self)
@@ -88,60 +115,6 @@ class Tensor:
     def __pow__(self, other):
         f = _import_module(_nn_func)
         return f.pow(self, other)
-
-
-class DoubleTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.double)
-
-
-class FloatTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.float)
-
-
-class HalfTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.half)
-
-
-class LongTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.long)
-
-
-class IntTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.int)
-
-
-class ShortTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.short)
-
-
-class CharTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.char)
-
-
-class ByteTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.byte)
-
-
-class BoolTensor(Tensor):
-
-    def __init__(self, data, use_grad) -> None:
-        super().__init__(data, use_grad, dtype=deepnet.bool)
 
 
 class DualTensor:

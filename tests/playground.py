@@ -5,11 +5,12 @@ import deepnet.nn.functional as f
 
 
 def main():
-    a = deepnet.rand((1, 1, 1, 1, 1, 1, 1, 1, 1), use_grad=True)
-    b = a.squeeze((0, 1, 2, 3, 5))
-    print(b.dim())
-    b.backward()
-    print(a.grad)
+    b = torch.tensor(4., requires_grad=True)
+    print(b)
+    print(b + 3)
+    a = deepnet.tensor(3.)
+    print(a)
+    print(deepnet.typename(a))
 
 
 if __name__ == "__main__":
