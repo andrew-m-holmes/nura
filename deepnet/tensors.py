@@ -1,9 +1,6 @@
-import importlib
 import deepnet
 from .dtype import _infer_dtype
 from typing import Tuple
-
-_nn_func = "deepnet.nn.functional"
 
 
 class Tensor:
@@ -62,8 +59,7 @@ class Tensor:
         return tensor(self.data, False, dtype=deepnet.bool)
 
     def clone(self):
-        f = _import_module(_nn_func)
-        return f.clone(self)
+        return deepnet.clone(self)
 
     def zero(self):
         self.grad = deepnet.zeros_like(self, use_grad=False)
@@ -72,12 +68,10 @@ class Tensor:
         raise NotImplementedError
 
     def squeeze(self, dims=None):
-        f = _import_module(_nn_func)
-        return f.squeeze(self, dims=dims)
+        return deepnet.squeeze(self, dims=dims)
 
     def tranpose(self, dim_0, dim_1):
-        f = _import_module(_nn_func)
-        return f.tranpose(self, dim_0, dim_1)
+        return deepnet.tranpose(self, dim_0, dim_1)
 
     def _set_grad_state(self, use_grad, grad_fn, is_leaf):
         self.use_grad = use_grad
@@ -133,9 +127,8 @@ class DualTensor:
         return self.primal, self.tangent
 
     def clone(self):
-        f = _import_module(_nn_func)
-        primal = f.clone(self.primal)
-        tangent = f.clone(self.tangent)
+        primal = deepnet.clone(self.primal)
+        tangent = deepnet.clone(self.tangent)
         return dual_tensor(primal, tangent)
 
     def __repr__(self) -> str:
@@ -169,11 +162,3 @@ def _preprocess_dual_tensor_args(primal, tangent):
     assert deepnet.is_tensor(tangent)
     assert primal.dtype == tangent.dtype
     return tangent
-
-
-def _import_module(name):
-    try:
-        module = importlib.import_module(name)
-        return module
-    except:
-        raise ValueError(f"Unknown module name: {name}")
