@@ -4,7 +4,7 @@ from .autograd.mode import (
     forward_ad)
 from .dtype import *
 from .utils import *
-
+from .functional import *
 
 __all__ = ["Tensor", "DualTensor", "tensor", "dual_tensor",
            "grad_enabled", "forward_ad_enabled", "no_grad",
