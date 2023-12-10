@@ -31,10 +31,10 @@ class Tensor:
     def nelem(self):
         return self.data.size
 
-    def detach(self) -> "Tensor":
+    def detach(self):
         return tensor(self.data, False, self.dtype)
 
-    def clone(self) -> "Tensor":
+    def clone(self):
         f = _import_module(_nn_func)
         return f.clone(self)
 
@@ -44,11 +44,11 @@ class Tensor:
     def sum(self, dims):
         raise NotImplementedError
 
-    def squeeze(self, dims=None) -> "Tensor":
+    def squeeze(self, dims=None):
         f = _import_module(_nn_func)
         return f.squeeze(self, dims=dims)
 
-    def tranpose(self, dim_0, dim_1) -> "Tensor":
+    def tranpose(self, dim_0, dim_1):
         f = _import_module(_nn_func)
         return f.tranpose(self, dim_0, dim_1)
 
@@ -65,27 +65,27 @@ class Tensor:
         rep += ")"
         return rep
 
-    def __add__(self, other: "Tensor") -> "Tensor":
+    def __add__(self, other):
         f = _import_module(_nn_func)
         return f.add(self, other)
 
-    def __sub__(self, other: "Tensor") -> "Tensor":
+    def __sub__(self, other):
         f = _import_module(_nn_func)
         return f.sub(self, other)
 
-    def __mul__(self, other: "Tensor") -> "Tensor":
+    def __mul__(self, other):
         f = _import_module(_nn_func)
         return f.mul(self, other)
 
-    def __truediv__(self, other: "Tensor") -> "Tensor":
+    def __truediv__(self, other):
         f = _import_module(_nn_func)
         return f.div(self, other)
 
-    def __matmul__(self, other: "Tensor") -> "Tensor":
+    def __matmul__(self, other):
         f = _import_module(_nn_func)
         return f.matmul(self, other)
 
-    def __pow__(self, other: "Tensor") -> "Tensor":
+    def __pow__(self, other):
         f = _import_module(_nn_func)
         return f.pow(self, other)
 
@@ -165,7 +165,7 @@ class DualTensor:
     def unpack(self) -> Tuple[Tensor, Tensor]:
         return self.primal, self.tangent
 
-    def clone(self) -> "DualTensor":
+    def clone(self):
         f = _import_module(_nn_func)
         primal = f.clone(self.primal)
         tangent = f.clone(self.tangent)
@@ -175,27 +175,27 @@ class DualTensor:
         rep = f"dual_tensor(primal: {self.primal}, tangent: {self.tangent})"
         return rep
 
-    def __add__(self, other: "DualTensor") -> "DualTensor":
+    def __add__(self, other):
         f = _import_module(_nn_func)
         return f.add(self, other)
 
-    def __sub__(self, other: "DualTensor") -> "DualTensor":
+    def __sub__(self, other):
         f = _import_module(_nn_func)
         return f.sub(self, other)
 
-    def __mul__(self, other: "DualTensor") -> "DualTensor":
+    def __mul__(self, other):
         f = _import_module(_nn_func)
         return f.mul(self, other)
 
-    def __truediv__(self, other: "DualTensor") -> "DualTensor":
+    def __truediv__(self, other):
         f = _import_module(_nn_func)
         return f.div(self, other)
 
-    def __matmul__(self, other: "DualTensor") -> "DualTensor":
+    def __matmul__(self, other):
         f = _import_module(_nn_func)
         return f.matmul(self, other)
 
-    def __pow__(self, other: "DualTensor") -> "DualTensor":
+    def __pow__(self, other):
         f = _import_module(_nn_func)
         return f.pow(self, other)
 
