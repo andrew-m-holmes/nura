@@ -5,12 +5,13 @@ import deepnet.nn.functional as f
 
 
 def main():
-    b = torch.tensor(4., requires_grad=True)
-    print(b)
-    print(b + 3)
-    a = deepnet.tensor(3.)
-    print(a)
-    print(deepnet.typename(a))
+
+    a = deepnet.tensor(5., use_grad=True)
+    b = deepnet.tensor(7., use_grad=True)
+    c = f.mul(a, 15)
+    print(c)
+    c.backward()
+    print(a.grad)
 
 
 if __name__ == "__main__":

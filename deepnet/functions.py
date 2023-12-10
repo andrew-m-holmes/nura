@@ -5,7 +5,7 @@ from deepnet.autograd.function import Function, Context
 from typing import Any
 
 
-class Add(Function):
+class _Add(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -25,12 +25,7 @@ class Add(Function):
         return tangent_out
 
 
-def add(a, b):
-    out = Add.apply(a, b)
-    return out
-
-
-class Sub(Function):
+class _Sub(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -50,12 +45,7 @@ class Sub(Function):
         return tangent_out
 
 
-def sub(a, b):
-    out = Sub.apply(a, b)
-    return out
-
-
-class Mul(Function):
+class _Mul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -78,12 +68,7 @@ class Mul(Function):
         return tangent_out
 
 
-def mul(a, b):
-    out = Mul.apply(a, b)
-    return out
-
-
-class Div(Function):
+class _Div(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -100,12 +85,7 @@ class Div(Function):
         return grad_a, grad_b
 
 
-def div(a, b):
-    out = Div.apply(a, b)
-    return out
-
-
-class Matmul(Function):
+class _Matmul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -124,12 +104,7 @@ class Matmul(Function):
         return grad_a, grad_b
 
 
-def matmul(a, b):
-    out = Matmul.apply(a, b)
-    return out
-
-
-class Pow(Function):
+class _Pow(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -146,12 +121,7 @@ class Pow(Function):
         return grad_a, grad_b
 
 
-def pow(a, b):
-    out = Pow.apply(a, b)
-    return out
-
-
-class Sine(Function):
+class _Sine(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -166,12 +136,7 @@ class Sine(Function):
         return grad_a
 
 
-def sine(a):
-    out = Sine.apply(a)
-    return out
-
-
-class Cosine(Function):
+class _Cosine(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -186,12 +151,7 @@ class Cosine(Function):
         return grad_a
 
 
-def cosine(a):
-    out = Cosine.apply(a)
-    return out
-
-
-class Sum(Function):
+class _Sum(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims=None,
@@ -208,12 +168,7 @@ class Sum(Function):
         raise NotImplementedError
 
 
-def sum(a, dims=None, keepdims=False):
-    out = Sum.apply(a, dims, keepdims=keepdims)
-    return out
-
-
-class Squeeze(Function):
+class _Squeeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
@@ -230,15 +185,7 @@ class Squeeze(Function):
         return grad_data
 
 
-def squeeze(a, dims=None):
-    if dims is None:
-        a_dim = a.dim()
-        dims = tuple(i for i in range(len(a_dim)) if a_dim[i] == 1)
-    out = Squeeze.apply(a, dims=dims)
-    return out
-
-
-class Unsqueeze(Function):
+class _Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
@@ -249,11 +196,7 @@ class Unsqueeze(Function):
         pass
 
 
-def unsqueeze(a, dims=None):
-    pass
-
-
-class Reshape(Function):
+class _Reshape(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
@@ -268,7 +211,7 @@ def reshape(a, dims=None):
     pass
 
 
-class Tranpose(Function):
+class _Tranpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim_0: int, dim_1: int):
@@ -286,12 +229,7 @@ class Tranpose(Function):
         return grad_data
 
 
-def tranpose(a, dim_0, dim_1):
-    out = Tranpose.apply(a, dim_0=dim_0, dim_1=dim_1)
-    return out
-
-
-class Clone(Function):
+class _Clone(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -303,8 +241,3 @@ class Clone(Function):
     @staticmethod
     def backward(context: Any, grad: Tensor):
         return grad
-
-
-def clone(a):
-    out = Clone.apply(a)
-    return out
