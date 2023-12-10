@@ -1,5 +1,5 @@
 import deepnet
-import deepnet.nn.functional as f
+import deepnet.functional as f
 
 
 class Node:

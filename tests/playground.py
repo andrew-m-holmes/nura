@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import deepnet
-import deepnet.nn.functional as f
+import deepnet.functional as f
 
 
 def main():

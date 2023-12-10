@@ -1,6 +1,6 @@
 import numpy as np
 import deepnet
-import deepnet.nn.functional as f
+import deepnet.functional as f
 
 
 def test_add_backward_scalar():

@@ -1,11 +1,11 @@
 import numpy as np
 import deepnet
-from deepnet import Tensor
-from deepnet.autograd.function import Function, Context
+from .tensors import Tensor
+from .autograd.function import Context, Function
 from typing import Any
 
 
-class _Add(Function):
+class Add(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -25,7 +25,7 @@ class _Add(Function):
         return tangent_out
 
 
-class _Sub(Function):
+class Sub(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -45,7 +45,7 @@ class _Sub(Function):
         return tangent_out
 
 
-class _Mul(Function):
+class Mul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -68,7 +68,7 @@ class _Mul(Function):
         return tangent_out
 
 
-class _Div(Function):
+class Div(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -85,7 +85,7 @@ class _Div(Function):
         return grad_a, grad_b
 
 
-class _Matmul(Function):
+class Matmul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -104,7 +104,7 @@ class _Matmul(Function):
         return grad_a, grad_b
 
 
-class _Pow(Function):
+class Pow(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -121,7 +121,7 @@ class _Pow(Function):
         return grad_a, grad_b
 
 
-class _Sine(Function):
+class Sine(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -136,7 +136,7 @@ class _Sine(Function):
         return grad_a
 
 
-class _Cosine(Function):
+class Cosine(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -151,7 +151,7 @@ class _Cosine(Function):
         return grad_a
 
 
-class _Sum(Function):
+class Sum(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims=None,
@@ -168,7 +168,7 @@ class _Sum(Function):
         raise NotImplementedError
 
 
-class _Squeeze(Function):
+class Squeeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
@@ -185,7 +185,7 @@ class _Squeeze(Function):
         return grad_data
 
 
-class _Unsqueeze(Function):
+class Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
@@ -196,7 +196,7 @@ class _Unsqueeze(Function):
         pass
 
 
-class _Reshape(Function):
+class Reshape(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
@@ -211,7 +211,7 @@ def reshape(a, dims=None):
     pass
 
 
-class _Tranpose(Function):
+class Tranpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim_0: int, dim_1: int):
@@ -229,7 +229,7 @@ class _Tranpose(Function):
         return grad_data
 
 
-class _Clone(Function):
+class Clone(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
