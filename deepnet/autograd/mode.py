@@ -1,18 +1,18 @@
 from contextlib import contextmanager
 
 
+def grad_enabled():
+    return Autograd._use_grad
+
+
+def forward_ad_enabled():
+    return Autograd._forward_mode
+
+
 class Autograd:
 
     _use_grad = True
     _forward_mode = False
-
-    @classmethod
-    def grad_enabled(cls):
-        return cls._use_grad
-
-    @classmethod
-    def forward_ad_enabled(cls):
-        return cls._forward_mode
 
 
 @contextmanager
