@@ -1,5 +1,6 @@
-import deepnet
 import numpy as np
+import deepnet
+from deepnet import Tensor, DualTensor
 
 
 def zeros(dim, use_grad=False, dtype=None):
@@ -54,8 +55,26 @@ def full(dim, num, use_grad=False, dtype=None):
 
 
 def is_tensor(item):
-    return isinstance(item, deepnet.Tensor)
+    return isinstance(item, Tensor)
 
 
 def is_dual_tensor(item):
-    return isinstance(item, deepnet.DualTensor)
+    return isinstance(item, DualTensor)
+
+
+def preprocess_to_tensor(*args):
+    tensor_fn = (
+        deepnet.dual_tensor
+        if deepnet.forward_ad_enabled() else deepnet.tensor)
+    assert is_valid_tensor_data(*args)
+    tensor_cls = [Tensor, DualTensor]
+    tensors = tuple(
+        tensor_fn(arg)
+        if type(arg) not in tensor_cls else arg for arg in args)
+    return tensors if len(tensors) > 1 else tensors[0]
+
+
+def is_valid_tensor_data(*args):
+    allowed_object_types = [
+        Tensor, DualTensor, np.ndarray, int, float, bool]
+    return all(type(arg) in allowed_object_types for arg in args)
