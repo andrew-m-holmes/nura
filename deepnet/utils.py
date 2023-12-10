@@ -74,6 +74,10 @@ def preprocess_to_tensor(*args):
     return tensors if len(tensors) > 1 else tensors[0]
 
 
+def is_all_int(*args):
+    return all(type(arg) is int for arg in args)
+
+
 def is_valid_tensor_data(*args):
     allowed_object_types = [
         Tensor, DualTensor, np.ndarray, int, float, bool]
