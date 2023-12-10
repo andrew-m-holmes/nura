@@ -154,8 +154,7 @@ class Cosine(Function):
 class Sum(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims=None,
-                keepdims=False):
+    def forward(context: Context, a: Tensor, dims, keepdims):
         context.save_tensors(a)
         out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
         out_dim = out.dim()
