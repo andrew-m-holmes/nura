@@ -1,5 +1,6 @@
 import deepnet
 import deepnet.functional as f
+import deepnet.utils as utils
 
 
 class Node:
@@ -46,16 +47,12 @@ class AccumulateGrad:
 
 def _process_grad_for_accumulate(tensor, grad):
     if tensor.dim() != grad.dim():
-        if _is_scalar(tensor):
+        if utils.is_scalar_tensor(tensor):
             return f.sum(grad, dims=grad.dim())
         dims = _get_dims_to_sum(tensor.dim(), grad.dim())
         keepdims = tensor.ndim() == grad.ndim()
         return f.sum(grad, dims, keepdims)
     return grad
-
-
-def _is_scalar(tensor):
-    return tensor.dim() == 0
 
 
 def _get_dims_to_sum(dim_1, dim_2):

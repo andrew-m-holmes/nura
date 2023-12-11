@@ -54,6 +54,11 @@ def full(dim, num, use_grad=False, dtype=None):
     return deepnet.tensor(data, use_grad, dtype)
 
 
+def is_of_tensor(*items):
+    return all(is_tensor(item) or is_dual_tensor(item)
+               for item in items)
+
+
 def is_tensor(item):
     return isinstance(item, Tensor)
 
@@ -62,23 +67,21 @@ def is_dual_tensor(item):
     return isinstance(item, DualTensor)
 
 
-def preprocess_to_tensor(*args):
-    tensor_fn = (
-        deepnet.dual_tensor
-        if deepnet.forward_ad_enabled() else deepnet.tensor)
-    assert is_valid_tensor_data(*args)
+def preprocess_to_tensors(*items):
+    assert all(is_of_tensor(item) or is_py_scalar(item)
+               for item in items)
     tensor_cls = [Tensor, DualTensor]
-    tensors = tuple(
-        tensor_fn(arg)
-        if type(arg) not in tensor_cls else arg for arg in args)
-    return tensors if len(tensors) > 1 else tensors[0]
+    tensor_fn = deepnet.tensor if not deepnet.forward_ad_enabled(
+    ) else deepnet.dual_tensor
+    return tuple(tensor_fn(item)
+                 if type(item) not in tensor_cls else item
+                 for item in items)
 
 
-def is_all_int(*args):
-    return all(type(arg) is int for arg in args)
+def is_py_scalar(item):
+    py_scalar_types = [float, int]
+    return type(item) in py_scalar_types
 
 
-def is_valid_tensor_data(*args):
-    allowed_object_types = [
-        Tensor, DualTensor, np.ndarray, int, float, bool]
-    return all(type(arg) in allowed_object_types for arg in args)
+def is_scalar_tensor(tensor):
+    return tensor.ndim() == 0
