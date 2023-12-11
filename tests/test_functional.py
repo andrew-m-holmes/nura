@@ -342,6 +342,102 @@ def test_cosine_forward_matrix():
         result_tensor.data, expected, decimal=5)
 
 
+def test_squeeze_forward_rank1_v0():
+    a = np.random.rand(1)
+
+    a_tensors = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensors)
+    assert result_tensor.dim() == ()
+
+
+def test_squeeze_forward_rank1_v1():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensor)
+    assert result_tensor.dim() == (5,)
+
+
+def test_squeeze_forward_rank2_v0():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensor)
+    assert result_tensor.dim() == (5, 5)
+
+
+def test_squeeze_forward_rank2_v1():
+    a = np.random.rand(3, 1)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensor)
+    assert result_tensor.dim() == (3,)
+
+
+def test_squeeze_forward_mutli_v0():
+    a = np.random.rand(3, 1, 5, 2, 1, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensor)
+    assert result_tensor.dim() == (3, 5, 2, 3)
+
+
+def test_squeeze_forward_multi_v1():
+    a = np.random.rand(1, 1, 1, 1, 1, 1, 1, 69, 1)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensor)
+    assert result_tensor.dim() == (69,)
+
+
+def test_squeeze_forward_multi_v2():
+    a = np.random.rand(4, 4, 5, 6, 2)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.squeeze(a_tensor)
+    assert result_tensor.dim() == (4, 4, 5, 6, 2)
+
+
+def test_transpose_forward_rank2_v0():
+    a = np.random.rand(3, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.transpose(a_tensor)
+    assert result_tensor.dim() == (5, 3)
+
+
+def test_transpose_forward_rank2_v1():
+    a = np.random.rand(3, 1)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.transpose(a_tensor)
+    assert result_tensor.dim() == (1, 3)
+
+
+def test_transpose_forward_multi_v0():
+    a = np.random.rand(4, 3, 2)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.transpose(a_tensor, dim_0=1, dim_1=2)
+    assert result_tensor.dim() == (4, 2, 3)
+
+
+def test_transpose_forward_multi_v1():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.transpose(a_tensor, dim_0=2, dim_1=3)
+    assert result_tensor.dim() == (2, 3, 5, 4)
+
+
+def test_transpose_forward_multi_v2():
+    a = np.random.rand(3, 4, 5, 6)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.transpose(a_tensor, dim_0=0, dim_1=3)
+    assert result_tensor.dim() == (6, 4, 5, 3)
+
+
 def main():
 
     # Add Tests
@@ -394,6 +490,27 @@ def main():
     test_cosine_forward_scalar()
     test_cosine_forward_vector()
     test_cosine_forward_matrix()
+
+    # Squeeze Tests
+
+    test_squeeze_forward_rank1_v0()
+    test_squeeze_forward_rank1_v1()
+    test_squeeze_forward_rank2_v0()
+    test_squeeze_forward_rank2_v1()
+
+    test_squeeze_forward_mutli_v0()
+    test_squeeze_forward_multi_v1()
+    test_squeeze_forward_multi_v2()
+
+    # Transpose Tests
+
+    test_transpose_forward_rank2_v0()
+    test_transpose_forward_rank2_v1()
+    test_transpose_forward_multi_v0()
+
+    test_transpose_forward_multi_v0()
+    test_transpose_forward_multi_v1()
+    test_transpose_forward_multi_v2()
 
     print("All tests passed")
 
