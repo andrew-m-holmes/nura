@@ -51,26 +51,47 @@ def cosine(a):
 
 
 def sum(a, dims=None, keepdims=True):
-    assert utils.is_of_tensor(a)
+    assert _valid_sum_args(a, dims, keepdims)
     out = funcs.Sum.apply(a, dims, keepdims)
     return out
 
 
-def tranpose(a, dim_0, dim_1):
-    assert utils.is_of_tensor(a)
-    assert utils.is_all_int(dim_0, dim_1)
-    assert a.ndim() >= 2
+def _valid_sum_args(a, dims, keepdims):
+    passed = utils.is_of_tensor(a) and utils.is_dims_arg(
+        dims) and utils.is_py_bool(keepdims)
+    return passed
+
+
+def transpose(a, dim_0, dim_1):
+    assert _valid_transpose_args(a, dim_0, dim_1)
     out = funcs.Tranpose.apply(a, dim_0, dim_1)
     return out
 
 
+def _valid_transpose_args(a, dim_0, dim_1):
+    passed = utils.is_of_tensor(a) and utils.is_all_py_scalars(
+        dim_0, dim_1) and a.ndim() >= 2
+    return passed
+
+
 def squeeze(a, dims=None):
-    assert utils.is_of_tensor(a)
+    assert _valid_squeeze_args(a, dims)
+    dims = _setup_dims_for_squeeze(dims)
+    out = funcs.Squeeze.apply(a, dims=dims)
+    return out
+
+
+def _setup_dims_for_squeeze(a, dims):
     if dims is None:
         a_dim = a.dim()
         dims = tuple(i for i in range(len(a_dim)) if a_dim[i] == 1)
-    out = funcs.Squeeze.apply(a, dims=dims)
-    return out
+    return dims
+
+
+def _valid_squeeze_args(a, dims):
+    passed = utils.is_of_tensor(
+        a) and utils.is_dims_arg(dims) and a.ndim() >= 1
+    return passed
 
 
 def clone(a):
