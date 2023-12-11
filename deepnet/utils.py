@@ -79,10 +79,26 @@ def preprocess_to_tensors(*items):
     return processed_items if len(processed_items) > 1 else processed_items[0]
 
 
+def is_all_py_scalars(*items):
+    return is_py_scalar(item for item in items)
+
+
 def is_py_scalar(item):
     py_scalar_types = [float, int]
     return type(item) in py_scalar_types
 
 
-def is_scalar_tensor(tensor):
-    return tensor.dim() == 0
+def is_py_bool(item):
+    return type(item) is bool
+
+
+def is_dims_arg(arg):
+    arg_type = type(arg)
+    if arg_type is None or is_py_scalar(arg):
+        return True
+    return all(is_py_scalar(val) for val in arg)
+
+
+def is_scalar_tensor(item):
+    assert is_of_tensor(item)
+    return item.dim() == 0
