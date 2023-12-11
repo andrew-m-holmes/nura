@@ -40,8 +40,8 @@ def rand(dim=None, use_grad=False, dtype=None):
 
 
 def randint(low, high, dim, dtype=None):
-    randint_arr = np.random.randint(low, high, dim, dtype)
-    return deepnet.tensor(randint_arr)
+    randint_arr = np.random.randint(low, high, dim)
+    return deepnet.tensor(randint_arr, dtype)
 
 
 def identity(n, use_grad=False, dtype=None):
@@ -93,8 +93,7 @@ def is_py_bool(item):
 
 
 def is_dims_arg(arg):
-    arg_type = type(arg)
-    if arg_type is None or is_py_scalar(arg):
+    if arg is None or type(arg) is int:
         return True
     return all(is_py_scalar(val) for val in arg)
 
