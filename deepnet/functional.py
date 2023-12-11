@@ -62,7 +62,7 @@ def _valid_sum_args(a, dims, keepdims):
     return passed
 
 
-def transpose(a, dim_0, dim_1):
+def transpose(a, dim_0=1, dim_1=0):
     assert _valid_transpose_args(a, dim_0, dim_1)
     out = funcs.Tranpose.apply(a, dim_0, dim_1)
     return out
@@ -76,7 +76,7 @@ def _valid_transpose_args(a, dim_0, dim_1):
 
 def squeeze(a, dims=None):
     assert _valid_squeeze_args(a, dims)
-    dims = _setup_dims_for_squeeze(dims)
+    dims = _setup_dims_for_squeeze(a, dims)
     out = funcs.Squeeze.apply(a, dims=dims)
     return out
 
