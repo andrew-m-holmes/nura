@@ -29,7 +29,7 @@ class Tensor:
         return self.data.size
 
     def detach(self):
-        return tensor(self.data, False, self.dtype)
+        return tensor(self.data, False, dtype=self.dtype)
 
     def byte(self):
         return tensor(self.data, False, dtype=deepnet.byte)
