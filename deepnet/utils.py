@@ -73,9 +73,10 @@ def preprocess_to_tensors(*items):
     tensor_cls = [Tensor, DualTensor]
     tensor_fn = deepnet.tensor if not deepnet.forward_ad_enabled(
     ) else deepnet.dual_tensor
-    return tuple(tensor_fn(item)
-                 if type(item) not in tensor_cls else item
-                 for item in items)
+    processed_items = tuple(tensor_fn(item)
+                            if type(item) not in tensor_cls else item
+                            for item in items)
+    return processed_items if len(processed_items) > 1 else processed_items[0]
 
 
 def is_py_scalar(item):
@@ -84,4 +85,4 @@ def is_py_scalar(item):
 
 
 def is_scalar_tensor(tensor):
-    return tensor.ndim() == 0
+    return tensor.dim() == 0
