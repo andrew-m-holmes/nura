@@ -6,12 +6,9 @@ import deepnet.functional as f
 
 def main():
 
-    a = deepnet.tensor(5., use_grad=True)
-    b = deepnet.tensor(7., use_grad=True)
-    c = f.mul(a, 15)
-    print(c)
-    c.backward()
-    print(a.grad)
+    a = deepnet.tensor([3., 4, 2], use_grad=True)
+    dual_a = deepnet.dual_tensor(a)
+    print(dual_a)
 
 
 if __name__ == "__main__":

@@ -72,9 +72,7 @@ def preprocess_to_tensors(*items):
     assert all(is_of_tensor(item) or is_py_scalar(item)
                for item in items)
     tensor_cls = [Tensor, DualTensor]
-    tensor_fn = deepnet.tensor if not deepnet.forward_ad_enabled(
-    ) else deepnet.dual_tensor
-    processed_items = tuple(tensor_fn(item)
+    processed_items = tuple(deepnet.tensor(item)
                             if type(item) not in tensor_cls else item
                             for item in items)
     return processed_items if len(processed_items) > 1 else processed_items[0]
