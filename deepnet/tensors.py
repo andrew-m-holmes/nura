@@ -1,5 +1,6 @@
+import numpy as np
 import deepnet
-from .dtype import _infer_dtype
+from .dtype import _infer_dtype, _dtype_map
 from typing import Tuple
 
 
@@ -142,11 +143,20 @@ def tensor(data, use_grad=False, dtype=None):
 
 
 def _preprocess_tensor_args(data, use_grad, dtype):
-    dtype = _infer_dtype(data) if dtype is None else dtype
-    if use_grad:
-        assert dtype.differentiable()
+    assert _valid_tensor_args(data, use_grad, dtype)
+    dtype = _infer_dtype(data)
     data = dtype.numpy(data)
     return data, dtype
+
+
+def _valid_tensor_args(data, use_grad, dtype):
+    return _valid_tensor_data(data) and deepnet.is_py_bool(
+        use_grad) and deepnet.is_dtype(dtype) if dtype is not None else True
+
+
+def _valid_tensor_data(data):
+    return deepnet.is_numpy(data) or deepnet.is_py_list(
+        data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
 
 def dual_tensor(primal, tangent=None):
@@ -155,10 +165,17 @@ def dual_tensor(primal, tangent=None):
 
 
 def _preprocess_dual_tensor_args(primal, tangent):
-    assert deepnet.is_tensor(primal)
+    assert _valid_dual_tensor_args(primal, tangent)
     if tangent is None:
         tangent = deepnet.ones_like(
             primal, use_grad=False, dtype=primal.dtype)
     assert deepnet.is_tensor(tangent)
-    assert primal.dtype == tangent.dtype
     return tangent
+
+
+def _valid_dual_tensor_args(primal, tangent):
+    if tangent is None:
+        return deepnet.is_tensor(primal)
+    passed = deepnet.is_tensor(primal) and deepnet.is_tensor(
+        tangent) and primal.dtype == tangent.dtype
+    return passed
