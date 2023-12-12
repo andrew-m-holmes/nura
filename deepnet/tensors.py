@@ -71,8 +71,11 @@ class Tensor:
     def squeeze(self, dims=None):
         return deepnet.squeeze(self, dims=dims)
 
-    def transpose(self, dim_0=1, dim_1=0):
+    def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
+
+    def reshape(self, dim):
+        return deepnet.reshape(self, dim)
 
     def _set_grad_state(self, use_grad, grad_fn, is_leaf):
         self.use_grad = use_grad
