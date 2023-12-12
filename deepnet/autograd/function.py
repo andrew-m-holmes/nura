@@ -2,6 +2,9 @@ from deepnet import Tensor, DualTensor
 from .graph import _pass_to_graph
 from typing import Tuple, Union
 
+_PreprocessOutput = Union[Tuple[Tensor, ...],
+                          Tensor, Tuple[DualTensor, ...], DualTensor]
+
 
 class Context:
 
@@ -51,7 +54,7 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args, **kwargs):
+    def apply(cls, *args, **kwargs) -> Union[Tensor, DualTensor, Tuple[Union[Tuple, Tensor], ...]]:
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)
         output = _pass_to_graph(context, output)
