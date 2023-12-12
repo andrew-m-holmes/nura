@@ -62,7 +62,7 @@ def _valid_sum_args(a, dims, keepdims):
     return passed
 
 
-def transpose(a, dim_0=1, dim_1=0):
+def transpose(a, dim_0=-2, dim_1=-1):
     assert _valid_transpose_args(a, dim_0, dim_1)
     out = funcs.Tranpose.apply(a, dim_0, dim_1)
     return out
@@ -92,6 +92,11 @@ def _valid_squeeze_args(a, dims):
     passed = utils.is_of_tensor(
         a) and utils.is_dims_arg(dims) and a.ndim() >= 1
     return passed
+
+
+def reshape(a, dim):
+    out = funcs.Reshape.apply(a, dim)
+    return out
 
 
 def clone(a):
