@@ -410,7 +410,7 @@ def test_transpose_forward_rank2_v1():
     a = np.random.rand(3, 1)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor)
+    result_tensor = deepnet.transpose(a_tensor, -1, -2)
     assert result_tensor.dim() == (1, 3)
 
 
@@ -418,15 +418,15 @@ def test_transpose_forward_multi_v0():
     a = np.random.rand(4, 3, 2)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor, dim_0=1, dim_1=2)
-    assert result_tensor.dim() == (4, 2, 3)
+    result_tensor = deepnet.transpose(a_tensor - 3, -1)
+    assert result_tensor.dim() == (2, 3, 4)
 
 
 def test_transpose_forward_multi_v1():
     a = np.random.rand(2, 3, 4, 5)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor, dim_0=2, dim_1=3)
+    result_tensor = deepnet.transpose(a_tensor, 2, 3)
     assert result_tensor.dim() == (2, 3, 5, 4)
 
 
@@ -434,7 +434,7 @@ def test_transpose_forward_multi_v2():
     a = np.random.rand(3, 4, 5, 6)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor, dim_0=0, dim_1=3)
+    result_tensor = deepnet.transpose(a_tensor, 0, 3)
     assert result_tensor.dim() == (6, 4, 5, 3)
 
 
@@ -506,7 +506,6 @@ def main():
 
     test_transpose_forward_rank2_v0()
     test_transpose_forward_rank2_v1()
-    test_transpose_forward_multi_v0()
 
     test_transpose_forward_multi_v0()
     test_transpose_forward_multi_v1()
