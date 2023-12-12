@@ -145,6 +145,8 @@ def tensor(data, use_grad=False, dtype=None):
 def _preprocess_tensor_args(data, use_grad, dtype):
     assert _valid_tensor_args(data, use_grad, dtype)
     dtype = _infer_dtype(data)
+    if use_grad:
+        assert dtype.differentiable()
     data = dtype.numpy(data)
     return data, dtype
 
@@ -176,6 +178,5 @@ def _preprocess_dual_tensor_args(primal, tangent):
 def _valid_dual_tensor_args(primal, tangent):
     if tangent is None:
         return deepnet.is_tensor(primal)
-    passed = deepnet.is_tensor(primal) and deepnet.is_tensor(
+    return deepnet.is_tensor(primal) and deepnet.is_tensor(
         tangent) and primal.dtype == tangent.dtype
-    return passed
