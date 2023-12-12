@@ -1,5 +1,6 @@
 import numpy as np
 import deepnet
+from deepnet.dtype import dtype
 from deepnet import Tensor, DualTensor
 
 
@@ -80,7 +81,7 @@ def preprocess_to_tensors(*items):
 
 
 def is_all_py_scalars(*items):
-    return is_py_scalar(item for item in items)
+    return all(is_py_scalar(item) for item in items)
 
 
 def is_py_scalar(item):
@@ -88,8 +89,19 @@ def is_py_scalar(item):
     return type(item) in py_scalar_types
 
 
+def is_numpy(item):
+    numpy_types = [
+        np.ndarray, np.uint8, np.int8, np.int16, np.int32, np.int64,
+        np.float16, np.float32, np.float64, np.bool_]
+    return type(item) in numpy_types
+
+
 def is_py_bool(item):
     return type(item) is bool
+
+
+def is_py_list(item):
+    return isinstance(item, list)
 
 
 def is_dims_arg(arg):
@@ -101,3 +113,7 @@ def is_dims_arg(arg):
 def is_scalar_tensor(item):
     assert is_of_tensor(item)
     return item.dim() == 0
+
+
+def is_dtype(item):
+    return issubclass(item, dtype)
