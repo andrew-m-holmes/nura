@@ -542,6 +542,83 @@ def test_cosine_backward_matrix():
         grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
 
+def test_squeeze_backward_rank1_v0():
+    a = np.random.rand(1)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_squeeze_backward_rank1_v1():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_squeeze_backward_rank2_v0():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_squeeze_backward_rank2_v1():
+    a = np.random.rand(3, 1)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_squeeze_backward_multi_v0():
+    a = np.random.rand(3, 1, 5, 2, 1, 3)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_squeeze_backward_multi_v1():
+    a = np.random.rand(1, 1, 1, 1, 1, 1, 1, 69, 1)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_squeeze_backward_multi_v2():
+    a = np.random.rand(4, 4, 5, 6, 2)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.squeeze(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
 def main():
 
     with deepnet.use_grad():
@@ -599,6 +676,17 @@ def main():
 
         test_pow_backward_vector_exp()
         test_pow_backward_matrix_exp()
+
+        # Squeeze Backward Tests
+
+        test_squeeze_backward_rank1_v0()
+        test_squeeze_backward_rank1_v1()
+        test_squeeze_backward_rank2_v0()
+        test_squeeze_backward_rank2_v1()
+
+        test_squeeze_backward_multi_v0()
+        test_squeeze_backward_multi_v1()
+        test_squeeze_backward_multi_v2()
 
         print("All tests passed")
 
