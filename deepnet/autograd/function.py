@@ -2,9 +2,6 @@ from deepnet import Tensor, DualTensor
 from .graph import _pass_to_graph
 from typing import Tuple, Union
 
-_PreprocessOutput = Union[Tuple[Tensor, ...],
-                          Tensor, Tuple[DualTensor, ...], DualTensor]
-
 
 class Context:
 
