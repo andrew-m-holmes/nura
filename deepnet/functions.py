@@ -188,11 +188,15 @@ class Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
-        pass
+        context.save_tensors(a)
+        out = deepnet.tensor(
+            np.expand_dims(a.data, axis=dims),
+            dtype=a.dtype)
+        return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        pass
+        return deepnet.tensor(grad.data.squeeze())
 
 
 class Reshape(Function):
