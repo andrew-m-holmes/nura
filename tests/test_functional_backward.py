@@ -619,6 +619,61 @@ def test_squeeze_backward_multi_v2():
     assert grad_a.dim() == a.shape
 
 
+def test_transpose_backward_rank2_v0():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.transpose(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_transpose_backward_rank2_v1():
+    a = np.random.rand(3, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.transpose(a_tensor)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_transpose_backward_rank3_v0():
+    a = np.random.rand(4, 3, 2)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.transpose(a_tensor, 1, 2)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_transpose_backward_multi_v0():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.transpose(a_tensor, -2, -3)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_transpose_backward_multi_v1():
+    a = np.random.rand(3, 4, 5, 6)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.transpose(a_tensor, 0, 3)
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
 def main():
 
     with deepnet.use_grad():
@@ -687,6 +742,15 @@ def main():
         test_squeeze_backward_multi_v0()
         test_squeeze_backward_multi_v1()
         test_squeeze_backward_multi_v2()
+
+        # Transpose Tests
+
+        test_transpose_backward_rank2_v0()
+        test_transpose_backward_rank2_v1()
+        test_transpose_backward_rank3_v0()
+
+        test_transpose_backward_multi_v0()
+        test_transpose_backward_multi_v1()
 
         print("All tests passed")
 
