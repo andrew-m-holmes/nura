@@ -69,9 +69,8 @@ def transpose(a, dim_0=-2, dim_1=-1):
 
 
 def _valid_transpose_args(a, dim_0, dim_1):
-    passed = utils.is_of_tensor(a) and utils.is_all_py_scalars(
+    return utils.is_of_tensor(a) and utils.is_all_py_scalars(
         dim_0, dim_1) and a.ndim() >= 2
-    return passed
 
 
 def squeeze(a, dims=None):
@@ -89,14 +88,18 @@ def _setup_dims_for_squeeze(a, dims):
 
 
 def _valid_squeeze_args(a, dims):
-    passed = utils.is_of_tensor(
-        a) and utils.is_dims_arg(dims) and a.ndim() >= 1
-    return passed
+    return utils.is_of_tensor(a) and utils.is_dims_arg(dims)
 
 
 def reshape(a, dim):
+    assert _valid_reshape_args(a, dim)
     out = funcs.Reshape.apply(a, dim)
     return out
+
+
+def _valid_reshape_args(a, dim):
+    return utils.is_of_tensor(a) and utils.is_dims_arg(
+        dim) and a.ndim() >= len(dim)
 
 
 def clone(a):
