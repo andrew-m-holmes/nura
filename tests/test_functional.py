@@ -418,7 +418,7 @@ def test_transpose_forward_multi_v0():
     a = np.random.rand(4, 3, 2)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor - 3, -1)
+    result_tensor = deepnet.transpose(a_tensor, -3, -1)
     assert result_tensor.dim() == (2, 3, 4)
 
 
