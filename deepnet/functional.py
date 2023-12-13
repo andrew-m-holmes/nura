@@ -98,8 +98,7 @@ def reshape(a, dim):
 
 
 def _valid_reshape_args(a, dim):
-    return utils.is_of_tensor(a) and utils.is_dims_arg(
-        dim) and a.ndim() >= len(dim)
+    return utils.is_of_tensor(a) and utils.is_dims_arg(dim)
 
 
 def clone(a):
