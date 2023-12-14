@@ -218,17 +218,17 @@ class Tranpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim_0: int, dim_1: int):
-        size = np.arange(a.ndim())
-        size[dim_0], size[dim_1] = size[dim_1], size[dim_0]
-        out = deepnet.tensor(a.data.transpose(size))
+        out = deepnet.tensor(a.data.swapaxes(dim_0, dim_1))
         context.save_tensors(a)
-        context.size = size
+        context.dim_0 = dim_0
+        context.dim_1 = dim_1
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        size = context.size
-        grad_data = deepnet.tensor(grad.data.transpose(size))
+        dim_0 = context.dim_0
+        dim_1 = context.dim_1
+        grad_data = deepnet.tensor(grad.data.swapaxes(dim_0, dim_1))
         return grad_data
 
 
