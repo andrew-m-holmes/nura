@@ -1,5 +1,5 @@
+import numpy as np
 import deepnet
-import deepnet.functional as f
 import deepnet.utils as utils
 
 
@@ -37,8 +37,8 @@ class AccumulateGrad:
     def apply(self, grad):
         if self.tensor.grad is None:
             self.tensor.grad = deepnet.zeros_like(self.tensor)
-        grad = _process_grad_for_accumulate(self.tensor, grad)
-        self.tensor.grad.data += grad.data
+        grad_data = _process_grad_for_accumulate(self.tensor, grad)
+        self.tensor.grad.data += grad_data.data
 
     @classmethod
     def with_tensor(cls, tensor):
@@ -48,11 +48,13 @@ class AccumulateGrad:
 def _process_grad_for_accumulate(tensor, grad):
     if tensor.dim() != grad.dim():
         if utils.is_scalar_tensor(tensor):
-            return f.sum(grad, dims=grad.dim())
+            return np.sum(
+                grad.data, axis=grad.dim(),
+                keepdims=keepdims)
         dims = _get_dims_to_sum(tensor.dim(), grad.dim())
         keepdims = tensor.ndim() == grad.ndim()
-        return f.sum(grad, dims, keepdims)
-    return grad
+        return np.sum(grad.data, axis=dims, keepdims=keepdims)
+    return grad.data
 
 
 def _get_dims_to_sum(dim_1, dim_2):
