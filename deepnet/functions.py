@@ -205,7 +205,7 @@ class Reshape(Function):
     def forward(context: Context, a: Tensor, dim: int):
         context.save_tensors(a)
         context.a_dim = a.dim()
-        out = deepnet.tensor(a.data.reshape(dim), dtype=a.dtype)
+        out = deepnet.tensor(a.data.reshape(dim))
         return out
 
     @staticmethod
@@ -232,13 +232,23 @@ class Tranpose(Function):
         return grad_data
 
 
+class Permute(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dims):
+        context.save_tensors(a)
+        context.a_dim = a.dim()
+        out = deepnet.tensor(a.data.transpose(dims))
+        return out
+
+
 class Clone(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
         context.save_tensors(a)
         out = deepnet.tensor(
-            a.data.copy(), use_grad=a.use_grad, dtype=a.dtype)
+            a.data.copy(), use_grad=a.use_grad)
         return out
 
     @staticmethod
