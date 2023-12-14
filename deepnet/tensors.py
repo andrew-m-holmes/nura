@@ -71,6 +71,9 @@ class Tensor:
     def squeeze(self, dims=None):
         return deepnet.squeeze(self, dims=dims)
 
+    def unsqueeze(self, dims):
+        return deepnet.unsqueeze(self, dims)
+
     def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
 
