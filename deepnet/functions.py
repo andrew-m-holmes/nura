@@ -163,10 +163,10 @@ class Sum(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a_dim = context.a_dim
-        grad_data = deepnet.tensor(np.ascontiguousarray(
+        grad_out = deepnet.tensor(np.ascontiguousarray(
             np.broadcast_to(
                 grad.data, a_dim)))
-        return grad_data
+        return grad_out
 
 
 class Squeeze(Function):
@@ -181,9 +181,9 @@ class Squeeze(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         dims = context.dims
-        grad_data = deepnet.tensor(
+        grad_out = deepnet.tensor(
             np.expand_dims(grad.data, axis=dims))
-        return grad_data
+        return grad_out
 
 
 class Unsqueeze(Function):
@@ -230,8 +230,8 @@ class Tranpose(Function):
     def backward(context: Context, grad: Tensor):
         dim_0 = context.dim_0
         dim_1 = context.dim_1
-        grad_data = deepnet.tensor(grad.data.swapaxes(dim_0, dim_1))
-        return grad_data
+        grad_out = deepnet.tensor(grad.data.swapaxes(dim_0, dim_1))
+        return grad_out
 
 
 class Permute(Function):
