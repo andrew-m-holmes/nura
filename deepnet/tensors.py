@@ -1,6 +1,5 @@
-import numpy as np
 import deepnet
-from .dtype import _infer_dtype, _dtype_map
+from .dtype import _infer_dtype
 from typing import Tuple
 
 
@@ -16,7 +15,7 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            assert self.nelem() == 1
+            assert self.ndim() == 0
             grad = deepnet.ones_like(self, dtype=self.dtype)
         self.grad_fn.apply(grad)
 
