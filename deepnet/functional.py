@@ -91,6 +91,12 @@ def _valid_squeeze_args(a, dims):
     return utils.is_of_tensor(a) and utils.is_dims_arg(dims)
 
 
+def unsqueeze(a, dims):
+    assert _valid_squeeze_args(a, dims)
+    out = funcs.Unsqueeze.apply(a, dims)
+    return out
+
+
 def reshape(a, dim):
     assert _valid_reshape_args(a, dim)
     out = funcs.Reshape.apply(a, dim)
