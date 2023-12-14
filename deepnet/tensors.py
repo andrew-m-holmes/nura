@@ -51,6 +51,7 @@ class Tensor:
         return tensor(self.data, self.use_grad, dtype=deepnet.half)
 
     def float(self):
+        print("here")
         return tensor(self.data, self.use_grad, dtype=deepnet.float)
 
     def double(self):
@@ -150,7 +151,7 @@ def tensor(data, use_grad=False, dtype=None):
 
 def _preprocess_tensor_args(data, use_grad, dtype):
     assert _valid_tensor_args(data, use_grad, dtype)
-    dtype = _infer_dtype(data)
+    dtype = _infer_dtype(data) if dtype is None else dtype
     if use_grad:
         assert dtype.differentiable()
     data = dtype.numpy(data)
