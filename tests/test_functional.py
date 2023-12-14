@@ -630,6 +630,20 @@ def main():
     test_squeeze_forward_multi_v1()
     test_squeeze_forward_multi_v2()
 
+    # Unsqueeze Tests
+
+    test_unsqueeze_forward_rank1_v0()
+    test_unsqueeze_forward_rank1_v1()
+    test_unsqueeze_forward_rank1_v2()
+
+    test_unsqueeze_forward_rank2_v0()
+    test_unsqueeze_forward_rank2_v1()
+    test_unsqueeze_forward_rank2_v2()
+
+    test_unsqueeze_forward_multi_v0()
+    test_unsqueeze_forward_multi_v1()
+    test_unsqueeze_forward_multi_v2()
+
     # Transpose Tests
 
     test_transpose_forward_rank2_v0()
@@ -649,20 +663,6 @@ def main():
     test_reshape_forward_rank3_to_rank2()
     test_reshape_forward_rank4_to_rank2()
     test_reshape_forward_with_negative_dim()
-
-    # Unsqueeze Tests
-
-    test_unsqueeze_forward_rank1_v0()
-    test_unsqueeze_forward_rank1_v1()
-    test_unsqueeze_forward_rank1_v2()
-
-    test_unsqueeze_forward_rank2_v0()
-    test_unsqueeze_forward_rank2_v1()
-    test_unsqueeze_forward_rank2_v2()
-
-    test_unsqueeze_forward_multi_v0()
-    test_unsqueeze_forward_multi_v1()
-    test_unsqueeze_forward_multi_v2()
 
     print("All tests passed")
 
