@@ -237,9 +237,14 @@ class Permute(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, dims):
         context.save_tensors(a)
-        context.a_dim = a.dim()
+        context.dims = dims
         out = deepnet.tensor(a.data.transpose(dims))
         return out
+
+    def backward(context: Context, grad: Tensor):
+        dims = np.argsort(context.dims)
+        grad_out = deepnet.tensor(grad.data.transpose(dims))
+        return grad_out
 
 
 class Clone(Function):

@@ -73,6 +73,16 @@ def _valid_transpose_args(a, dim_0, dim_1):
         dim_0, dim_1) and a.ndim() >= 2
 
 
+def permute(a, dims=None):
+    assert _valid_permute_args(a, dims)
+    out = funcs.Permute.apply(a, dims)
+    return out
+
+
+def _valid_permute_args(a, dims):
+    return utils.is_tensor(a) and utils.is_dims_arg(dims)
+
+
 def squeeze(a, dims=None):
     assert _valid_squeeze_args(a, dims)
     dims = _setup_dims_for_squeeze(a, dims)
