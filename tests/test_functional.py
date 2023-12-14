@@ -398,6 +398,78 @@ def test_squeeze_forward_multi_v2():
     assert result_tensor.dim() == (4, 4, 5, 6, 2)
 
 
+def test_unsqueeze_forward_rank1_v0():
+    a = np.random.rand(3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 1))
+    assert result_tensor.dim() == (1, 1, 3)
+
+
+def test_unsqueeze_forward_rank1_v1():
+    a = np.random.rand(4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (1, 2))
+    assert result_tensor.dim() == (4, 1, 1)
+
+
+def test_unsqueeze_forward_rank1_v2():
+    a = np.random.rand(7)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (2, 1, 0))
+    assert result_tensor.dim() == (1, 1, 1, 7)
+
+
+def test_unsqueeze_forward_rank2_v0():
+    a = np.random.rand(7, 8)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0))
+    assert result_tensor.dim() == (1, 7, 8)
+
+
+def test_unsqueeze_forward_rank2_v1():
+    a = np.random.rand(9, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 3))
+    assert result_tensor.dim() == (1, 9, 3, 1)
+
+
+def test_unsqueeze_forward_rank2_v2():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2, 3))
+    assert result_tensor.dim() == (1, 5, 1, 1, 5)
+
+
+def test_unsqueeze_forward_multi_v0():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2))
+    assert result_tensor.dim() == (1, 3, 1, 4, 5)
+
+
+def test_unsqueeze_forward_multi_v1():
+    a = np.random.rand(2, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (1, 3, 4))
+    assert result_tensor.dim() == (2, 1, 3, 1, 1)
+
+
+def test_unsqueeze_forward_multi_v2():
+    a = np.random.rand(5, 6, 7, 8)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2, 5))
+    assert result_tensor.dim() == (1, 5, 1, 6, 7, 1, 8)
+
+
 def test_transpose_forward_rank2_v0():
     a = np.random.rand(3, 5)
 
@@ -577,6 +649,20 @@ def main():
     test_reshape_forward_rank3_to_rank2()
     test_reshape_forward_rank4_to_rank2()
     test_reshape_forward_with_negative_dim()
+
+    # Unsqueeze Tests
+
+    test_unsqueeze_forward_rank1_v0()
+    test_unsqueeze_forward_rank1_v1()
+    test_unsqueeze_forward_rank1_v2()
+
+    test_unsqueeze_forward_rank2_v0()
+    test_unsqueeze_forward_rank2_v1()
+    test_unsqueeze_forward_rank2_v2()
+
+    test_unsqueeze_forward_multi_v0()
+    test_unsqueeze_forward_multi_v1()
+    test_unsqueeze_forward_multi_v2()
 
     print("All tests passed")
 
