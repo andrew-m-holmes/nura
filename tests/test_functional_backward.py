@@ -619,6 +619,61 @@ def test_squeeze_backward_multi_v2():
     assert grad_a.dim() == a.shape
 
 
+def test_unsqueeze_backward_multi_v0():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_unsqueeze_backward_multi_v1():
+    a = np.random.rand(2, 3)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.unsqueeze(a_tensor, (1, 3, 4))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_unsqueeze_backward_multi_v2():
+    a = np.random.rand(5, 6, 7, 8)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2, 5))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_unsqueeze_backward_multi_v3():
+    a = np.random.rand(4, 3)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.unsqueeze(a_tensor, (1,))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
+def test_unsqueeze_backward_multi_v4():
+    a = np.random.rand(2, 5, 3)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 3))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+
 def test_transpose_backward_rank2_v0():
     a = np.random.rand(5, 5)
 
@@ -820,7 +875,16 @@ def main():
         test_squeeze_backward_multi_v1()
         test_squeeze_backward_multi_v2()
 
-        # Transpose Tests
+        # Unsqueeze Backward Tests
+
+        test_unsqueeze_backward_multi_v0()
+        test_unsqueeze_backward_multi_v1()
+        test_unsqueeze_backward_multi_v2()
+
+        test_unsqueeze_backward_multi_v3()
+        test_unsqueeze_backward_multi_v4()
+
+        # Transpose Backward Tests
 
         test_transpose_backward_rank2_v0()
         test_transpose_backward_rank2_v1()
@@ -829,7 +893,7 @@ def main():
         test_transpose_backward_multi_v0()
         test_transpose_backward_multi_v1()
 
-        # Reshape Tests
+        # Reshape Backward Tests
 
         test_reshape_backward_rank1_to_rank2()
         test_reshape_backward_rank2_to_rank3()
