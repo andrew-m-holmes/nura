@@ -50,7 +50,7 @@ def cosine(a):
     return out
 
 
-def sum(a, dims=None, keepdims=True):
+def sum(a, dims=None, keepdims=False):
     assert _valid_sum_args(a, dims, keepdims)
     out = funcs.Sum.apply(a, dims, keepdims)
     return out

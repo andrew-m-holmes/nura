@@ -156,15 +156,17 @@ class Sum(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, dims, keepdims):
         context.save_tensors(a)
+        context.a_dim = a.dim()
         out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
-        out_dim = out.dim()
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        # TODO figure out how to make the grad repeat to match the dims of input
-        grad = deepnet.fill(grad.data)
-        raise NotImplementedError
+        a_dim = context.a_dim
+        grad_data = deepnet.tensor(np.ascontiguousarray(
+            np.broadcast_to(
+                grad.data, a_dim)))
+        return grad_data
 
 
 class Squeeze(Function):
