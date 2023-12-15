@@ -28,9 +28,6 @@ class Tensor:
     def nelem(self):
         return self.data.size
 
-    def detach(self):
-        return tensor(self.data, False, dtype=self.dtype)
-
     def byte(self):
         return tensor(self.data, False, dtype=deepnet.byte)
 
@@ -57,6 +54,9 @@ class Tensor:
 
     def bool(self):
         return tensor(self.data, False, dtype=deepnet.bool)
+
+    def detach(self):
+        return tensor(self.data, False, dtype=self.dtype)
 
     def clone(self):
         return deepnet.clone(self)
