@@ -50,7 +50,6 @@ class Tensor:
         return tensor(self.data, self.use_grad, dtype=deepnet.half)
 
     def float(self):
-        print("here")
         return tensor(self.data, self.use_grad, dtype=deepnet.float)
 
     def double(self):
