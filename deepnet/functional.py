@@ -50,7 +50,7 @@ def cosine(a):
     return out
 
 
-def sum(a, dims=None, keepdims=True):
+def sum(a, dims=None, keepdims=False):
     assert _valid_sum_args(a, dims, keepdims)
     out = funcs.Sum.apply(a, dims, keepdims)
     return out
@@ -62,16 +62,25 @@ def _valid_sum_args(a, dims, keepdims):
     return passed
 
 
-def transpose(a, dim_0=1, dim_1=0):
+def transpose(a, dim_0=-2, dim_1=-1):
     assert _valid_transpose_args(a, dim_0, dim_1)
     out = funcs.Tranpose.apply(a, dim_0, dim_1)
     return out
 
 
 def _valid_transpose_args(a, dim_0, dim_1):
-    passed = utils.is_of_tensor(a) and utils.is_all_py_scalars(
+    return utils.is_of_tensor(a) and utils.is_all_py_scalars(
         dim_0, dim_1) and a.ndim() >= 2
-    return passed
+
+
+def permute(a, dims=None):
+    assert _valid_permute_args(a, dims)
+    out = funcs.Permute.apply(a, dims)
+    return out
+
+
+def _valid_permute_args(a, dims):
+    return utils.is_tensor(a) and utils.is_dims_arg(dims)
 
 
 def squeeze(a, dims=None):
@@ -89,9 +98,23 @@ def _setup_dims_for_squeeze(a, dims):
 
 
 def _valid_squeeze_args(a, dims):
-    passed = utils.is_of_tensor(
-        a) and utils.is_dims_arg(dims) and a.ndim() >= 1
-    return passed
+    return utils.is_of_tensor(a) and utils.is_dims_arg(dims)
+
+
+def unsqueeze(a, dims):
+    assert _valid_squeeze_args(a, dims)
+    out = funcs.Unsqueeze.apply(a, dims)
+    return out
+
+
+def reshape(a, dim):
+    assert _valid_reshape_args(a, dim)
+    out = funcs.Reshape.apply(a, dim)
+    return out
+
+
+def _valid_reshape_args(a, dim):
+    return utils.is_of_tensor(a) and utils.is_dims_arg(dim)
 
 
 def clone(a):

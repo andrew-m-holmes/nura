@@ -156,15 +156,17 @@ class Sum(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, dims, keepdims):
         context.save_tensors(a)
+        context.a_dim = a.dim()
         out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
-        out_dim = out.dim()
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        # TODO figure out how to make the grad repeat to match the dims of input
-        grad = deepnet.fill(grad.data)
-        raise NotImplementedError
+        a_dim = context.a_dim
+        grad_out = deepnet.tensor(np.ascontiguousarray(
+            np.broadcast_to(
+                grad.data, a_dim)))
+        return grad_out
 
 
 class Squeeze(Function):
@@ -179,53 +181,72 @@ class Squeeze(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         dims = context.dims
-        grad_data = deepnet.tensor(
+        grad_out = deepnet.tensor(
             np.expand_dims(grad.data, axis=dims))
-        return grad_data
+        return grad_out
 
 
 class Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: int):
-        pass
+        context.save_tensors(a)
+        out = deepnet.tensor(
+            np.expand_dims(a.data, axis=dims),
+            dtype=a.dtype)
+        return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        pass
+        return deepnet.tensor(grad.data.squeeze())
 
 
 class Reshape(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims: int):
-        pass
+    def forward(context: Context, a: Tensor, dim: int):
+        context.save_tensors(a)
+        context.a_dim = a.dim()
+        out = deepnet.tensor(a.data.reshape(dim))
+        return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        pass
-
-
-def reshape(a, dims=None):
-    pass
+        a_dim = context.a_dim
+        return deepnet.tensor(grad.data.reshape(a_dim))
 
 
 class Tranpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim_0: int, dim_1: int):
-        size = np.arange(a.ndim())
-        size[dim_0], size[dim_1] = size[dim_1], size[dim_0]
-        out = deepnet.tensor(a.data.transpose(size))
+        out = deepnet.tensor(a.data.swapaxes(dim_0, dim_1))
         context.save_tensors(a)
-        context.size = size
+        context.dim_0 = dim_0
+        context.dim_1 = dim_1
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        size = context.size
-        grad_data = deepnet.tensor(grad.data.transpose(size))
-        return grad_data
+        dim_0 = context.dim_0
+        dim_1 = context.dim_1
+        grad_out = deepnet.tensor(grad.data.swapaxes(dim_0, dim_1))
+        return grad_out
+
+
+class Permute(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dims):
+        context.save_tensors(a)
+        context.dims = dims
+        out = deepnet.tensor(a.data.transpose(dims))
+        return out
+
+    def backward(context: Context, grad: Tensor):
+        dims = np.argsort(context.dims)
+        grad_out = deepnet.tensor(grad.data.transpose(dims))
+        return grad_out
 
 
 class Clone(Function):
@@ -234,7 +255,7 @@ class Clone(Function):
     def forward(context: Context, a: Tensor):
         context.save_tensors(a)
         out = deepnet.tensor(
-            a.data.copy(), use_grad=a.use_grad, dtype=a.dtype)
+            a.data.copy(), use_grad=a.use_grad)
         return out
 
     @staticmethod

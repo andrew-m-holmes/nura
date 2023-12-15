@@ -15,7 +15,7 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            assert self.nelem() == 1
+            assert self.ndim() == 0
             grad = deepnet.ones_like(self, dtype=self.dtype)
         self.grad_fn.apply(grad)
 
@@ -70,8 +70,14 @@ class Tensor:
     def squeeze(self, dims=None):
         return deepnet.squeeze(self, dims=dims)
 
-    def transpose(self, dim_0=1, dim_1=0):
+    def unsqueeze(self, dims):
+        return deepnet.unsqueeze(self, dims)
+
+    def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
+
+    def reshape(self, dim):
+        return deepnet.reshape(self, dim)
 
     def _set_grad_state(self, use_grad, grad_fn, is_leaf):
         self.use_grad = use_grad
@@ -142,11 +148,22 @@ def tensor(data, use_grad=False, dtype=None):
 
 
 def _preprocess_tensor_args(data, use_grad, dtype):
+    assert _valid_tensor_args(data, use_grad, dtype)
     dtype = _infer_dtype(data) if dtype is None else dtype
     if use_grad:
         assert dtype.differentiable()
     data = dtype.numpy(data)
     return data, dtype
+
+
+def _valid_tensor_args(data, use_grad, dtype):
+    return _valid_tensor_data(data) and deepnet.is_py_bool(
+        use_grad) and deepnet.is_dtype(dtype) if dtype is not None else True
+
+
+def _valid_tensor_data(data):
+    return deepnet.is_numpy(data) or deepnet.is_py_list(
+        data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
 
 def dual_tensor(primal, tangent=None):
@@ -155,10 +172,16 @@ def dual_tensor(primal, tangent=None):
 
 
 def _preprocess_dual_tensor_args(primal, tangent):
-    assert deepnet.is_tensor(primal)
+    assert _valid_dual_tensor_args(primal, tangent)
     if tangent is None:
         tangent = deepnet.ones_like(
             primal, use_grad=False, dtype=primal.dtype)
     assert deepnet.is_tensor(tangent)
-    assert primal.dtype == tangent.dtype
     return tangent
+
+
+def _valid_dual_tensor_args(primal, tangent):
+    if tangent is None:
+        return deepnet.is_tensor(primal)
+    return deepnet.is_tensor(primal) and deepnet.is_tensor(
+        tangent) and primal.dtype == tangent.dtype

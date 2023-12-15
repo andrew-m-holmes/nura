@@ -398,6 +398,78 @@ def test_squeeze_forward_multi_v2():
     assert result_tensor.dim() == (4, 4, 5, 6, 2)
 
 
+def test_unsqueeze_forward_rank1_v0():
+    a = np.random.rand(3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 1))
+    assert result_tensor.dim() == (1, 1, 3)
+
+
+def test_unsqueeze_forward_rank1_v1():
+    a = np.random.rand(4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (1, 2))
+    assert result_tensor.dim() == (4, 1, 1)
+
+
+def test_unsqueeze_forward_rank1_v2():
+    a = np.random.rand(7)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (2, 1, 0))
+    assert result_tensor.dim() == (1, 1, 1, 7)
+
+
+def test_unsqueeze_forward_rank2_v0():
+    a = np.random.rand(7, 8)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0))
+    assert result_tensor.dim() == (1, 7, 8)
+
+
+def test_unsqueeze_forward_rank2_v1():
+    a = np.random.rand(9, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 3))
+    assert result_tensor.dim() == (1, 9, 3, 1)
+
+
+def test_unsqueeze_forward_rank2_v2():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2, 3))
+    assert result_tensor.dim() == (1, 5, 1, 1, 5)
+
+
+def test_unsqueeze_forward_multi_v0():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2))
+    assert result_tensor.dim() == (1, 3, 1, 4, 5)
+
+
+def test_unsqueeze_forward_multi_v1():
+    a = np.random.rand(2, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (1, 3, 4))
+    assert result_tensor.dim() == (2, 1, 3, 1, 1)
+
+
+def test_unsqueeze_forward_multi_v2():
+    a = np.random.rand(5, 6, 7, 8)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.unsqueeze(a_tensor, (0, 2, 5))
+    assert result_tensor.dim() == (1, 5, 1, 6, 7, 1, 8)
+
+
 def test_transpose_forward_rank2_v0():
     a = np.random.rand(3, 5)
 
@@ -410,7 +482,7 @@ def test_transpose_forward_rank2_v1():
     a = np.random.rand(3, 1)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor)
+    result_tensor = deepnet.transpose(a_tensor, -1, -2)
     assert result_tensor.dim() == (1, 3)
 
 
@@ -418,15 +490,15 @@ def test_transpose_forward_multi_v0():
     a = np.random.rand(4, 3, 2)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor, dim_0=1, dim_1=2)
-    assert result_tensor.dim() == (4, 2, 3)
+    result_tensor = deepnet.transpose(a_tensor, -3, -1)
+    assert result_tensor.dim() == (2, 3, 4)
 
 
 def test_transpose_forward_multi_v1():
     a = np.random.rand(2, 3, 4, 5)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor, dim_0=2, dim_1=3)
+    result_tensor = deepnet.transpose(a_tensor, 2, 3)
     assert result_tensor.dim() == (2, 3, 5, 4)
 
 
@@ -434,8 +506,64 @@ def test_transpose_forward_multi_v2():
     a = np.random.rand(3, 4, 5, 6)
 
     a_tensor = deepnet.tensor(a)
-    result_tensor = deepnet.transpose(a_tensor, dim_0=0, dim_1=3)
+    result_tensor = deepnet.transpose(a_tensor, 0, 3)
     assert result_tensor.dim() == (6, 4, 5, 3)
+
+
+def test_reshape_forward_rank1_to_rank2():
+    a = np.random.rand(10)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (5, 2))
+    assert result_tensor.dim() == (5, 2)
+
+
+def test_reshape_forward_rank2_to_rank1():
+    a = np.random.rand(4, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (12,))
+    assert result_tensor.dim() == (12,)
+
+
+def test_reshape_forward_rank2_to_rank3():
+    a = np.random.rand(6, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (2, 3, 4))
+    assert result_tensor.dim() == (2, 3, 4)
+
+
+def test_reshape_forward_rank3_to_rank2():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (6, 4))
+    assert result_tensor.dim() == (6, 4)
+
+
+def test_reshape_forward_rank3_to_rank4():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (2, 2, 3, 2))
+    assert result_tensor.dim() == (2, 2, 3, 2)
+
+
+def test_reshape_forward_rank4_to_rank2():
+    a = np.random.rand(2, 2, 3, 2)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (4, 6))
+    assert result_tensor.dim() == (4, 6)
+
+
+def test_reshape_forward_with_negative_dim():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.reshape(a_tensor, (-1, 5))
+    assert result_tensor.dim() == (12, 5)
 
 
 def main():
@@ -502,15 +630,39 @@ def main():
     test_squeeze_forward_multi_v1()
     test_squeeze_forward_multi_v2()
 
+    # Unsqueeze Tests
+
+    test_unsqueeze_forward_rank1_v0()
+    test_unsqueeze_forward_rank1_v1()
+    test_unsqueeze_forward_rank1_v2()
+
+    test_unsqueeze_forward_rank2_v0()
+    test_unsqueeze_forward_rank2_v1()
+    test_unsqueeze_forward_rank2_v2()
+
+    test_unsqueeze_forward_multi_v0()
+    test_unsqueeze_forward_multi_v1()
+    test_unsqueeze_forward_multi_v2()
+
     # Transpose Tests
 
     test_transpose_forward_rank2_v0()
     test_transpose_forward_rank2_v1()
-    test_transpose_forward_multi_v0()
 
     test_transpose_forward_multi_v0()
     test_transpose_forward_multi_v1()
     test_transpose_forward_multi_v2()
+
+    # Reshape Tests
+
+    test_reshape_forward_rank1_to_rank2()
+    test_reshape_forward_rank2_to_rank3()
+    test_reshape_forward_rank3_to_rank4()
+
+    test_reshape_forward_rank2_to_rank1()
+    test_reshape_forward_rank3_to_rank2()
+    test_reshape_forward_rank4_to_rank2()
+    test_reshape_forward_with_negative_dim()
 
     print("All tests passed")
 
