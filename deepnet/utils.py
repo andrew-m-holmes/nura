@@ -95,7 +95,7 @@ def is_numpy(item):
 
 
 def is_py_bool(item):
-    return type(item) is bool
+    return isinstance(item, bool)
 
 
 def is_py_list(item):
@@ -103,7 +103,7 @@ def is_py_list(item):
 
 
 def is_dims_arg(arg):
-    if arg is None or type(arg) is int:
+    if arg is None or isinstance(arg, int):
         return True
     return all(is_py_scalar(val) for val in arg)
 
