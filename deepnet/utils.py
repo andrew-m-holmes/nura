@@ -75,7 +75,8 @@ def preprocess_to_tensors(*items):
     processed_items = tuple(deepnet.tensor(item)
                             if type(item) not in tensor_cls else item
                             for item in items)
-    return processed_items if len(processed_items) > 1 else processed_items[0]
+    return processed_items if len(
+        processed_items) > 1 else processed_items[0]
 
 
 def is_all_py_scalars(*items):
