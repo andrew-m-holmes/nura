@@ -201,6 +201,22 @@ class Unsqueeze(Function):
         return deepnet.tensor(grad.data.squeeze())
 
 
+class View(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dim):
+        context.save_tensors(a)
+        context.a_dim = a.dim()
+        out = deepnet.tensor(a.data.reshape(dim, order="C"))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a_dim = context.a_dim
+        grad_out = deepnet.tensor(grad.data.reshape(a_dim, order="C"))
+        return grad_out
+
+
 class Reshape(Function):
 
     @staticmethod

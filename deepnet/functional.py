@@ -107,8 +107,21 @@ def unsqueeze(a, dims):
     return out
 
 
+def view(a, dim):
+    assert _valid_view_args(a, dim)
+    out = funcs.View.apply(a, dim)
+    return out
+
+
+def _valid_view_args(a, dim):
+    if utils.is_tensor(a):
+        return utils.is_contiguous(a) and utils.is_dims_arg(dim)
+    return False
+
+
 def reshape(a, dim):
     assert _valid_reshape_args(a, dim)
+    a = utils.to_contiguous(a)
     out = funcs.Reshape.apply(a, dim)
     return out
 
