@@ -25,8 +25,10 @@ class dtype:
     @classmethod
     def numpy(cls, data):
         if not isinstance(data, np.ndarray):
-            data = np.array(data)
-        return data.astype(cls._wrapping)
+            data = np.array(data, cls._wrapping)
+        if np.dtype(data.dtype) is not np.dtype(cls._wrapping):
+            data = data.astype(cls._wrapping)
+        return data
 
     @classmethod
     def name(cls):
