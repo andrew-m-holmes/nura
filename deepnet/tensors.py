@@ -75,6 +75,9 @@ class Tensor:
 
     def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
+    
+    def contiguous(self):
+        return deepnet.to_contiguous(self)
 
     def reshape(self, dim):
         return deepnet.reshape(self, dim)
@@ -111,37 +114,6 @@ class Tensor:
         return deepnet.pow(self, other)
 
 
-class DualTensor:
-
-    def __init__(self, primal, tangent=None) -> None:
-        self.primal = primal
-        self.tangent = tangent
-
-    @property
-    def data(self):
-        return self.primal.data
-
-    @property
-    def dtype(self):
-        return self.primal.dtype
-
-    @property
-    def use_grad(self):
-        return self.primal.use_grad
-
-    def unpack(self) -> Tuple[Tensor, Tensor]:
-        return self.primal, self.tangent
-
-    def clone(self):
-        primal = deepnet.clone(self.primal)
-        tangent = deepnet.clone(self.tangent)
-        return dual_tensor(primal, tangent)
-
-    def __repr__(self) -> str:
-        rep = f"dual_tensor(primal: {self.primal}, tangent: {self.tangent})"
-        return rep
-
-
 def tensor(data, use_grad=False, dtype=None):
     data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
     return Tensor(data, use_grad, dtype)
@@ -166,6 +138,14 @@ def _valid_tensor_data(data):
         data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
 
+class DualTensor(Tensor):
+
+    def __init__(self, data, tangent_data, use_grad, dtype) -> None:
+        super().__init__(data, use_grad, dtype)
+
+# TODO
+
+
 def dual_tensor(primal, tangent=None):
     tangent = _preprocess_dual_tensor_args(primal, tangent)
     return DualTensor(primal, tangent)
@@ -184,4 +164,4 @@ def _valid_dual_tensor_args(primal, tangent):
     if tangent is None:
         return deepnet.is_tensor(primal)
     return deepnet.is_tensor(primal) and deepnet.is_tensor(
-        tangent) and primal.dtype == tangent.dtype
+        tangent) and primal.dtype == tangent.dtype and primal.dtype.differentiable()

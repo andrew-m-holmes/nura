@@ -79,6 +79,17 @@ def preprocess_to_tensors(*items):
         processed_items) > 1 else processed_items[0]
 
 
+def to_contiguous(tensor):
+    if is_contiguous(tensor):
+        return tensor
+    tensor.data = np.ascontiguousarray(tensor.data)
+    return tensor
+
+
+def is_contiguous(tensor):
+    return tensor.data.flags["C_CONTIGUOUS"]
+
+
 def is_all_py_scalars(*items):
     return all(is_py_scalar(item) for item in items)
 
