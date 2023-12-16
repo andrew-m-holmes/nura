@@ -75,7 +75,7 @@ class Tensor:
 
     def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
-    
+
     def contiguous(self):
         return deepnet.to_contiguous(self)
 
@@ -112,6 +112,10 @@ class Tensor:
 
     def __pow__(self, other):
         return deepnet.pow(self, other)
+
+    def __getitem__(self, indices):
+        return tensor(self.data[indices],
+                      self.use_grad, self.dtype)
 
 
 def tensor(data, use_grad=False, dtype=None):
