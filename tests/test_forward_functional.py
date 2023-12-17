@@ -509,6 +509,55 @@ def test_transpose_forward_multi_v2():
     result_tensor = deepnet.transpose(a_tensor, 0, 3)
     assert result_tensor.dim() == (6, 4, 5, 3)
 
+def test_view_forward_rank1_to_rank2():
+    a = np.random.rand(12)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (4, 3))
+    assert result_tensor.dim() == (4, 3)
+
+def test_view_forward_rank2_to_rank1():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (25,))
+    assert result_tensor.dim() == (25,)
+
+def test_view_forward_rank2_to_rank3():
+    a = np.random.rand(8, 6)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (2, 4, 6))
+    assert result_tensor.dim() == (2, 4, 6)
+
+def test_view_forward_rank3_to_rank2():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (12, 5))
+    assert result_tensor.dim() == (12, 5)
+
+def test_view_forward_rank3_to_rank4():
+    a = np.random.rand(3, 2, 6)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (3, 1, 2, 6))
+    assert result_tensor.dim() == (3, 1, 2, 6)
+
+def test_view_forward_rank4_to_rank2():
+    a = np.random.rand(2, 3, 4, 2)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (6, 8))
+    assert result_tensor.dim() == (6, 8)
+
+def test_view_forward_with_negative_dim():
+    a = np.random.rand(4, 3, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.view(a_tensor, (-1, 6))
+    assert result_tensor.dim() == (10, 6)
+
 
 def test_reshape_forward_rank1_to_rank2():
     a = np.random.rand(10)
@@ -652,6 +701,17 @@ def main():
     test_transpose_forward_multi_v0()
     test_transpose_forward_multi_v1()
     test_transpose_forward_multi_v2()
+
+    # View Tests
+
+    test_view_forward_rank1_to_rank2()
+    test_view_forward_rank2_to_rank3()
+    test_view_forward_rank3_to_rank4()
+
+    test_view_forward_rank2_to_rank1()
+    test_view_forward_rank3_to_rank2()
+    test_view_forward_rank4_to_rank2()
+    test_view_forward_with_negative_dim()
 
     # Reshape Tests
 
