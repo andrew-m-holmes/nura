@@ -710,6 +710,41 @@ def test_reshape_forward_with_negative_dim():
     result_tensor = deepnet.reshape(a_tensor, (-1, 5))
     assert result_tensor.dim() == (12, 5)
 
+def test_clone_forward_scalar():
+    a = np.random.rand()
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.clone(a_tensor)
+
+    assert np.allclose(result_tensor.data, a_tensor.data)
+    assert result_tensor.data is not a_tensor.data
+
+def test_clone_forward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.clone(a_tensor)
+
+    assert np.allclose(result_tensor.data, a_tensor.data)
+    assert result_tensor.data is not a_tensor.data
+
+def test_clone_forward_matrix():
+    a = np.random.rand(3, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.clone(a_tensor)
+
+    assert np.allclose(result_tensor.data, a_tensor.data)
+    assert result_tensor.data is not a_tensor.data
+
+def test_clone_forward_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.clone(a_tensor)
+
+    assert np.allclose(result_tensor.data, a_tensor.data)
+    assert result_tensor.data is not a_tensor.data
 
 def main():
 
@@ -839,6 +874,13 @@ def main():
     test_reshape_forward_rank4_to_rank2()
     test_reshape_forward_with_negative_dim()
 
+    # Clone Tests
+
+    test_clone_forward_scalar()
+    test_clone_forward_vector()
+    test_clone_forward_matrix()
+    test_clone_forward_higher_rank_tensor()
+    
     print("All tests passed")
 
 
