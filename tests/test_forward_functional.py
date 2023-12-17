@@ -509,6 +509,48 @@ def test_transpose_forward_multi_v2():
     result_tensor = deepnet.transpose(a_tensor, 0, 3)
     assert result_tensor.dim() == (6, 4, 5, 3)
 
+def test_permute_forward_rank3_v0():
+    a = np.random.rand(64, 10, 512)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.permute(a_tensor, (2, 1, 0))
+    assert result_tensor.dim() == (512, 10, 64)
+
+def test_permute_forward_rank3_v1():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.permute(a_tensor, (1, 0, 2))
+    assert result_tensor.dim() == (4, 3, 5)
+
+def test_permute_forward_rank4_v0():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.permute(a_tensor, (3, 2, 1, 0))
+    assert result_tensor.dim() == (5, 4, 3, 2)
+
+def test_permute_forward_rank4_v1():
+    a = np.random.rand(5, 6, 7, 8)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.permute(a_tensor, (0, 3, 2, 1))
+    assert result_tensor.dim() == (5, 8, 7, 6)
+
+def test_permute_forward_rank2_v0():
+    a = np.random.rand(10, 20)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.permute(a_tensor, (1, 0))
+    assert result_tensor.dim() == (20, 10)
+
+def test_permute_forward_rank5_v0():
+    a = np.random.rand(1, 2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = deepnet.permute(a_tensor, (4, 3, 2, 1, 0))
+    assert result_tensor.dim() == (5, 4, 3, 2, 1)
+
 def test_view_forward_rank1_to_rank2():
     a = np.random.rand(12)
 
@@ -701,6 +743,15 @@ def main():
     test_transpose_forward_multi_v0()
     test_transpose_forward_multi_v1()
     test_transpose_forward_multi_v2()
+
+    # Permute Tests
+
+    test_permute_forward_rank2_v0()
+    test_permute_forward_rank3_v0()
+    test_permute_forward_rank3_v1()
+    test_permute_forward_rank4_v0()
+    test_permute_forward_rank4_v1()
+    test_permute_forward_rank5_v0()
 
     # View Tests
 
