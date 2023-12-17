@@ -728,6 +728,56 @@ def test_transpose_backward_multi_v1():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+def test_permute_backward_rank2_v0():
+    a = np.random.rand(10, 20)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.permute(a_tensor, (1, 0))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+def test_permute_backward_rank3_v0():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.permute(a_tensor, (1, 0, 2))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+def test_permute_backward_rank3_v1():
+    a = np.random.rand(64, 10, 512)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.permute(a_tensor, (2, 1, 0))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+def test_permute_backward_rank4_v0():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.permute(a_tensor, (3, 2, 1, 0))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
+def test_permute_backward_rank4_v1():
+    a = np.random.rand(5, 6, 7, 8)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.permute(a_tensor, (0, 3, 2, 1))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim() == a.shape
+
 
 def test_reshape_backward_rank1_to_rank2():
     a = np.random.rand(10)
@@ -892,6 +942,14 @@ def main():
 
         test_transpose_backward_multi_v0()
         test_transpose_backward_multi_v1()
+
+        # Permute Backward Tests
+
+        test_permute_backward_rank2_v0()
+        test_permute_backward_rank3_v0()
+        test_permute_backward_rank3_v1()
+        test_permute_backward_rank4_v0()
+        test_permute_backward_rank4_v1()
 
         # Reshape Backward Tests
 
