@@ -1088,13 +1088,13 @@ def main():
 
         # Sum Backward Tests
 
-        # test_sum_backward_single_dim()
-        # test_sum_backward_multiple_dims()
-        # test_sum_backward_higher_rank_tensor()
+        test_sum_backward_single_dim()
+        test_sum_backward_multiple_dims()
+        test_sum_backward_higher_rank_tensor()
 
-        # test_sum_backward_keepdims_false()
-        # test_sum_backward_keepdims_true()
-        # test_sum_backward_single_element_tensor()
+        test_sum_backward_keepdims_false()
+        test_sum_backward_keepdims_true()
+        test_sum_backward_single_element_tensor()
     
 
         # Squeeze Backward Tests
