@@ -157,15 +157,23 @@ class Sum(Function):
     def forward(context: Context, a: Tensor, dims, keepdims):
         context.save_tensors(a)
         context.a_dim = a.dim()
+        context.dims = dims
+        context.keepdims = keepdims
         out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
         return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a_dim = context.a_dim
-        grad_out = deepnet.tensor(np.ascontiguousarray(
-            np.broadcast_to(
-                grad.data, a_dim)))
+        dims = context.dims
+        keepdims = context.keepdims
+        grad_data = grad.data
+        if not keepdims:
+            grad_data = np.expand_dims(grad_data, axis=dims)
+        grad_out = deepnet.tensor(
+            np.ascontiguousarray(
+                np.broadcast_to(
+                    grad_data, a_dim)))
         return grad_out
 
 
