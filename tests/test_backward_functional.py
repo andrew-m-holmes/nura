@@ -246,7 +246,8 @@ def test_div_backward_matrix():
     np.testing.assert_allclose(
         grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
-# Using symbolic differentiaton as numeric differentiation, gives unwanted results
+# Using symbolic differentiaton as numeric differentiation, gives
+# unwanted results
 
 
 def test_matmul_backward_same_shape():
@@ -541,16 +542,17 @@ def test_cosine_backward_matrix():
     np.testing.assert_allclose(
         grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
+
 def test_sum_backward_single_dim():
     a = np.random.rand(3, 4, 5)
 
     a_tensor = deepnet.tensor(a, use_grad=True)
     result_tensor = deepnet.sum(a_tensor, 1)
-    print(result_tensor.dim())
     result_tensor.backward(deepnet.ones_like(result_tensor))
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_sum_backward_multiple_dims():
     a = np.random.rand(4, 5, 6)
@@ -562,6 +564,7 @@ def test_sum_backward_multiple_dims():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_sum_backward_keepdims_true():
     a = np.random.rand(2, 3, 4)
 
@@ -571,6 +574,7 @@ def test_sum_backward_keepdims_true():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_sum_backward_keepdims_false():
     a = np.random.rand(2, 3, 4)
@@ -582,6 +586,7 @@ def test_sum_backward_keepdims_false():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_sum_backward_single_element_tensor():
     a = np.random.rand(1)
 
@@ -591,6 +596,7 @@ def test_sum_backward_single_element_tensor():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_sum_backward_higher_rank_tensor():
     a = np.random.rand(2, 3, 4, 5)
@@ -789,6 +795,7 @@ def test_transpose_backward_multi_v1():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_permute_backward_rank2_v0():
     a = np.random.rand(10, 20)
 
@@ -798,6 +805,7 @@ def test_permute_backward_rank2_v0():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_permute_backward_rank3_v0():
     a = np.random.rand(3, 4, 5)
@@ -809,6 +817,7 @@ def test_permute_backward_rank3_v0():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_permute_backward_rank3_v1():
     a = np.random.rand(64, 10, 512)
 
@@ -818,6 +827,7 @@ def test_permute_backward_rank3_v1():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_permute_backward_rank4_v0():
     a = np.random.rand(2, 3, 4, 5)
@@ -829,6 +839,7 @@ def test_permute_backward_rank4_v0():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_permute_backward_rank4_v1():
     a = np.random.rand(5, 6, 7, 8)
 
@@ -838,6 +849,7 @@ def test_permute_backward_rank4_v1():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_view_backward_rank1_to_rank2():
     a = np.random.rand(12)
@@ -849,6 +861,7 @@ def test_view_backward_rank1_to_rank2():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_view_backward_rank2_to_rank1():
     a = np.random.rand(5, 4)
 
@@ -858,6 +871,7 @@ def test_view_backward_rank2_to_rank1():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_view_backward_rank2_to_rank3():
     a = np.random.rand(8, 6)
@@ -869,6 +883,7 @@ def test_view_backward_rank2_to_rank3():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_view_backward_rank3_to_rank2():
     a = np.random.rand(3, 5, 4)
 
@@ -878,6 +893,7 @@ def test_view_backward_rank3_to_rank2():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
+
 
 def test_view_backward_rank3_to_rank4():
     a = np.random.rand(3, 4, 2)
@@ -889,6 +905,7 @@ def test_view_backward_rank3_to_rank4():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_view_backward_rank4_to_rank2():
     a = np.random.rand(3, 2, 4, 2)
 
@@ -899,6 +916,7 @@ def test_view_backward_rank4_to_rank2():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_view_backward_with_negative_dim():
     a = np.random.rand(4, 3, 5)
 
@@ -908,7 +926,6 @@ def test_view_backward_with_negative_dim():
 
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
-
 
 
 def test_reshape_backward_rank1_to_rank2():
@@ -987,6 +1004,7 @@ def test_reshape_backward_with_negative_dim():
     grad_a = a_tensor.grad
     assert grad_a.dim() == a.shape
 
+
 def test_clone_backward_scalar():
     a = np.random.rand()
 
@@ -996,6 +1014,7 @@ def test_clone_backward_scalar():
 
     grad_a = a_tensor.grad
     assert np.allclose(grad_a.data, 1.0)
+
 
 def test_clone_backward_vector():
     a = np.random.rand(5)
@@ -1007,6 +1026,7 @@ def test_clone_backward_vector():
     grad_a = a_tensor.grad
     assert np.allclose(grad_a.data, np.ones_like(a))
 
+
 def test_clone_backward_matrix():
     a = np.random.rand(3, 3)
 
@@ -1016,6 +1036,7 @@ def test_clone_backward_matrix():
 
     grad_a = a_tensor.grad
     assert np.allclose(grad_a.data, np.ones_like(a))
+
 
 def test_clone_backward_higher_rank_tensor():
     a = np.random.rand(2, 3, 4)
@@ -1095,7 +1116,6 @@ def main():
         test_sum_backward_keepdims_false()
         test_sum_backward_keepdims_true()
         test_sum_backward_single_element_tensor()
-    
 
         # Squeeze Backward Tests
 
