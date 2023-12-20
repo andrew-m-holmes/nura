@@ -74,9 +74,7 @@ def _pass_to_graph(context, output):
 
 def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):
-        saved_tensors = _preprocess_for_reverse_ad(
-            context.saved_tensors())
-        next_functions = _get_next_functions(saved_tensors)
+        next_functions = _get_next_functions(context.saved_tensors())
         node = Node.with_context(context, next_functions)
         output._set_grad_state(
             use_grad=True, grad_fn=node, is_leaf=False)
@@ -112,16 +110,6 @@ def _get_next_functions_helper(tensor):
         context = AccumulateGrad.with_tensor(tensor)
         return Node.with_context(context, next_functions=None)
     return tensor.grad_fn
-
-
-def _preprocess_for_reverse_ad(saved_tensors):
-    processed_tensors = []
-    for tensor in saved_tensors:
-        if deepnet.is_dual_tensor(tensor):
-            processed_tensors.append(tensor.primal)
-        else:
-            processed_tensors.append(tensor)
-    return processed_tensors
 
 
 def _preprocess_grad_output(grad):
