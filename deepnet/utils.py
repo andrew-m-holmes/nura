@@ -1,7 +1,7 @@
 import numpy as np
 import deepnet
 from deepnet.dtype import dtype
-from deepnet import Tensor, DualTensor
+from deepnet import Tensor
 
 
 def zeros(dim, use_grad=False, dtype=None):
@@ -56,25 +56,15 @@ def full(dim, num, use_grad=False, dtype=None):
 
 
 def is_of_tensor(*items):
-    return all(is_tensor(item) or is_dual_tensor(item)
-               for item in items)
+    return all(is_tensor(item) for item in items)
 
 
 def is_tensor(item):
     return isinstance(item, Tensor)
 
-
-def is_dual_tensor(item):
-    return isinstance(item, DualTensor)
-
-
 def preprocess_to_tensors(*items):
-    assert all(is_of_tensor(item) or is_py_scalar(item)
-               for item in items)
-    tensor_cls = [Tensor, DualTensor]
-    processed_items = tuple(deepnet.tensor(item)
-                            if type(item) not in tensor_cls else item
-                            for item in items)
+    assert all(is_tensor(item) or is_py_scalar(item) for item in items)
+    processed_items = tuple(deepnet.tensor(item) if not isinstance(item, Tensor) else item for item in items)
     return processed_items if len(
         processed_items) > 1 else processed_items[0]
 
@@ -89,6 +79,12 @@ def to_contiguous(tensor):
 def is_contiguous(tensor):
     return tensor.data.flags["C_CONTIGUOUS"]
 
+def is_numpy(item):
+    numpy_types = [
+        np.ndarray, np.uint8, np.int8, np.int16, np.int32, np.int64,
+        np.float16, np.float32, np.float64, np.bool_]
+    return type(item) in numpy_types
+
 
 def is_all_py_scalars(*items):
     return all(is_py_scalar(item) for item in items)
@@ -98,12 +94,6 @@ def is_py_scalar(item):
     py_scalar_types = [float, int]
     return type(item) in py_scalar_types
 
-
-def is_numpy(item):
-    numpy_types = [
-        np.ndarray, np.uint8, np.int8, np.int16, np.int32, np.int64,
-        np.float16, np.float32, np.float64, np.bool_]
-    return type(item) in numpy_types
 
 
 def is_py_bool(item):
@@ -121,8 +111,9 @@ def is_dims_arg(arg):
 
 
 def is_scalar_tensor(item):
-    assert is_of_tensor(item)
-    return item.dim() == 0
+    if is_tensor(item):
+        return item.dim() == 0
+    return False
 
 
 def is_dtype(item):
