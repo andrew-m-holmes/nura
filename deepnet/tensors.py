@@ -12,12 +12,24 @@ class Tensor:
         self.use_grad = use_grad
         self.is_leaf = True
         self.dtype = dtype
+        self.tangent = None
+        self.in_dual = False
 
     def backward(self, grad=None):
         if grad is None:
             assert self.ndim() == 0
             grad = deepnet.ones_like(self, dtype=self.dtype)
         self.grad_fn.apply(grad)
+
+    def dual(self, tangent=None):
+        make_dual(self, tangent)
+
+    def undual(self):
+        del self.tangent
+        self._set_dual_state(None, False)
+
+    def is_dual(self):
+        return self.in_dual
 
     def dim(self) -> Tuple[int, ...]:
         return self.data.shape
@@ -64,8 +76,8 @@ class Tensor:
     def zero(self):
         self.grad = deepnet.zeros_like(self, use_grad=False)
 
-    def sum(self, dims):
-        raise NotImplementedError
+    def sum(self, dims, keepdims):
+        return deepnet.sum(self, dims, keepdims)
 
     def squeeze(self, dims=None):
         return deepnet.squeeze(self, dims=dims)
@@ -86,6 +98,10 @@ class Tensor:
         self.use_grad = use_grad
         self.grad_fn = grad_fn
         self.is_leaf = is_leaf
+    
+    def _set_dual_state(self, tangent, in_dual):
+        self.tangent = tangent
+        self.in_dual = in_dual
 
     def __repr__(self) -> str:
         rep = f"tensor({self.data}"
@@ -122,6 +138,12 @@ def tensor(data, use_grad=False, dtype=None):
     data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
     return Tensor(data, use_grad, dtype)
 
+def make_dual(tensor, tangent):
+    assert _valid_make_dual_args(tensor, tangent)
+    tangent = deepnet.zeros_like(tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
+    tensor._set_dual_state(tangent, True)
+    return tensor
+
 
 def _preprocess_tensor_args(data, use_grad, dtype):
     assert _valid_tensor_args(data, use_grad, dtype)
@@ -142,30 +164,11 @@ def _valid_tensor_data(data):
         data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
 
-class DualTensor(Tensor):
-
-    def __init__(self, data, tangent_data, use_grad, dtype) -> None:
-        super().__init__(data, use_grad, dtype)
-
-# TODO
-
-
-def dual_tensor(primal, tangent=None):
-    tangent = _preprocess_dual_tensor_args(primal, tangent)
-    return DualTensor(primal, tangent)
-
-
-def _preprocess_dual_tensor_args(primal, tangent):
-    assert _valid_dual_tensor_args(primal, tangent)
+def _valid_make_dual_args(tensor, tangent):
+    if not deepnet.is_tensor(tensor):
+        return False
     if tangent is None:
-        tangent = deepnet.ones_like(
-            primal, use_grad=False, dtype=primal.dtype)
-    assert deepnet.is_tensor(tangent)
-    return tangent
-
-
-def _valid_dual_tensor_args(primal, tangent):
-    if tangent is None:
-        return deepnet.is_tensor(primal)
-    return deepnet.is_tensor(primal) and deepnet.is_tensor(
-        tangent) and primal.dtype == tangent.dtype and primal.dtype.differentiable()
+        return True
+    if deepnet.is_py_scalar(tangent):
+        return deepnet.is_scalar_tensor(tensor)
+    return tensor.dtype == tangent.dtype and tensor.dim() == tangent.dim()
