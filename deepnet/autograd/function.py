@@ -1,4 +1,4 @@
-from deepnet import Tensor, DualTensor
+from deepnet import Tensor
 from .graph import _pass_to_graph
 from typing import Tuple, Union
 
@@ -11,7 +11,7 @@ class Context:
     def save_tensors(self, *tensors):
         self._saved_tensors = tensors
 
-    def saved_tensors(self) -> Tuple[Union[Tensor, DualTensor], ...]:
+    def saved_tensors(self) -> Tuple[Tensor, ...]:
         return self._saved_tensors
 
 
@@ -51,8 +51,7 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args, **kwargs) -> Union[Tensor,
-                                             DualTensor, Tuple[Union[Tuple, Tensor], ...]]:
+    def apply(cls, *args, **kwargs) -> Union[Tensor, Tuple[Tensor, ...]]:
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)
         output = _pass_to_graph(context, output)
