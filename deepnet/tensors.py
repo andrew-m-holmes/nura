@@ -21,8 +21,8 @@ class Tensor:
             grad = deepnet.ones_like(self, dtype=self.dtype)
         self.grad_fn.apply(grad)
 
-    def dual(self, tangent=None):
-        return make_dual(self, tangent)
+    def dual(self, tangent=None, inplace=False):
+        return make_dual(self, tangent, inplace)
 
     def undual(self):
         del self.tangent
@@ -98,7 +98,7 @@ class Tensor:
         self.use_grad = use_grad
         self.grad_fn = grad_fn
         self.is_leaf = is_leaf
-    
+
     def _set_dual_state(self, tangent, in_dual):
         self.tangent = tangent
         self.in_dual = in_dual
@@ -111,7 +111,6 @@ class Tensor:
             rep += f", dtype={self.dtype.name()}"
         if self.in_dual:
             rep += f", in_dual=True"
-        
         rep += ")"
         return rep
 
@@ -142,6 +141,7 @@ def tensor(data, use_grad=False, dtype=None):
     data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
     return Tensor(data, use_grad, dtype)
 
+
 def _preprocess_tensor_args(data, use_grad, dtype):
     assert _valid_tensor_args(data, use_grad, dtype)
     dtype = _infer_dtype(data) if dtype is None else dtype
@@ -160,15 +160,19 @@ def _valid_tensor_data(data):
     return deepnet.is_numpy(data) or deepnet.is_py_list(
         data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
-def make_dual(tensor, tangent):
+
+def make_dual(tensor, tangent, inplace=False):
     # assert _valid_make_dual_args(tensor, tangent) # TODO
-    tensor = _make_dual_helper(tensor)
-    tangent = deepnet.zeros_like(tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
+    tensor = _make_dual_helper(tensor, inplace)
+    tangent = deepnet.zeros_like(
+        tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
     tensor._set_dual_state(tangent, True)
     return tensor
 
-def _make_dual_helper(tensor):
+
+def _make_dual_helper(tensor, inplace):
+    if inplace:
+        return tensor
     if tensor.use_grad:
         return tensor.clone()
     return tensor.clone().detach()
-

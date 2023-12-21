@@ -51,7 +51,8 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args, **kwargs) -> Union[Tensor, Tuple[Tensor, ...]]:
+    def apply(cls, *args, **
+              kwargs) -> Union[Tensor, Tuple[Tensor, ...]]:
         context = cls._backward_cls()
         output = cls.forward(context, *args, **kwargs)
         output = _pass_to_graph(context, output)

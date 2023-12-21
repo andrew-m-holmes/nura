@@ -29,6 +29,12 @@ class Node:
         return str(self.context.__class__.__name__)
 
 
+def _preprocess_grad_output(grad):
+    if deepnet.is_tensor(grad):
+        grad = (grad,)
+    return grad
+
+
 class AccumulateGrad:
 
     def __init__(self, tensor) -> None:
@@ -72,6 +78,14 @@ def _pass_to_graph(context, output):
     return output
 
 
+def _pass_for_forward_ad(context, output):
+    tangents = [dual_tensor.tangent
+                for dual_tensor in context.saved_tensors()]
+    tangent_out = context.apply_jvp(*tangents)
+    output._set_dual_state(tangent_out, True)
+    return output
+
+
 def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):
         next_functions = _get_next_functions(context.saved_tensors())
@@ -79,7 +93,6 @@ def _pass_for_reverse_ad(context, output):
         output._set_grad_state(
             use_grad=True, grad_fn=node, is_leaf=False)
     return output
-
 
 
 def _context_has_grad_tensors(context):
@@ -103,16 +116,3 @@ def _get_next_functions_helper(tensor):
         context = AccumulateGrad.with_tensor(tensor)
         return Node.with_context(context, next_functions=None)
     return tensor.grad_fn
-
-
-def _preprocess_grad_output(grad):
-    if deepnet.is_tensor(grad):
-        grad = (grad,)
-    return grad
-
-def _pass_for_forward_ad(context, output):
-    tangents = [dual_tensor.tangent
-                for dual_tensor in context.saved_tensors()]
-    tangent_out = context.apply_jvp(*tangents)
-    output._set_dual_state(tangent_out, True)
-    return output

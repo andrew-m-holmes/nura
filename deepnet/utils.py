@@ -62,9 +62,13 @@ def is_of_tensor(*items):
 def is_tensor(item):
     return isinstance(item, Tensor)
 
+
 def preprocess_to_tensors(*items):
-    assert all(is_tensor(item) or is_py_scalar(item) for item in items)
-    processed_items = tuple(deepnet.tensor(item) if not isinstance(item, Tensor) else item for item in items)
+    assert all(is_tensor(item) or is_py_scalar(item)
+               for item in items)
+    processed_items = tuple(
+        deepnet.tensor(item) if not isinstance(
+            item, Tensor) else item for item in items)
     return processed_items if len(
         processed_items) > 1 else processed_items[0]
 
@@ -78,6 +82,7 @@ def to_contiguous(tensor):
 
 def is_contiguous(tensor):
     return tensor.data.flags["C_CONTIGUOUS"]
+
 
 def is_numpy(item):
     numpy_types = [
@@ -93,7 +98,6 @@ def is_all_py_scalars(*items):
 def is_py_scalar(item):
     py_scalar_types = [float, int]
     return type(item) in py_scalar_types
-
 
 
 def is_py_bool(item):
