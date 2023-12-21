@@ -2,7 +2,6 @@ import deepnet
 from .dtype import _infer_dtype
 from typing import Tuple
 
-
 class Tensor:
 
     def __init__(self, data, use_grad, dtype) -> None:
@@ -138,12 +137,12 @@ class Tensor:
 
 
 def tensor(data, use_grad=False, dtype=None):
+    _tensor_args_check(data, use_grad, dtype)
     data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
     return Tensor(data, use_grad, dtype)
 
 
 def _preprocess_tensor_args(data, use_grad, dtype):
-    assert _valid_tensor_args(data, use_grad, dtype)
     dtype = _infer_dtype(data) if dtype is None else dtype
     if use_grad:
         assert dtype.differentiable()
@@ -151,10 +150,11 @@ def _preprocess_tensor_args(data, use_grad, dtype):
     return data, dtype
 
 
-def _valid_tensor_args(data, use_grad, dtype):
-    return _valid_tensor_data(data) and deepnet.is_py_bool(
-        use_grad) and deepnet.is_dtype(dtype) if dtype is not None else True
-
+def _tensor_args_check(data, use_grad, dtype):
+    assert _valid_tensor_data(data)
+    assert deepnet.is_py_bool(use_grad)
+    if dtype is not None:
+        assert deepnet.is_dtype(dtype)
 
 def _valid_tensor_data(data):
     return deepnet.is_numpy(data) or deepnet.is_py_list(
@@ -162,17 +162,25 @@ def _valid_tensor_data(data):
 
 
 def make_dual(tensor, tangent, inplace=False):
-    # assert _valid_make_dual_args(tensor, tangent) # TODO
-    tensor = _make_dual_helper(tensor, inplace)
-    tangent = deepnet.zeros_like(
-        tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
+    _make_dual_args_check(tensor, tangent, inplace)
+    tensor, tangent = _make_dual_helper(tensor, tangent, inplace)
     tensor._set_dual_state(tangent, True)
     return tensor
 
 
-def _make_dual_helper(tensor, inplace):
+def _make_dual_helper(tensor, tangent, inplace):
+    tangent = deepnet.zeros_like(
+        tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
     if inplace:
-        return tensor
+        return tensor, tangent
     if tensor.use_grad:
-        return tensor.clone()
-    return tensor.clone().detach()
+        return tensor.clone(), tangent
+    return tensor.clone().detach(), tangent
+
+def _make_dual_args_check(tensor, tangent, inplace):
+    assert deepnet.is_tensor(tensor)
+    if tangent is not None:
+        assert deepnet.is_tensor(tangent)
+        assert tensor.dim() == tangent.dim()
+        assert tensor.dtype == tangent.dtype
+    assert deepnet.is_py_bool(inplace)
