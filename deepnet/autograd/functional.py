@@ -9,6 +9,7 @@ def jacobian(input, func):
 
 
 def vjp(primals, cotangent, func, use_graph=False):
+    # TODO checks here
     primals, cotangent = _vjp_pre_process(
         primals, cotangent, use_graph)
     with deepnet.use_grad():
@@ -42,10 +43,6 @@ def _vjp_post_process(output, cotangents, use_graph):
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
-    # TODO assert diff
-    assert all(deepnet.is_tensor(primal) for primal in primals)
-    assert deepnet.is_tensor(cotangent)
-
     temp = primals
     primals = []
     for primal in temp:
@@ -57,6 +54,9 @@ def _vjp_pre_process(primals, cotangent, use_graph):
     cotangent._set_grad_state(
         use_grad=True, grad_fn=None, is_leaf=True)
     return primals, cotangent
+
+def _vjp_args_check(primals, cotangent, use_graph):
+    pass
 
 
 def _is_leaf_node(node):
@@ -72,34 +72,16 @@ def _is_intermediate_node(node):
 
 
 def jvp(primals, tangents, func, use_graph=False):
-    dual_tensors = _jvp_pre_process(primals, tangents, use_graph)
-    with deepnet.forward_ad():
-        with deepnet.set_grad(use_graph):
-            output = func(*dual_tensors)
-    return _jvp_post_process(output)
-
+    # TODO
+    pass
 
 def _jvp_post_process(output):
-    if isinstance(output, tuple):
-        return tuple(dual_tensor.unpack() for dual_tensor in output)
-    return output.unpack()
-
+    # TODO
+    pass
 
 def _jvp_pre_process(primals, tangents, use_graph):
-    # TODO assert diff
-    assert all(deepnet.is_tensor(primal) for primal in primals)
-    assert all(deepnet.is_tensor(tangent) for tangent in tangents)
-    assert len(primals) == len(tangents)
-
-    dual_tensors = []
-    for primal, tangent in zip(primals, tangents):
-        if use_graph:
-            primal._set_grad_state(
-                use_grad=True, grad_fn=None, is_leaf=True)
-        dual_tensor = deepnet.dual_tensor(primal, tangent)
-        dual_tensors.append(dual_tensor)
-    return dual_tensors
-
+    # TODO 
+    pass
 
 def grad(inputs, outputs):
     # will take the outputs and find the
