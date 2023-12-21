@@ -79,6 +79,7 @@ class Div(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
+        # TODO will cast to double even if data is float
         grad_a = deepnet.tensor(1. / b.data * grad.data)
         grad_b = deepnet.tensor(-1. * a.data / b.data **
                                 2. * grad.data)
@@ -115,6 +116,7 @@ class Pow(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b, out = context.saved_tensors()
+        # TODO will cast to double even if dtype is float
         grad_a = deepnet.tensor(
             b.data * np.power(a.data, b.data - 1.) * grad.data)
         grad_b = deepnet.tensor(out.data * np.log(a.data) * grad.data)
@@ -147,7 +149,7 @@ class Cosine(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(grad.data * -1. * np.sin(a.data))
+        grad_a = deepnet.tensor(grad.data * np.negative(np.sin(a.data)))
         return grad_a
 
 
