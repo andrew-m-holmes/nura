@@ -168,17 +168,17 @@ def make_dual(tensor, tangent, inplace=False):
 
 
 def _make_dual_helper(tensor, tangent, inplace):
-    tangent = deepnet.zeros_like(
-        tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
+    if tangent is None:
+        tangent = deepnet.zeros_like(tensor)
     if inplace:
         return tensor, tangent
-    if tensor.use_grad:
-        return tensor.clone(), tangent
-    return tensor.clone().detach(), tangent
+    return deepnet.tensor(
+        tensor.data, use_grad=tensor.use_grad), tangent
 
 
 def _make_dual_args_check(tensor, tangent, inplace):
     assert deepnet.is_tensor(tensor)
+    assert tensor.dtype.differentiable()
     if tangent is not None:
         assert deepnet.is_tensor(tangent)
         assert tensor.dim() == tangent.dim()
