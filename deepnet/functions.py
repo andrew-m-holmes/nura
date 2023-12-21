@@ -285,3 +285,7 @@ class Clone(Function):
     @staticmethod
     def backward(context: Any, grad: Tensor):
         return grad
+
+    @staticmethod
+    def jvp(context: Context, tangent: Tensor):
+        return tangent
