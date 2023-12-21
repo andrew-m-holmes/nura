@@ -90,7 +90,7 @@ def _pass_for_forward_ad(context, output):
 def _preprocess_for_forward_ad(context):
     return [tensor if tensor.in_dual else tensor.dual(
         inplace=False) for tensor in context.saved_tensors()]
-    
+
 
 def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):

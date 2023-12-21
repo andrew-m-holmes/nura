@@ -38,7 +38,7 @@ def _process_node(node, cotangent):
 def _vjp_post_process(output, cotangents, use_graph):
     if not use_graph:
         output._set_grad_state(
-            use_grad=False, grad_fn=None, is_leaf=False)
+            use_grad=False, grad_fn=None, is_leaf=True)
     return output, tuple(reversed(cotangents))
 
 
@@ -47,13 +47,14 @@ def _vjp_pre_process(primals, cotangent, use_graph):
     primals = []
     for primal in temp:
         if not use_graph:
-            primal = primal.detach().clone()
+            primal = primal.clone().detach()
         primal._set_grad_state(
             use_grad=True, grad_fn=None, is_leaf=True)
         primals.append(primal)
     cotangent._set_grad_state(
         use_grad=True, grad_fn=None, is_leaf=True)
     return primals, cotangent
+
 
 def _vjp_args_check(primals, cotangent, use_graph):
     pass
@@ -75,13 +76,16 @@ def jvp(primals, tangents, func, use_graph=False):
     # TODO
     pass
 
+
 def _jvp_post_process(output):
     # TODO
     pass
 
+
 def _jvp_pre_process(primals, tangents, use_graph):
-    # TODO 
+    # TODO
     pass
+
 
 def grad(inputs, outputs):
     # will take the outputs and find the

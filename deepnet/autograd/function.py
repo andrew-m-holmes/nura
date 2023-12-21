@@ -1,3 +1,4 @@
+import deepnet
 from deepnet import Tensor
 from .graph import _pass_to_graph
 from typing import Tuple, Union
@@ -9,6 +10,7 @@ class Context:
         self._saved_tensors = None
 
     def save_tensors(self, *tensors):
+        assert deepnet.is_all_tensor(*tensors)
         self._saved_tensors = tensors
 
     def saved_tensors(self) -> Tuple[Tensor, ...]:
