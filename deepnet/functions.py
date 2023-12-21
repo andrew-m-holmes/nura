@@ -15,8 +15,8 @@ class Add(Function):
 
     @staticmethod
     def backward(context: Any, grad: Tensor):
-        grad_a = deepnet.tensor(1. * grad.data)
-        grad_b = deepnet.tensor(1. * grad.data)
+        grad_a = grad
+        grad_b = grad
         return grad_a, grad_b
 
     @staticmethod
@@ -36,7 +36,7 @@ class Sub(Function):
     @staticmethod
     def backward(context: Any, grad: Tensor):
         grad_a = grad
-        grad_b = deepnet.tensor(grad.data * -1.)
+        grad_b = deepnet.tensor(np.negative(grad.data))
         return grad_a, grad_b
 
     @staticmethod
