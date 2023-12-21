@@ -55,7 +55,7 @@ def full(dim, num, use_grad=False, dtype=None):
     return deepnet.tensor(data, use_grad, dtype)
 
 
-def is_of_tensor(*items):
+def is_all_tensor(*items):
     return all(is_tensor(item) for item in items)
 
 
