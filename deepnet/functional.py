@@ -61,6 +61,7 @@ def _sum_args_check(a, dims, keepdims):
     assert utils.is_dims_arg(dims)
     assert utils.is_py_bool(keepdims)
 
+
 def transpose(a, dim_0=-2, dim_1=-1):
     _transpose_args_check(a, dim_0, dim_1)
     out = funcs.Tranpose.apply(a, dim_0, dim_1)
@@ -82,6 +83,7 @@ def permute(a, dims=None):
 def _permute_args_check(a, dims):
     assert utils.is_tensor(a)
     assert utils.is_dims_arg(dims)
+
 
 def squeeze(a, dims=None):
     _squeeze_args_check(a, dims)
@@ -118,6 +120,7 @@ def _view_args_check(a, dim):
     assert utils.is_tensor(a)
     assert utils.is_contiguous(a)
     assert utils.is_dims_arg(dim)
+
 
 def reshape(a, dim):
     _reshape_args_check(a, dim)

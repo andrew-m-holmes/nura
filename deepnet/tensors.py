@@ -2,6 +2,7 @@ import deepnet
 from .dtype import _infer_dtype
 from typing import Tuple
 
+
 class Tensor:
 
     def __init__(self, data, use_grad, dtype) -> None:
@@ -26,9 +27,6 @@ class Tensor:
     def undual(self):
         del self.tangent
         self._set_dual_state(None, False)
-
-    def is_dual(self):
-        return self.in_dual
 
     def dim(self) -> Tuple[int, ...]:
         return self.data.shape
@@ -156,6 +154,7 @@ def _tensor_args_check(data, use_grad, dtype):
     if dtype is not None:
         assert deepnet.is_dtype(dtype)
 
+
 def _valid_tensor_data(data):
     return deepnet.is_numpy(data) or deepnet.is_py_list(
         data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
@@ -176,6 +175,7 @@ def _make_dual_helper(tensor, tangent, inplace):
     if tensor.use_grad:
         return tensor.clone(), tangent
     return tensor.clone().detach(), tangent
+
 
 def _make_dual_args_check(tensor, tangent, inplace):
     assert deepnet.is_tensor(tensor)
