@@ -9,7 +9,7 @@ def jacobian(input, func):
 
 
 def vjp(primals, cotangent, func, use_graph=False):
-    # TODO checks here
+    _vjp_args_check(primals, cotangent, use_graph)
     primals, cotangent = _vjp_pre_process(
         primals, cotangent, use_graph)
     with deepnet.use_grad():
@@ -43,9 +43,9 @@ def _vjp_post_process(output, cotangents, use_graph):
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
-    temp = primals
+    tmp = primals
     primals = []
-    for primal in temp:
+    for primal in tmp:
         if not use_graph:
             primal = primal.clone().detach()
         primal._set_grad_state(
@@ -57,7 +57,11 @@ def _vjp_pre_process(primals, cotangent, use_graph):
 
 
 def _vjp_args_check(primals, cotangent, use_graph):
-    pass
+    assert deepnet.is_all_tensor(*primals)
+    assert deepnet.is_tensor(cotangent)
+    assert deepnet.is_py_bool(use_graph)
+    assert all(tensor.dtype.differentiable() for tensor in primals)
+    assert cotangent.dtype.differentiable()
 
 
 def _is_leaf_node(node):
