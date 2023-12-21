@@ -13,9 +13,10 @@ class Context:
         assert deepnet.is_all_tensor(*tensors)
         self._saved_tensors = tensors
 
-    def saved_tensors(self) -> Tuple[Tensor, ...]:
+    def saved_tensors(self) -> Union[Tensor, Tuple[Tensor, ...]]:
+        if self._saved_tensors is not None and len(self._saved_tensors) == 1:
+            return self._saved_tensors[0]
         return self._saved_tensors
-
 
 class BackwardFunction(Context):
 
