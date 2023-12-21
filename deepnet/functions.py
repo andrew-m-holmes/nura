@@ -133,7 +133,7 @@ class Sine(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        a = context.saved_tensors()
+        a = context.saved_tensors()[0]
         grad_a = deepnet.tensor(grad.data * np.cos(a.data))
         return grad_a
 
@@ -142,7 +142,7 @@ class Cosine(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
-        context.save_tensors(a)
+        context.save_tensors(a)[0]
         out = deepnet.tensor(np.cos(a.data))
         return out
 
