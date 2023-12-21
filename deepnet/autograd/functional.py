@@ -1,5 +1,5 @@
 import deepnet
-
+from types import FunctionType
 
 def jacobian(input, func):
     # literally computes the full jacobian matrix for func
@@ -10,8 +10,7 @@ def jacobian(input, func):
 
 def vjp(primals, cotangent, func, use_graph=False):
     _vjp_args_check(primals, cotangent, use_graph)
-    primals, cotangent = _vjp_pre_process(
-        primals, cotangent, use_graph)
+    primals, cotangent = _vjp_pre_process(primals, cotangent, func, use_graph)
     with deepnet.use_grad():
         output = func(*primals)
 
@@ -56,9 +55,10 @@ def _vjp_pre_process(primals, cotangent, use_graph):
     return primals, cotangent
 
 
-def _vjp_args_check(primals, cotangent, use_graph):
+def _vjp_args_check(primals, cotangent, func, use_graph):
     assert deepnet.is_all_tensor(*primals)
     assert deepnet.is_tensor(cotangent)
+    assert isinstance(func, FunctionType)
     assert deepnet.is_py_bool(use_graph)
     assert all(tensor.dtype.differentiable() for tensor in primals)
     assert cotangent.dtype.differentiable()
@@ -77,19 +77,39 @@ def _is_intermediate_node(node):
 
 
 def jvp(primals, tangents, func, use_graph=False):
-    # TODO
-    pass
+    _jvp_args_check(primals, tangents, func, use_graph)
+    primals = _jvp_pre_process_primals(primals, tangents, use_graph)
 
+    with deepnet.forward_ad(), deepnet.set_grad(use_graph):
+        output = func(*primals)
+    output, tangent = _jvp_post_process(primals, output)
+    return output, tangent
+    
 
-def _jvp_post_process(output):
-    # TODO
-    pass
+def _jvp_post_process(primals, output):
+    for primal in primals:
+        tensor, tangent = primal.undual(inplace=True)
+    tangent = output.tangent
+    output._set_dual_state(None, False)
+    return output, tangent
 
+def _jvp_pre_process_primals(primals, tangents, use_graph):
+    tmp = primals
+    primals = []
+    for primal, tangent in zip(tmp, tangents):
+        if not use_graph:
+            primal = primal.clone().detach()
+        primal._set_grad_state(use_grad=use_graph, grad_fn=None, is_leaf=True)
+        tangent._set_grad_state(use_grad=False, grad_fn=None, is_leaf=True)
+        primal._set_dual_state(tangent, in_dual=True)
+        primals.append(primal)
+    return primals
 
-def _jvp_pre_process(primals, tangents, use_graph):
-    # TODO
-    pass
-
+def _jvp_args_check(primals, tangents, func, use_graph):
+    assert deepnet.is_all_tensor(*primals)
+    assert deepnet.is_all_tensor(*tangents)
+    assert isinstance(func, FunctionType)
+    assert deepnet.is_py_bool(use_graph)
 
 def grad(inputs, outputs):
     # will take the outputs and find the
