@@ -27,7 +27,7 @@ def div(a, b):
 
 
 def matmul(a, b):
-    assert utils.is_of_tensor(a, b)
+    assert utils.is_all_tensor(a, b)
     out = funcs.Matmul.apply(a, b)
     return out
 
@@ -51,40 +51,40 @@ def cosine(a):
 
 
 def sum(a, dims=None, keepdims=False):
-    assert _valid_sum_args(a, dims, keepdims)
+    _sum_args_check(a, dims, keepdims)
     out = funcs.Sum.apply(a, dims, keepdims)
     return out
 
 
-def _valid_sum_args(a, dims, keepdims):
-    passed = utils.is_of_tensor(a) and utils.is_dims_arg(
-        dims) and utils.is_py_bool(keepdims)
-    return passed
-
+def _sum_args_check(a, dims, keepdims):
+    assert utils.is_tensor(a)
+    assert utils.is_dims_arg(dims)
+    assert utils.is_py_bool(keepdims)
 
 def transpose(a, dim_0=-2, dim_1=-1):
-    assert _valid_transpose_args(a, dim_0, dim_1)
+    _transpose_args_check(a, dim_0, dim_1)
     out = funcs.Tranpose.apply(a, dim_0, dim_1)
     return out
 
 
-def _valid_transpose_args(a, dim_0, dim_1):
-    return utils.is_of_tensor(a) and utils.is_all_py_scalars(
-        dim_0, dim_1) and a.ndim() >= 2
+def _transpose_args_check(a, dim_0, dim_1):
+    assert utils.is_tensor(a)
+    assert a.ndim() >= 2
+    assert utils.is_all_py_scalars(dim_0, dim_1)
 
 
 def permute(a, dims=None):
-    assert _valid_permute_args(a, dims)
+    _permute_args_check(a, dims)
     out = funcs.Permute.apply(a, dims)
     return out
 
 
-def _valid_permute_args(a, dims):
-    return utils.is_tensor(a) and utils.is_dims_arg(dims)
-
+def _permute_args_check(a, dims):
+    assert utils.is_tensor(a)
+    assert utils.is_dims_arg(dims)
 
 def squeeze(a, dims=None):
-    assert _valid_squeeze_args(a, dims)
+    _squeeze_args_check(a, dims)
     dims = _setup_dims_for_squeeze(a, dims)
     out = funcs.Squeeze.apply(a, dims=dims)
     return out
@@ -97,40 +97,41 @@ def _setup_dims_for_squeeze(a, dims):
     return dims
 
 
-def _valid_squeeze_args(a, dims):
-    return utils.is_of_tensor(a) and utils.is_dims_arg(dims)
+def _squeeze_args_check(a, dims):
+    assert utils.is_tensor(a)
+    assert utils.is_dims_arg(dims)
 
 
 def unsqueeze(a, dims):
-    assert _valid_squeeze_args(a, dims)
+    _squeeze_args_check(a, dims)
     out = funcs.Unsqueeze.apply(a, dims)
     return out
 
 
 def view(a, dim):
-    assert _valid_view_args(a, dim)
+    _view_args_check(a, dim)
     out = funcs.View.apply(a, dim)
     return out
 
 
-def _valid_view_args(a, dim):
-    if utils.is_tensor(a):
-        return utils.is_contiguous(a) and utils.is_dims_arg(dim)
-    return False
-
+def _view_args_check(a, dim):
+    assert utils.is_tensor(a)
+    assert utils.is_contiguous(a)
+    assert utils.is_dims_arg(dim)
 
 def reshape(a, dim):
-    assert _valid_reshape_args(a, dim)
+    _reshape_args_check(a, dim)
     a = utils.to_contiguous(a)
     out = funcs.Reshape.apply(a, dim)
     return out
 
 
-def _valid_reshape_args(a, dim):
-    return utils.is_of_tensor(a) and utils.is_dims_arg(dim)
+def _reshape_args_check(a, dim):
+    assert utils.is_tensor(a)
+    assert utils.is_dims_arg(dim)
 
 
 def clone(a):
-    assert utils.is_of_tensor(a)
+    assert utils.is_tensor(a)
     out = funcs.Clone.apply(a)
     return out
