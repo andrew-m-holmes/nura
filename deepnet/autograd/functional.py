@@ -19,7 +19,7 @@ def vjp(primals, cotangent, func, use_graph=False):
     stack = [(output.grad_fn, cotangent)]
     while stack:
         node, cotangent = stack.pop()
-        if _is_leaf_node(node):
+        if _is_leaf_node(node) and node.context.tensor in primals:
             cotangents.append(cotangent)
         elif _is_intermediate_node(node):
             next_nodes, next_cotangents = _process_node(
