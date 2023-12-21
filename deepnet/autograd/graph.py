@@ -81,13 +81,6 @@ def _pass_for_reverse_ad(context, output):
     return output
 
 
-def _pass_for_forward_ad(context, output):
-    tangents = [dual_tensor.tangent
-                for dual_tensor in context.saved_tensors()]
-    tangent_out = context.apply_jvp(*tangents)
-    output._set_dual_state(tangent_out, True)
-    return output
-
 
 def _context_has_grad_tensors(context):
     if context.saved_tensors():
@@ -116,3 +109,10 @@ def _preprocess_grad_output(grad):
     if deepnet.is_tensor(grad):
         grad = (grad,)
     return grad
+
+def _pass_for_forward_ad(context, output):
+    tangents = [dual_tensor.tangent
+                for dual_tensor in context.saved_tensors()]
+    tangent_out = context.apply_jvp(*tangents)
+    output._set_dual_state(tangent_out, True)
+    return output
