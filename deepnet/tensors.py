@@ -22,7 +22,7 @@ class Tensor:
         self.grad_fn.apply(grad)
 
     def dual(self, tangent=None):
-        make_dual(self, tangent)
+        return make_dual(self, tangent)
 
     def undual(self):
         del self.tangent
@@ -107,7 +107,11 @@ class Tensor:
         rep = f"tensor({self.data}"
         if self.use_grad:
             rep += f", grad_fn={self.grad_fn}"
-        rep += f", dtype={self.dtype.name()}"
+        else:
+            rep += f", dtype={self.dtype.name()}"
+        if self.in_dual:
+            rep += f", in_dual=True"
+        
         rep += ")"
         return rep
 
@@ -138,13 +142,6 @@ def tensor(data, use_grad=False, dtype=None):
     data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
     return Tensor(data, use_grad, dtype)
 
-def make_dual(tensor, tangent):
-    assert _valid_make_dual_args(tensor, tangent)
-    tangent = deepnet.zeros_like(tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
-    tensor._set_dual_state(tangent, True)
-    return tensor
-
-
 def _preprocess_tensor_args(data, use_grad, dtype):
     assert _valid_tensor_args(data, use_grad, dtype)
     dtype = _infer_dtype(data) if dtype is None else dtype
@@ -163,12 +160,15 @@ def _valid_tensor_data(data):
     return deepnet.is_numpy(data) or deepnet.is_py_list(
         data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
+def make_dual(tensor, tangent):
+    # assert _valid_make_dual_args(tensor, tangent) # TODO
+    tensor = _make_dual_helper(tensor)
+    tangent = deepnet.zeros_like(tensor) if tangent is None else deepnet.preprocess_to_tensors(tangent)
+    tensor._set_dual_state(tangent, True)
+    return tensor
 
-def _valid_make_dual_args(tensor, tangent):
-    if not deepnet.is_tensor(tensor):
-        return False
-    if tangent is None:
-        return True
-    if deepnet.is_py_scalar(tangent):
-        return deepnet.is_scalar_tensor(tensor)
-    return tensor.dtype == tangent.dtype and tensor.dim() == tangent.dim()
+def _make_dual_helper(tensor):
+    if tensor.use_grad:
+        return tensor.clone()
+    return tensor.clone().detach()
+
