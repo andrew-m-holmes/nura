@@ -14,16 +14,32 @@ def vjp(primals, cotangent, func, use_graph=False):
         primals, cotangent, use_graph)
     with deepnet.use_grad():
         output = func(*primals)
-        output.backward(cotangent)
-    cotangents = [tensor.grad for tensor in primals]
-    output = _vjp_post_process_output(output, use_graph)
-    return output, cotangents
 
-def _vjp_post_process_output(output, use_graph):
+    cotangents = []
+    stack = [(output.grad_fn, cotangent)]
+    while stack:
+        node, cotangent = stack.pop()
+        if _is_leaf_node(node):
+            cotangents.append(cotangent)
+        elif _is_intermediate_node(node):
+            next_nodes, next_cotangents = _process_node(
+                node, cotangent)
+            for node, cotangent in zip(next_nodes, next_cotangents):
+                if _is_leaf_node(node) or _is_intermediate_node(node):
+                    stack.append((node, cotangent))
+    return _vjp_post_process(output, cotangents, use_graph)
+
+
+def _process_node(node, cotangent):
+    next_cotangents = node.context.apply(cotangent)
+    return node.next_functions, next_cotangents
+
+
+def _vjp_post_process(output, cotangents, use_graph):
     if not use_graph:
         output._set_grad_state(
             use_grad=False, grad_fn=None, is_leaf=True)
-    return output
+    return output, tuple(reversed(cotangents))
 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
@@ -46,6 +62,18 @@ def _vjp_args_check(primals, cotangent, use_graph):
     assert deepnet.is_py_bool(use_graph)
     assert all(tensor.dtype.differentiable() for tensor in primals)
     assert cotangent.dtype.differentiable()
+
+
+def _is_leaf_node(node):
+    if node is not None:
+        return repr(node) == "AccumulateGrad"
+    return False
+
+
+def _is_intermediate_node(node):
+    if node is not None:
+        return "Backward" in repr(node)
+    return False
 
 
 def jvp(primals, tangents, func, use_graph=False):
