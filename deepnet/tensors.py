@@ -8,25 +8,24 @@ class Tensor:
     def __init__(self, data, use_grad, dtype) -> None:
         self.data = data
         self.grad = None
+        self.tangent = None
         self.grad_fn = None
         self.use_grad = use_grad
+        self.in_dual = False
         self.is_leaf = True
         self.dtype = dtype
-        self.tangent = None
-        self.in_dual = False
 
     def backward(self, grad=None):
         if grad is None:
             assert self.ndim() == 0
-            grad = deepnet.ones_like(self, dtype=self.dtype)
+            grad = deepnet.ones_like(self)
         self.grad_fn.apply(grad)
 
     def dual(self, tangent=None, inplace=False):
         return make_dual(self, tangent, inplace)
 
-    def undual(self):
-        del self.tangent
-        self._set_dual_state(None, False)
+    def undual(self, inplace=False):
+        return undual(self, inplace)
 
     def dim(self) -> Tuple[int, ...]:
         return self.data.shape
@@ -160,7 +159,7 @@ def _valid_tensor_data(data):
         data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
 
 
-def make_dual(tensor, tangent, inplace=False):
+def make_dual(tensor, tangent=None, inplace=False):
     _make_dual_args_check(tensor, tangent, inplace)
     tensor, tangent = _make_dual_helper(tensor, tangent, inplace)
     tensor._set_dual_state(tangent, True)
@@ -184,3 +183,17 @@ def _make_dual_args_check(tensor, tangent, inplace):
         assert tensor.dim() == tangent.dim()
         assert tensor.dtype == tangent.dtype
     assert deepnet.is_py_bool(inplace)
+
+def undual(tensor, inplace=False):
+    _undual_args_check(tensor, inplace)
+    tangent = tensor.tangent
+    if not inplace:
+        tensor = deepnet.tensor(tensor.data, tensor.use_grad)
+    tensor._set_dual_state(None, False)
+    return tensor, tangent
+
+
+def _undual_args_check(tensor, inplace):
+    assert deepnet.is_tensor(tensor)
+    assert deepnet.is_py_bool(inplace)
+    assert tensor.in_dual
