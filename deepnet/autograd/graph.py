@@ -85,7 +85,7 @@ def _pass_for_forward_ad(context, output):
     tangents = [dual_tensor.tangent
                 for dual_tensor in context.saved_tensors()]
     tangent_out = context.apply_jvp(*tangents)
-    output = deepnet.dual_tensor(output, tangent_out)
+    output._set_dual_state(tangent_out, True)
     return output
 
 
