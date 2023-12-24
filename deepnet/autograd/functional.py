@@ -25,13 +25,14 @@ def vjp(primals, cotangent, func, use_graph=False):
             next_nodes, next_cotangents = _process_node(
                 node, cotangent)
             for node, cotangent in zip(next_nodes, next_cotangents):
-                if _is_leaf_node(node) or _is_intermediate_node(node):
-                    stack.append((node, cotangent))
+                stack.append((node, cotangent))
     return _vjp_post_process(vjp_map, output, use_graph)
 
 
 def _process_node(node, cotangent):
     next_cotangents = node.context.apply(cotangent)
+    if deepnet.is_tensor(next_cotangents):
+        next_cotangents = (next_cotangents,)
     return node.next_functions, next_cotangents
 
 
