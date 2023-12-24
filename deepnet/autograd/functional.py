@@ -38,6 +38,7 @@ def _vjp_post_process(vjp_map, output, use_graph):
     for primal, cotangent in  vjp_map.items():
         if primal.dim() != cotangent.dim():
             cotangent = _vjp_reduce_sum_cotangent(primal, cotangent)
+            cotangent = _broadcast_to_match(primal, cotangent)
             vjp_map[primal] = cotangent
     if not use_graph:
         output._set_grad_state(
@@ -52,6 +53,11 @@ def _vjp_reduce_sum_cotangent(primal, cotangent):
     with deepnet.no_grad():
         cotangent = deepnet.sum(cotangent, dims, keepdims)
     return cotangent
+
+def _broadcast_to_match(primal, cotangent):
+    if primal.dim() != cotangent.dim():
+        cotangent = deepnet.tensor(np.broadcast_to(cotangent.data, primal.dim()))
+    return cotangent 
 
 def _vjp_pre_process(primals, cotangent, use_graph):
     tmp = primals
