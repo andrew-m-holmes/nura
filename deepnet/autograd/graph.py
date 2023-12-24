@@ -63,12 +63,11 @@ def _process_grad_for_accumulate(tensor, grad):
     return grad.data
 
 
-def _get_dims_to_sum(dim_1, dim_2):
-    diff = len(dim_2) - len(dim_1)
-    padded_dim_1 = [1] * diff + list(dim_1)
-    return tuple([i for i in range(len(dim_2))
-                  if dim_2[i] != padded_dim_1[i]])
-
+def _get_dims_to_sum(dim_0, dim_1):
+    dim_0 = np.pad(dim_0, (len(dim_1) - len(dim_0), 0), constant_values=0)
+    mask = dim_0 != np.array(dim_1)
+    dims = tuple(i for i, b in enumerate(mask) if b)
+    return dims
 
 def _pass_to_graph(context, output):
     if deepnet.grad_enabled():
