@@ -1,6 +1,6 @@
 import deepnet
-from deepnet import Tensor
 from .graph import _pass_to_graph
+from deepnet import Tensor
 from typing import Tuple, Union
 
 

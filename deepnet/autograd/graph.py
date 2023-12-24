@@ -1,7 +1,5 @@
 import numpy as np
 import deepnet
-import deepnet.utils as utils
-
 
 class Node:
 
