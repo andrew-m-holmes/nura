@@ -31,8 +31,6 @@ def vjp(primals, cotangent, func, use_graph=False):
 
 def _process_node(node, cotangent):
     next_cotangents = node.context.apply(cotangent)
-    if deepnet.is_tensor(next_cotangents):
-        next_cotangents = (next_cotangents,)
     return node.next_functions, next_cotangents
 
 
@@ -122,6 +120,9 @@ def _jvp_pre_process_primals(primals, tangents, use_graph):
 def _jvp_args_check(primals, tangents, func, use_graph):
     assert deepnet.is_all_tensor(*primals)
     assert deepnet.is_all_tensor(*tangents)
+    assert len(primals) == len(tangents)
+    for primal, tangent in zip(primals, tangents):
+        assert primal.dim() == tangent.dim()
     assert isinstance(func, FunctionType)
     assert deepnet.is_py_bool(use_graph)
 
