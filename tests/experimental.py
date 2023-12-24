@@ -1,22 +1,15 @@
+import numpy as np
 import deepnet
 import deepnet.functional as f
-import numpy as np
-import deepnet.autograd.functional as af
-import torch
-import torch.autograd.functional as taf
+from deepnet.autograd.functional import vjp, jvp
 
 def main():
-
-    def func(x, w, b):
-        return f.matmul(x, w.t) + b
-
-    x = deepnet.rand((5, 4), use_grad=True).float()
-    w = deepnet.rand((3, 4), use_grad=True).float()
-    b = deepnet.tensor(3, use_grad=True).float()
-    v = deepnet.ones((5, 3)).float()
-
-    output, vjp = af.vjp((x, w, b), v, func, use_graph=True)
-    print(vjp)
+    
+    a = np.random.rand(4, 5, 6)
+    b = a.sum()
+    c = np.random.rand(1)
+    d = np.broadcast_to(b, (1,))
+    print(d.shape)
 
 if __name__ == "__main__":
     main()
