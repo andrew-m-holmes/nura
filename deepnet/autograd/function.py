@@ -16,6 +16,7 @@ class Context:
     def saved_tensors(self) -> Union[Tensor, Tuple[Tensor, ...]]:
         return self._saved_tensors
 
+
 class BackwardFunction(Context):
 
     def apply(self, *args):

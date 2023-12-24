@@ -209,6 +209,7 @@ def _make_dual_args_check(tensor, tangent, inplace):
         assert tensor.dtype == tangent.dtype
     assert deepnet.is_py_bool(inplace)
 
+
 def undual(tensor, inplace=False):
     _undual_args_check(tensor, inplace)
     tangent = tensor.tangent

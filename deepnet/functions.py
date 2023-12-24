@@ -106,7 +106,8 @@ class Matmul(Function):
 
     @staticmethod
     def jvp(context: Context, tangent_a: Tensor, tangent_b: Tensor):
-        pass        
+        pass
+
 
 class Pow(Function):
 
@@ -152,7 +153,11 @@ class Cosine(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(grad.data * np.negative(np.sin(a.data)))
+        grad_a = deepnet.tensor(
+            grad.data *
+            np.negative(
+                np.sin(
+                    a.data)))
         return (grad_a,)
 
 
@@ -213,6 +218,7 @@ class Unsqueeze(Function):
     def backward(context: Context, grad: Tensor):
         grad_out = deepnet.tensor(grad.data.squeeze())
         return (grad_out,)
+
 
 class View(Function):
 
