@@ -168,13 +168,18 @@ def test_vjp_matmul_add_broadcast():
 
 def main():
 
+    # Basic VJP Tests
 
     test_vjp_no_graph()
     test_vjp_with_graph()
 
+    # Composition Function VJP Tests
+
     test_vjp_add_sub()
     test_vjp_mul_div()
     test_vjp_matmul_sum()
+
+    # Broadcasting Function VJP Tests
 
     test_vjp_add_mul_broadcast()
     test_vjp_nested_operations_broadcast()
