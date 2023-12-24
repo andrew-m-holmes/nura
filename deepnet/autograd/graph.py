@@ -53,10 +53,6 @@ class AccumulateGrad:
 
 def _process_grad_for_accumulate(tensor, grad):
     if tensor.dim() != grad.dim():
-        if utils.is_scalar_tensor(tensor):
-            return np.sum(
-                grad.data, axis=grad.dim(),
-                keepdims=False)
         dims = _get_dims_to_sum(tensor.dim(), grad.dim())
         keepdims = tensor.ndim() == grad.ndim()
         return np.sum(grad.data, axis=dims, keepdims=keepdims)

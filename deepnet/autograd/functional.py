@@ -1,4 +1,6 @@
 import deepnet
+import numpy as np
+from collections import OrderedDict
 from types import FunctionType
 
 def jacobian(input, func):
@@ -11,22 +13,21 @@ def jacobian(input, func):
 def vjp(primals, cotangent, func, use_graph=False):
     _vjp_args_check(primals, cotangent, func, use_graph)
     primals, cotangent = _vjp_pre_process(primals, cotangent, use_graph)
+    vjp_map = OrderedDict().fromkeys(primals)
     with deepnet.use_grad():
         output = func(*primals)
-
-    cotangents = []
     stack = [(output.grad_fn, cotangent)]
     while stack:
         node, cotangent = stack.pop()
-        if _is_leaf_node(node) and node.context.tensor in primals:
-            cotangents.append(cotangent)
+        if _is_leaf_node(node) and node.context.tensor in vjp_map:
+            vjp_map[node.context.tensor] = cotangent
         elif _is_intermediate_node(node):
             next_nodes, next_cotangents = _process_node(
                 node, cotangent)
             for node, cotangent in zip(next_nodes, next_cotangents):
                 if _is_leaf_node(node) or _is_intermediate_node(node):
                     stack.append((node, cotangent))
-    return _vjp_post_process(output, cotangents, use_graph)
+    return _vjp_post_process(vjp_map, output, use_graph)
 
 
 def _process_node(node, cotangent):
@@ -34,12 +35,24 @@ def _process_node(node, cotangent):
     return node.next_functions, next_cotangents
 
 
-def _vjp_post_process(output, cotangents, use_graph):
+def _vjp_post_process(vjp_map, output, use_graph):
+    for primal, cotangent in  vjp_map.items():
+        if primal.dim() != cotangent.dim():
+            cotangent = _vjp_reduce_sum_cotangent(primal, cotangent)
+            vjp_map[primal] = cotangent
     if not use_graph:
         output._set_grad_state(
             use_grad=False, grad_fn=None, is_leaf=True)
-    return output, tuple(reversed(cotangents))
+    return output, tuple(vjp_map.values())
 
+def _vjp_reduce_sum_cotangent(primal, cotangent):
+    padded_dim = np.pad(primal.dim(), pad_width=(cotangent.ndim() - primal.ndim(), 0), constant_values=0)
+    mask = padded_dim != np.array(cotangent.dim())
+    dims = tuple(i for i, b in enumerate(mask) if b) 
+    keepdims = primal.ndim() == cotangent.ndim()
+    with deepnet.no_grad():
+        cotangent = deepnet.sum(cotangent, dims, keepdims)
+    return cotangent
 
 def _vjp_pre_process(primals, cotangent, use_graph):
     tmp = primals
