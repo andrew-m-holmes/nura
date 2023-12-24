@@ -74,9 +74,7 @@ def _vjp_reduce_sum_cotangent(primal, cotangent):
 def _broadcast_to_match(primal, cotangent):
     if primal.dim() != cotangent.dim():
         cotangent = deepnet.tensor(
-            np.broadcast_to(
-                cotangent.data,
-                primal.dim()))
+            np.broadcast_to(cotangent.data, primal.dim()))
     return cotangent
 
 
@@ -139,8 +137,7 @@ def _jvp_pre_process_primals(primals, tangents, use_graph):
     for primal, tangent in zip(tmp, tangents):
         if not use_graph:
             primal = primal.clone().detach()
-        primal._set_grad_state(
-            use_grad=use_graph,
+        primal._set_grad_state(use_grad=use_graph,
             grad_fn=None,
             is_leaf=True)
         tangent._set_grad_state(
