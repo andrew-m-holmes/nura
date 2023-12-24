@@ -9,8 +9,8 @@ def jacobian(input, func):
 
 
 def vjp(primals, cotangent, func, use_graph=False):
-    _vjp_args_check(primals, cotangent, use_graph)
-    primals, cotangent = _vjp_pre_process(primals, cotangent, func, use_graph)
+    _vjp_args_check(primals, cotangent, func, use_graph)
+    primals, cotangent = _vjp_pre_process(primals, cotangent, use_graph)
     with deepnet.use_grad():
         output = func(*primals)
 
