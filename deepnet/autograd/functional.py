@@ -16,6 +16,7 @@ def vjp(primals, cotangent, func, use_graph=False):
     primals, cotangent = _vjp_pre_process(
         primals, cotangent, use_graph)
     vjp_map = OrderedDict().fromkeys(primals)
+
     with deepnet.use_grad():
         output = func(*primals)
     stack = [(output.grad_fn, cotangent)]
@@ -60,10 +61,7 @@ def _accumulate_vjp_cotangent(cotangent_0, cotangent_1):
 def _vjp_reduce_sum_cotangent(primal, cotangent):
     padded_dim = np.pad(
         primal.dim(),
-        pad_width=(
-            cotangent.ndim() -
-            primal.ndim(),
-            0),
+        pad_width=(cotangent.ndim() - primal.ndim(),),
         constant_values=0)
     mask = padded_dim != np.array(cotangent.dim())
     dims = tuple(i for i, b in enumerate(mask) if b)
