@@ -16,7 +16,6 @@ class Node:
                 self.next_functions, next_grads)
 
     def _apply_next_functions(self, next_functions, next_grads):
-        next_grads = _preprocess_grad_output(next_grads)
         for next_function, grad in zip(next_functions, next_grads):
             if next_function is not None:
                 next_function.apply(grad)
@@ -27,12 +26,6 @@ class Node:
 
     def __repr__(self) -> str:
         return str(self.context.__class__.__name__)
-
-
-def _preprocess_grad_output(grad):
-    if deepnet.is_tensor(grad):
-        grad = (grad,)
-    return grad
 
 
 class AccumulateGrad:
