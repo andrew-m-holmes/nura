@@ -84,6 +84,10 @@ class Tensor:
     def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
 
+    @property
+    def t(self):
+        return deepnet.transpose(self, -2, -1)
+
     def contiguous(self):
         return deepnet.to_contiguous(self)
 
