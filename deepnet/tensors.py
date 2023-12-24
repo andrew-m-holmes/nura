@@ -33,7 +33,7 @@ class Tensor:
     def ndim(self) -> int:
         return self.data.ndim
 
-    def nelem(self):
+    def nelem(self) -> int:
         return self.data.size
 
     def byte(self):
@@ -76,7 +76,7 @@ class Tensor:
         return deepnet.sum(self, dims, keepdims)
 
     def squeeze(self, dims=None):
-        return deepnet.squeeze(self, dims=dims)
+        return deepnet.squeeze(self, dims)
 
     def unsqueeze(self, dims):
         return deepnet.unsqueeze(self, dims)
@@ -113,20 +113,41 @@ class Tensor:
     def __add__(self, other):
         return deepnet.add(self, other)
 
+    def __radd__(self, other):
+        return deepnet.add(self, other)
+
     def __sub__(self, other):
         return deepnet.sub(self, other)
 
+    def __rsub__(self, other):
+        return deepnet.sub(other, self)
+
     def __mul__(self, other):
+        return deepnet.mul(self, other)
+
+    def __rmul__(self, other):
         return deepnet.mul(self, other)
 
     def __truediv__(self, other):
         return deepnet.div(self, other)
 
+    def __rtruediv__(self, other):
+        return deepnet.div(other, self)
+
     def __matmul__(self, other):
         return deepnet.matmul(self, other)
 
+    def __rmatmul__(self, other):
+        return deepnet.matmul(other, self)
+
     def __pow__(self, other):
         return deepnet.pow(self, other)
+
+    def __rpow__(self, other):
+        return deepnet.pow(other, self)
+
+    def __len__(self):
+        return self.data.shape[0]
 
     def __getitem__(self, indices):
         return tensor(self.data[indices],
@@ -141,8 +162,6 @@ def tensor(data, use_grad=False, dtype=None):
 
 def _preprocess_tensor_args(data, use_grad, dtype):
     dtype = _infer_dtype(data) if dtype is None else dtype
-    if use_grad:
-        assert dtype.differentiable()
     data = dtype.numpy(data)
     return data, dtype
 
@@ -152,6 +171,8 @@ def _tensor_args_check(data, use_grad, dtype):
     assert deepnet.is_py_bool(use_grad)
     if dtype is not None:
         assert deepnet.is_dtype(dtype)
+        if use_grad:
+            assert dtype.differentiable()
 
 
 def _valid_tensor_data(data):
