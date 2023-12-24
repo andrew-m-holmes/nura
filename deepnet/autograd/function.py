@@ -23,9 +23,9 @@ class BackwardFunction(Context):
         backward_fn = self._forward_cls.backward
         return backward_fn(self, *args)
 
-    def apply_jvp(self, *args):
+    def apply_jvp(self):
         jvp_fn = self._forward_cls.jvp
-        return jvp_fn(self, *args)
+        return jvp_fn(self)
 
 
 class FunctionMeta(type):
@@ -49,7 +49,7 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @staticmethod
-    def jvp(context, *tangents):
+    def jvp(context):
         raise NotImplementedError
 
     @classmethod

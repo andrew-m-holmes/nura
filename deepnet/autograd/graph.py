@@ -67,17 +67,14 @@ def _pass_to_graph(context, output):
 
 
 def _pass_for_forward_ad(context, output):
-    saved_tensors = _preprocess_for_forward_ad(context)
-    tangents = [tensor.tangent for tensor in saved_tensors]
-    tangent_out = context.apply_jvp(*tangents)
+    _forward_ad_context_check(context)
+    tangent_out = context.apply_jvp()
     output._set_dual_state(tangent_out, True)
     return output
 
 
-def _preprocess_for_forward_ad(context):
-    return [tensor if tensor.in_dual else tensor.dual(
-        inplace=False) for tensor in context.saved_tensors()]
-
+def _forward_ad_context_check(context):
+    assert all(tensor.in_dual for tensor in context.saved_tensors())
 
 def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):
