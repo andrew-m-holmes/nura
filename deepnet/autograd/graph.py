@@ -60,8 +60,8 @@ def _process_grad_for_accumulate(tensor, grad):
 
 
 def _get_dims_to_sum(dim_0, dim_1):
-    dim_0 = np.pad(dim_0, (len(dim_1) - len(dim_0), 0), constant_values=0)
-    mask = dim_0 != np.array(dim_1)
+    padded_dim_0 = np.pad(dim_0, (len(dim_1) - len(dim_0), 0), constant_values=0)
+    mask = padded_dim_0 != np.array(dim_1)
     dims = tuple(i for i, b in enumerate(mask) if b)
     return dims
 
