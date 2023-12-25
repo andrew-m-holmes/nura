@@ -144,6 +144,12 @@ class Sine(Function):
         grad_a = deepnet.tensor(grad.data * np.cos(a.data))
         return (grad_a,)
 
+    @staticmethod
+    def jvp(context: Context):
+        a = context.saved_tensors()[0]
+        tangent_out = deepnet.tensor(a.tangent.data * np.cos(a.data))
+        return tangent_out
+
 
 class Cosine(Function):
 
@@ -156,12 +162,14 @@ class Cosine(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(
-            grad.data *
-            np.negative(
-                np.sin(
-                    a.data)))
+        grad_a = deepnet.tensor(grad.data * np.negative(np.sin(a.data)))
         return (grad_a,)
+    
+    @staticmethod
+    def jvp(context: Context):
+        a = context.saved_tensors()[0]
+        tangent_out = deepnet.tensor(a.tangent.data * np.negative(np.sin(a.data)))
+        return tangent_out
 
 
 class Sum(Function):
