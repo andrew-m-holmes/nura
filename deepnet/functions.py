@@ -20,8 +20,9 @@ class Add(Function):
         return grad_a, grad_b
 
     @staticmethod
-    def jvp(context: Any, tangent_a: Tensor, tangent_b: Tensor):
-        tangent_out = deepnet.tensor(tangent_a.data + tangent_b.data)
+    def jvp(context: Context):
+        a, b = context.saved_tensors()
+        tangent_out = deepnet.tensor(np.ones_like(a.data) + np.ones_like(b.data))
         return tangent_out
 
 
@@ -40,8 +41,9 @@ class Sub(Function):
         return grad_a, grad_b
 
     @staticmethod
-    def jvp(context: Any, tangent_a: Tensor, tangent_b: Tensor):
-        tangent_out = deepnet.tensor(tangent_a.data - tangent_b.data)
+    def jvp(context: Context): 
+        a, b = context.saved_tensors()
+        tangent_out = deepnet.tensor(np.ones_like(a.data) + np.negative(np.ones_like(b.data)))
         return tangent_out
 
 
@@ -61,12 +63,10 @@ class Mul(Function):
         return grad_a, grad_b
 
     @staticmethod
-    def jvp(context: Context, tangent_a: Tensor, tangent_b: Tensor):
+    def jvp(context: Context):
         a, b = context.saved_tensors()
-        tangent_out = deepnet.tensor(
-            tangent_a.data * b.data + tangent_b.data * a.data)
+        tangent_out = deepnet.tensor(a.data + b.data)
         return tangent_out
-
 
 class Div(Function):
 
@@ -79,11 +79,15 @@ class Div(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
-        # TODO will cast to double even if data is float
         grad_a = deepnet.tensor(1. / b.data * grad.data)
-        grad_b = deepnet.tensor(-1. * a.data / b.data **
-                                2. * grad.data)
+        grad_b = deepnet.tensor(np.negative(a.data) / b.data ** 2. * grad.data)
         return grad_a, grad_b
+    
+    @staticmethod
+    def jvp(context: Context):
+        a, b = context.saved_tensors()
+        tangent_out = deepnet.tensor(a.tangent.data / b.data + a.data * (np.negative(b.tangent.data) / b.data ** 2))
+        return tangent_out
 
 
 class Matmul(Function):
@@ -120,7 +124,6 @@ class Pow(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b, out = context.saved_tensors()
-        # TODO will cast to double even if dtype is float
         grad_a = deepnet.tensor(
             b.data * np.power(a.data, b.data - 1.) * grad.data)
         grad_b = deepnet.tensor(out.data * np.log(a.data) * grad.data)
