@@ -13,7 +13,7 @@ class Context:
         assert deepnet.is_all_tensor(*tensors)
         self._saved_tensors = tensors
 
-    def saved_tensors(self) -> Union[Tensor, Tuple[Tensor, ...]]:
+    def saved_tensors(self) -> Tuple[Tensor, ...]:
         return self._saved_tensors
 
 
