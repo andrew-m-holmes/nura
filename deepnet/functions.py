@@ -109,7 +109,7 @@ class Matmul(Function):
         return grad_a, grad_b
 
     @staticmethod
-    def jvp(context: Context, tangent_a: Tensor, tangent_b: Tensor):
+    def jvp(context: Context):
         pass
 
 
@@ -129,6 +129,39 @@ class Pow(Function):
         grad_b = deepnet.tensor(out.data * np.log(a.data) * grad.data)
         return grad_a, grad_b
 
+    @staticmethod
+    def jvp(context: Context):
+        pass
+
+class Exp(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save_tensors(a)
+        out = deepnet.tensor(np.exp(a.data))
+        context.out = out
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        out = context.out
+        grad_out = deepnet.tensor(out.data * grad.data)
+        return grad_out
+
+    
+class Log(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save_tensors(a)
+        out = deepnet.tensor(np.log(a.data))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.saved_tensors()[0]
+        grad_out = deepnet.tensor(1. / a.data * grad.data)
+        return grad_out
 
 class Sine(Function):
 
