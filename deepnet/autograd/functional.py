@@ -60,7 +60,7 @@ def _vjp_reduce_sum_cotangent(primal, cotangent):
         pad_width=(cotangent.ndim() - primal.ndim(), 0),
         constant_values=0)
     mask = padded_dim != np.array(cotangent.dim())
-    dims = tuple(i for i, b in enumerate(mask) if b)
+    dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
     keepdims = primal.ndim() == cotangent.ndim()
     with deepnet.no_grad():
         cotangent = deepnet.sum(cotangent, dims, keepdims)
