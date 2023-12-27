@@ -160,11 +160,11 @@ class Tensor:
 
 def tensor(data, use_grad=False, dtype=None):
     _tensor_args_check(data, use_grad, dtype)
-    data, dtype = _preprocess_tensor_args(data, use_grad, dtype)
+    data, dtype = _preprocess_tensor_args(data, dtype)
     return Tensor(data, use_grad, dtype)
 
 
-def _preprocess_tensor_args(data, use_grad, dtype):
+def _preprocess_tensor_args(data, dtype):
     dtype = _infer_dtype(data) if dtype is None else dtype
     data = dtype.numpy(data)
     return data, dtype
