@@ -36,7 +36,6 @@ def vjp(primals, cotangent, func, use_graph=False):
     return _vjp_post_process(vjp_map, output, use_graph)
 
 
-
 def _vjp_post_process(vjp_map, output, use_graph):
     for primal, cotangent in vjp_map.items():
         if primal.dim() != cotangent.dim():
@@ -96,6 +95,7 @@ def _vjp_args_check(primals, cotangent, func, use_graph):
     assert all(tensor.dtype.differentiable() for tensor in primals)
     assert cotangent.dtype.differentiable()
 
+
 def _process_node(node, cotangent):
     next_cotangents = node.context.apply(cotangent)
     return node.next_functions, next_cotangents
@@ -138,8 +138,8 @@ def _jvp_pre_process_primals(primals, tangents, use_graph):
         if not use_graph:
             primal = primal.clone().detach()
         primal._set_grad_state(use_grad=use_graph,
-            grad_fn=None,
-            is_leaf=True)
+                               grad_fn=None,
+                               is_leaf=True)
         tangent._set_grad_state(
             use_grad=False,
             grad_fn=None,

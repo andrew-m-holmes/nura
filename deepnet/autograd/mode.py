@@ -54,14 +54,16 @@ def forward_ad():
     finally:
         Autograd._forward_mode = prev
 
+
 @contextmanager
 def no_forward_ad():
     prev = Autograd._forward_mode
-    Autograd._forward_mode = False 
+    Autograd._forward_mode = False
     try:
         yield
     finally:
         Autograd._forward_mode = prev
+
 
 @contextmanager
 def set_forward_ad(mode):

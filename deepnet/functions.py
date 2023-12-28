@@ -41,9 +41,12 @@ class Sub(Function):
         return grad_a, grad_b
 
     @staticmethod
-    def jvp(context: Context): 
+    def jvp(context: Context):
         a, b = context.saved_tensors()
-        tan_out = deepnet.tensor(a.tangent.data + np.negative(b.tangent.data))
+        tan_out = deepnet.tensor(
+            a.tangent.data +
+            np.negative(
+                b.tangent.data))
         return tan_out
 
 
@@ -65,8 +68,13 @@ class Mul(Function):
     @staticmethod
     def jvp(context: Context):
         a, b = context.saved_tensors()
-        tan_out = deepnet.tensor(a.data * b.tangent.data + b.data * a.tangent.data)
+        tan_out = deepnet.tensor(
+            a.data *
+            b.tangent.data +
+            b.data *
+            a.tangent.data)
         return tan_out
+
 
 class Div(Function):
 
@@ -80,13 +88,21 @@ class Div(Function):
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
         grad_a = deepnet.tensor(1. / b.data * grad.data)
-        grad_b = deepnet.tensor(np.negative(a.data) / b.data ** 2. * grad.data)
+        grad_b = deepnet.tensor(
+            np.negative(
+                a.data) /
+            b.data ** 2. *
+            grad.data)
         return grad_a, grad_b
-    
+
     @staticmethod
     def jvp(context: Context):
         a, b = context.saved_tensors()
-        tan_out = deepnet.tensor(a.tangent.data / b.data + a.data * (np.negative(b.tangent.data) / b.data ** 2))
+        tan_out = deepnet.tensor(a.tangent.data /
+                                 b.data +
+                                 a.data *
+                                 (np.negative(b.tangent.data) /
+                                  b.data ** 2))
         return tan_out
 
 
@@ -132,10 +148,12 @@ class Pow(Function):
     @staticmethod
     def jvp(context: Context):
         a, b, out = context.saved_tensors()
-        tan_0 = b.data * np.power(a.data, b.data - 1.) * a.tangent.data
+        tan_0 = b.data * np.power(a.data,
+                                  b.data - 1.) * a.tangent.data
         tan_1 = np.log(a.data) * out * b.tangent.data
         tan_out = deepnet.tensor(tan_0 + tan_1)
         return tan_out
+
 
 class Exp(Function):
 
@@ -157,7 +175,7 @@ class Exp(Function):
         tan_out = deepnet.tensor(out.data * a.tangent.data)
         return tan_out
 
-    
+
 class Log(Function):
 
     @staticmethod
@@ -177,6 +195,7 @@ class Log(Function):
         a = context.saved_tensors()[0]
         tan_out = deepnet.tensor(1. / a.data * a.tangent.data)
         return tan_out
+
 
 class Sine(Function):
 
@@ -210,13 +229,21 @@ class Cosine(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(grad.data * np.negative(np.sin(a.data)))
+        grad_a = deepnet.tensor(
+            grad.data *
+            np.negative(
+                np.sin(
+                    a.data)))
         return (grad_a,)
-    
+
     @staticmethod
     def jvp(context: Context):
         a = context.saved_tensors()[0]
-        tan_out = deepnet.tensor(a.tangent.data * np.negative(np.sin(a.data)))
+        tan_out = deepnet.tensor(
+            a.tangent.data *
+            np.negative(
+                np.sin(
+                    a.data)))
         return tan_out
 
 
@@ -239,7 +266,10 @@ class Sum(Function):
         grad_data = grad.data
         if not keepdims:
             grad_data = np.expand_dims(grad_data, axis=dims)
-            grad_out = deepnet.tensor(np.ascontiguousarray(np.broadcast_to(grad_data, a_dim)))
+            grad_out = deepnet.tensor(
+                np.ascontiguousarray(
+                    np.broadcast_to(
+                        grad_data, a_dim)))
         return (grad_out,)
 
 

@@ -1,6 +1,7 @@
 import numpy as np
 import deepnet
 
+
 class Node:
 
     def __init__(self, context, next_functions=None):
@@ -75,6 +76,7 @@ def _pass_for_forward_ad(context, output):
 
 def _forward_ad_context_check(context):
     assert all(tensor.in_dual for tensor in context.saved_tensors())
+
 
 def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):
