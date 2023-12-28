@@ -302,6 +302,33 @@ def test_exp_forward_matrix():
     expected = np.exp(a)
     np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
+def test_log_forward_scalar():
+    a = np.random.rand()
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.log(a_tensor)
+
+    expected = np.log(a)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
+
+def test_log_forward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.log(a_tensor)
+
+    expected = np.log(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+def test_log_forward_matrix():
+    a = np.random.rand(3, 3)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.log(a_tensor)
+
+    expected = np.log(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
 
 def test_sine_forward_scalar():
     a = np.random.rand()
@@ -843,6 +870,12 @@ def main():
     test_exp_forward_scalar()
     test_exp_forward_vector()
     test_exp_forward_matrix()
+
+    # Log Tests
+
+    test_log_forward_scalar()
+    test_log_forward_vector()
+    test_log_forward_matrix()
 
     # Sine Tests
 
