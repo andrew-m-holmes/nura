@@ -156,7 +156,7 @@ class Exp(Function):
     def backward(context: Context, grad: Tensor):
         a, out = context.saved_tensors()
         grad_out = deepnet.tensor(out.data * grad.data)
-        return grad_out
+        return (grad_out,)
 
     @staticmethod
     def jvp(context: Context):
@@ -177,7 +177,7 @@ class Log(Function):
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
         grad_out = deepnet.tensor(1. / a.data * grad.data)
-        return grad_out
+        return (grad_out,)
 
     @staticmethod
     def jvp(context: Context):
