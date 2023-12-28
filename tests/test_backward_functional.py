@@ -486,6 +486,48 @@ def test_exp_backward_matrix():
     expected_grad_a = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
     np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
+def test_log_backward_scalar():
+    a = np.random.rand()
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = f.log(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.log(a + h) - np.log(a - h)) / (2 * h)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
+def test_log_backward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = f.log(a_tensor)
+
+    ones = np.ones(5)
+    v = deepnet.tensor(ones, dtype=deepnet.float)
+    result_tensor.backward(v)
+    grad_a = a_tensor.grad
+
+    h = 1e-8
+    expected_grad_a = (np.log(a + h) - np.log(a - h)) / (2 * h)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
+def test_log_backward_matrix():
+    a = np.random.rand(3, 3)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = f.log(a_tensor)
+
+    ones = np.ones((3, 3))
+    m = deepnet.tensor(ones, dtype=deepnet.float)
+    result_tensor.backward(m)
+    grad_a = a_tensor.grad
+
+    h = 1e-8
+    expected_grad_a = (np.log(a + h) - np.log(a - h)) / (2 * h)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
 
 def test_sine_backward_scalar():
     a = np.random.rand()
@@ -1154,6 +1196,12 @@ def main():
         test_exp_backward_scalar()
         test_exp_backward_vector()
         test_exp_backward_matrix()
+
+        # Log Backward Tests
+
+        test_log_backward_scalar()
+        test_log_backward_vector()
+        test_log_backward_matrix()
 
         # Sum Backward Tests
 
