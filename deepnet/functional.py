@@ -37,6 +37,15 @@ def pow(a, b):
     out = funcs.Pow.apply(a, b)
     return out
 
+def exp(a):
+    a = utils.preprocess_to_tensors(a)
+    out = funcs.Exp.apply(a)
+    return out
+
+def log(a):
+    a = utils.preprocess_to_tensors(a)
+    out = funcs.Log.apply(a)
+    return out
 
 def sine(a):
     a = utils.preprocess_to_tensors(a)
