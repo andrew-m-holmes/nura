@@ -43,10 +43,7 @@ class Sub(Function):
     @staticmethod
     def jvp(context: Context):
         a, b = context.saved_tensors()
-        tan_out = deepnet.tensor(
-            a.tangent.data +
-            np.negative(
-                b.tangent.data))
+        tan_out = deepnet.tensor(a.tangent.data + np.negative(b.tangent.data))
         return tan_out
 
 
@@ -88,11 +85,7 @@ class Div(Function):
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
         grad_a = deepnet.tensor(1. / b.data * grad.data)
-        grad_b = deepnet.tensor(
-            np.negative(
-                a.data) /
-            b.data ** 2. *
-            grad.data)
+        grad_b = deepnet.tensor(np.negative(a.data) / b.data ** 2. * grad.data)
         return grad_a, grad_b
 
     @staticmethod
@@ -230,10 +223,7 @@ class Cosine(Function):
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
         grad_a = deepnet.tensor(
-            grad.data *
-            np.negative(
-                np.sin(
-                    a.data)))
+            grad.data * np.negative(np.sin(a.data)))
         return (grad_a,)
 
     @staticmethod
@@ -266,10 +256,7 @@ class Sum(Function):
         grad_data = grad.data
         if not keepdims:
             grad_data = np.expand_dims(grad_data, axis=dims)
-            grad_out = deepnet.tensor(
-                np.ascontiguousarray(
-                    np.broadcast_to(
-                        grad_data, a_dim)))
+        grad_out = deepnet.tensor(np.ascontiguousarray(np.broadcast_to(grad_data, a_dim)))
         return (grad_out,)
 
 
