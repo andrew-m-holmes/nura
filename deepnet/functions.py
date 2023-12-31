@@ -398,7 +398,7 @@ class Permute(Function):
     def jvp(context: Context):
         a = context.saved_tensors()[0]
         dims = context.dims
-        tan_out = deepnet.tensor(a.tangent.data.tranpose(dims))
+        tan_out = deepnet.tensor(a.tangent.data.transpose(dims))
         return tan_out
 
 class Clone(Function):
