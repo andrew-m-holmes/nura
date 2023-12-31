@@ -2,8 +2,6 @@ import numpy as np
 import deepnet
 import deepnet.functional as f
 
-deepnet.set_forward_ad(True)
-
 def test_add_jvp_scalar():
     a = np.random.rand()
     b = np.random.rand()
