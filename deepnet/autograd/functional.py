@@ -116,7 +116,6 @@ def _is_intermediate_node(node):
 def jvp(primals, tangents, func, use_graph=False):
     _jvp_args_check(primals, tangents, func, use_graph)
     primals = _jvp_pre_process_primals(primals, tangents, use_graph)
-
     with deepnet.forward_ad(), deepnet.set_grad(use_graph):
         output = func(*primals)
     output, tangent = _jvp_post_process(primals, output)
@@ -126,9 +125,8 @@ def jvp(primals, tangents, func, use_graph=False):
 def _jvp_post_process(primals, output):
     for primal in primals:
         tensor, tangent = primal.undual(inplace=True)
-    tangent = output.tangent
-    output.undual(inplace=True)
-    return output, tangent
+    output, output_tangent = output.undual(inplace=True)
+    return output, output_tangent
 
 
 def _jvp_pre_process_primals(primals, tangents, use_graph):
@@ -137,13 +135,8 @@ def _jvp_pre_process_primals(primals, tangents, use_graph):
     for primal, tangent in zip(tmp, tangents):
         if not use_graph:
             primal = primal.clone().detach()
-        primal._set_grad_state(use_grad=use_graph,
-                               grad_fn=None,
-                               is_leaf=True)
-        tangent._set_grad_state(
-            use_grad=False,
-            grad_fn=None,
-            is_leaf=True)
+        primal._set_grad_state(use_grad=use_graph,grad_fn=None,is_leaf=True)
+        tangent._set_grad_state(use_grad=False,grad_fn=None,is_leaf=True)
         primal._set_dual_state(tangent, in_dual=True)
         primals.append(primal)
     return primals
