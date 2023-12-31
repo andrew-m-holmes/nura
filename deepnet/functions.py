@@ -66,7 +66,7 @@ class Mul(Function):
         a, b = context.saved_tensors()
         tan_a = b.data * a.tangent.data
         tan_b = a.data * b.tangent.data
-        tan_out = (tan_a + tan_b)
+        tan_out = deepnet.tensor(tan_a + tan_b)
         return tan_out
 
 
