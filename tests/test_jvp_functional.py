@@ -8,7 +8,8 @@ def test_add_jvp_scalar():
 
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
     b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
-    result_tensor = f.add(a_tensor, b_tensor)
+    with deepnet.forward_ad():
+        result_tensor = f.add(a_tensor, b_tensor)
 
     h = 1e-8
     expected_a = (a + h + b - (a - h + b)) / (2 * h)
