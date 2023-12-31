@@ -166,7 +166,6 @@ def test_div_jvp_vector():
     expected = expected_a + expected_b
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
-    b = np.random.rand(3, 3) 
 
 def test_div_jvp_matrix():
     a = np.random.rand(3, 3)
