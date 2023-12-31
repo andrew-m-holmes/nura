@@ -2,187 +2,198 @@ import numpy as np
 import deepnet
 import deepnet.functional as f
 
-with deepnet.forward_ad():
+def test_add_jvp_scalar():
+    a = np.random.rand()
+    b = np.random.rand()
 
-    def test_add_jvp_scalar():
-        a = np.random.rand()
-        b = np.random.rand()
-
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    print(a_tensor.tangent)
+    with deepnet.forward_ad():
         result_tensor = f.add(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = (a + h + b - (a - h + b)) / (2 * h)
-        expected_b = (a + b + h - (a + b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = (a + h + b - (a - h + b)) / (2 * h)
+    expected_b = (a + b + h - (a + b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_add_jvp_vector():
-        a = np.random.rand(5)
-        b = np.random.rand(5)
+def test_add_jvp_vector():
+    a = np.random.rand(5)
+    b = np.random.rand(5)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
         result_tensor = f.add(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = (a + h + b - (a - h + b)) / (2 * h)
-        expected_b = (a + b + h - (a + b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = (a + h + b - (a - h + b)) / (2 * h)
+    expected_b = (a + b + h - (a + b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_add_jvp_matrix():
-        a = np.random.rand(3, 3)
-        b = np.random.rand(3, 3)
+def test_add_jvp_matrix():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3, 3)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    with deepnet.forward_ad():
         result_tensor = f.add(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = (a + h + b - (a - h + b)) / (2 * h)
-        expected_b = (a + b + h - (a + b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = (a + h + b - (a - h + b)) / (2 * h)
+    expected_b = (a + b + h - (a + b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_sub_jvp_scalar():
-        a = np.random.rand()
-        b = np.random.rand()
+def test_sub_jvp_scalar():
+    a = np.random.rand()
+    b = np.random.rand()
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
         result_tensor = f.sub(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = (a + h - b - (a - h - b)) / (2 * h)
-        expected_b = (a - (b + h) - (a - (b - h))) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = (a + h - b - (a - h - b)) / (2 * h)
+    expected_b = (a - (b + h) - (a - (b - h))) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_sub_jvp_vector():
-        a = np.random.rand(5)
-        b = np.random.rand(5)
+def test_sub_jvp_vector():
+    a = np.random.rand(5)
+    b = np.random.rand(5)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
         result_tensor = f.sub(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = (a + h - b - (a - h - b)) / (2 * h)
-        expected_b = (a - (b + h) - (a - (b - h))) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = (a + h - b - (a - h - b)) / (2 * h)
+    expected_b = (a - (b + h) - (a - (b - h))) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_sub_jvp_matrix():
-        a = np.random.rand(3, 3)
-        b = np.random.rand(3, 3)
+def test_sub_jvp_matrix():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3, 3)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    with deepnet.forward_ad():
         result_tensor = f.sub(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = (a + h - b - (a - h - b)) / (2 * h)
-        expected_b = (a - (b + h) - (a - (b - h))) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = (a + h - b - (a - h - b)) / (2 * h)
+    expected_b = (a - (b + h) - (a - (b - h))) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_mul_jvp_scalar():
-        a = np.random.rand()
-        b = np.random.rand()
+def test_mul_jvp_scalar():
+    a = np.random.rand()
+    b = np.random.rand()
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
         result_tensor = f.mul(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = ((a + h) * b - (a - h) * b) / (2 * h)
-        expected_b = (a * (b + h) - a * (b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = ((a + h) * b - (a - h) * b) / (2 * h)
+    expected_b = (a * (b + h) - a * (b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_mul_jvp_vector():
-        a = np.random.rand(5)
-        b = np.random.rand(5)
+def test_mul_jvp_vector():
+    a = np.random.rand(5)
+    b = np.random.rand(5)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
         result_tensor = f.mul(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = ((a + h) * b - (a - h) * b) / (2 * h)
-        expected_b = (a * (b + h) - a * (b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = ((a + h) * b - (a - h) * b) / (2 * h)
+    expected_b = (a * (b + h) - a * (b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_mul_jvp_matrix():
-        a = np.random.rand(3, 3)
-        b = np.random.rand(3, 3)
+def test_mul_jvp_matrix():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3, 3)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    with deepnet.forward_ad():
         result_tensor = f.mul(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = ((a + h) * b - (a - h) * b) / (2 * h)
-        expected_b = (a * (b + h) - a * (b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = ((a + h) * b - (a - h) * b) / (2 * h)
+    expected_b = (a * (b + h) - a * (b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_div_jvp_scalar():
-        a = np.random.rand()   
-        b = np.random.rand() 
+def test_div_jvp_scalar():
+    a = np.random.rand()   
+    b = np.random.rand() 
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
         result_tensor = f.div(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = ((a + h) / b - (a - h) / b) / (2 * h)
-        expected_b = (a / (b + h) - a / (b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = ((a + h) / b - (a - h) / b) / (2 * h)
+    expected_b = (a / (b + h) - a / (b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_div_jvp_vector():
-        a = np.random.rand(5) 
-        b = np.random.rand(5) 
+def test_div_jvp_vector():
+    a = np.random.rand(5) 
+    b = np.random.rand(5) 
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
         result_tensor = f.div(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = ((a + h) / b - (a - h) / b) / (2 * h)
-        expected_b = (a / (b + h) - a / (b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = ((a + h) / b - (a - h) / b) / (2 * h)
+    expected_b = (a / (b + h) - a / (b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
-    def test_div_jvp_matrix():
-        a = np.random.rand(3, 3)
-        b = np.random.rand(3, 3)
+def test_div_jvp_matrix():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3, 3)
 
-        a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
-        b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    with deepnet.forward_ad():
         result_tensor = f.div(a_tensor, b_tensor)
 
-        h = 1e-8
-        expected_a = ((a + h) / b - (a - h) / b) / (2 * h)
-        expected_b = (a / (b + h) - a / (b - h)) / (2 * h)
-        expected = expected_a + expected_b
-        np.testing.assert_allclose(
-            result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+    h = 1e-8
+    expected_a = ((a + h) / b - (a - h) / b) / (2 * h)
+    expected_b = (a / (b + h) - a / (b - h)) / (2 * h)
+    expected = expected_a + expected_b
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
 
 def main():
