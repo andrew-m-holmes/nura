@@ -14,6 +14,8 @@ def test_add_jvp_scalar():
     expected_a = (a + h + b - (a - h + b)) / (2 * h)
     expected_b = (a + b + h - (a + b - h)) / (2 * h)
     expected = expected_a + expected_b
+    if result_tensor.tangent is None:
+        print(a_tensor)
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
