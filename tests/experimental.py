@@ -7,18 +7,15 @@ import deepnet
 
 def main():
 
-    a = torch.rand((1,)).float()
-    b = torch.rand((1,)).float()
-
-    v = torch.ones_like(a)
-    output, jvp = taf.jvp(torch.div, (a, b), (v, v))
-    print(output, jvp, sep="\n")
-    
-    a = deepnet.tensor(a.numpy())
-    b = deepnet.tensor(b.numpy())
-    v = deepnet.ones_like(a)
-    output, jvp = daf.jvp((a, b), (v, v), deepnet.div)
-    print(output, jvp, sep="\n")
+    a = deepnet.rand((2, 3, 4), use_grad=True)
+    print(deepnet.is_contiguous(a))
+    b = a[:, 1, 2:3]
+    print(deepnet.is_contiguous(b))
+    c = b.contiguous()
+    print(deepnet.is_contiguous(c))
+    print(c)
+    c.backward(deepnet.ones_like(c))
+    print(b.grad)
 
 if __name__ == "__main__":
     main()
