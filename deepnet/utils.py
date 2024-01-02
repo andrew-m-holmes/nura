@@ -78,7 +78,7 @@ def to_contiguous(tensor):
         return tensor
     contiguous_tensor = tensor.clone()
     contiguous_tensor.data = np.ascontiguousarray(tensor.data)
-    return tensor
+    return contiguous_tensor
 
 
 def is_contiguous(tensor):
