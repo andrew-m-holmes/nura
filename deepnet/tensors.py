@@ -104,15 +104,16 @@ class Tensor:
         self.in_dual = in_dual
 
     def __repr__(self) -> str:
-        rep = f"tensor({self.data}"
+        base = repr(self.data)
+        dtype_start = base.index(", dtype")
+        rep = base[:dtype_start].replace("array", "tensor")
         if self.use_grad:
             rep += f", grad_fn={self.grad_fn}"
         else:
             rep += f", dtype={self.dtype.name()}"
-        if self.in_dual:
-            rep += f", in_dual=True"
         rep += ")"
         return rep
+
 
     def __add__(self, other):
         return deepnet.add(self, other)
@@ -153,10 +154,8 @@ class Tensor:
     def __len__(self):
         return self.data.shape[0]
 
-    def __getitem__(self, indices):
-        return tensor(self.data[indices],
-                      self.use_grad, self.dtype)
-
+    def __getitem__(self, _slice):
+        return deepnet.slice(self, _slice)
 
 def tensor(data, use_grad=False, dtype=None):
     _tensor_args_check(data, use_grad, dtype)
