@@ -147,3 +147,8 @@ def clone(a):
     assert utils.is_tensor(a)
     out = funcs.Clone.apply(a)
     return out
+
+def slice(a, _slice):
+    assert utils.is_tensor(a)
+    out = funcs.Slice.apply(a, _slice)
+    return out

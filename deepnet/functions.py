@@ -406,8 +406,7 @@ class Clone(Function):
     @staticmethod
     def forward(context: Context, a: Tensor):
         context.save_tensors(a)
-        out = deepnet.tensor(
-            a.data.copy(), use_grad=a.use_grad)
+        out = deepnet.tensor(a.data.copy())
         return out
 
     @staticmethod
@@ -418,4 +417,34 @@ class Clone(Function):
     def jvp(context: Context):
         a = context.saved_tensors()[0]
         tan_out = a.tangent
+        return tan_out
+
+class Slice(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, _slice: slice):
+        context.save_tensors(a)
+        context.slice = _slice
+        context.dim = a.dim()
+        out = deepnet.tensor(a.data[_slice])
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        dim = context.dim
+        _slice = context.slice
+        mask = np.zeros((dim))
+        mask[_slice] = 1.
+        grad_data = np.ascontiguousarray(np.broadcast_to(grad.data, dim))
+        grad_out = deepnet.tensor(grad_data * mask)
+        return (grad_out,)
+
+    @staticmethod
+    def jvp(context: Context):
+        a = context.saved_tensors()[0]
+        _slice = context.slice
+        dim = context.dim
+        mask = np.zeros((dim))
+        mask[_slice] = 1. 
+        tan_out = deepnet.tensor(a.tangent.data[_slice] * mask)
         return tan_out
