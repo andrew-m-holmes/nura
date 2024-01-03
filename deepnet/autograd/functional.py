@@ -54,10 +54,7 @@ def _accumulate_vjp_cotangent(cotangent_0, cotangent_1):
 
 
 def _vjp_reduce_sum_cotangent(primal, cotangent):
-    padded_dim = np.pad(
-        primal.dim(),
-        pad_width=(cotangent.ndim() - primal.ndim(), 0),
-        constant_values=0)
+    padded_dim = np.pad(primal.dim(), pad_width=(cotangent.ndim() - primal.ndim(), 0), constant_values=0)
     mask = padded_dim != np.array(cotangent.dim())
     dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
     keepdims = primal.ndim() == cotangent.ndim()
