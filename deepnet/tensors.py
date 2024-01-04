@@ -105,8 +105,10 @@ class Tensor:
 
     def __repr__(self) -> str:
         base = repr(self.data)
-        dtype_start = base.index(", dtype")
-        rep = base[:dtype_start].replace("array", "tensor")
+        rep = base.replace("array", "tensor")
+        if ", dtype" in rep:
+            start = rep.index(", dtype")
+            rep = rep[:start]
         if self.use_grad:
             rep += f", grad_fn={self.grad_fn}"
         else:
