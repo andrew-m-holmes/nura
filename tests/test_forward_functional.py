@@ -823,6 +823,51 @@ def test_clone_forward_higher_rank_tensor():
     assert np.allclose(result_tensor.data, a_tensor.data)
     assert result_tensor.data is not a_tensor.data
 
+def test_slice_forward_single_index():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = a_tensor[2, :]
+
+    expected = a[2, :]
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+def test_slice_forward_range():
+    a = np.random.rand(10, 10)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = a_tensor[2:5, 3:7]
+
+    expected = a[2:5, 3:7]
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+def test_slice_forward_step():
+    a = np.random.rand(8, 8)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = a_tensor[::2, ::3]
+
+    expected = a[::2, ::3]
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+def test_slice_forward_negative_indices():
+    a = np.random.rand(6, 6)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = a_tensor[-3:, -3:]
+
+    expected = a[-3:, -3:]
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+def test_slice_forward_mixed_indices():
+    a = np.random.rand(7, 7)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = a_tensor[1:5, -3]
+
+    expected = a[1:5, -3]
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
 
 def main():
 
@@ -970,6 +1015,14 @@ def main():
     test_clone_forward_vector()
     test_clone_forward_matrix()
     test_clone_forward_higher_rank_tensor()
+
+    # Slice
+
+    test_slice_forward_single_index()
+    test_slice_forward_range()
+    test_slice_forward_step()
+    test_slice_forward_negative_indices()
+    test_slice_forward_mixed_indices()
 
     print("All tests passed")
 
