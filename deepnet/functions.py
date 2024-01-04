@@ -431,20 +431,16 @@ class Slice(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        dim = context.dim
         _slice = context.slice
+        dim = context.dim
         mask = np.zeros((dim))
-        mask[_slice] = 1.
-        grad_data = np.ascontiguousarray(np.broadcast_to(grad.data, dim))
-        grad_out = deepnet.tensor(grad_data * mask)
-        return (grad_out,)
+        mask[_slice] = grad.data
+        grad_out = deepnet.tensor(mask)
+        return grad_out
 
     @staticmethod
     def jvp(context: Context):
         a = context.saved_tensors()[0]
         _slice = context.slice
-        dim = context.dim
-        mask = np.zeros((dim))
-        mask[_slice] = 1. 
-        tan_out = deepnet.tensor(a.tangent.data[_slice] * mask)
+        tan_out = deepnet.tensor(a.tangent.data[_slice])
         return tan_out
