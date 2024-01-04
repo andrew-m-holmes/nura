@@ -17,7 +17,7 @@ class Tensor:
 
     def backward(self, grad=None):
         if grad is None:
-            assert self.ndim() == 0
+            assert self.nelem() == 1
             grad = deepnet.ones_like(self)
         self.grad_fn.apply(grad)
 
