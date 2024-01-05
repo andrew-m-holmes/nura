@@ -322,6 +322,40 @@ def test_pow_jvp_matrix_exp():
     expected_tangent = expected_tangent_a + expected_tangent_b
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
 
+def test_exp_jvp_scalar():
+    a = np.random.rand()
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
+        result_tensor = f.exp(a_tensor)
+
+    h = 1e-8
+    expected_tangent = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_exp_jvp_vector():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
+        result_tensor = f.exp(a_tensor)
+
+    h = 1e-8
+    expected_tangent = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_exp_jvp_matrix():
+    a = np.random.rand(3, 4)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4))))
+    with deepnet.forward_ad():
+        result_tensor = f.exp(a_tensor)
+
+    h = 1e-8
+    expected_tangent = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+
 
 def main():
 
@@ -364,6 +398,12 @@ def main():
 
     test_pow_jvp_vector_exp()
     test_pow_jvp_matrix_exp()
+
+    # Exp JVP Tests
+
+    test_exp_jvp_scalar()
+    test_exp_jvp_vector()
+    test_exp_jvp_matrix()
 
     print("All tests passed")
 
