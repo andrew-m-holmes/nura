@@ -113,6 +113,8 @@ class Tensor:
             rep += f", grad_fn={self.grad_fn}"
         else:
             rep += f", dtype={self.dtype.name()}"
+        if self.in_dual:
+            rep += f", in_dual={self.in_dual}"
         rep += ")"
         return rep
 
@@ -197,8 +199,7 @@ def _make_dual_helper(tensor, tangent, inplace):
         tangent = deepnet.zeros_like(tensor)
     if inplace:
         return tensor, tangent
-    return deepnet.tensor(
-        tensor.data, use_grad=tensor.use_grad), tangent
+    return deepnet.tensor(tensor.data, use_grad=tensor.use_grad), tangent
 
 
 def _make_dual_args_check(tensor, tangent, inplace):
