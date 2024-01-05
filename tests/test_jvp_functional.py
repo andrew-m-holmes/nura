@@ -388,6 +388,60 @@ def test_log_jvp_matrix():
     expected_tangent = ((np.log(a + h) - np.log(a - h)) / (2 * h))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
 
+def test_sine_jvp_scalar():
+    a = np.random.rand()
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
+        result_tensor = f.sine(a_tensor)
+    h = 1e-8
+    expected_tangent = ((np.sin(a + h) - np.sin(a - h)) / (2 * h))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_sine_jvp_vector():
+    a = np.random.rand(4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(4)))
+    with deepnet.forward_ad():
+        result_tensor = f.sine(a_tensor)
+    h = 1e-8
+    expected_tangent = ((np.sin(a + h) - np.sin(a - h)) / (2 * h))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_sine_jvp_matrix():
+    a = np.random.rand(3, 3)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
+    with deepnet.forward_ad():
+        result_tensor = f.sine(a_tensor)
+    h = 1e-8
+    expected_tangent = ((np.sin(a + h) - np.sin(a - h)) / (2 * h))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_cosine_jvp_scalar():
+    a = np.random.rand()
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
+        result_tensor = f.cosine(a_tensor)
+    h = 1e-8
+    expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_cosine_jvp_vector():
+    a = np.random.rand(4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(4)))
+    with deepnet.forward_ad():
+        result_tensor = f.cosine(a_tensor)
+    h = 1e-8
+    expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_cosine_jvp_matrix():
+    a = np.random.rand(4, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 4))))
+    with deepnet.forward_ad():
+        result_tensor = f.cosine(a_tensor)
+    h = 1e-8
+    expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def main():
 
@@ -442,6 +496,18 @@ def main():
     test_log_jvp_scalar()
     test_log_jvp_vector()
     test_log_jvp_matrix()
+
+    # Sine JVP Tests
+
+    test_sine_jvp_scalar()
+    test_sine_jvp_vector()
+    test_sine_jvp_matrix()
+
+    # Cosine JVP Tests
+
+    test_cosine_jvp_scalar()
+    test_cosine_jvp_vector()
+    test_cosine_jvp_matrix()
 
     print("All tests passed")
 
