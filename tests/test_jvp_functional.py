@@ -482,6 +482,76 @@ def test_sum_jvp_single_element_rank1():
     expected_tangent = np.sum(np.ones(1))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
 
+def test_squeeze_jvp_rank1_v0():
+    a = np.random.rand(1)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(1)))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones(1))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_squeeze_jvp_rank1_v1():
+    a = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones(5))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_squeeze_jvp_rank2_v0():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((5, 5))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones((5, 5)))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_squeeze_jvp_rank2_v1():
+    a = np.random.rand(3, 1)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 1))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones((3, 1)))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_squeeze_jvp_multi_v0():
+    a = np.random.rand(2, 1, 4, 1, 5)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 1, 4, 1, 5))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones((2, 1, 4, 1, 5)))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_squeeze_jvp_multi_v1():
+    a = np.random.rand(1, 1, 1, 1, 1, 50, 1)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((1, 1, 1, 1, 1, 50, 1))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones((1, 1, 1, 1, 1, 50, 1)))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_squeeze_jvp_multi_v2():
+    a = np.random.rand(3, 3, 1, 7)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3, 1, 7))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.squeeze(a_tensor)
+
+    expected_tangent = np.squeeze(np.ones((3, 3, 1, 7)))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def main():
 
@@ -556,6 +626,17 @@ def main():
     test_sum_jvp_keepdims()
     test_sum_jvp_single_element_rank1()
     test_sum_jvp_higher_rank_tensor()
+
+    # Squeeze JVP Tests
+
+    test_squeeze_jvp_rank1_v0()
+    test_squeeze_jvp_rank1_v1()
+    test_squeeze_jvp_rank2_v0()
+    test_squeeze_jvp_rank2_v1()
+
+    test_squeeze_jvp_multi_v0()
+    test_squeeze_jvp_multi_v1()
+    test_squeeze_jvp_multi_v2()
 
     print("All tests passed")
 
