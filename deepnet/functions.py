@@ -302,7 +302,7 @@ class Unsqueeze(Function):
     def jvp(context: Context):
         a = context.saved_tensors()[0]
         dims = context.dims
-        tan_out = deepnet.tensor(a.tangent.data.unsqueeze(axis=dims))
+        tan_out = deepnet.tensor(np.expand_dims(a.tangent.data, axis=dims))
         return tan_out
 
 
