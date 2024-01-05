@@ -442,6 +442,46 @@ def test_cosine_jvp_matrix():
     expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
 
+def test_sum_jvp_single_dim():
+    a = np.random.rand(3, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.sum(a_tensor, dims=1)
+    expected_tangent = np.sum(np.ones((3, 4)), axis=1)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_sum_jvp_multiple_dim():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4, 5))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.sum(a_tensor, dims=(1, 2))
+    expected_tangent = np.sum(np.ones((3, 4, 5)), axis=(1, 2))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_sum_jvp_keepdims():
+    a = np.random.rand(3, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.sum(a_tensor, dims=1, keepdims=True)
+    expected_tangent = np.sum(np.ones((3, 4)), axis=1, keepdims=True)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_sum_jvp_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3, 4, 5))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.sum(a_tensor, dims=(1, 3))
+    expected_tangent = np.sum(np.ones((2, 3, 4, 5)), axis=(1, 3))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_sum_jvp_single_element_rank1():
+    a = np.random.rand(1)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(1)))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.sum(a_tensor)
+    expected_tangent = np.sum(np.ones(1))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def main():
 
@@ -508,6 +548,14 @@ def main():
     test_cosine_jvp_scalar()
     test_cosine_jvp_vector()
     test_cosine_jvp_matrix()
+
+    # Sum JVP Tests
+
+    test_sum_jvp_single_dim()
+    test_sum_jvp_multiple_dim()
+    test_sum_jvp_keepdims()
+    test_sum_jvp_single_element_rank1()
+    test_sum_jvp_higher_rank_tensor()
 
     print("All tests passed")
 
