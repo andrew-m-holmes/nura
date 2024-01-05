@@ -642,6 +642,51 @@ def test_transpose_jvp_multi_v4():
     expected_tangent = np.swapaxes(np.ones((2, 5, 3)), 0, 2)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+def test_permute_jvp_rank2_v0():
+    a = np.random.rand(8, 15)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((8, 15))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.permute(a_tensor, (1, 0))
+
+    expected_tangent = np.transpose(np.ones((8, 15)))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_permute_jvp_rank3_v0():
+    a = np.random.rand(4, 5, 6)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 5, 6))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.permute(a_tensor, (1, 0, 2))
+
+    expected_tangent = np.transpose(np.ones((4, 5, 6)), (1, 0, 2))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_permute_jvp_rank3_v1():
+    a = np.random.rand(70, 15, 512)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((70, 15, 512))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.permute(a_tensor, (2, 1, 0))
+
+    expected_tangent = np.transpose(np.ones((70, 15, 512)), (2, 1, 0))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_permute_jvp_rank4_v0():
+    a = np.random.rand(3, 4, 5, 6)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4, 5, 6))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.permute(a_tensor, (3, 2, 1, 0))
+
+    expected_tangent = np.transpose(np.ones((3, 4, 5, 6)), (3, 2, 1, 0))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_permute_jvp_rank4_v1():
+    a = np.random.rand(6, 7, 8, 9)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((6, 7, 8, 9))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.permute(a_tensor, (0, 3, 2, 1))
+
+    expected_tangent = np.transpose(np.ones((6, 7, 8, 9)), (0, 3, 2, 1))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def main():
 
@@ -743,6 +788,14 @@ def main():
     test_transpose_jvp_multi_v2()
     test_transpose_jvp_multi_v3()
     test_transpose_jvp_multi_v4()
+
+    # Permute JVP Tests
+
+    test_permute_jvp_rank2_v0()
+    test_permute_jvp_rank3_v0()
+    test_permute_jvp_rank3_v1()
+    test_permute_jvp_rank4_v0()
+    test_permute_jvp_rank4_v1()
 
     print("All tests passed")
 
