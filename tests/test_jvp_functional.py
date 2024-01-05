@@ -178,6 +178,7 @@ def test_div_jvp_vector():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_div_jvp_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -194,38 +195,92 @@ def test_div_jvp_matrix():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+# Using symbolic differentiaton as numeric differentiation, gives
+# unwanted results
+
+def test_matmul_jvp_square_matrices():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3, 3)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 3))))
+    with deepnet.forward_ad():
+        result_tensor = f.matmul(a_tensor, b_tensor)
+
+    expected_tangent = np.matmul(a, np.ones((3, 3))) + np.matmul(np.ones((3, 3)), b)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_matmul_jvp_different_shapes():
+    a = np.random.rand(4, 3)
+    b = np.random.rand(3, 5)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((3, 5))))
+    with deepnet.forward_ad():
+        result_tensor = f.matmul(a_tensor, b_tensor)
+
+    expected_tangent = np.matmul(a, np.ones((3, 5))) + np.matmul(np.ones((4, 3)), b)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+
+def test_matmul_jvp_higher_rank_same_shape():
+    a = np.random.rand(2, 3, 4, 4)
+    b = np.random.rand(2, 3, 4, 4)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3, 4, 4))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((2, 3, 4, 4))))
+    with deepnet.forward_ad():
+        result_tensor = f.matmul(a_tensor, b_tensor)
+
+    expected_tangent = np.matmul(a, np.ones((2, 3, 4, 4))) + np.matmul(np.ones((2, 3, 4, 4)), b)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
+def test_matmul_jvp_higher_rank_different_shape():
+    a = np.random.rand(2, 4, 3)
+    b = np.random.rand(2, 3, 5)
+
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 4, 3))))
+    b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones((2, 3, 5))))
+    with deepnet.forward_ad():
+        result_tensor = f.matmul(a_tensor, b_tensor)
+
+    expected_tangent = np.matmul(a, np.ones((2, 3, 5))) + np.matmul(np.ones((2, 4, 3)), b)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
 
 def main():
 
+    # Add JVP Tests
 
-    with deepnet.forward_ad():
+    test_add_jvp_scalar()
+    test_add_jvp_vector()
+    test_add_jvp_matrix()
 
-        # Add JVP Tests
+    # Sub JVP Tests
 
-        test_add_jvp_scalar()
-        test_add_jvp_vector()
-        test_add_jvp_matrix()
+    test_sub_jvp_scalar()
+    test_sub_jvp_vector()
+    test_sub_jvp_matrix()
 
-        # Sub JVP Tests
+    # Mul JVP Tests
 
-        test_sub_jvp_scalar()
-        test_sub_jvp_vector()
-        test_sub_jvp_matrix()
+    test_mul_jvp_scalar()
+    test_mul_jvp_vector()
+    test_mul_jvp_matrix()
 
-        # Mul JVP Tests
+    # Div JVP Tests
 
-        test_mul_jvp_scalar()
-        test_mul_jvp_vector()
-        test_mul_jvp_matrix()
+    test_div_jvp_scalar()
+    test_div_jvp_vector()
+    test_div_jvp_matrix()
 
-        # Div JVP Tests
+    # Matmul JVP Tests
 
-        test_div_jvp_scalar()
-        test_div_jvp_vector()
-        test_div_jvp_matrix()
+    test_matmul_jvp_square_matrices()
+    test_matmul_jvp_different_shapes()
+    test_matmul_jvp_higher_rank_same_shape()
+    test_matmul_jvp_higher_rank_different_shape()
 
-
-        print("All tests passed")
+    print("All tests passed")
 
 if __name__ == "__main__":
     main()
