@@ -11,14 +11,14 @@ def jacobian(input, func):
     pass
 
 
-def vjp(primals, cotangent, func, use_graph=False):
+def vjp(primals, cotangent, func, *func_args, use_graph=False):
     _vjp_args_check(primals, cotangent, func, use_graph)
     primals, cotangent = _vjp_pre_process(
         primals, cotangent, use_graph)
     vjp_map = OrderedDict().fromkeys(primals)
 
     with deepnet.use_grad():
-        output = func(*primals)
+        output = func(*primals, *func_args)
     stack = [(output.grad_fn, cotangent)]
     while stack:
         node, cotangent = stack.pop()
@@ -110,11 +110,11 @@ def _is_intermediate_node(node):
     return False
 
 
-def jvp(primals, tangents, func, use_graph=False):
+def jvp(primals, tangents, func, *func_args, use_graph=False):
     _jvp_args_check(primals, tangents, func, use_graph)
     primals = _jvp_pre_process_primals(primals, tangents, use_graph)
     with deepnet.forward_ad(), deepnet.set_grad(use_graph):
-        output = func(*primals)
+        output = func(*primals, *func_args)
     output, tangent = _jvp_post_process(primals, output)
     return output, tangent
 
