@@ -143,10 +143,12 @@ def _jvp_args_check(primals, tangents, func, use_graph):
     assert deepnet.is_all_tensor(*primals)
     assert deepnet.is_all_tensor(*tangents)
     assert len(primals) == len(tangents)
-    for primal, tangent in zip(primals, tangents):
-        assert primal.dim() == tangent.dim()
+    assert all(primal.dim() == tangent.dim() for primal, tangent in zip(primals, tangents))
     assert isinstance(func, FunctionType)
     assert deepnet.is_py_bool(use_graph)
+    assert all(tensor.dtype.differentiable() for tensor in primals)
+    assert all(tangent.dtype.differentiable() for tangent in tangents)
+
 
 
 def grad(inputs, outputs):
