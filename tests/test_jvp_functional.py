@@ -1034,6 +1034,13 @@ def main():
     test_clone_jvp_matrix()
     test_clone_jvp_higher_rank_tensor()
 
+    # Slice JVP Tests
+    
+    test_clone_jvp_scalar()
+    test_clone_jvp_vector()
+    test_clone_jvp_matrix()
+    test_clone_jvp_higher_rank_tensor()
+
     print("All tests passed")
 
 if __name__ == "__main__":
