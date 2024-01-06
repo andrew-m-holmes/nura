@@ -8,9 +8,9 @@ class Tensor:
     def __init__(self, data, use_grad, dtype) -> None:
         self.data = data
         self.grad = None
-        self.tangent = None
         self.grad_fn = None
         self.use_grad = use_grad
+        self.tangent = None
         self.in_dual = False
         self.is_leaf = True
         self.dtype = dtype
