@@ -218,8 +218,7 @@ class Cosine(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(
-            grad.data * np.negative(np.sin(a.data)))
+        grad_a = deepnet.tensor(grad.data * np.negative(np.sin(a.data)))
         return (grad_a,)
 
     @staticmethod
@@ -271,8 +270,7 @@ class Squeeze(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         dims = context.dims
-        grad_out = deepnet.tensor(
-            np.expand_dims(grad.data, axis=dims))
+        grad_out = deepnet.tensor(np.expand_dims(grad.data, axis=dims))
         return (grad_out,)
 
     @staticmethod
@@ -416,7 +414,7 @@ class Clone(Function):
     @staticmethod
     def jvp(context: Context):
         a = context.saved_tensors()[0]
-        tan_out = a.tangent
+        tan_out = deepnet.tensor(a.tangent.data.copy())
         return tan_out
 
 class Slice(Function):
