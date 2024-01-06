@@ -70,7 +70,7 @@ class Tensor:
         return deepnet.clone(self)
 
     def zero(self):
-        self.grad = deepnet.zeros_like(self, use_grad=False)
+        self.grad = deepnet.zeros_like(self)
 
     def sum(self, dims, keepdims):
         return deepnet.sum(self, dims, keepdims)
@@ -105,7 +105,8 @@ class Tensor:
 
     def __repr__(self) -> str:
         base = repr(self.data)
-        rep = base.replace("array", "tensor")
+        name = "tensor" if self.ndim() else "scalar" 
+        rep = base.replace("array", name).replace(")", "")
         if ", dtype" in rep:
             start = rep.index(", dtype")
             rep = rep[:start]
