@@ -849,6 +849,51 @@ def test_clone_jvp_higher_rank_tensor():
     expected_tangent = np.ones((2, 3, 4))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+def test_slice_jvp_single_index():
+    a = np.random.rand(10)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
+    with deepnet.forward_ad():
+        result_tensor = a_tensor[3]
+
+    expected_tangent = np.ones(10)[3]
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_slice_jvp_range():
+    a = np.random.rand(10)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
+    with deepnet.forward_ad():
+        result_tensor = a_tensor[2:7]
+
+    expected_tangent = np.ones(10)[2:7]
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_slice_jvp_step():
+    a = np.random.rand(10)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
+    with deepnet.forward_ad():
+        result_tensor = a_tensor[1:8:2]
+
+    expected_tangent = np.ones(10)[1:8:2]
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_slice_jvp_negative_indices():
+    a = np.random.rand(10)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
+    with deepnet.forward_ad():
+        result_tensor = a_tensor[-5:-2]
+
+    expected_tangent = np.ones(10)[-5:-2]
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_slice_jvp_mixed_indices():
+    a = np.random.rand(10)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
+    with deepnet.forward_ad():
+        result_tensor = a_tensor[1:-2]
+
+    expected_tangent = np.ones(10)[1:-2]
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 
 def main():
@@ -981,6 +1026,8 @@ def main():
     test_reshape_jvp_rank3_to_rank2()
     test_reshape_jvp_rank4_to_rank2()
     test_reshape_jvp_with_negative_dim()
+
+    # Clone JVP Tests
 
     test_clone_jvp_scalar()
     test_clone_jvp_vector()
