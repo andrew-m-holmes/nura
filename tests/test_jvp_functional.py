@@ -813,6 +813,42 @@ def test_reshape_jvp_with_negative_dim():
     expected_tangent = np.ones((4, 5, 3)).reshape(-1, 15)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+def test_clone_jvp_scalar():
+    a = np.random.rand()
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.clone(a_tensor)
+
+    expected_tangent = np.ones(1)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_clone_jvp_vector():
+    a = np.random.rand(5)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.clone(a_tensor)
+
+    expected_tangent = np.ones(5)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_clone_jvp_matrix():
+    a = np.random.rand(4, 3)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 3))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.clone(a_tensor)
+
+    expected_tangent = np.ones((4, 3))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_clone_jvp_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3, 4))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.clone(a_tensor)
+
+    expected_tangent = np.ones((2, 3, 4))
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 
 def main():
@@ -946,6 +982,10 @@ def main():
     test_reshape_jvp_rank4_to_rank2()
     test_reshape_jvp_with_negative_dim()
 
+    test_clone_jvp_scalar()
+    test_clone_jvp_vector()
+    test_clone_jvp_matrix()
+    test_clone_jvp_higher_rank_tensor()
 
     print("All tests passed")
 
