@@ -687,6 +687,69 @@ def test_permute_jvp_rank4_v1():
     expected_tangent = np.transpose(np.ones((6, 7, 8, 9)), (0, 3, 2, 1))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+def test_view_jvp_rank1_to_rank2():
+    a = np.random.rand(10)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (2, 5))
+
+    expected_tangent = np.ones(10).reshape(2, 5)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_view_jvp_rank2_to_rank3():
+    a = np.random.rand(6, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((6, 4))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (2, 3, 4))
+
+    expected_tangent = np.ones((6, 4)).reshape(2, 3, 4)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_view_jvp_rank3_to_rank4():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3, 4))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (2, 2, 3, 2))
+
+    expected_tangent = np.ones((2, 3, 4)).reshape(2, 2, 3, 2)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_view_jvp_rank2_to_rank1():
+    a = np.random.rand(4, 3)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 3))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (12,))
+
+    expected_tangent = np.ones((4, 3)).reshape(12)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_view_jvp_rank3_to_rank2():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3, 4))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (6, 4))
+
+    expected_tangent = np.ones((2, 3, 4)).reshape(6, 4)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_view_jvp_rank4_to_rank2():
+    a = np.random.rand(2, 2, 3, 2)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 2, 3, 2))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (4, 6))
+
+    expected_tangent = np.ones((2, 2, 3, 2)).reshape(4, 6)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
+def test_view_jvp_with_negative_dim():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4, 5))))
+    with deepnet.forward_ad():
+        result_tensor = deepnet.view(a_tensor, (-1, 5))
+
+    expected_tangent = np.ones((3, 4, 5)).reshape(-1, 5)
+    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def main():
 
@@ -796,6 +859,17 @@ def main():
     test_permute_jvp_rank3_v1()
     test_permute_jvp_rank4_v0()
     test_permute_jvp_rank4_v1()
+
+    # View JVP Tests
+
+    test_view_jvp_rank1_to_rank2()
+    test_view_jvp_rank2_to_rank3()
+    test_view_jvp_rank3_to_rank4()
+
+    test_view_jvp_rank2_to_rank1()
+    test_view_jvp_rank3_to_rank2()
+    test_view_jvp_rank4_to_rank2()
+    test_view_jvp_with_negative_dim()
 
     print("All tests passed")
 
