@@ -151,8 +151,21 @@ def _jvp_args_check(primals, tangents, func, use_graph):
 
 
 
-def grad(inputs, outputs):
+def grad(inputs, outputs, output_grads=None):
+    _grad_args_check(inputs, outputs, output_grads)
     # will take the outputs and find the
     # gradients for every input passed
     # will not accumulate them
     pass
+
+def _grad_args_check(inputs, output, output_grad):
+    assert deepnet.is_all_tensor(inputs)
+    assert deepnet.is_tensor(output)
+    assert all(tensor.dtype.differentiable() for tensor in inputs) 
+    assert output.dtype.differentiable()
+    if output_grad is not None:
+        assert deepnet.is_tensor(output_grad)
+        assert output_grad.dtype.differentiable()
+    assert all(tensor.use_grad for tensor in inputs)
+    assert output.use_grad
+    assert output.grad_fn is not None
