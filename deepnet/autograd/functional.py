@@ -1,6 +1,5 @@
 import deepnet
 import numpy as np
-from collections import OrderedDict
 from types import FunctionType
 
 
@@ -13,9 +12,9 @@ def jacobian(input, func):
 
 def vjp(primals, cotangent, func, *func_args, use_graph=False):
     _vjp_args_check(primals, cotangent, func, use_graph)
-    primals, cotangent = _vjp_pre_process(
+    primals, cotangent = _vjp_preprocess(
         primals, cotangent, use_graph)
-    vjp_map = OrderedDict().fromkeys(primals)
+    vjp_map = {primal: None for primal in primals}
 
     with deepnet.use_grad():
         output = func(*primals, *func_args)
@@ -43,6 +42,7 @@ def _vjp_post_process(vjp_map, output, use_graph):
             cotangent = _broadcast_to_match(primal, cotangent)
             vjp_map[primal] = cotangent
     if not use_graph:
+        del output.grad_fn
         output._set_grad_state(
             use_grad=False, grad_fn=None, is_leaf=True)
     return output, tuple(vjp_map.values())
@@ -70,7 +70,7 @@ def _broadcast_to_match(primal, cotangent):
     return cotangent
 
 
-def _vjp_pre_process(primals, cotangent, use_graph):
+def _vjp_preprocess(primals, cotangent, use_graph):
     tmp = primals
     primals = []
     for primal in tmp:
@@ -93,26 +93,10 @@ def _vjp_args_check(primals, cotangent, func, use_graph):
     assert cotangent.dtype.differentiable()
 
 
-def _process_node(node, cotangent):
-    next_cotangents = node.context.apply(cotangent)
-    return node.next_functions, next_cotangents
-
-
-def _is_leaf_node(node):
-    if node is not None:
-        return repr(node) == "AccumulateGrad"
-    return False
-
-
-def _is_intermediate_node(node):
-    if node is not None:
-        return "Backward" in repr(node)
-    return False
-
 
 def jvp(primals, tangents, func, *func_args, use_graph=False):
     _jvp_args_check(primals, tangents, func, use_graph)
-    primals = _jvp_pre_process_primals(primals, tangents, use_graph)
+    primals = _jvp_preprocess_primals(primals, tangents, use_graph)
     with deepnet.forward_ad(), deepnet.set_grad(use_graph):
         output = func(*primals, *func_args)
     output, tangent = _jvp_post_process(primals, output)
@@ -126,7 +110,7 @@ def _jvp_post_process(primals, output):
     return output, output_tangent
 
 
-def _jvp_pre_process_primals(primals, tangents, use_graph):
+def _jvp_preprocess_primals(primals, tangents, use_graph):
     tmp = primals
     primals = []
     for primal, tangent in zip(tmp, tangents):
@@ -151,21 +135,43 @@ def _jvp_args_check(primals, tangents, func, use_graph):
 
 
 
-def grad(inputs, outputs, output_grads=None):
-    _grad_args_check(inputs, outputs, output_grads)
-    # will take the outputs and find the
-    # gradients for every input passed
-    # will not accumulate them
-    pass
+def grad(inputs, output, output_grad=None):
+    _grad_args_check(inputs, output, output_grad)
+    if output_grad is None:
+        output_grad = deepnet.ones_like(output)
+    grad_map = OrderedDict().fromkeys(inputs)
+    stack = [(output.grad_fn, output_grad)]
+    while stack:
+        pass
+
+
 
 def _grad_args_check(inputs, output, output_grad):
     assert deepnet.is_all_tensor(inputs)
     assert deepnet.is_tensor(output)
     assert all(tensor.dtype.differentiable() for tensor in inputs) 
     assert output.dtype.differentiable()
-    if output_grad is not None:
+    if output.nelem() > 1:
+        assert output_grad is not None
         assert deepnet.is_tensor(output_grad)
+        assert output_grad.dim() == output.dim()
         assert output_grad.dtype.differentiable()
     assert all(tensor.use_grad for tensor in inputs)
     assert output.use_grad
     assert output.grad_fn is not None
+
+def _process_node(node, grad):
+    next_grads = node.context.apply(grad)
+    return node.next_functions, next_grads
+
+
+def _is_leaf_node(node):
+    if node is not None:
+        return repr(node) == "AccumulateGrad"
+    return False
+
+
+def _is_intermediate_node(node):
+    if node is not None:
+        return "Backward" in repr(node)
+    return False
