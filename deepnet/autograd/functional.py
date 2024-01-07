@@ -25,7 +25,7 @@ def vjp(primals, cotangent, func, *func_args, use_graph=False):
             if vjp_map[node.context.tensor] is None:
                 vjp_map[node.context.tensor] = cotangent
             else:
-                vjp_map[node.context.tensor] = _accumulate_vjp_cotangent(
+                vjp_map[node.context.tensor] = _accumulate_grad(
                     vjp_map[node.context.tensor], cotangent)
         elif _is_intermediate_node(node):
             next_nodes, next_cotangents = _process_node(
@@ -38,7 +38,7 @@ def vjp(primals, cotangent, func, *func_args, use_graph=False):
 def _vjp_post_process(vjp_map, output, use_graph):
     for primal, cotangent in vjp_map.items():
         if primal.dim() != cotangent.dim():
-            cotangent = _vjp_reduce_sum_cotangent(primal, cotangent)
+            cotangent = _reduce_sum_grad(primal, cotangent)
             cotangent = _broadcast_to_match(primal, cotangent)
             vjp_map[primal] = cotangent
     if not use_graph:
@@ -46,28 +46,6 @@ def _vjp_post_process(vjp_map, output, use_graph):
         output._set_grad_state(
             use_grad=False, grad_fn=None, is_leaf=True)
     return output, tuple(vjp_map.values())
-
-
-def _accumulate_vjp_cotangent(cotangent_0, cotangent_1):
-    with deepnet.no_grad():
-        return deepnet.add(cotangent_0, cotangent_1)
-
-
-def _vjp_reduce_sum_cotangent(primal, cotangent):
-    padded_dim = np.pad(primal.dim(), pad_width=(cotangent.ndim() - primal.ndim(), 0), constant_values=0)
-    mask = padded_dim != np.array(cotangent.dim())
-    dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
-    keepdims = primal.ndim() == cotangent.ndim()
-    with deepnet.no_grad():
-        cotangent = deepnet.sum(cotangent, dims, keepdims)
-    return cotangent
-
-
-def _broadcast_to_match(primal, cotangent):
-    if primal.dim() != cotangent.dim():
-        cotangent = deepnet.tensor(
-            np.broadcast_to(cotangent.data, primal.dim()))
-    return cotangent
 
 
 def _vjp_preprocess(primals, cotangent, use_graph):
@@ -139,7 +117,7 @@ def grad(inputs, output, output_grad=None):
     _grad_args_check(inputs, output, output_grad)
     if output_grad is None:
         output_grad = deepnet.ones_like(output)
-    grad_map = OrderedDict().fromkeys(inputs)
+    grad_map = {tensor: deepnet.ones_like(tensor) for tensor in inputs}
     stack = [(output.grad_fn, output_grad)]
     while stack:
         pass
@@ -175,3 +153,25 @@ def _is_intermediate_node(node):
     if node is not None:
         return "Backward" in repr(node)
     return False
+
+def _accumulate_grad(grad_0, grad_1):
+    with deepnet.no_grad():
+        return deepnet.add(grad_0, grad_1)
+
+
+def _reduce_sum_grad(tensor, grad):
+    padded_dim = np.pad(tensor.dim(), pad_width=(grad.ndim() - tensor.ndim(), 0), constant_values=0)
+    mask = padded_dim != np.array(grad.dim())
+    dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
+    keepdims = tensor.ndim() == grad.ndim()
+    with deepnet.no_grad():
+        grad = deepnet.sum(grad, dims, keepdims)
+    return grad
+
+
+def _broadcast_to_match(tensor, grad):
+    if tensor.dim() != grad.dim():
+        grad = deepnet.tensor(
+            np.broadcast_to(grad.data, tensor.dim()))
+    return grad
+
