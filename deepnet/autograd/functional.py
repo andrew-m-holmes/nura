@@ -119,9 +119,20 @@ def grad(inputs, output, output_grad=None):
         output_grad = deepnet.ones_like(output)
     grad_map = {tensor: deepnet.ones_like(tensor) for tensor in inputs}
     stack = [(output.grad_fn, output_grad)]
-    while stack:
-        pass
 
+    while stack:
+        node, curr_grad = stack.pop()
+        if _is_leaf_node(node) and node.context.tensor in grad_map:
+            tensor = node.context.tensor
+            if tensor.dim() != curr_grad.dim():
+                curr_grad = _reduce_sum_grad(tensor, curr_grad)
+            curr_grad = _broadcast_to_match(tensor, curr_grad)
+            grad_map[tensor] = _accumulate_grad(grad_map[tensor], curr_grad)
+        elif _is_intermediate_node(node):
+            next_nodes, next_grads = _process_node(node, curr_grad)
+            for next_node, next_grad in zip(next_nodes, next_grads):
+                stack.append((next_node, next_grad))
+    return tuple(grad_map.values())
 
 
 def _grad_args_check(inputs, output, output_grad):
