@@ -444,6 +444,7 @@ def test_pow_backward_matrix_exp():
     np.testing.assert_allclose(
         grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
+
 def test_exp_backward_scalar():
     a = np.random.rand()
 
@@ -454,7 +455,9 @@ def test_exp_backward_scalar():
     grad_a = a_tensor.grad
     h = 1e-8
     expected_grad_a = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
-    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
 
 def test_exp_backward_vector():
     a = np.random.rand(5)
@@ -469,7 +472,9 @@ def test_exp_backward_vector():
 
     h = 1e-8
     expected_grad_a = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
-    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
 
 def test_exp_backward_matrix():
     a = np.random.rand(5, 4)
@@ -484,7 +489,9 @@ def test_exp_backward_matrix():
 
     h = 1e-8
     expected_grad_a = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
-    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
 
 def test_log_backward_scalar():
     a = np.random.rand()
@@ -496,7 +503,9 @@ def test_log_backward_scalar():
     grad_a = a_tensor.grad
     h = 1e-8
     expected_grad_a = (np.log(a + h) - np.log(a - h)) / (2 * h)
-    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
 
 def test_log_backward_vector():
     a = np.random.rand(5)
@@ -511,7 +520,9 @@ def test_log_backward_vector():
 
     h = 1e-8
     expected_grad_a = (np.log(a + h) - np.log(a - h)) / (2 * h)
-    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+
 
 def test_log_backward_matrix():
     a = np.random.rand(3, 3)
@@ -526,7 +537,8 @@ def test_log_backward_matrix():
 
     h = 1e-8
     expected_grad_a = (np.log(a + h) - np.log(a - h)) / (2 * h)
-    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
 
 def test_sine_backward_scalar():
@@ -1133,6 +1145,75 @@ def test_clone_backward_higher_rank_tensor():
     assert np.allclose(grad_a.data, np.ones_like(a))
 
 
+def test_slice_backward_single_index():
+    a = np.random.rand(5, 5)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = a_tensor[2, :]
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    expected_grad = np.zeros_like(a)
+    expected_grad[2, :] = 1
+    np.testing.assert_array_almost_equal(
+        a_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_slice_backward_range():
+    a = np.random.rand(10, 10)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = a_tensor[2:5, 3:7]
+    gradient_mask = deepnet.ones_like(result_tensor)
+    result_tensor.backward(gradient_mask)
+
+    expected_grad = np.zeros_like(a)
+    expected_grad[2:5, 3:7] = 1
+    np.testing.assert_array_almost_equal(
+        a_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_slice_backward_step():
+    a = np.random.rand(8, 8)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = a_tensor[::2, ::3]
+    gradient_mask = deepnet.ones_like(result_tensor)
+    result_tensor.backward(gradient_mask)
+
+    expected_grad = np.zeros_like(a)
+    expected_grad[::2, ::3] = 1
+    np.testing.assert_array_almost_equal(
+        a_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_slice_backward_negative_indices():
+    a = np.random.rand(6, 6)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = a_tensor[-3:, -3:]
+    gradient_mask = deepnet.ones_like(result_tensor)
+    result_tensor.backward(gradient_mask)
+
+    expected_grad = np.zeros_like(a)
+    expected_grad[-3:, -3:] = 1
+    np.testing.assert_array_almost_equal(
+        a_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_slice_backward_mixed_indices():
+    a = np.random.rand(7, 7)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = a_tensor[1:5, -3]
+    gradient_mask = deepnet.ones_like(result_tensor)
+    result_tensor.backward(gradient_mask)
+
+    expected_grad = np.zeros_like(a)
+    expected_grad[1:5, -3] = 1
+    np.testing.assert_array_almost_equal(
+        a_tensor.grad.data, expected_grad, decimal=5)
+
+
 def main():
 
     with deepnet.use_grad():
@@ -1278,6 +1359,14 @@ def main():
         test_clone_backward_vector()
         test_clone_backward_matrix()
         test_clone_backward_higher_rank_tensor()
+
+        # Slice Backward Tests
+
+        test_slice_backward_single_index()
+        test_slice_backward_range()
+        test_slice_backward_step()
+        test_slice_backward_negative_indices()
+        test_slice_backward_mixed_indices()
 
         print("All tests passed")
 

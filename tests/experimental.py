@@ -1,24 +1,13 @@
-import torch
-import torch.autograd.functional as taf
-import deepnet.autograd.functional as daf
 import numpy as np
+import torch
+import torch.autograd as torch_autograd
 import deepnet
+import deepnet.autograd as deepnet_autograd
+from deepnet.autograd.functional import vjp, jvp, grad, jacobian
 
 
 def main():
-
-    a = torch.rand((1,)).float()
-    b = torch.rand((1,)).float()
-
-    v = torch.ones_like(a)
-    output, jvp = taf.jvp(torch.div, (a, b), (v, v))
-    print(output, jvp, sep="\n")
-    
-    a = deepnet.tensor(a.numpy())
-    b = deepnet.tensor(b.numpy())
-    v = deepnet.ones_like(a)
-    output, jvp = daf.jvp((a, b), (v, v), deepnet.div)
-    print(output, jvp, sep="\n")
+    pass
 
 if __name__ == "__main__":
     main()

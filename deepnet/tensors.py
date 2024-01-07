@@ -8,16 +8,16 @@ class Tensor:
     def __init__(self, data, use_grad, dtype) -> None:
         self.data = data
         self.grad = None
-        self.tangent = None
         self.grad_fn = None
         self.use_grad = use_grad
+        self.tangent = None
         self.in_dual = False
         self.is_leaf = True
         self.dtype = dtype
 
     def backward(self, grad=None):
         if grad is None:
-            assert self.ndim() == 0
+            assert self.nelem() == 1
             grad = deepnet.ones_like(self)
         self.grad_fn.apply(grad)
 
@@ -70,7 +70,7 @@ class Tensor:
         return deepnet.clone(self)
 
     def zero(self):
-        self.grad = deepnet.zeros_like(self, use_grad=False)
+        self.grad = deepnet.zeros_like(self)
 
     def sum(self, dims, keepdims):
         return deepnet.sum(self, dims, keepdims)
@@ -104,15 +104,21 @@ class Tensor:
         self.in_dual = in_dual
 
     def __repr__(self) -> str:
-        rep = f"tensor({self.data}"
+        base = repr(self.data)
+        name = "tensor" if self.ndim() else "scalar" 
+        rep = base.replace("array", name).replace(")", "")
+        if ", dtype" in rep:
+            start = rep.index(", dtype")
+            rep = rep[:start]
         if self.use_grad:
             rep += f", grad_fn={self.grad_fn}"
         else:
             rep += f", dtype={self.dtype.name()}"
         if self.in_dual:
-            rep += f", in_dual=True"
+            rep += f", in_dual={self.in_dual}"
         rep += ")"
         return rep
+
 
     def __add__(self, other):
         return deepnet.add(self, other)
@@ -153,10 +159,8 @@ class Tensor:
     def __len__(self):
         return self.data.shape[0]
 
-    def __getitem__(self, indices):
-        return tensor(self.data[indices],
-                      self.use_grad, self.dtype)
-
+    def __getitem__(self, _slice):
+        return deepnet.slice(self, _slice)
 
 def tensor(data, use_grad=False, dtype=None):
     _tensor_args_check(data, use_grad, dtype)
@@ -196,8 +200,7 @@ def _make_dual_helper(tensor, tangent, inplace):
         tangent = deepnet.zeros_like(tensor)
     if inplace:
         return tensor, tangent
-    return deepnet.tensor(
-        tensor.data, use_grad=tensor.use_grad), tangent
+    return deepnet.tensor(tensor.data, use_grad=tensor.use_grad), tangent
 
 
 def _make_dual_args_check(tensor, tangent, inplace):

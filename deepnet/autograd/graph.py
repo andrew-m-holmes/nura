@@ -44,7 +44,7 @@ class AccumulateGrad:
 
 
 def _process_grad_for_accumulate(tensor, grad):
-    if tensor.dim() != grad.dim():
+    if tensor.dim() != grad.dim() and tensor.ndim() <= grad.ndim():
         dims = _get_dims_to_sum(tensor.dim(), grad.dim())
         keepdims = tensor.ndim() == grad.ndim()
         return np.sum(grad.data, axis=dims, keepdims=keepdims)
@@ -68,14 +68,15 @@ def _pass_to_graph(context, output):
 
 
 def _pass_for_forward_ad(context, output):
-    _forward_ad_context_check(context)
+    # _forward_ad_context_check(context)
     tangent_out = context.apply_jvp()
     output._set_dual_state(tangent_out, True)
     return output
 
 
-def _forward_ad_context_check(context):
-    assert all(tensor.in_dual for tensor in context.saved_tensors())
+# def _forward_ad_context_check(context):
+    # TODO how should we handle non-tensors in forward ad? should we be band from using reverse ad in forward ad?
+    # assert any(tensor.in_dual for tensor in context.saved_tensors())
 
 
 def _pass_for_reverse_ad(context, output):

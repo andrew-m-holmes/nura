@@ -76,9 +76,9 @@ def preprocess_to_tensors(*items):
 def to_contiguous(tensor):
     if is_contiguous(tensor):
         return tensor
-    # TODO should this be inplace?
-    tensor.data = np.ascontiguousarray(tensor.data)
-    return tensor
+    contiguous_tensor = tensor.clone()
+    contiguous_tensor.data = np.ascontiguousarray(tensor.data)
+    return contiguous_tensor
 
 
 def is_contiguous(tensor):
