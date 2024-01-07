@@ -2,6 +2,7 @@ import numpy as np
 import deepnet
 import deepnet.functional as f
 
+
 def test_add_jvp_scalar():
     a = np.random.rand()
     b = np.random.rand()
@@ -17,6 +18,7 @@ def test_add_jvp_scalar():
     expected = expected_a + expected_b
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+
 
 def test_add_jvp_vector():
     a = np.random.rand(5)
@@ -34,6 +36,7 @@ def test_add_jvp_vector():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_add_jvp_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -49,6 +52,7 @@ def test_add_jvp_matrix():
     expected = expected_a + expected_b
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+
 
 def test_sub_jvp_scalar():
     a = np.random.rand()
@@ -66,6 +70,7 @@ def test_sub_jvp_scalar():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_sub_jvp_vector():
     a = np.random.rand(5)
     b = np.random.rand(5)
@@ -81,6 +86,7 @@ def test_sub_jvp_vector():
     expected = expected_a + expected_b
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+
 
 def test_sub_jvp_matrix():
     a = np.random.rand(3, 3)
@@ -98,6 +104,7 @@ def test_sub_jvp_matrix():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_mul_jvp_scalar():
     a = np.random.rand()
     b = np.random.rand()
@@ -113,6 +120,7 @@ def test_mul_jvp_scalar():
     expected = expected_a + expected_b
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
+
 
 def test_mul_jvp_vector():
     a = np.random.rand(5)
@@ -130,6 +138,7 @@ def test_mul_jvp_vector():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_mul_jvp_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -146,9 +155,10 @@ def test_mul_jvp_matrix():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_div_jvp_scalar():
-    a = np.random.rand()   
-    b = np.random.rand() 
+    a = np.random.rand()
+    b = np.random.rand()
 
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(1.))
     b_tensor = deepnet.tensor(b).dual(deepnet.tensor(1.))
@@ -162,9 +172,10 @@ def test_div_jvp_scalar():
     np.testing.assert_allclose(
         result_tensor.tangent.data, expected, rtol=1e-5, atol=1e-5)
 
+
 def test_div_jvp_vector():
-    a = np.random.rand(5) 
-    b = np.random.rand(5) 
+    a = np.random.rand(5)
+    b = np.random.rand(5)
 
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
     b_tensor = deepnet.tensor(b).dual(deepnet.tensor(np.ones(5)))
@@ -198,6 +209,7 @@ def test_div_jvp_matrix():
 # Using symbolic differentiaton as numeric differentiation, gives
 # unwanted results
 
+
 def test_matmul_jvp_square_matrices():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -207,8 +219,11 @@ def test_matmul_jvp_square_matrices():
     with deepnet.forward_ad():
         result_tensor = f.matmul(a_tensor, b_tensor)
 
-    expected_tangent = np.matmul(a, np.ones((3, 3))) + np.matmul(np.ones((3, 3)), b)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    expected_tangent = np.matmul(a, np.ones(
+        (3, 3))) + np.matmul(np.ones((3, 3)), b)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_matmul_jvp_different_shapes():
     a = np.random.rand(4, 3)
@@ -219,8 +234,10 @@ def test_matmul_jvp_different_shapes():
     with deepnet.forward_ad():
         result_tensor = f.matmul(a_tensor, b_tensor)
 
-    expected_tangent = np.matmul(a, np.ones((3, 5))) + np.matmul(np.ones((4, 3)), b)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    expected_tangent = np.matmul(a, np.ones(
+        (3, 5))) + np.matmul(np.ones((4, 3)), b)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
 
 
 def test_matmul_jvp_higher_rank_same_shape():
@@ -232,8 +249,11 @@ def test_matmul_jvp_higher_rank_same_shape():
     with deepnet.forward_ad():
         result_tensor = f.matmul(a_tensor, b_tensor)
 
-    expected_tangent = np.matmul(a, np.ones((2, 3, 4, 4))) + np.matmul(np.ones((2, 3, 4, 4)), b)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    expected_tangent = np.matmul(a, np.ones(
+        (2, 3, 4, 4))) + np.matmul(np.ones((2, 3, 4, 4)), b)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_matmul_jvp_higher_rank_different_shape():
     a = np.random.rand(2, 4, 3)
@@ -244,8 +264,11 @@ def test_matmul_jvp_higher_rank_different_shape():
     with deepnet.forward_ad():
         result_tensor = f.matmul(a_tensor, b_tensor)
 
-    expected_tangent = np.matmul(a, np.ones((2, 3, 5))) + np.matmul(np.ones((2, 4, 3)), b)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    expected_tangent = np.matmul(a, np.ones(
+        (2, 3, 5))) + np.matmul(np.ones((2, 4, 3)), b)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_pow_jvp_scalar():
     a = np.random.rand()
@@ -260,7 +283,9 @@ def test_pow_jvp_scalar():
     expected_tangent_a = ((a + h) ** b - (a - h) ** b) / (2 * h)
     expected_tangent_b = (a ** (b + h) - a ** (b - h)) / (2 * h)
     expected_tangent = expected_tangent_a + expected_tangent_b
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_pow_jvp_vector():
     a = np.random.rand(4)
@@ -275,7 +300,9 @@ def test_pow_jvp_vector():
     expected_tangent_a = ((a + h) ** b - (a - h) ** b) / (2 * h)
     expected_tangent_b = (a ** (b + h) - a ** (b - h)) / (2 * h)
     expected_tangent = expected_tangent_a + expected_tangent_b
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_pow_jvp_matrix():
     a = np.random.rand(3, 3)
@@ -290,7 +317,9 @@ def test_pow_jvp_matrix():
     expected_tangent_a = ((a + h) ** b - (a - h) ** b) / (2 * h)
     expected_tangent_b = (a ** (b + h) - a ** (b - h)) / (2 * h)
     expected_tangent = expected_tangent_a + expected_tangent_b
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_pow_jvp_vector_exp():
     a = np.random.rand(4)
@@ -305,7 +334,9 @@ def test_pow_jvp_vector_exp():
     expected_tangent_a = ((a + h) ** b - (a - h) ** b) / (2 * h)
     expected_tangent_b = (a ** (b + h) - a ** (b - h)) / (2 * h)
     expected_tangent = expected_tangent_a + expected_tangent_b
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_pow_jvp_matrix_exp():
     a = np.random.rand(3, 3)
@@ -320,7 +351,9 @@ def test_pow_jvp_matrix_exp():
     expected_tangent_a = ((a + h) ** b - (a - h) ** b) / (2 * h)
     expected_tangent_b = (a ** (b + h) - a ** (b - h)) / (2 * h)
     expected_tangent = expected_tangent_a + expected_tangent_b
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_exp_jvp_scalar():
     a = np.random.rand()
@@ -331,7 +364,9 @@ def test_exp_jvp_scalar():
 
     h = 1e-8
     expected_tangent = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_exp_jvp_vector():
     a = np.random.rand(5)
@@ -342,7 +377,9 @@ def test_exp_jvp_vector():
 
     h = 1e-8
     expected_tangent = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_exp_jvp_matrix():
     a = np.random.rand(3, 4)
@@ -353,7 +390,9 @@ def test_exp_jvp_matrix():
 
     h = 1e-8
     expected_tangent = (np.exp(a + h) - np.exp(a - h)) / (2 * h)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_log_jvp_scalar():
     a = np.random.rand()
@@ -364,7 +403,9 @@ def test_log_jvp_scalar():
 
     h = 1e-8
     expected_tangent = ((np.log(a + h) - np.log(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_log_jvp_vector():
     a = np.random.rand(5)
@@ -375,7 +416,9 @@ def test_log_jvp_vector():
 
     h = 1e-8
     expected_tangent = ((np.log(a + h) - np.log(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_log_jvp_matrix():
     a = np.random.rand(3, 4)
@@ -386,7 +429,9 @@ def test_log_jvp_matrix():
 
     h = 1e-8
     expected_tangent = ((np.log(a + h) - np.log(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sine_jvp_scalar():
     a = np.random.rand()
@@ -395,7 +440,9 @@ def test_sine_jvp_scalar():
         result_tensor = f.sine(a_tensor)
     h = 1e-8
     expected_tangent = ((np.sin(a + h) - np.sin(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sine_jvp_vector():
     a = np.random.rand(4)
@@ -404,7 +451,9 @@ def test_sine_jvp_vector():
         result_tensor = f.sine(a_tensor)
     h = 1e-8
     expected_tangent = ((np.sin(a + h) - np.sin(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sine_jvp_matrix():
     a = np.random.rand(3, 3)
@@ -413,7 +462,9 @@ def test_sine_jvp_matrix():
         result_tensor = f.sine(a_tensor)
     h = 1e-8
     expected_tangent = ((np.sin(a + h) - np.sin(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_cosine_jvp_scalar():
     a = np.random.rand()
@@ -422,7 +473,9 @@ def test_cosine_jvp_scalar():
         result_tensor = f.cosine(a_tensor)
     h = 1e-8
     expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_cosine_jvp_vector():
     a = np.random.rand(4)
@@ -431,7 +484,9 @@ def test_cosine_jvp_vector():
         result_tensor = f.cosine(a_tensor)
     h = 1e-8
     expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_cosine_jvp_matrix():
     a = np.random.rand(4, 4)
@@ -440,7 +495,9 @@ def test_cosine_jvp_matrix():
         result_tensor = f.cosine(a_tensor)
     h = 1e-8
     expected_tangent = ((np.cos(a + h) - np.cos(a - h)) / (2 * h))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sum_jvp_single_dim():
     a = np.random.rand(3, 4)
@@ -448,7 +505,9 @@ def test_sum_jvp_single_dim():
     with deepnet.forward_ad():
         result_tensor = deepnet.sum(a_tensor, dims=1)
     expected_tangent = np.sum(np.ones((3, 4)), axis=1)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sum_jvp_multiple_dim():
     a = np.random.rand(3, 4, 5)
@@ -456,7 +515,9 @@ def test_sum_jvp_multiple_dim():
     with deepnet.forward_ad():
         result_tensor = deepnet.sum(a_tensor, dims=(1, 2))
     expected_tangent = np.sum(np.ones((3, 4, 5)), axis=(1, 2))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sum_jvp_keepdims():
     a = np.random.rand(3, 4)
@@ -464,7 +525,9 @@ def test_sum_jvp_keepdims():
     with deepnet.forward_ad():
         result_tensor = deepnet.sum(a_tensor, dims=1, keepdims=True)
     expected_tangent = np.sum(np.ones((3, 4)), axis=1, keepdims=True)
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sum_jvp_higher_rank_tensor():
     a = np.random.rand(2, 3, 4, 5)
@@ -472,7 +535,9 @@ def test_sum_jvp_higher_rank_tensor():
     with deepnet.forward_ad():
         result_tensor = deepnet.sum(a_tensor, dims=(1, 3))
     expected_tangent = np.sum(np.ones((2, 3, 4, 5)), axis=(1, 3))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_sum_jvp_single_element_rank1():
     a = np.random.rand(1)
@@ -480,7 +545,9 @@ def test_sum_jvp_single_element_rank1():
     with deepnet.forward_ad():
         result_tensor = deepnet.sum(a_tensor)
     expected_tangent = np.sum(np.ones(1))
-    np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        result_tensor.tangent.data, expected_tangent, rtol=1e-5, atol=1e-5)
+
 
 def test_squeeze_jvp_rank1_v0():
     a = np.random.rand(1)
@@ -492,6 +559,7 @@ def test_squeeze_jvp_rank1_v0():
     expected_tangent = np.squeeze(np.ones(1))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_squeeze_jvp_rank1_v1():
     a = np.random.rand(5)
 
@@ -501,6 +569,7 @@ def test_squeeze_jvp_rank1_v1():
 
     expected_tangent = np.squeeze(np.ones(5))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_squeeze_jvp_rank2_v0():
     a = np.random.rand(5, 5)
@@ -512,6 +581,7 @@ def test_squeeze_jvp_rank2_v0():
     expected_tangent = np.squeeze(np.ones((5, 5)))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_squeeze_jvp_rank2_v1():
     a = np.random.rand(3, 1)
 
@@ -521,6 +591,7 @@ def test_squeeze_jvp_rank2_v1():
 
     expected_tangent = np.squeeze(np.ones((3, 1)))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_squeeze_jvp_multi_v0():
     a = np.random.rand(2, 1, 4, 1, 5)
@@ -532,15 +603,18 @@ def test_squeeze_jvp_multi_v0():
     expected_tangent = np.squeeze(np.ones((2, 1, 4, 1, 5)))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_squeeze_jvp_multi_v1():
     a = np.random.rand(1, 1, 1, 1, 1, 50, 1)
 
-    a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((1, 1, 1, 1, 1, 50, 1))))
+    a_tensor = deepnet.tensor(a).dual(
+        deepnet.tensor(np.ones((1, 1, 1, 1, 1, 50, 1))))
     with deepnet.forward_ad():
         result_tensor = deepnet.squeeze(a_tensor)
 
     expected_tangent = np.squeeze(np.ones((1, 1, 1, 1, 1, 50, 1)))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_squeeze_jvp_multi_v2():
     a = np.random.rand(3, 3, 1, 7)
@@ -552,6 +626,7 @@ def test_squeeze_jvp_multi_v2():
     expected_tangent = np.squeeze(np.ones((3, 3, 1, 7)))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_unsqueeze_jvp_multi_v0():
     a = np.random.rand(3, 4, 5)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 4, 5))))
@@ -560,6 +635,7 @@ def test_unsqueeze_jvp_multi_v0():
 
     expected_tangent = np.expand_dims(np.ones((3, 4, 5)), axis=(0, 2))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_unsqueeze_jvp_multi_v1():
     a = np.random.rand(2, 3)
@@ -570,6 +646,7 @@ def test_unsqueeze_jvp_multi_v1():
     expected_tangent = np.expand_dims(np.ones((2, 3)), axis=(1, 3, 4))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_unsqueeze_jvp_multi_v2():
     a = np.random.rand(5, 6, 7, 8)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((5, 6, 7, 8))))
@@ -578,6 +655,7 @@ def test_unsqueeze_jvp_multi_v2():
 
     expected_tangent = np.expand_dims(np.ones((5, 6, 7, 8)), axis=(0, 2, 5))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_unsqueeze_jvp_multi_v3():
     a = np.random.rand(4, 3)
@@ -588,6 +666,7 @@ def test_unsqueeze_jvp_multi_v3():
     expected_tangent = np.expand_dims(np.ones((4, 3)), axis=1)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_unsqueeze_jvp_multi_v4():
     a = np.random.rand(2, 5, 3)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 5, 3))))
@@ -596,6 +675,7 @@ def test_unsqueeze_jvp_multi_v4():
 
     expected_tangent = np.expand_dims(np.ones((2, 5, 3)), axis=(0, 3))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_transpose_jvp_multi_v0():
     a = np.random.rand(3, 4, 5)
@@ -606,6 +686,7 @@ def test_transpose_jvp_multi_v0():
     expected_tangent = np.swapaxes(np.ones((3, 4, 5)), 1, 2)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_transpose_jvp_multi_v1():
     a = np.random.rand(2, 3)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3))))
@@ -614,6 +695,7 @@ def test_transpose_jvp_multi_v1():
 
     expected_tangent = np.swapaxes(np.ones((2, 3)), 0, 1)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_transpose_jvp_multi_v2():
     a = np.random.rand(5, 6, 7, 8)
@@ -624,6 +706,7 @@ def test_transpose_jvp_multi_v2():
     expected_tangent = np.swapaxes(np.ones((5, 6, 7, 8)), 2, 3)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_transpose_jvp_multi_v3():
     a = np.random.rand(4, 3)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 3))))
@@ -632,6 +715,7 @@ def test_transpose_jvp_multi_v3():
 
     expected_tangent = np.swapaxes(np.ones((4, 3)), -1, -2)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_transpose_jvp_multi_v4():
     a = np.random.rand(2, 5, 3)
@@ -642,6 +726,7 @@ def test_transpose_jvp_multi_v4():
     expected_tangent = np.swapaxes(np.ones((2, 5, 3)), 0, 2)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_permute_jvp_rank2_v0():
     a = np.random.rand(8, 15)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((8, 15))))
@@ -650,6 +735,7 @@ def test_permute_jvp_rank2_v0():
 
     expected_tangent = np.transpose(np.ones((8, 15)))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_permute_jvp_rank3_v0():
     a = np.random.rand(4, 5, 6)
@@ -660,6 +746,7 @@ def test_permute_jvp_rank3_v0():
     expected_tangent = np.transpose(np.ones((4, 5, 6)), (1, 0, 2))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_permute_jvp_rank3_v1():
     a = np.random.rand(70, 15, 512)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((70, 15, 512))))
@@ -668,6 +755,7 @@ def test_permute_jvp_rank3_v1():
 
     expected_tangent = np.transpose(np.ones((70, 15, 512)), (2, 1, 0))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_permute_jvp_rank4_v0():
     a = np.random.rand(3, 4, 5, 6)
@@ -678,6 +766,7 @@ def test_permute_jvp_rank4_v0():
     expected_tangent = np.transpose(np.ones((3, 4, 5, 6)), (3, 2, 1, 0))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_permute_jvp_rank4_v1():
     a = np.random.rand(6, 7, 8, 9)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((6, 7, 8, 9))))
@@ -686,6 +775,7 @@ def test_permute_jvp_rank4_v1():
 
     expected_tangent = np.transpose(np.ones((6, 7, 8, 9)), (0, 3, 2, 1))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_view_jvp_rank1_to_rank2():
     a = np.random.rand(10)
@@ -696,6 +786,7 @@ def test_view_jvp_rank1_to_rank2():
     expected_tangent = np.ones(10).reshape(2, 5)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_view_jvp_rank2_to_rank3():
     a = np.random.rand(6, 4)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((6, 4))))
@@ -704,6 +795,7 @@ def test_view_jvp_rank2_to_rank3():
 
     expected_tangent = np.ones((6, 4)).reshape(2, 3, 4)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_view_jvp_rank3_to_rank4():
     a = np.random.rand(2, 3, 4)
@@ -714,6 +806,7 @@ def test_view_jvp_rank3_to_rank4():
     expected_tangent = np.ones((2, 3, 4)).reshape(2, 2, 3, 2)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_view_jvp_rank2_to_rank1():
     a = np.random.rand(4, 3)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 3))))
@@ -722,6 +815,7 @@ def test_view_jvp_rank2_to_rank1():
 
     expected_tangent = np.ones((4, 3)).reshape(12)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_view_jvp_rank3_to_rank2():
     a = np.random.rand(2, 3, 4)
@@ -732,6 +826,7 @@ def test_view_jvp_rank3_to_rank2():
     expected_tangent = np.ones((2, 3, 4)).reshape(6, 4)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_view_jvp_rank4_to_rank2():
     a = np.random.rand(2, 2, 3, 2)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 2, 3, 2))))
@@ -740,6 +835,7 @@ def test_view_jvp_rank4_to_rank2():
 
     expected_tangent = np.ones((2, 2, 3, 2)).reshape(4, 6)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_view_jvp_with_negative_dim():
     a = np.random.rand(3, 4, 5)
@@ -750,6 +846,7 @@ def test_view_jvp_with_negative_dim():
     expected_tangent = np.ones((3, 4, 5)).reshape(-1, 5)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_reshape_jvp_rank1_to_rank2():
     a = np.random.rand(12)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(12)))
@@ -758,6 +855,7 @@ def test_reshape_jvp_rank1_to_rank2():
 
     expected_tangent = np.ones(12).reshape(3, 4)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_reshape_jvp_rank2_to_rank3():
     a = np.random.rand(8, 6)
@@ -768,6 +866,7 @@ def test_reshape_jvp_rank2_to_rank3():
     expected_tangent = np.ones((8, 6)).reshape(2, 4, 6)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_reshape_jvp_rank3_to_rank4():
     a = np.random.rand(3, 2, 6)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((3, 2, 6))))
@@ -776,6 +875,7 @@ def test_reshape_jvp_rank3_to_rank4():
 
     expected_tangent = np.ones((3, 2, 6)).reshape(1, 3, 4, 3)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_reshape_jvp_rank2_to_rank1():
     a = np.random.rand(5, 4)
@@ -786,6 +886,7 @@ def test_reshape_jvp_rank2_to_rank1():
     expected_tangent = np.ones((5, 4)).reshape(20)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_reshape_jvp_rank3_to_rank2():
     a = np.random.rand(2, 6, 4)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 6, 4))))
@@ -794,6 +895,7 @@ def test_reshape_jvp_rank3_to_rank2():
 
     expected_tangent = np.ones((2, 6, 4)).reshape(12, 4)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_reshape_jvp_rank4_to_rank2():
     a = np.random.rand(4, 3, 2, 2)
@@ -804,6 +906,7 @@ def test_reshape_jvp_rank4_to_rank2():
     expected_tangent = np.ones((4, 3, 2, 2)).reshape(6, 8)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_reshape_jvp_with_negative_dim():
     a = np.random.rand(4, 5, 3)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((4, 5, 3))))
@@ -812,6 +915,7 @@ def test_reshape_jvp_with_negative_dim():
 
     expected_tangent = np.ones((4, 5, 3)).reshape(-1, 15)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_clone_jvp_scalar():
     a = np.random.rand()
@@ -822,6 +926,7 @@ def test_clone_jvp_scalar():
     expected_tangent = np.ones(1)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_clone_jvp_vector():
     a = np.random.rand(5)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(5)))
@@ -830,6 +935,7 @@ def test_clone_jvp_vector():
 
     expected_tangent = np.ones(5)
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_clone_jvp_matrix():
     a = np.random.rand(4, 3)
@@ -840,6 +946,7 @@ def test_clone_jvp_matrix():
     expected_tangent = np.ones((4, 3))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_clone_jvp_higher_rank_tensor():
     a = np.random.rand(2, 3, 4)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones((2, 3, 4))))
@@ -848,6 +955,7 @@ def test_clone_jvp_higher_rank_tensor():
 
     expected_tangent = np.ones((2, 3, 4))
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_slice_jvp_single_index():
     a = np.random.rand(10)
@@ -858,6 +966,7 @@ def test_slice_jvp_single_index():
     expected_tangent = np.ones(10)[3]
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_slice_jvp_range():
     a = np.random.rand(10)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
@@ -866,6 +975,7 @@ def test_slice_jvp_range():
 
     expected_tangent = np.ones(10)[2:7]
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
+
 
 def test_slice_jvp_step():
     a = np.random.rand(10)
@@ -876,6 +986,7 @@ def test_slice_jvp_step():
     expected_tangent = np.ones(10)[1:8:2]
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_slice_jvp_negative_indices():
     a = np.random.rand(10)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
@@ -885,6 +996,7 @@ def test_slice_jvp_negative_indices():
     expected_tangent = np.ones(10)[-5:-2]
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
 
+
 def test_slice_jvp_mixed_indices():
     a = np.random.rand(10)
     a_tensor = deepnet.tensor(a).dual(deepnet.tensor(np.ones(10)))
@@ -893,7 +1005,6 @@ def test_slice_jvp_mixed_indices():
 
     expected_tangent = np.ones(10)[1:-2]
     np.testing.assert_allclose(result_tensor.tangent.data, expected_tangent)
-
 
 
 def main():
@@ -1035,13 +1146,14 @@ def main():
     test_clone_jvp_higher_rank_tensor()
 
     # Slice JVP Tests
-    
+
     test_clone_jvp_scalar()
     test_clone_jvp_vector()
     test_clone_jvp_matrix()
     test_clone_jvp_higher_rank_tensor()
 
     print("All tests passed")
+
 
 if __name__ == "__main__":
     main()

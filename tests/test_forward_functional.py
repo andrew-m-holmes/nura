@@ -275,6 +275,7 @@ def test_pow_forward_matrix_exp():
     np.testing.assert_array_almost_equal(
         result_tensor.data, expected, decimal=5)
 
+
 def test_exp_forward_scalar():
     a = np.random.rand()
 
@@ -284,6 +285,7 @@ def test_exp_forward_scalar():
     expected = np.exp(a)
     np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
 
+
 def test_exp_forward_vector():
     a = np.random.rand(4)
 
@@ -291,7 +293,9 @@ def test_exp_forward_vector():
     result_tensor = f.exp(a_tensor)
 
     expected = np.exp(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_exp_forward_matrix():
     a = np.random.rand(2, 3)
@@ -300,7 +304,9 @@ def test_exp_forward_matrix():
     result_tensor = f.exp(a_tensor)
 
     expected = np.exp(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_log_forward_scalar():
     a = np.random.rand()
@@ -311,6 +317,7 @@ def test_log_forward_scalar():
     expected = np.log(a)
     np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
 
+
 def test_log_forward_vector():
     a = np.random.rand(5)
 
@@ -318,7 +325,9 @@ def test_log_forward_vector():
     result_tensor = f.log(a_tensor)
 
     expected = np.log(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_log_forward_matrix():
     a = np.random.rand(3, 3)
@@ -327,7 +336,8 @@ def test_log_forward_matrix():
     result_tensor = f.log(a_tensor)
 
     expected = np.log(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
 
 
 def test_sine_forward_scalar():
@@ -823,6 +833,7 @@ def test_clone_forward_higher_rank_tensor():
     assert np.allclose(result_tensor.data, a_tensor.data)
     assert result_tensor.data is not a_tensor.data
 
+
 def test_slice_forward_single_index():
     a = np.random.rand(5, 5)
 
@@ -830,7 +841,9 @@ def test_slice_forward_single_index():
     result_tensor = a_tensor[2, :]
 
     expected = a[2, :]
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_slice_forward_range():
     a = np.random.rand(10, 10)
@@ -839,7 +852,9 @@ def test_slice_forward_range():
     result_tensor = a_tensor[2:5, 3:7]
 
     expected = a[2:5, 3:7]
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_slice_forward_step():
     a = np.random.rand(8, 8)
@@ -848,7 +863,9 @@ def test_slice_forward_step():
     result_tensor = a_tensor[::2, ::3]
 
     expected = a[::2, ::3]
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_slice_forward_negative_indices():
     a = np.random.rand(6, 6)
@@ -857,7 +874,9 @@ def test_slice_forward_negative_indices():
     result_tensor = a_tensor[-3:, -3:]
 
     expected = a[-3:, -3:]
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
+
 
 def test_slice_forward_mixed_indices():
     a = np.random.rand(7, 7)
@@ -866,7 +885,8 @@ def test_slice_forward_mixed_indices():
     result_tensor = a_tensor[1:5, -3]
 
     expected = a[1:5, -3]
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(
+        result_tensor.data, expected, decimal=5)
 
 
 def main():
