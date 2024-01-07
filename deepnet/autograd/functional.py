@@ -114,6 +114,8 @@ def _jvp_args_check(primals, tangents, func, use_graph):
 
 def grad(inputs, output, output_grad=None):
     _grad_args_check(inputs, output, output_grad)
+    if deepnet.is_tensor(inputs):
+        inputs = (inputs,)
     if output_grad is None:
         output_grad = deepnet.ones_like(output)
     grad_map = {tensor: deepnet.zeros_like(tensor) for tensor in inputs}
