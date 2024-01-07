@@ -379,6 +379,7 @@ def test_jvp_sine_permute_sum_broadcast():
     for primal in primals:
         assert primal.grad is not None
 
+
 def test_grad_add_sub():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -457,6 +458,49 @@ def test_grad_nested_operations_broadcast():
 
     for primal, partial_derivative in zip((a_tensor, b_tensor), partial_derivatives):
         assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_cos_scalar():
+    a = np.random.rand()
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = f.cosine(a_tensor)
+
+    partial_derivatives = grad(a_tensor, result_tensor) 
+    result_tensor.backward()
+
+    assert np.allclose(a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_sin_vector():
+    a = np.random.rand(5)
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = f.sine(a_tensor)
+
+    partial_derivatives = grad(a_tensor, result_tensor, deepnet.ones_like(result_tensor))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    assert np.allclose(a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_div_large_tensor():
+    a = np.random.rand(4, 4)
+    b = np.random.rand(4, 4) 
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    b_tensor = deepnet.tensor(b, use_grad=True)
+    result_tensor = f.div(a_tensor, b_tensor)
+
+    partial_derivatives = grad((a_tensor, b_tensor), result_tensor, deepnet.ones_like(result_tensor))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    for primal, partial_derivative in zip((a_tensor, b_tensor), partial_derivatives):
+        assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_permute_complex_tensor():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    result_tensor = deepnet.permute(a_tensor, (2, 0, 1))
+
+    partial_derivatives = grad(a_tensor, result_tensor, deepnet.ones_like(result_tensor))
+    result_tensor.backward(deepnet.ones_like(result_tensor))
+
+    assert np.allclose(a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5)
 
 
 def main():
