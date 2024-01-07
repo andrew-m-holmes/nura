@@ -133,11 +133,15 @@ def grad(inputs, output, output_grad=None):
             next_nodes, next_grads = _process_node(node, curr_grad)
             for next_node, next_grad in zip(next_nodes, next_grads):
                 stack.append((next_node, next_grad))
-    return tuple(grad_map.values())
+    return _grad_post_process(grad_map.values())
 
+def _grad_post_process(grads):
+    if len(grads) == 1:
+        return list(grads)[0]
+    return grads
 
 def _grad_args_check(inputs, output, output_grad):
-    assert deepnet.is_all_tensor(*inputs)
+    assert deepnet.is_tensor(inputs) or deepnet.is_all_tensor(*inputs) 
     assert deepnet.is_tensor(output)
     assert all(tensor.dtype.differentiable() for tensor in inputs) 
     assert output.dtype.differentiable()
