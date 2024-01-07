@@ -112,12 +112,11 @@ def _jvp_args_check(primals, tangents, func, use_graph):
     assert all(tangent.dtype.differentiable() for tangent in tangents)
 
 
-
 def grad(inputs, output, output_grad=None):
     _grad_args_check(inputs, output, output_grad)
     if output_grad is None:
         output_grad = deepnet.ones_like(output)
-    grad_map = {tensor: deepnet.ones_like(tensor) for tensor in inputs}
+    grad_map = {tensor: deepnet.zeros_like(tensor) for tensor in inputs}
     stack = [(output.grad_fn, output_grad)]
 
     while stack:
@@ -136,7 +135,7 @@ def grad(inputs, output, output_grad=None):
 
 
 def _grad_args_check(inputs, output, output_grad):
-    assert deepnet.is_all_tensor(inputs)
+    assert deepnet.is_all_tensor(*inputs)
     assert deepnet.is_tensor(output)
     assert all(tensor.dtype.differentiable() for tensor in inputs) 
     assert output.dtype.differentiable()
@@ -166,9 +165,8 @@ def _is_intermediate_node(node):
     return False
 
 def _accumulate_grad(grad_0, grad_1):
-    with deepnet.no_grad():
-        return deepnet.add(grad_0, grad_1)
-
+    grad_0.data += grad_1.data
+    return grad_0
 
 def _reduce_sum_grad(tensor, grad):
     padded_dim = np.pad(tensor.dim(), pad_width=(grad.ndim() - tensor.ndim(), 0), constant_values=0)
