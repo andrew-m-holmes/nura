@@ -1,6 +1,6 @@
 import deepnet
 import deepnet.functional as f
-from deepnet.autograd.functional import vjp, jvp
+from deepnet.autograd.functional import vjp, jvp, grad
 import numpy as np
 
 
@@ -379,6 +379,85 @@ def test_jvp_sine_permute_sum_broadcast():
     for primal in primals:
         assert primal.grad is not None
 
+def test_grad_add_sub():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3, 3)
+    c = np.random.rand(3, 3)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    b_tensor = deepnet.tensor(b, use_grad=True)
+    c_tensor = deepnet.tensor(c, use_grad=True)
+    result_tensor = f.sub(f.add(a_tensor, b_tensor), c_tensor)
+
+    output_grad = deepnet.ones_like(result_tensor)
+    partial_derivatives = grad((a_tensor, b_tensor, c_tensor), result_tensor, output_grad)
+    result_tensor.backward(output_grad)
+
+    for primal, partial_derivative in zip((a_tensor, b_tensor, c_tensor), partial_derivatives):
+        assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_mul_div():
+    a = np.random.rand(2, 2)
+    b = np.random.rand(2, 2)
+    c = np.random.rand(2, 2)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    b_tensor = deepnet.tensor(b, use_grad=True)
+    c_tensor = deepnet.tensor(c, use_grad=True)
+    result_tensor = f.div(f.mul(a_tensor, b_tensor), c_tensor)
+
+    output_grad = deepnet.ones_like(result_tensor) 
+    partial_derivatives = grad((a_tensor, b_tensor, c_tensor), result_tensor, output_grad)
+    result_tensor.backward(output_grad)
+
+    for primal, partial_derivative in zip((a_tensor, b_tensor, c_tensor), partial_derivatives):
+        assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_matmul_sum():
+    a = np.random.rand(2, 3)
+    b = np.random.rand(3, 2)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    b_tensor = deepnet.tensor(b, use_grad=True)
+    result_tensor = f.sum(f.matmul(a_tensor, b_tensor), dims=0)
+
+    output_grad = deepnet.ones_like(result_tensor) 
+    partial_derivatives = grad((a_tensor, b_tensor), result_tensor, output_grad)
+    result_tensor.backward(output_grad)
+
+    for primal, partial_derivative in zip((a_tensor, b_tensor), partial_derivatives):
+        assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_add_mul_broadcast():
+    a = np.random.rand(2, 4)
+    b = np.random.rand(4,)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    b_tensor = deepnet.tensor(b, use_grad=True)
+    result_tensor = f.mul(f.add(a_tensor, b_tensor), b_tensor)
+
+    output_grad = deepnet.ones_like(result_tensor) 
+    partial_derivatives = grad((a_tensor, b_tensor), result_tensor, output_grad)
+    result_tensor.backward(output_grad)
+
+    for primal, partial_derivative in zip((a_tensor, b_tensor), partial_derivatives):
+        assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
+def test_grad_nested_operations_broadcast():
+    a = np.random.rand(3, 3)
+    b = np.random.rand(3,)
+
+    a_tensor = deepnet.tensor(a, use_grad=True)
+    b_tensor = deepnet.tensor(b, use_grad=True)
+
+    result_tensor = f.cosine(f.div(f.add(a_tensor, b_tensor), f.sine(b_tensor)))
+    output_grad = deepnet.ones_like(result_tensor) 
+    partial_derivatives = grad((a_tensor, b_tensor), result_tensor, output_grad)
+    result_tensor.backward(output_grad)
+
+    for primal, partial_derivative in zip((a_tensor, b_tensor), partial_derivatives):
+        assert np.allclose(primal.grad.data, partial_derivative.data, rtol=1e-5, atol=1e-5)
+
 
 def main():
 
@@ -415,6 +494,14 @@ def main():
     test_jvp_add_mul_broadcast()
     test_jvp_nested_operations_broadcast()
     test_jvp_sine_permute_sum_broadcast()
+
+    # Grad Tests
+
+    test_grad_add_sub()
+    test_grad_mul_div()
+    test_grad_matmul_sum()
+    test_grad_add_mul_broadcast()
+    test_grad_nested_operations_broadcast()
 
     print("All tests passed")
 
