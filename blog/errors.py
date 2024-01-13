@@ -2,22 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def f(x):
-    return np.power(x, 2)  
+    return (x - 10) ** 2 * (3 * x ** 2 - 3 * x + 1) 
 
 def df(x):
-    return 2 * x
-
-def f(x):
-    return 64 * x * (1 - x) * (1 - 2*x)**2 * (1 - 8*x + 8*x**2)**2
-
-def df(x):
-    return (64*x*(1 - 2*x)**2*(1 - x)*(32*x - 16)*(8*x**2 - 8*x + 1) - 
-            64*x*(1 - 2*x)**2*(8*x**2 - 8*x + 1)**2 + 
-            64*x*(1 - x)*(8*x - 4)*(8*x**2 - 8*x + 1)**2 + 
-            64*(1 - 2*x)**2*(1 - x)*(8*x**2 - 8*x + 1)**2)
+    return 2 * (x - 10) * (3 * x ** 2 - 3 * x + 1) +  (x - 10) ** 2 * (6 * x - 3)
 
 x0 = 2.
-hs = np.logspace(-7, 0, 100).astype(np.float32)  
+hs = np.logspace(-7, 0, 30).astype(np.float32)  
 
 true_grad = df(x0)
 forward_grad = (f(x0 + hs) - f(x0)) / hs
@@ -26,8 +17,10 @@ central_difference_error = abs(true_grad - central_grad)
 forward_difference_error = abs(true_grad - forward_grad)
 
 plt.style.use("dark_background")
-plt.loglog(hs, central_difference_error, label="Central Difference")
-plt.loglog(hs, forward_difference_error, label="Forward Difference\nDerivative")
+plt.loglog(hs, central_difference_error, "o", label="Central Difference", color="dodgerblue")
+plt.loglog(hs, forward_difference_error, "o", label="Forward Difference", color="red")
+plt.text(1.75e-6, 0.1, "Round-off")
+plt.text(5e-3, 0.1, "Truncation")
 plt.xlabel("h")
 plt.ylabel("Error")
 plt.axhline(0, color="white")  
