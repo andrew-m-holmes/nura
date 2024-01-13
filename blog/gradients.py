@@ -28,7 +28,7 @@ def main():
 
     plt.style.use("dark_background")
     plt.plot(x, y, label="cos(x)", color="dodgerblue")
-    plt.plot(x, true_tangent, label="-sin(x)", color="red")
+    plt.plot(x, true_tangent, label=f"Gradient", color="red")
     plt.plot(x, forward_tangent, label="Forward Difference", color="aquamarine")
     plt.plot(x, central_tangent, label="Central Difference", color="blueviolet")
     plt.legend()
