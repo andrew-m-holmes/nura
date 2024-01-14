@@ -153,19 +153,41 @@ def _grad_args_check(inputs, output, output_grad):
 
 
 def jac(inputs, func, *func_args, use_graph=False):
-        tensor = inputs[0]
-        for i in range(tensor.ndim()):
-            pass
+    index = _get_tensor_of_interest_index(inputs)
+    perturbations = _get_perturbations(inputs[index])
+    tangents = _get_tangents(inputs, index)
+    for perturb in perturbations:
+        tangents[index] = perturb
+        output, jaccol = jvp(inputs, tuple(tangents), func, *func_args, use_graph=use_graph)
+        print(jaccol)
 
-def _get_perturbations(tensor):
-    dim = tensor.dim()
+def _get_tangents(inputs, index):
     tangents = []
+    for i, tensor in enumerate(inputs):
+        if i != index:
+            tangents.append(deepnet.ones_like(tensor))
+        else: 
+            tangents.append(None)
+    return tangents
+
+def _get_tensor_of_interest_index(inputs):
+    if deepnet.is_tensor(inputs):
+        return 0
+    tensor_of_interest = max(inputs, key=lambda tensor: tensor.ndim())
+    for index, tensor in enumerate(inputs):
+        if tensor is tensor_of_interest:
+            return index
+
+def _get_perturbations(tensor_of_interest):
+    dim = tensor_of_interest.dim()
+    perturbations = []
     for index in np.ndindex(dim):
         zeros = np.zeros(dim)
         zeros[index] = 1
-        tangent = deepnet.tensor(zeros, dtype=tensor.dtype)
-        tangents.append(tangent)
-    return tangents
+        perturbation = deepnet.tensor(zeros, dtype=tensor_of_interest.dtype)
+        perturbations.append(perturbation)
+    return perturbations
+
 
 def _process_node(node, grad):
     next_grads = node.context.apply(grad)
