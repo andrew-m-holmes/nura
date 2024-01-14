@@ -94,6 +94,7 @@ class Div(Function):
         return tan_out
 
 
+# TODO needs tests
 class Dot(Function):
 
     @staticmethod
