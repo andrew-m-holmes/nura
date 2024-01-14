@@ -5,6 +5,7 @@ from deepnet import Tensor
 
 
 def zeros(dim, use_grad=False, dtype=None):
+    dim = preprocess_dim(dim)
     zero_arr = np.zeros(dim)
     return deepnet.tensor(zero_arr, use_grad, dtype)
 
@@ -16,6 +17,7 @@ def zeros_like(tensor, use_grad=False, dtype=None):
 
 
 def ones(dim, use_grad=False, dtype=None):
+    dim = preprocess_dim(dim)
     ones_arr = np.ones(dim)
     return deepnet.tensor(ones_arr, use_grad, dtype)
 
@@ -27,20 +29,19 @@ def ones_like(tensor, use_grad=False, dtype=None):
 
 
 def randn(dim=None, use_grad=False, dtype=None):
-    if dim is None:
-        dim = ()
+    dim = preprocess_dim(dim)
     randn_arr = np.random.randn(*dim)
     return deepnet.tensor(randn_arr, use_grad, dtype)
 
 
 def rand(dim=None, use_grad=False, dtype=None):
-    if dim is None:
-        dim = ()
+    dim = preprocess_dim(dim)
     rand_arr = np.random.rand(*dim)
     return deepnet.tensor(rand_arr, use_grad, dtype)
 
 
 def randint(low, high, dim, dtype=None):
+    dim = preprocess_dim(dim)
     randint_arr = np.random.randint(low, high, dim)
     return deepnet.tensor(randint_arr, dtype)
 
@@ -51,16 +52,9 @@ def identity(n, use_grad=False, dtype=None):
 
 
 def full(dim, num, use_grad=False, dtype=None):
+    dim = preprocess_dim(dim)
     data = np.full(dim, num)
     return deepnet.tensor(data, use_grad, dtype)
-
-
-def is_all_tensor(*items):
-    return all(is_tensor(item) for item in items)
-
-
-def is_tensor(item):
-    return isinstance(item, Tensor)
 
 
 def preprocess_to_tensors(*items):
@@ -71,7 +65,14 @@ def preprocess_to_tensors(*items):
             item, Tensor) else item for item in items)
     return processed_items if len(
         processed_items) > 1 else processed_items[0]
+    
 
+def preprocess_dim(dim):
+    if dim is None:
+        return tuple()
+    if is_py_scalar(dim):
+        dim = (dim,)
+    return dim
 
 def to_contiguous(tensor):
     if is_contiguous(tensor):
@@ -79,6 +80,13 @@ def to_contiguous(tensor):
     contiguous_tensor = tensor.clone()
     contiguous_tensor.data = np.ascontiguousarray(tensor.data)
     return contiguous_tensor
+
+def is_all_tensor(*items):
+    return all(is_tensor(item) for item in items)
+
+
+def is_tensor(item):
+    return isinstance(item, Tensor)
 
 
 def is_contiguous(tensor):
