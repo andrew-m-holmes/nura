@@ -32,9 +32,11 @@ def dot(a, b):
     out = funcs.Dot.apply(a, b)
     return out
 
+
 def _dot_args_check(a, b):
     assert a.dim() == b.dim()
     assert a.ndim() == b.ndim() == 1
+
 
 def matmul(a, b):
     assert utils.is_all_tensor(a, b)
@@ -56,15 +58,18 @@ def pow(a, b):
     out = funcs.Pow.apply(a, b)
     return out
 
+
 def exp(a):
     a = utils.preprocess_to_tensors(a)
     out = funcs.Exp.apply(a)
     return out
 
+
 def log(a):
     a = utils.preprocess_to_tensors(a)
     out = funcs.Log.apply(a)
     return out
+
 
 def sine(a):
     a = utils.preprocess_to_tensors(a)
@@ -166,6 +171,7 @@ def clone(a):
     assert utils.is_tensor(a)
     out = funcs.Clone.apply(a)
     return out
+
 
 def slice(a, _slice):
     assert utils.is_tensor(a)

@@ -71,7 +71,6 @@ def _vjp_args_check(primals, cotangent, func, use_graph):
     assert cotangent.dtype.differentiable()
 
 
-
 def jvp(primals, tangents, func, *func_args, use_graph=False):
     _jvp_args_check(primals, tangents, func, use_graph)
     primals = _jvp_preprocess_primals(primals, tangents, use_graph)
@@ -94,8 +93,8 @@ def _jvp_preprocess_primals(primals, tangents, use_graph):
     for primal, tangent in zip(tmp, tangents):
         if not use_graph:
             primal = primal.clone().detach()
-        primal._set_grad_state(use_grad=use_graph,grad_fn=None,is_leaf=True)
-        tangent._set_grad_state(use_grad=False,grad_fn=None,is_leaf=True)
+        primal._set_grad_state(use_grad=use_graph, grad_fn=None, is_leaf=True)
+        tangent._set_grad_state(use_grad=False, grad_fn=None, is_leaf=True)
         primal._set_dual_state(tangent, in_dual=True)
         primals.append(primal)
     return primals
@@ -105,7 +104,8 @@ def _jvp_args_check(primals, tangents, func, use_graph):
     assert deepnet.is_all_tensor(*primals)
     assert deepnet.is_all_tensor(*tangents)
     assert len(primals) == len(tangents)
-    assert all(primal.dim() == tangent.dim() for primal, tangent in zip(primals, tangents))
+    assert all(primal.dim() == tangent.dim()
+               for primal, tangent in zip(primals, tangents))
     assert isinstance(func, FunctionType)
     assert deepnet.is_py_bool(use_graph)
     assert all(tensor.dtype.differentiable() for tensor in primals)
@@ -135,15 +135,17 @@ def grad(inputs, output, output_grad=None):
                 stack.append((next_node, next_grad))
     return _grad_post_process(grad_map.values())
 
+
 def _grad_post_process(grads):
     if len(grads) == 1:
         return list(grads)[0]
     return grads
 
+
 def _grad_args_check(inputs, output, output_grad):
-    assert deepnet.is_tensor(inputs) or deepnet.is_all_tensor(*inputs) 
+    assert deepnet.is_tensor(inputs) or deepnet.is_all_tensor(*inputs)
     assert deepnet.is_tensor(output)
-    assert all(tensor.dtype.differentiable() for tensor in inputs) 
+    assert all(tensor.dtype.differentiable() for tensor in inputs)
     assert output.dtype.differentiable()
     if output.nelem() > 1:
         assert output_grad is not None
@@ -153,6 +155,7 @@ def _grad_args_check(inputs, output, output_grad):
     assert all(tensor.use_grad for tensor in inputs)
     assert output.use_grad
     assert output.grad_fn is not None
+
 
 def _process_node(node, grad):
     next_grads = node.context.apply(grad)
@@ -170,12 +173,15 @@ def _is_intermediate_node(node):
         return "Backward" in repr(node)
     return False
 
+
 def _accumulate_grad(grad_0, grad_1):
     grad_0.data += grad_1.data
     return grad_0
 
+
 def _reduce_sum_grad(tensor, grad):
-    padded_dim = np.pad(tensor.dim(), pad_width=(grad.ndim() - tensor.ndim(), 0), constant_values=0)
+    padded_dim = np.pad(tensor.dim(), pad_width=(
+        grad.ndim() - tensor.ndim(), 0), constant_values=0)
     mask = padded_dim != np.array(grad.dim())
     dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
     keepdims = tensor.ndim() == grad.ndim()
@@ -189,4 +195,3 @@ def _broadcast_to_match(tensor, grad):
         grad = deepnet.tensor(
             np.broadcast_to(grad.data, tensor.dim()))
     return grad
-

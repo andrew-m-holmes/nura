@@ -42,7 +42,7 @@ class Sub(Function):
     def jvp(context: Context):
         a, b = context.saved_tensors()
         tan_b = np.negative(b.tangent.data)
-        tan_out = deepnet.tensor(a.tangent.data + tan_b) 
+        tan_out = deepnet.tensor(a.tangent.data + tan_b)
         return tan_out
 
 
@@ -93,6 +93,7 @@ class Div(Function):
         tan_out = deepnet.tensor(tan_a + tan_b)
         return tan_out
 
+
 class Dot(Function):
 
     @staticmethod
@@ -104,8 +105,8 @@ class Dot(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
-        grad_a = deepnet.tensor(np.dot(grad.data, b.data)) 
-        grad_b = deepnet.tensor(np.dot(a.data, grad.data)) 
+        grad_a = deepnet.tensor(np.dot(grad.data, b.data))
+        grad_b = deepnet.tensor(np.dot(a.data, grad.data))
         return grad_a, grad_b
 
     @staticmethod
@@ -115,6 +116,7 @@ class Dot(Function):
         tan_b = np.dot(a.data, b.tangent)
         tan_out = deepnet.tensor(tan_a + tan_b)
         return tan_out
+
 
 class Matmul(Function):
 
@@ -139,6 +141,7 @@ class Matmul(Function):
         tan_out = deepnet.tensor(tan_a + tan_b)
         return tan_out
 
+
 class Pow(Function):
 
     @staticmethod
@@ -150,7 +153,8 @@ class Pow(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b, out = context.saved_tensors()
-        grad_a = deepnet.tensor(b.data * np.power(a.data, b.data - 1.) * grad.data)
+        grad_a = deepnet.tensor(
+            b.data * np.power(a.data, b.data - 1.) * grad.data)
         grad_b = deepnet.tensor(out.data * np.log(a.data) * grad.data)
         return grad_a, grad_b
 
@@ -266,7 +270,8 @@ class Sum(Function):
         grad_data = grad.data
         if not keepdims:
             grad_data = np.expand_dims(grad_data, axis=dims)
-        grad_out = deepnet.tensor(np.ascontiguousarray(np.broadcast_to(grad_data, a_dim)))
+        grad_out = deepnet.tensor(np.ascontiguousarray(
+            np.broadcast_to(grad_data, a_dim)))
         return (grad_out,)
 
     @staticmethod
@@ -274,8 +279,10 @@ class Sum(Function):
         a = context.saved_tensors()[0]
         dims = context.dims
         keepdims = context.keepdims
-        tan_out = deepnet.tensor(np.sum(a.tangent.data, axis=dims, keepdims=keepdims))
+        tan_out = deepnet.tensor(
+            np.sum(a.tangent.data, axis=dims, keepdims=keepdims))
         return tan_out
+
 
 class Squeeze(Function):
 
@@ -321,7 +328,6 @@ class Unsqueeze(Function):
         dims = context.dims
         tan_out = deepnet.tensor(np.expand_dims(a.tangent.data, axis=dims))
         return tan_out
-
 
 
 class View(Function):
@@ -371,6 +377,7 @@ class Reshape(Function):
         tan_out = deepnet.tensor(a.tangent.data.reshape(dim))
         return tan_out
 
+
 class Tranpose(Function):
 
     @staticmethod
@@ -396,6 +403,7 @@ class Tranpose(Function):
         tan_out = deepnet.tensor(a.tangent.data.swapaxes(dim_0, dim_1))
         return tan_out
 
+
 class Permute(Function):
 
     @staticmethod
@@ -418,6 +426,7 @@ class Permute(Function):
         tan_out = deepnet.tensor(a.tangent.data.transpose(dims))
         return tan_out
 
+
 class Clone(Function):
 
     @staticmethod
@@ -435,6 +444,7 @@ class Clone(Function):
         a = context.saved_tensors()[0]
         tan_out = deepnet.tensor(a.tangent.data.copy())
         return tan_out
+
 
 class Slice(Function):
 

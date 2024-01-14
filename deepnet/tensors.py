@@ -127,7 +127,6 @@ class Tensor:
         rep += ")"
         return rep
 
-
     def __add__(self, other):
         return deepnet.add(self, other)
 
@@ -169,6 +168,7 @@ class Tensor:
 
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
+
 
 def tensor(data, use_grad=False, dtype=None):
     _tensor_args_check(data, use_grad, dtype)

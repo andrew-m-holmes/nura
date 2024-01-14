@@ -65,7 +65,7 @@ def preprocess_to_tensors(*items):
             item, Tensor) else item for item in items)
     return processed_items if len(
         processed_items) > 1 else processed_items[0]
-    
+
 
 def preprocess_dim(dim):
     if dim is None:
@@ -74,12 +74,14 @@ def preprocess_dim(dim):
         dim = (dim,)
     return dim
 
+
 def to_contiguous(tensor):
     if is_contiguous(tensor):
         return tensor
     contiguous_tensor = tensor.clone()
     contiguous_tensor.data = np.ascontiguousarray(tensor.data)
     return contiguous_tensor
+
 
 def is_all_tensor(*items):
     return all(is_tensor(item) for item in items)
@@ -127,6 +129,7 @@ def is_scalar_tensor(item):
     if is_tensor(item):
         return item.dim() == 0
     return False
+
 
 def is_vector_tensor(tensor):
     if is_tensor(tensor):
