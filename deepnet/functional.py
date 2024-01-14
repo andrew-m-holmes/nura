@@ -27,19 +27,19 @@ def div(a, b):
 
 
 def dot(a, b):
-    assert utils.is_all_tensor(a, b)
     _dot_args_check(a, b)
     out = funcs.Dot.apply(a, b)
     return out
 
 
 def _dot_args_check(a, b):
+    assert utils.is_all_tensor(a, b)
     assert a.dim() == b.dim()
     assert a.ndim() == b.ndim() == 1
 
 
 def matmul(a, b):
-    assert utils.is_all_tensor(a, b)
+    _matmul_args_check(a, b)
     a, b = _setup_tensors_for_matmul(a, b)
     out = funcs.Matmul.apply(a, b)
     return out
@@ -52,6 +52,10 @@ def _setup_tensors_for_matmul(a, b):
         b = unsqueeze(b, -1)
     return a, b
 
+def _matmul_args_check(a, b):
+    assert utils.is_all_tensor(a, b)
+    assert a.ndim() >= 1
+    assert b.ndim() >= 1
 
 def pow(a, b):
     a, b = utils.preprocess_to_tensors(a, b)
