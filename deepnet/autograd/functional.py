@@ -3,11 +3,6 @@ import numpy as np
 from types import FunctionType
 
 
-def jacobian(input, func):
-    # literally computes the full jacobian matrix for func
-    # which holds the partial derivatives of the func outputs wrt
-    # to every single input to that func
-    pass
 
 
 def vjp(primals, cotangent, func, *func_args, use_graph=False):
@@ -156,6 +151,21 @@ def _grad_args_check(inputs, output, output_grad):
     assert output.use_grad
     assert output.grad_fn is not None
 
+
+def jac(inputs, func, *func_args, use_graph=False):
+        tensor = inputs[0]
+        for i in range(tensor.ndim()):
+            pass
+
+def _get_perturbations(tensor):
+    dim = tensor.dim()
+    tangents = []
+    for index in np.ndindex(dim):
+        zeros = np.zeros(dim)
+        zeros[index] = 1
+        tangent = deepnet.tensor(zeros, dtype=tensor.dtype)
+        tangents.append(tangent)
+    return tangents
 
 def _process_node(node, grad):
     next_grads = node.context.apply(grad)
