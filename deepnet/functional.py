@@ -38,8 +38,17 @@ def _dot_args_check(a, b):
 
 def matmul(a, b):
     assert utils.is_all_tensor(a, b)
+    a, b = _setup_tensors_for_matmul(a, b)
     out = funcs.Matmul.apply(a, b)
     return out
+
+
+def _setup_tensors_for_matmul(a, b):
+    if utils.is_vector_tensor(a):
+        a = unsqueeze(a, 0)
+    if utils.is_vector_tensor(b):
+        b = unsqueeze(b, -1)
+    return a, b
 
 
 def pow(a, b):
