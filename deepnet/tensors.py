@@ -104,8 +104,16 @@ class Tensor:
         self.in_dual = in_dual
 
     def __repr__(self) -> str:
+        if self.ndim() == 0:
+            name = "scalar"
+        elif self.ndim() == 1:
+            name = "vector"
+        elif self.ndim() == 2:
+            name = "matrix"
+        else:
+            name = "matrix"
+
         base = repr(self.data)
-        name = "tensor" if self.ndim() else "scalar" 
         rep = base.replace("array", name).replace(")", "")
         if ", dtype" in rep:
             start = rep.index(", dtype")
