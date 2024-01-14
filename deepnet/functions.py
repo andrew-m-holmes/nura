@@ -93,23 +93,42 @@ class Div(Function):
         tan_out = deepnet.tensor(tan_a + tan_b)
         return tan_out
 
+class Dot(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor):
+        context.save_tensors(a, b)
+        out = deepnet.tensor(np.dot(a.data, b.data))
+        return out
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a, b = context.saved_tensors()
+        grad_a = deepnet.tensor(np.dot(grad.data, b.data)) 
+        grad_b = deepnet.tensor(np.dot(a.data, grad.data)) 
+        return grad_a, grad_b
+
+    @staticmethod
+    def jvp(context: Context):
+        a, b = context.saved_tensors()
+        tan_a = np.dot(a.tangent, b.data)
+        tan_b = np.dot(a.data, b.tangent)
+        tan_out = deepnet.tensor(tan_a + tan_b)
+        return tan_out
 
 class Matmul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         context.save_tensors(a, b)
-        out = a.data @ b.data
-        return deepnet.tensor(out)
+        out = deepnet.tensor(a.data @ b.data)
+        return out
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.saved_tensors()
-        dim_a, dim_b = np.arange(a.ndim()), np.arange(b.ndim())
-        dim_a[-2], dim_a[-1] = dim_a[-1], dim_a[-2]
-        dim_b[-2], dim_b[-1] = dim_b[-1], dim_b[-2]
-        grad_a = deepnet.tensor(grad.data @ b.data.transpose(dim_b))
-        grad_b = deepnet.tensor(a.data.transpose(dim_a) @ grad.data)
+        grad_a = deepnet.tensor(grad.data @ np.swapaxes(b.data, -2, -1))
+        grad_b = deepnet.tensor(np.swapaxes(a.data, -2, -1) @ grad.data)
         return grad_a, grad_b
 
     @staticmethod
