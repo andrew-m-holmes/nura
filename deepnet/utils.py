@@ -128,6 +128,11 @@ def is_scalar_tensor(item):
         return item.dim() == 0
     return False
 
+def is_vector_tensor(tensor):
+    if is_tensor(tensor):
+        return tensor.ndim() == 1
+    return False
+
 
 def is_dtype(item):
     return issubclass(item, dtype)
