@@ -103,30 +103,6 @@ class Tensor:
         self.tangent = tangent
         self.in_dual = in_dual
 
-    def __repr__(self) -> str:
-        if self.ndim() == 0:
-            name = "scalar"
-        elif self.ndim() == 1:
-            name = "vector"
-        elif self.ndim() == 2:
-            name = "matrix"
-        else:
-            name = "matrix"
-
-        base = repr(self.data)
-        rep = base.replace("array", name).replace(")", "")
-        if ", dtype" in rep:
-            start = rep.index(", dtype")
-            rep = rep[:start]
-        if self.use_grad:
-            rep += f", grad_fn={self.grad_fn}"
-        else:
-            rep += f", dtype={self.dtype.name()}"
-        if self.in_dual:
-            rep += f", in_dual={self.in_dual}"
-        rep += ")"
-        return rep
-
     def __add__(self, other):
         return deepnet.add(self, other)
 
@@ -168,6 +144,35 @@ class Tensor:
 
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
+
+    def __setitem__(self, _slice, item):
+        assert not self.use_grad
+        self.data[_slice] = item.data if deepnet.is_tensor(item) else item
+        self.use_grad = False
+
+    def __repr__(self) -> str:
+        if self.ndim() == 0:
+            name = "scalar"
+        elif self.ndim() == 1:
+            name = "vector"
+        elif self.ndim() == 2:
+            name = "matrix"
+        else:
+            name = "matrix"
+
+        base = str(self.data)
+        rep = base.replace("array", name).replace(")", "")
+        if ", dtype" in rep:
+            start = rep.index(", dtype")
+            rep = rep[:start]
+        if self.use_grad:
+            rep += f", grad_fn={self.grad_fn}"
+        else:
+            rep += f", dtype={self.dtype.name()}"
+        if self.in_dual:
+            rep += f", in_dual={self.in_dual}"
+        rep += ")"
+        return rep
 
 
 def tensor(data, use_grad=False, dtype=None):
