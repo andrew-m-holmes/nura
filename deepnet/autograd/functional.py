@@ -3,8 +3,6 @@ import numpy as np
 from types import FunctionType
 
 
-
-
 def vjp(primals, cotangent, func, *func_args, use_graph=False):
     _vjp_args_check(primals, cotangent, func, use_graph)
     primals, cotangent = _vjp_preprocess(
@@ -152,39 +150,37 @@ def _grad_args_check(inputs, output, output_grad):
     assert output.grad_fn is not None
 
 
-def jac(inputs, func, *func_args, use_graph=False):
-    index = _get_tensor_of_interest_index(inputs)
-    perturbations = _get_perturbations(inputs[index])
-    tangents = _get_tangents(inputs, index)
-    for perturb in perturbations:
-        tangents[index] = perturb
-        output, jaccol = jvp(inputs, tuple(tangents), func, *func_args, use_graph=use_graph)
-        print(jaccol)
-
-def _get_tangents(inputs, index):
-    tangents = []
-    for i, tensor in enumerate(inputs):
-        if i != index:
-            tangents.append(deepnet.ones_like(tensor))
-        else: 
-            tangents.append(None)
-    return tangents
-
-def _get_tensor_of_interest_index(inputs):
+def jac(inputs, func, *func_args, index=0, use_graph=False):
     if deepnet.is_tensor(inputs):
-        return 0
-    tensor_of_interest = max(inputs, key=lambda tensor: tensor.ndim())
-    for index, tensor in enumerate(inputs):
-        if tensor is tensor_of_interest:
-            return index
+        inputs = (inputs,)
+    jac_dim = _get_jac_dim(inputs, func, *func_args, index=index)
+    jac_matrix = np.zeros(jac_dim)
+    perturbations = _get_perturbations(inputs[index])
+    tangents = [deepnet.zeros_like(
+        tensor) if i != index else None for i, tensor in enumerate(inputs)]
+    for col, perturb in enumerate(perturbations):
+        tangents[index] = perturb
+        output, jaccol = jvp(inputs, tuple(tangents), func,
+                             *func_args, use_graph=use_graph)
+        jac_matrix[col] = jaccol.data
+    return jac_matrix
 
-def _get_perturbations(tensor_of_interest):
-    dim = tensor_of_interest.dim()
+
+def _get_jac_dim(inputs, func, *func_args, index):
+    dummies = tuple(deepnet.zeros_like(tensor) for tensor in inputs)
+    with deepnet.no_grad():
+        output = func(*dummies, *func_args)
+    jac_dim = list(inputs[index].dim()) + list(output.dim())
+    return tuple(jac_dim)
+
+
+def _get_perturbations(tensor):
+    dim = tensor.dim()
     perturbations = []
     for index in np.ndindex(dim):
         zeros = np.zeros(dim)
         zeros[index] = 1
-        perturbation = deepnet.tensor(zeros, dtype=tensor_of_interest.dtype)
+        perturbation = deepnet.tensor(zeros, dtype=tensor.dtype)
         perturbations.append(perturbation)
     return perturbations
 
