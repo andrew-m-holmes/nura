@@ -150,22 +150,21 @@ def _grad_args_check(inputs, output, output_grad):
     assert output.grad_fn is not None
 
 
-def jac(inputs, func, *func_args, index=0, use_graph=False):
+def jacfwd(inputs, func, *func_args, index=0, use_graph=False):
     if deepnet.is_tensor(inputs):
         inputs = (inputs,)
     jac_dim = _get_jac_dim(inputs, func, *func_args, index=index)
-    jac_matrix = np.zeros(jac_dim)
+    jacobian = deepnet.zeros(jac_dim, dtype=inputs[0].dtype)
     perturbations = _get_perturbations(inputs[index])
     tangents = [deepnet.zeros_like(
         tensor) if i != index else None for i, tensor in enumerate(inputs)]
-    print(len(perturbations), jac_dim)
     for col, perturb in enumerate(perturbations):
         tangents[index] = perturb
         output, jaccol = jvp(inputs, tuple(tangents), func,
                              *func_args, use_graph=use_graph)
         print(jaccol.dim())
-        jac_matrix[col] = jaccol.data
-    return jac_matrix
+        jacobian[col] = jaccol
+    return output, jacobian
 
 
 def _get_jac_dim(inputs, func, *func_args, index):

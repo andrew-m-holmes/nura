@@ -75,7 +75,7 @@ def _pass_for_forward_ad(context, output):
 
 
 # def _forward_ad_context_check(context):
-    # TODO how should we handle non-tensors in forward ad? should we be band from using reverse ad in forward ad?
+    # TODO how should we handle non-tensors in forward ad? should we be banned from using reverse ad in forward ad?
     # assert any(tensor.in_dual for tensor in context.saved_tensors())
 
 
