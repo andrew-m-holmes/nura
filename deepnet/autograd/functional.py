@@ -158,10 +158,12 @@ def jac(inputs, func, *func_args, index=0, use_graph=False):
     perturbations = _get_perturbations(inputs[index])
     tangents = [deepnet.zeros_like(
         tensor) if i != index else None for i, tensor in enumerate(inputs)]
+    print(len(perturbations), jac_dim)
     for col, perturb in enumerate(perturbations):
         tangents[index] = perturb
         output, jaccol = jvp(inputs, tuple(tangents), func,
                              *func_args, use_graph=use_graph)
+        print(jaccol.dim())
         jac_matrix[col] = jaccol.data
     return jac_matrix
 
