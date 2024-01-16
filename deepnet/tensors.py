@@ -69,6 +69,10 @@ class Tensor:
     def clone(self):
         return deepnet.clone(self)
 
+    def item(self):
+        if self.nelem() == 1:
+            return self.data.item()
+
     def zero(self):
         self.grad = deepnet.zeros_like(self)
 
@@ -158,12 +162,12 @@ class Tensor:
         elif self.ndim() == 2:
             name = "matrix"
         else:
-            name = "matrix"
+            name = "tensor"
 
-        base = str(self.data)
-        rep = base.replace("array", name).replace(")", "")
-        if ", dtype" in rep:
-            start = rep.index(", dtype")
+        base = repr(self.data)
+        rep = base.replace("array", name).replace(",", "").replace(")", "")
+        if " dtype" in rep:
+            start = rep.index(" dtype")
             rep = rep[:start]
         if self.use_grad:
             rep += f", grad_fn={self.grad_fn}"
