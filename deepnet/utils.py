@@ -43,7 +43,7 @@ def rand(dim=None, use_grad=False, dtype=None):
 def randint(low, high, dim, dtype=None):
     dim = preprocess_dim(dim)
     randint_arr = np.random.randint(low, high, dim)
-    return deepnet.tensor(randint_arr, dtype)
+    return deepnet.tensor(randint_arr, dtype=dtype)
 
 
 def identity(n, use_grad=False, dtype=None):
