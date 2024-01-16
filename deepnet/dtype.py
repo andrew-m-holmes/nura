@@ -124,12 +124,7 @@ def _infer_dtype(data):
     if isinstance(data, np.ndarray):
         return _dtype_map.get(data.dtype)
     if isinstance(data, list):
-        return _dtype_map.get(
-            _infer_dtype_from_list(data))
+        return _infer_dtype(np.array(data))
     return _dtype_map.get(type(data))
 
 
-def _infer_dtype_from_list(data):
-    if isinstance(data, list):
-        return _infer_dtype_from_list(data[0])
-    return type(data)
