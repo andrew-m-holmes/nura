@@ -155,17 +155,8 @@ class Tensor:
         self.use_grad = False
 
     def __repr__(self) -> str:
-        if self.ndim() == 0:
-            name = "scalar"
-        elif self.ndim() == 1:
-            name = "vector"
-        elif self.ndim() == 2:
-            name = "matrix"
-        else:
-            name = "tensor"
-
         base = repr(self.data)
-        rep = base.replace("array", name).replace(",", "").replace(")", "")
+        rep = base.replace("array", "tensor").replace(",", "").replace(")", "")
         if " dtype" in rep:
             start = rep.index(" dtype")
             rep = rep[:start]
