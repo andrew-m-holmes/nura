@@ -75,13 +75,6 @@ def preprocess_dim(dim):
     return dim
 
 
-def to_contiguous(tensor):
-    if is_contiguous(tensor):
-        return tensor
-    contiguous_tensor = tensor.clone()
-    contiguous_tensor.data = np.ascontiguousarray(tensor.data)
-    return contiguous_tensor
-
 
 def is_all_tensor(*items):
     return all(is_tensor(item) for item in items)

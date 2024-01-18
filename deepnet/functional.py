@@ -1,3 +1,4 @@
+import numpy as np
 import deepnet.utils as utils
 import deepnet.functions as funcs
 
@@ -161,7 +162,7 @@ def _view_args_check(a, dim):
 
 def reshape(a, dim):
     _reshape_args_check(a, dim)
-    a = utils.to_contiguous(a)
+    a = to_contiguous(a)
     out = funcs.Reshape.apply(a, dim)
     return out
 
@@ -175,6 +176,13 @@ def clone(a):
     assert utils.is_tensor(a)
     out = funcs.Clone.apply(a)
     return out
+
+def to_contiguous(tensor):
+    if utils.is_contiguous(tensor):
+        return tensor
+    contiguous_tensor = tensor.clone()
+    contiguous_tensor.data = np.ascontiguousarray(tensor.data)
+    return contiguous_tensor
 
 
 def slice(a, _slice):
