@@ -147,10 +147,6 @@ class Tensor:
     def __len__(self):
         return self.data.shape[0]
 
-    def __setattr__(self, name, value):
-        # TODO use_grad situations
-        pass
-
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
 
@@ -174,7 +170,6 @@ class Tensor:
             rep += f", in_dual={self.in_dual}"
         rep += ")"
         return rep
-
 
 def tensor(data, use_grad=False, dtype=None):
     _tensor_args_check(data, use_grad, dtype)
