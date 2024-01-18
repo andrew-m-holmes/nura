@@ -16,6 +16,7 @@ class Tensor:
         self.dtype = dtype
 
     def backward(self, grad=None):
+        assert self.grad_fn is not None
         if grad is None:
             assert self.nelem() == 1
             grad = deepnet.ones_like(self)
@@ -70,13 +71,13 @@ class Tensor:
         return deepnet.clone(self)
 
     def item(self):
-        if self.nelem() == 1:
-            return self.data.item()
+        assert self.nelem() == 1
+        return self.data.item()
 
     def zero(self):
         self.grad = deepnet.zeros_like(self)
 
-    def sum(self, dims, keepdims):
+    def sum(self, dims=None, keepdims=False):
         return deepnet.sum(self, dims, keepdims)
 
     def squeeze(self, dims=None):
