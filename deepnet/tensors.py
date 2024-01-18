@@ -83,11 +83,11 @@ class Tensor:
         self.tangent = tangent
         self.in_dual = in_dual
 
-    def contiguous(self):
-        return deepnet.to_contiguous(self)
-
     def clone(self):
         return deepnet.clone(self)
+
+    def contiguous(self):
+        return deepnet.to_contiguous(self)
 
     def sum(self, dims=None, keepdims=False):
         return deepnet.sum(self, dims, keepdims)
@@ -104,7 +104,6 @@ class Tensor:
     @property
     def T(self):
         return deepnet.transpose(self, -2, -1)
-
 
     def reshape(self, dim):
         return deepnet.reshape(self, dim)
@@ -148,10 +147,15 @@ class Tensor:
     def __len__(self):
         return self.data.shape[0]
 
+    def __setattr__(self, name, value):
+        # TODO use_grad situations
+        pass
+
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
 
     def __setitem__(self, _slice, item):
+        # TODO can this be differentiable?
         assert not self.use_grad
         self.data[_slice] = item.data if deepnet.is_tensor(item) else item
         self.use_grad = False

@@ -90,8 +90,8 @@ def _pass_for_reverse_ad(context, output):
 
 def _context_has_grad_tensors(context):
     if context.saved_tensors():
-        return any(tensor.use_grad
-                   for tensor in context.saved_tensors())
+        return (any(tensor.use_grad for tensor in context.saved_tensors()) 
+                and all(tensor.dtype.differentiable() for tensor in context.saved_tensors()))
     return False
 
 
