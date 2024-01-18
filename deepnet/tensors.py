@@ -15,19 +15,6 @@ class Tensor:
         self.is_leaf = True
         self.dtype = dtype
 
-    def backward(self, grad=None):
-        assert self.grad_fn is not None
-        if grad is None:
-            assert self.nelem() == 1
-            grad = deepnet.ones_like(self)
-        self.grad_fn.apply(grad)
-
-    def dual(self, tangent=None, inplace=False):
-        return make_dual(self, tangent, inplace)
-
-    def undual(self, inplace=False):
-        return undual(self, inplace)
-
     def dim(self) -> Tuple[int, ...]:
         return self.data.shape
 
@@ -36,6 +23,10 @@ class Tensor:
 
     def nelem(self) -> int:
         return self.data.size
+
+    def item(self):
+        assert self.nelem() == 1
+        return self.data.item()
 
     def byte(self):
         return tensor(self.data, False, dtype=deepnet.byte)
@@ -64,18 +55,39 @@ class Tensor:
     def bool(self):
         return tensor(self.data, False, dtype=deepnet.bool)
 
-    def detach(self):
-        return tensor(self.data, False, dtype=self.dtype)
-
-    def clone(self):
-        return deepnet.clone(self)
-
-    def item(self):
-        assert self.nelem() == 1
-        return self.data.item()
+    def backward(self, grad=None):
+        assert self.grad_fn is not None
+        if grad is None:
+            assert self.nelem() == 1
+            grad = deepnet.ones_like(self)
+        self.grad_fn.apply(grad)
 
     def zero(self):
         self.grad = deepnet.zeros_like(self)
+
+    def detach(self):
+        return tensor(self.data, False, dtype=self.dtype)
+
+    def dual(self, tangent=None, inplace=False):
+        return make_dual(self, tangent, inplace)
+
+    def undual(self, inplace=False):
+        return undual(self, inplace)
+
+    def _set_grad_state(self, use_grad, grad_fn, is_leaf):
+        self.use_grad = use_grad
+        self.grad_fn = grad_fn
+        self.is_leaf = is_leaf
+
+    def _set_dual_state(self, tangent, in_dual):
+        self.tangent = tangent
+        self.in_dual = in_dual
+
+    def contiguous(self):
+        return deepnet.to_contiguous(self)
+
+    def clone(self):
+        return deepnet.clone(self)
 
     def sum(self, dims=None, keepdims=False):
         return deepnet.sum(self, dims, keepdims)
@@ -90,23 +102,12 @@ class Tensor:
         return deepnet.transpose(self, dim_0, dim_1)
 
     @property
-    def t(self):
+    def T(self):
         return deepnet.transpose(self, -2, -1)
 
-    def contiguous(self):
-        return deepnet.to_contiguous(self)
 
     def reshape(self, dim):
         return deepnet.reshape(self, dim)
-
-    def _set_grad_state(self, use_grad, grad_fn, is_leaf):
-        self.use_grad = use_grad
-        self.grad_fn = grad_fn
-        self.is_leaf = is_leaf
-
-    def _set_dual_state(self, tangent, in_dual):
-        self.tangent = tangent
-        self.in_dual = in_dual
 
     def __add__(self, other):
         return deepnet.add(self, other)
