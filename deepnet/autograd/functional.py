@@ -158,12 +158,12 @@ def jacfwd(inputs, func, *func_args, index=0, use_graph=False):
     perturbations = _get_perturbations(inputs[index])
     tangents = [deepnet.zeros_like(
         tensor) if i != index else None for i, tensor in enumerate(inputs)]
-    slices = np.ndindex(inputs[index].dim())
+    slices = _get_slices(jac_dim, inputs[index].dim())
     for _slice, perturb in zip(slices, perturbations):
         tangents[index] = perturb
         output, jaccol = jvp(inputs, tuple(tangents), func,
                              *func_args, use_graph=use_graph)
-        jacobian[..., *_slice] = jaccol
+        jacobian[_slice] = jaccol
     return output, jacobian
 
 
@@ -172,6 +172,15 @@ def _get_jac_dim(inputs, func, *func_args, index):
     with deepnet.no_grad():
         output = func(*dummies, *func_args)
     return output.dim() + inputs[index].dim()
+
+def _get_slices(jac_dim, input_dim):
+    slices = [] 
+    all_slice = slice(None)
+    base_slice = [all_slice for _ in range(len(jac_dim) - len(input_dim))]
+    for index in np.ndindex(input_dim):
+        jac_slice = base_slice + list(index)
+        slices.append(tuple(jac_slice))
+    return slices
 
 def _get_perturbations(tensor):
     perturbations = []

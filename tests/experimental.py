@@ -7,17 +7,13 @@ from deepnet.autograd.functional import vjp, jvp, grad, jacfwd, _get_perturbatio
 
 def main():
 
-    a = deepnet.rand(5, use_grad=True, dtype=deepnet.float)
-    b = deepnet.rand(1, use_grad=True).float()
-    def f(a, b):
-        return a * b - b ** a
-    
-    out, jac= jacfwd((a, b), f, index=1, use_graph=True)
-    out.backward(deepnet.ones_like(out))
-    print(a.grad)
-    print(b.grad)
-    print(jac.sum())
-    print(jac)
+   a = deepnet.rand((4,)) 
+   b = deepnet.rand((4,))
+   out, jac = jacfwd((a, b), deepnet.mul, use_graph=True)
+   out.backward(deepnet.ones_like(out))
+   print(jac)
+   print(a.grad)
+
 
 if __name__ == "__main__":
     main()
