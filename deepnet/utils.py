@@ -4,40 +4,40 @@ from deepnet.dtype import dtype
 from deepnet import Tensor
 
 
-def zeros(dim, use_grad=False, dtype=None):
+def zeros(dim, diff=False, dtype=None):
     dim = preprocess_dim(dim)
     zero_arr = np.zeros(dim)
-    return deepnet.tensor(zero_arr, use_grad, dtype)
+    return deepnet.tensor(zero_arr, diff, dtype)
 
 
-def zeros_like(tensor, use_grad=False, dtype=None):
+def zeros_like(tensor, diff=False, dtype=None):
     data = tensor.data
     zero_arr = np.zeros_like(data)
-    return deepnet.tensor(zero_arr, use_grad, dtype)
+    return deepnet.tensor(zero_arr, diff, dtype)
 
 
-def ones(dim, use_grad=False, dtype=None):
+def ones(dim, diff=False, dtype=None):
     dim = preprocess_dim(dim)
     ones_arr = np.ones(dim)
-    return deepnet.tensor(ones_arr, use_grad, dtype)
+    return deepnet.tensor(ones_arr, diff, dtype)
 
 
-def ones_like(tensor, use_grad=False, dtype=None):
+def ones_like(tensor, diff=False, dtype=None):
     data = tensor.data
     ones_arr = np.ones_like(data)
-    return deepnet.tensor(ones_arr, use_grad, dtype)
+    return deepnet.tensor(ones_arr, diff, dtype)
 
 
-def randn(dim=None, use_grad=False, dtype=None):
+def randn(dim=None, diff=False, dtype=None):
     dim = preprocess_dim(dim)
     randn_arr = np.random.randn(*dim)
-    return deepnet.tensor(randn_arr, use_grad, dtype)
+    return deepnet.tensor(randn_arr, diff, dtype)
 
 
-def rand(dim=None, use_grad=False, dtype=None):
+def rand(dim=None, diff=False, dtype=None):
     dim = preprocess_dim(dim)
     rand_arr = np.random.rand(*dim)
-    return deepnet.tensor(rand_arr, use_grad, dtype)
+    return deepnet.tensor(rand_arr, diff, dtype)
 
 
 def randint(low, high, dim, dtype=None):
@@ -46,15 +46,15 @@ def randint(low, high, dim, dtype=None):
     return deepnet.tensor(randint_arr, dtype=dtype)
 
 
-def identity(n, use_grad=False, dtype=None):
+def identity(n, diff=False, dtype=None):
     data = np.identity(n)
-    return deepnet.tensor(data, use_grad, dtype)
+    return deepnet.tensor(data, diff, dtype)
 
 
-def full(dim, num, use_grad=False, dtype=None):
+def full(dim, num, diff=False, dtype=None):
     dim = preprocess_dim(dim)
     data = np.full(dim, num)
-    return deepnet.tensor(data, use_grad, dtype)
+    return deepnet.tensor(data, diff, dtype)
 
 
 def preprocess_to_tensors(*items):
@@ -101,6 +101,7 @@ def is_all_py_scalars(*items):
 
 def is_py_scalar(item):
     py_scalar_types = [float, int]
+    print(type(item))
     return type(item) in py_scalar_types
 
 

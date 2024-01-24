@@ -2,6 +2,23 @@ import numpy as np
 import deepnet
 
 
+class Graph:
+
+    _graph = {}
+
+    @classmethod
+    def add(cls, tensor, node):
+        cls._graph[tensor] = node
+
+    @classmethod
+    def delete(cls, tensor):
+        cls._graph.pop(tensor)
+
+    @classmethod
+    def clear(cls):
+        cls._graph.clear()
+
+
 class Node:
 
     def __init__(self, context, next_functions=None):
@@ -83,14 +100,13 @@ def _pass_for_reverse_ad(context, output):
     if _context_has_grad_tensors(context):
         next_functions = _get_next_functions(context.saved_tensors())
         node = Node.with_context(context, next_functions)
-        output._set_grad_state(
-            use_grad=True, grad_fn=node, is_leaf=False)
+        output = output._with(grad_fn=node, leaf=False, diff=True)
     return output
 
 
 def _context_has_grad_tensors(context):
     if context.saved_tensors():
-        return (any(tensor.use_grad for tensor in context.saved_tensors()) 
+        return (any(tensor.diff for tensor in context.saved_tensors()) 
                 and all(tensor.dtype.differentiable() for tensor in context.saved_tensors()))
     return False
 
@@ -105,7 +121,7 @@ def _get_next_functions(saved_tensors):
 
 
 def _get_next_functions_helper(tensor):
-    if tensor.is_leaf and tensor.use_grad:
+    if tensor.leaf and tensor.diff:
         context = AccumulateGrad.with_tensor(tensor)
         return Node.with_context(context, next_functions=None)
     return tensor.grad_fn

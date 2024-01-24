@@ -16,13 +16,6 @@ class dtype:
         return cls._differentiable
 
     @classmethod
-    def cast(cls, tensor):
-        data = tensor.data.astype(cls._wrapping)
-        new_tensor = deepnet.tensor(
-            data, tensor.use_grad, tensor.dtype)
-        return new_tensor
-
-    @classmethod
     def numpy(cls, data):
         if not isinstance(data, np.ndarray):
             data = np.array(data, cls._wrapping)
