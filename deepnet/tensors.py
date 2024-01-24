@@ -177,36 +177,30 @@ def tensor(data, diff=False, dtype=None):
     data = dtype.numpy(data)
     return Tensor(data, diff, dtype)
 
-def _handle_tensor(data, diff, dtype):
-    if (not deepnet.is_py_scalar(data) or not deepnet.is_py_bool(data) 
-        or not deepnet.is_py_list(data) or not isinstance(data, np.ndarray))
+# def _handle_tensor(data, diff, dtype):
+#     if (not deepnet.is_py_scalar(data) or not deepnet.is_py_bool(data) 
+#         or not deepnet.is_py_list(data) or not isinstance(data, np.ndarray))
 
 def dual(primal, tan=None):
-    _handle_dual(primal, tan)
+    # _handle_dual(primal, tan)
     if tan is None:
         tan = deepnet.zeros_like(primal)
     return DualTensor(primal.data, tan, primal.dtype)
 
-def _handle_dual(primal, tan):
-    if not isinstance(primal, Tensor):
-        raise ValueError(f"Invalid argument for primal: {primal}")
-    if not primal.dtype.can_diff():
-        raise TypeError("dtype of primal is not differentiable valid dtypes=[deepnet.half, deepnet.float, deepnet.double]")
-    if tan is not None:
-        if not isinstance(tan, Tensor):
-            raise ValueError(f"Invalid argument for tan: {tan}")
-        if primal.dtype != tan.dtype:
-            raise TypeError(f"dtype mismatch between primal ({primal.dtype.name()}) and tan ({tan.dtype.name()})")
-        if primal.dim() != tan.dim():
-            raise ValueError(f"dim mismatch between primal ({primal.dim()}) and tan ({tan.dim()})")
-        if tan.diff:
-            raise AttributeError("tan cannot be a differentiable Tensor")
-
-def _dual_arg_check(primal, tan):
-    assert deepnet.is_tensor(primal)
-    if tan is not None:
-        assert deepnet.is_tensor(tan)
-        assert primal.dtype == tan.dtype
+# def _handle_dual(primal, tan):
+#     if not isinstance(primal, Tensor):
+#         raise ValueError(f"Invalid argument for primal: {primal}")
+#     if not primal.dtype.can_diff():
+#         raise TypeError("dtype of primal is not differentiable valid dtypes=[deepnet.half, deepnet.float, deepnet.double]")
+#     if tan is not None:
+#         if not isinstance(tan, Tensor):
+#             raise ValueError(f"Invalid argument for tan: {tan}")
+#         if primal.dtype != tan.dtype:
+#             raise TypeError(f"dtype mismatch between primal ({primal.dtype.name()}) and tan ({tan.dtype.name()})")
+#         if primal.dim() != tan.dim():
+#             raise ValueError(f"dim mismatch between primal ({primal.dim()}) and tan ({tan.dim()})")
+#         if tan.diff:
+#             raise AttributeError("tan cannot be a differentiable Tensor")
 
 def _to(obj, dtype):
     if isinstance(obj, Tensor):
