@@ -8,12 +8,12 @@ _py_bool = bool
 
 class dtype:
 
-    _differentiable = None
+    _can_diff = None
     _wrapping = None
 
     @classmethod
-    def differentiable(cls):
-        return cls._differentiable
+    def can_diff(cls):
+        return cls._can_diff
 
     @classmethod
     def numpy(cls, data):
@@ -30,55 +30,55 @@ class dtype:
 
 class byte(dtype):
 
-    _differentiable = False
+    _can_diff = False
     _wrapping = np.uint8
 
 
 class char(dtype):
 
-    _differentiable = False
+    _can_diff = False
     _wrapping = np.int8
 
 
 class short(dtype):
 
-    _differentiable = False
+    _can_diff = False
     _wrapping = np.int16
 
 
 class int(dtype):
 
-    _differentiable = False
+    _can_diff = False
     _wrapping = np.int32
 
 
 class long(dtype):
 
-    _differentiable = False
+    _can_diff = False
     _wrapping = np.int64
 
 
 class half(dtype):
 
-    _differentiable = True
+    _can_diff = True
     _wrapping = np.float16
 
 
 class float(dtype):
 
-    _differentiable = True
+    _can_diff = True
     _wrapping = np.float32
 
 
 class double(dtype):
 
-    _differentiable = True
+    _can_diff = True
     _wrapping = np.float64
 
 
 class bool(dtype):
 
-    _differentiable = False
+    _can_diff = False
     _wrapping = np.bool_
 
 
@@ -113,11 +113,11 @@ def typename(obj):
     return obj_dtype.name().capitalize() + str(obj.__class__.__name__)
 
 
-def _infer_dtype(data):
+def get_dtype(data):
     if isinstance(data, np.ndarray):
         return _dtype_map.get(data.dtype)
     if isinstance(data, list):
-        return _infer_dtype(np.array(data))
+        return get_dtype(np.array(data))
     return _dtype_map.get(type(data))
 
 
