@@ -2,9 +2,9 @@ name: Python package
 
 on:
   push:
-    branches: [ "refactor" ]
+    branches: [ "null" ]
   pull_request:
-    branches: [ "refactor" ]
+    branches: [ "null" ]
 
 jobs:
   build:
