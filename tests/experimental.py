@@ -1,5 +1,6 @@
-import numpy as np 
+import numpy as np
 import deepnet
+
 
 def main():
 

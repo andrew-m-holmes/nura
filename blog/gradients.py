@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def main():
 
     def f(x):
-        return np.cos(x) 
+        return np.cos(x)
 
     def df(x):
         return -np.sin(x)
@@ -14,12 +15,11 @@ def main():
 
     x = np.linspace(0, 4, 150)
     h = 0.7
-    x0 = 2.0 
+    x0 = 2.0
     y0 = f(x0)
     true_grad = df(x0)
     forward_grad = (f(x0 + h) - f(x0)) / h
     central_grad = (f(x0 + h) - f(x0 - h)) / (2 * h)
-    
 
     y = f(x)
     true_tangent = tangent_line(x, x0, y0, true_grad)
@@ -33,13 +33,12 @@ def main():
     plt.plot(x, central_tangent, label="Central Difference", color="blueviolet")
     plt.legend()
 
-    plt.axhline(0, color="white")  
-    plt.axvline(0, color="white")  
+    plt.axhline(0, color="white")
+    plt.axvline(0, color="white")
 
     plt.xlim(min(x), max(x))
     plt.ylim(min(y), max(y))
-
-    plt.show()
+    plt.savefig("./images/gradients.png", dpi=300)
 
 
 if __name__ == "__main__":
