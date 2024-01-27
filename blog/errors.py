@@ -31,4 +31,5 @@ plt.ylabel("Error")
 plt.axhline(0, color="white")
 plt.axvline(0, color="white")
 plt.legend()
-plt.savefig("errors.png", dpi=300)
+plt.savefig("./images/errors.png", dpi=200)
+
