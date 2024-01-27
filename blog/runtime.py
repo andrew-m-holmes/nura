@@ -1,10 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 
+
 def main():
-    n_million_range = np.arange(1e6, 10e6, 1e6)  
-    m_million_range = np.arange(1e6, 10e6, 1e6)  
+    n_million_range = np.arange(1e6, 10e6, 1e6)
+    m_million_range = np.arange(1e6, 10e6, 1e6)
 
     n_million_grid, m_million_grid = np.meshgrid(n_million_range, m_million_range)
     complexity_million = 2 * n_million_grid * m_million_grid
@@ -12,7 +13,9 @@ def main():
     fig = plt.figure(figsize=(12, 10))
     ax = fig.add_subplot(111, projection="3d")
 
-    surf = ax.plot_surface(n_million_grid, m_million_grid, complexity_million, cmap="cool")
+    surf = ax.plot_surface(
+        n_million_grid, m_million_grid, complexity_million, cmap="cool"
+    )
 
     ax.set_xlabel("$n$")
     ax.set_ylabel("$m$")
@@ -40,7 +43,7 @@ def main():
     ax.yaxis.pane.set_edgecolor("black")
     ax.zaxis.pane.set_edgecolor("black")
 
-    plt.show()
+    plt.savefig("./images/runtime.png", dpi=300)
 
 
 if __name__ == "__main__":
