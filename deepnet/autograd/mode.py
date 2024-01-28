@@ -1,10 +1,11 @@
 from contextlib import contextmanager
 
 
-def revgrad_enabled():
+def grad_enabled():
     return Autograd._use_grad
 
-def fwdgrad_enabled():
+
+def forward_ad_enabled():
     return Autograd._forward_mode
 
 
@@ -15,7 +16,7 @@ class Autograd:
 
 
 @contextmanager
-def fwdgrad():
+def use_grad():
     prev = Autograd._use_grad
     Autograd._use_grad = True
     try:
