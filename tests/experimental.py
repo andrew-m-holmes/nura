@@ -6,7 +6,7 @@ def main():
 
     a = deepnet.rand(3, diff=True).float()
     b = deepnet.rand(3, diff=True).float()
-    c = a + b
+    c = deepnet.add(a, b)
     print(c)
     print(c.backfn)
 
