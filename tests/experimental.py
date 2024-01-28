@@ -4,9 +4,11 @@ import deepnet
 
 def main():
 
-    data = np.random.randint(0, 10, (2, 2))
-    a = deepnet.tensor(data)
-    a.dual()
+    a = deepnet.rand(3, diff=True).float()
+    b = deepnet.rand(3, diff=True).float()
+    c = a + b
+    print(c)
+    print(c.backfn)
 
 if __name__ == "__main__":
     main()

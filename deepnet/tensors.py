@@ -1,6 +1,7 @@
-import numpy as np
 import deepnet
+from .dtype import to, get_dtype
 from typing import Tuple
+
 
 class TensorBase:
 
@@ -20,9 +21,18 @@ class TensorBase:
     def item(self):
         assert self.nelem() == 1
         return self.data.item()
+    
+    def withattrs(self, **attrs):
+        if isinstance(self, Tensor):
+            obj = tensor(self.data, self.diff, self.dtype)
+        elif isinstance(self, Dual):
+            obj = dual(self.data, self.tan)
+        for name, attr in attrs.items():
+            setattr(obj, name , attr)
+        return obj
 
     def to(self, dtype):
-        return _to(self, dtype)
+        return to(self, dtype)
 
     def byte(self):
         return self.to(deepnet.byte)
@@ -77,9 +87,6 @@ class TensorBase:
 
     def permute(self, dims=None):
         return deepnet.permute(self, dims=dims)
-
-    def withattr(self, **attrs):
-        return _withattrs(self, **attrs)
     
     def __add__(self, other):
         return deepnet.add(self, other)
@@ -158,7 +165,7 @@ class Tensor(TensorBase):
     def dual(self, tan=None):
         return dual(self, tan)
 
-class DualTensor(TensorBase):
+class Dual(TensorBase):
     
     def __init__(self, data, tan, dtype) -> None:
         super().__init__(data, dtype)
@@ -172,50 +179,14 @@ class DualTensor(TensorBase):
 
 def tensor(data, diff=False, dtype=None):
     if dtype is None:
-        dtype = deepnet.get_dtype(data)
-    diff = dtype.can_diff and diff
+        dtype = get_dtype(data)
+    if diff:
+        assert dtype.can_diff
     data = dtype.numpy(data)
     return Tensor(data, diff, dtype)
 
-# def _handle_tensor(data, diff, dtype):
-#     if (not deepnet.is_py_scalar(data) or not deepnet.is_py_bool(data) 
-#         or not deepnet.is_py_list(data) or not isinstance(data, np.ndarray))
-
-def dual(primal, tan=None):
-    # _handle_dual(primal, tan)
+def dual(tensor: Tensor, tan=None):
+    assert tensor.dtype.can_diff
     if tan is None:
-        tan = deepnet.zeros_like(primal)
-    return DualTensor(primal.data, tan, primal.dtype)
-
-# def _handle_dual(primal, tan):
-#     if not isinstance(primal, Tensor):
-#         raise ValueError(f"Invalid argument for primal: {primal}")
-#     if not primal.dtype.can_diff():
-#         raise TypeError("dtype of primal is not differentiable valid dtypes=[deepnet.half, deepnet.float, deepnet.double]")
-#     if tan is not None:
-#         if not isinstance(tan, Tensor):
-#             raise ValueError(f"Invalid argument for tan: {tan}")
-#         if primal.dtype != tan.dtype:
-#             raise TypeError(f"dtype mismatch between primal ({primal.dtype.name()}) and tan ({tan.dtype.name()})")
-#         if primal.dim() != tan.dim():
-#             raise ValueError(f"dim mismatch between primal ({primal.dim()}) and tan ({tan.dim()})")
-#         if tan.diff:
-#             raise AttributeError("tan cannot be a differentiable Tensor")
-
-def _to(obj, dtype):
-    if isinstance(obj, Tensor):
-        data = dtype.numpy(obj.data)
-        return Tensor(data, obj.diff, dtype)
-    elif isinstance(obj, DualTensor):
-        data = dtype.numpy(obj.data)
-        tan = tan.to(dtype)
-        return DualTensor(data, tan, dtype)
-
-def _withattrs(obj, **attrs):
-    if isinstance(obj, Tensor):
-        obj = tensor(obj.data, obj.diff, obj.dtype)
-    elif isinstance(obj, DualTensor):
-        obj = dual(obj, obj.tan)
-    for name, value in attrs.items():
-        setattr(obj, name, value)
-    return obj
+        tan = deepnet.ones_like(tensor)
+    return Dual(tensor.data, tan, tensor.dtype)

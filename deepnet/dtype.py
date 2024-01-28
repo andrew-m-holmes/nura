@@ -1,5 +1,5 @@
-import numpy as np
 import deepnet
+import numpy as np
 
 _py_int = int
 _py_float = float
@@ -107,17 +107,26 @@ _dtype_map = {
 }
 
 
+def to(obj, dtype):
+    if isinstance(obj, deepnet.Tensor):
+        data = dtype.numpy(obj.data)
+        return deepnet.tensor(data, obj.diff, dtype)
+    elif isinstance(obj, deepnet.Dual):
+        data = dtype.numpy(obj.data)
+        tan = obj.tan.to(dtype)
+        return deepnet.dual(data, tan)
+
 def typename(obj):
     assert hasattr(obj, "dtype")
     obj_dtype = obj.dtype
     return obj_dtype.name().capitalize() + str(obj.__class__.__name__)
 
 
-def get_dtype(data):
+def get_dtype(data) -> dtype:
     if isinstance(data, np.ndarray):
-        return _dtype_map.get(data.dtype)
+        return _dtype_map[data.dtype]
     if isinstance(data, list):
         return get_dtype(np.array(data))
-    return _dtype_map.get(type(data))
+    return _dtype_map[type(data)]
 
 

@@ -1,11 +1,12 @@
 import numpy as np
+
 import deepnet
-from deepnet.dtype import dtype
 from deepnet import Tensor
+from deepnet.dtype import dtype
 
 
 def zeros(dim, diff=False, dtype=None):
-    dim = preprocess_dim(dim)
+    dim = todim(dim)
     zero_arr = np.zeros(dim)
     return deepnet.tensor(zero_arr, diff, dtype)
 
@@ -17,7 +18,7 @@ def zeros_like(tensor, diff=False, dtype=None):
 
 
 def ones(dim, diff=False, dtype=None):
-    dim = preprocess_dim(dim)
+    dim = todim(dim)
     ones_arr = np.ones(dim)
     return deepnet.tensor(ones_arr, diff, dtype)
 
@@ -29,19 +30,19 @@ def ones_like(tensor, diff=False, dtype=None):
 
 
 def randn(dim=None, diff=False, dtype=None):
-    dim = preprocess_dim(dim)
+    dim = todim(dim)
     randn_arr = np.random.randn(*dim)
     return deepnet.tensor(randn_arr, diff, dtype)
 
 
 def rand(dim=None, diff=False, dtype=None):
-    dim = preprocess_dim(dim)
+    dim = todim(dim)
     rand_arr = np.random.rand(*dim)
     return deepnet.tensor(rand_arr, diff, dtype)
 
 
 def randint(low, high, dim, dtype=None):
-    dim = preprocess_dim(dim)
+    dim = todim(dim)
     randint_arr = np.random.randint(low, high, dim)
     return deepnet.tensor(randint_arr, dtype=dtype)
 
@@ -52,84 +53,17 @@ def identity(n, diff=False, dtype=None):
 
 
 def full(dim, num, diff=False, dtype=None):
-    dim = preprocess_dim(dim)
+    dim = todim(dim)
     data = np.full(dim, num)
     return deepnet.tensor(data, diff, dtype)
 
 
-def preprocess_to_tensors(*items):
-    assert all(is_tensor(item) or is_py_scalar(item)
-               for item in items)
-    processed_items = tuple(
-        deepnet.tensor(item) if not isinstance(
-            item, Tensor) else item for item in items)
-    return processed_items if len(
-        processed_items) > 1 else processed_items[0]
-
-
-def preprocess_dim(dim):
+def todim(dim):
     if dim is None:
         return tuple()
-    if is_py_scalar(dim):
-        dim = (dim,)
+    if isinstance(dim, int):
+        return (dim,)
     return dim
-
-
-
-def is_all_tensor(*items):
-    return all(is_tensor(item) for item in items)
-
-
-def is_tensor(item):
-    return isinstance(item, Tensor)
-
 
 def is_contiguous(tensor):
     return tensor.data.flags["C_CONTIGUOUS"]
-
-
-def is_numpy(item):
-    numpy_types = [
-        np.ndarray, np.uint8, np.int8, np.int16, np.int32, np.int64,
-        np.float16, np.float32, np.float64, np.bool_]
-    return type(item) in numpy_types
-
-
-def is_all_py_scalars(*items):
-    return all(is_py_scalar(item) for item in items)
-
-
-def is_py_scalar(item):
-    py_scalar_types = [float, int]
-    print(type(item))
-    return type(item) in py_scalar_types
-
-
-def is_py_bool(item):
-    return isinstance(item, bool)
-
-
-def is_py_list(item):
-    return isinstance(item, list)
-
-
-def is_dims_arg(arg):
-    if arg is None or isinstance(arg, int):
-        return True
-    return all(is_py_scalar(val) for val in arg)
-
-
-def is_scalar_tensor(item):
-    if is_tensor(item):
-        return item.dim() == 0
-    return False
-
-
-def is_vector_tensor(tensor):
-    if is_tensor(tensor):
-        return tensor.ndim() == 1
-    return False
-
-
-def is_dtype(item):
-    return issubclass(item, dtype)

@@ -1,4 +1,5 @@
 import numpy as np
+
 import deepnet
 
 
@@ -21,27 +22,22 @@ class Graph:
 
 class Node:
 
-    def __init__(self, context, next_functions=None):
-        self.context = context
-        self.next_functions = next_functions
+    def __init__(self, ctx, backfns=None):
+        self.ctx = ctx
+        self.backfns = backfns
 
     def apply(self, grad):
-        next_grads = self.context.apply(grad)
-        if self.next_functions:
-            self._apply_next_functions(
-                self.next_functions, next_grads)
+        next_grads = self.ctx.apply(grad)
+        if self.backfns:
+            self._apply_backfns(self.backfns, next_grads)
 
-    def _apply_next_functions(self, next_functions, next_grads):
-        for next_function, grad in zip(next_functions, next_grads):
+    def _apply_backfns(self, backfns, next_grads):
+        for next_function, grad in zip(backfns, next_grads):
             if next_function is not None:
                 next_function.apply(grad)
 
-    @classmethod
-    def with_context(cls, context, next_functions):
-        return cls(context, next_functions)
-
     def __repr__(self) -> str:
-        return str(self.context.__class__.__name__)
+        return str(self.ctx.__class__.__name__)
 
 
 class AccumulateGrad:
@@ -55,11 +51,6 @@ class AccumulateGrad:
         grad_data = _process_grad_for_accumulate(self.tensor, grad)
         self.tensor.grad.data += grad_data.data
 
-    @classmethod
-    def with_tensor(cls, tensor):
-        return cls(tensor)
-
-
 def _process_grad_for_accumulate(tensor, grad):
     if tensor.dim() != grad.dim() and tensor.ndim() <= grad.ndim():
         dims = _get_dims_to_sum(tensor.dim(), grad.dim())
@@ -69,59 +60,46 @@ def _process_grad_for_accumulate(tensor, grad):
 
 
 def _get_dims_to_sum(dim_0, dim_1):
-    padded_dim_0 = np.pad(
-        dim_0, (len(dim_1) - len(dim_0), 0), constant_values=0)
+    padded_dim_0 = np.pad(dim_0, (len(dim_1) - len(dim_0), 0), constant_values=0)
     mask = padded_dim_0 != np.array(dim_1)
     dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
     return dims
 
 
-def _pass_to_graph(context, output):
-    if deepnet.grad_enabled():
-        output = _pass_for_reverse_ad(context, output)
-    if deepnet.forward_ad_enabled():
-        output = _pass_for_forward_ad(context, output)
+def _pass_to_graph(ctx, output):
+    output = _pass_for_reverse_ad(ctx, output)
     return output
 
 
-def _pass_for_forward_ad(context, output):
-    # _forward_ad_context_check(context)
-    tangent_out = context.apply_jvp()
+def _fwdout(ctx, output):
+    tan = ctx.apply_jvp()
+    return None
     output._set_dual_state(tangent_out, True)
     return output
 
 
-# def _forward_ad_context_check(context):
-    # TODO how should we handle non-tensors in forward ad? should we be banned from using reverse ad in forward ad?
-    # assert any(tensor.in_dual for tensor in context.saved_tensors())
-
-
-def _pass_for_reverse_ad(context, output):
-    if _context_has_grad_tensors(context):
-        next_functions = _get_next_functions(context.saved_tensors())
-        node = Node.with_context(context, next_functions)
-        output = output._with(grad_fn=node, leaf=False, diff=True)
+def _revout(ctx, output):
+    if _diff_ctx(ctx):
+        backfns = _get_backfns(ctx.tensors())
+        node = Node(ctx, backfns)
+        output = output.withattrs(backfn=node, leaf=False)
     return output
 
-
-def _context_has_grad_tensors(context):
-    if context.saved_tensors():
-        return (any(tensor.diff for tensor in context.saved_tensors()) 
-                and all(tensor.dtype.differentiable() for tensor in context.saved_tensors()))
+def _diff_ctx(ctx):
+    if ctx.tensors():
+        return any(tensor.diff for tensor in ctx.tensors())
     return False
 
 
-def _get_next_functions(saved_tensors):
-    next_functions = []
-    for tensor in saved_tensors:
-        next_function = _get_next_functions_helper(
-            tensor)
-        next_functions.append(next_function)
-    return tuple(next_functions)
+def _get_backfns(tensors):
+    backfns = []
+    for tensor in tensors:
+        next_function = _get_backfns_helper(tensor)
+        backfns.append(next_function)
+    return backfns
 
-
-def _get_next_functions_helper(tensor):
-    if tensor.leaf and tensor.diff:
-        context = AccumulateGrad.with_tensor(tensor)
-        return Node.with_context(context, next_functions=None)
-    return tensor.grad_fn
+def _get_backfns_helper(tensor):
+    if tensor.leaf:
+        ctx = AccumulateGrad(tensor)
+        return Node(ctx, backfns=None)
+    return tensor.backfn
