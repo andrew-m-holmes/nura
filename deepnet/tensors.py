@@ -1,38 +1,40 @@
-import deepnet
-from .dtype import to, get_dtype
 from typing import Tuple
+
+import deepnet
 
 
 class TensorBase:
 
     def __init__(self, data, dtype) -> None:
-        self.data = data
-        self.dtype = dtype
+        self._data = data
+        self._dtype = dtype
 
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @property
     def dim(self) -> Tuple[int, ...]:
-        return self.data.shape
+        return self._data.shape
 
+    @property
     def ndim(self) -> int:
-        return self.data.ndim
+        return self._data.ndim
 
+    @property
     def nelem(self) -> int:
-        return self.data.size
+        return self._data.size
 
     def item(self):
-        assert self.nelem() == 1
-        return self.data.item()
-    
-    def withattrs(self, **attrs):
-        if isinstance(self, Tensor):
-            obj = tensor(self.data, self.diff, self.dtype)
-        elif isinstance(self, Dual):
-            obj = dual(self.data, self.tan)
-        for name, attr in attrs.items():
-            setattr(obj, name , attr)
-        return obj
+        assert self.nelem == 1
+        return self._data.item()
 
     def to(self, dtype):
-        return to(self, dtype)
+        return deepnet.to(self, dtype)
 
     def byte(self):
         return self.to(deepnet.byte)
@@ -87,7 +89,7 @@ class TensorBase:
 
     def permute(self, dims=None):
         return deepnet.permute(self, dims=dims)
-    
+
     def __add__(self, other):
         return deepnet.add(self, other)
 
@@ -96,7 +98,7 @@ class TensorBase:
 
     def __sub__(self, other):
         return deepnet.sub(self, other)
-    
+
     def __pos__(self):
         raise NotImplementedError
 
@@ -134,59 +136,70 @@ class TensorBase:
         return deepnet.pow(other, self)
 
     def __len__(self):
-        return self.data.shape[0]
+        return self._data.shape[0]
 
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
 
     def __setitem__(self, _slice, item):
-        self.data[_slice] = item.data if deepnet.is_tensor(item) else item
+        pass
+
+    def __setattr__(self, name, value):
+        # make instance attrs immutable
+        assert name not in self.__dict__
+        self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        base = repr(self.data)
+        base = repr(self._data)
         rep = base.replace("array", "tensor").replace(",", "").replace(")", "")
         if " dtype" in rep:
             start = rep.index(" dtype")
             rep = rep[:start]
         return rep + ")"
 
+
 class Tensor(TensorBase):
 
-    def __init__(self, data, diff, dtype) -> None:
+    def __init__(self, data, diff, grad, backfn, leaf, dtype) -> None:
         super().__init__(data, dtype)
-        self.diff = diff
-        self.grad = None
-        self.backfn = None
-        self.leaf = True
+        self._diff = diff
+        self._grad = grad
+        self._backfn = backfn
+        self._leaf = leaf
 
+    @property
+    def diff(self):
+        return self._diff
+
+    @property
+    def grad(self):
+        return self._grad
+
+    @property
+    def backfn(self):
+        return self._backfn
+
+    @property
+    def leaf(self):
+        return self._leaf
+        
     def backward(self, grad=None):
         raise NotImplementedError
 
-    def dual(self, tan=None):
-        return dual(self, tan)
+    def withstate(self, diff=None, grad=None, backfn=None, leaf=True):
+        if diff is None:
+            diff = self.diff
+        if grad is None:
+            grad = self.grad
+        if backfn is None:
+            backfn = self.backfn
+        return Tensor(self.data, diff, grad, backfn, leaf, self.dtype)
 
-class Dual(TensorBase):
-    
-    def __init__(self, data, tan, dtype) -> None:
-        super().__init__(data, dtype)
-        self.tan = tan
-
-    def unpack(self):
-        return tensor(self.data, False, self.dtype), self.tan
-
-    def __repr__(self) -> str:
-        return super().__repr__().replace("tensor", "  dual")
 
 def tensor(data, diff=False, dtype=None):
     if dtype is None:
-        dtype = get_dtype(data)
+        dtype = deepnet.get_dtype(data)
     if diff:
         assert dtype.can_diff
     data = dtype.numpy(data)
-    return Tensor(data, diff, dtype)
-
-def dual(tensor: Tensor, tan=None):
-    assert tensor.dtype.can_diff
-    if tan is None:
-        tan = deepnet.ones_like(tensor)
-    return Dual(tensor.data, tan, tensor.dtype)
+    return Tensor(data, diff, None, None, True, dtype)

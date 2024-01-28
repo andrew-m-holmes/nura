@@ -53,6 +53,6 @@ class Function(metaclass=FunctionMeta):
     @classmethod
     def apply(cls, *args, **kwargs) -> Tensor:
         ctx = cls.backcls()
-        output = cls.forward(ctx, *args, **kwargs)
-        output = graph._pass_to_graph(ctx, output)
-        return output
+        rawout = cls.forward(ctx, *args, **kwargs)
+        out = graph._graphout(ctx, rawout)
+        return out

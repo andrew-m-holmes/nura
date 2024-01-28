@@ -108,13 +108,9 @@ _dtype_map = {
 
 
 def to(obj, dtype):
-    if isinstance(obj, deepnet.Tensor):
-        data = dtype.numpy(obj.data)
-        return deepnet.tensor(data, obj.diff, dtype)
-    elif isinstance(obj, deepnet.Dual):
-        data = dtype.numpy(obj.data)
-        tan = obj.tan.to(dtype)
-        return deepnet.dual(data, tan)
+    assert isinstance(obj, deepnet.Tensor)
+    data = dtype.numpy(obj.data)
+    return deepnet.tensor(data, obj.diff, dtype)
 
 def typename(obj):
     assert hasattr(obj, "dtype")

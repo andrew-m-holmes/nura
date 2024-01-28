@@ -1,75 +1,21 @@
 from contextlib import contextmanager
 
-
-def grad_enabled():
-    return Autograd._use_grad
-
-
-def forward_ad_enabled():
-    return Autograd._forward_mode
-
+def gradon():
+    return Autograd._autograd
 
 class Autograd:
 
-    _use_grad = True
-    _forward_mode = False
+    _autograd = True
 
 
 @contextmanager
-def use_grad():
-    prev = Autograd._use_grad
-    Autograd._use_grad = True
+def autograd(state=True):
+    prev = Autograd._autograd
+    Autograd._autograd= state
     try:
         yield
     finally:
-        Autograd._use_grad = prev
+        Autograd._autograd = prev
 
 
-@contextmanager
-def no_grad():
-    prev = Autograd._use_grad
-    Autograd._use_grad = False
-    try:
-        yield
-    finally:
-        Autograd._use_grad = prev
 
-
-@contextmanager
-def set_grad(mode):
-    prev = Autograd._use_grad
-    Autograd._use_grad = mode
-    try:
-        yield
-    finally:
-        Autograd._use_grad = prev
-
-
-@contextmanager
-def forward_ad():
-    prev = Autograd._forward_mode
-    Autograd._forward_mode = True
-    try:
-        yield
-    finally:
-        Autograd._forward_mode = prev
-
-
-@contextmanager
-def no_forward_ad():
-    prev = Autograd._forward_mode
-    Autograd._forward_mode = False
-    try:
-        yield
-    finally:
-        Autograd._forward_mode = prev
-
-
-@contextmanager
-def set_forward_ad(mode):
-    prev = Autograd._forward_mode
-    Autograd._forward_mode = mode
-    try:
-        yield
-    finally:
-        Autograd._forward_mode = prev

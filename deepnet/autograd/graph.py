@@ -1,6 +1,7 @@
 import numpy as np
 
 import deepnet
+from . import mode
 
 
 class Graph:
@@ -22,19 +23,19 @@ class Graph:
 
 class Node:
 
-    def __init__(self, ctx, backfns=None):
+    def __init__(self, ctx, nodefns=None):
         self.ctx = ctx
-        self.backfns = backfns
+        self.nodefns = nodefns
 
     def apply(self, grad):
-        next_grads = self.ctx.apply(grad)
-        if self.backfns:
-            self._apply_backfns(self.backfns, next_grads)
+        grads = self.ctx.apply(grad)
+        if self.nodefns:
+            self._apply_nodefns(self.nodefns, grads)
 
-    def _apply_backfns(self, backfns, next_grads):
-        for next_function, grad in zip(backfns, next_grads):
-            if next_function is not None:
-                next_function.apply(grad)
+    def _apply_nodefns(self, nodefns , grads):
+        for nodefn, grad in zip(nodefns, grads):
+            if nodefn is not None:
+                nodefn.apply(grad)
 
     def __repr__(self) -> str:
         return str(self.ctx.__class__.__name__)
@@ -51,6 +52,7 @@ class AccumulateGrad:
         grad_data = _process_grad_for_accumulate(self.tensor, grad)
         self.tensor.grad.data += grad_data.data
 
+
 def _process_grad_for_accumulate(tensor, grad):
     if tensor.dim() != grad.dim() and tensor.ndim() <= grad.ndim():
         dims = _get_dims_to_sum(tensor.dim(), grad.dim())
@@ -66,39 +68,34 @@ def _get_dims_to_sum(dim_0, dim_1):
     return dims
 
 
-def _pass_to_graph(ctx, output):
-    pass
-    return output
+def _graphout(ctx, rawout):
+    out = deepnet.tensor(rawout)
+    if mode.gradon():
+        return _augmentout(ctx, out)
+    return out
 
-def _ctx_mode(ctx):
-    return all(isinstance(tensor, deepnet.Tensor) for tensor in ctx.tensors())
-
-def _fwdout(ctx, output):
-    tan = ctx.apply_jvp()
-    return output.withattrs(tan=tan)
-
-
-def _revout(ctx, output):
-    if _diff_ctx(ctx):
-        backfns = _get_backfns(ctx.tensors())
-        node = Node(ctx, backfns)
-        return output.withattrs(backfn=node, leaf=False)
-
-def _diff_ctx(ctx):
-    if ctx.tensors():
-        return any(tensor.diff for tensor in ctx.tensors())
-    return False
+def _augmentout(ctx, out):
+    if _candiff(ctx):
+        nodefns = _get_nodefns(ctx.tensors())
+        node = Node(ctx, nodefns)
+        return out.withstate(backfn=node, leaf=False)
+    return out
 
 
-def _get_backfns(tensors):
-    backfns = []
+def _candiff(ctx):
+    return ctx.tensors() and any(tensor.diff for tensor in ctx.tensors())
+
+
+def _get_nodefns(tensors):
+    nodefns = []
     for tensor in tensors:
-        next_function = _get_backfns_helper(tensor)
-        backfns.append(next_function)
-    return backfns
+        nodefn = _get_nodefns_helper(tensor)
+        nodefns.append(nodefn)
+    return nodefns
 
-def _get_backfns_helper(tensor):
+
+def _get_nodefns_helper(tensor):
     if tensor.leaf:
         ctx = AccumulateGrad(tensor)
-        return Node(ctx, backfns=None)
-    return tensor.backfn
+        return Node(ctx, nodefns=None)
+    return tensor.nodefn
