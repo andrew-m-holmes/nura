@@ -67,23 +67,22 @@ def _get_dims_to_sum(dim_0, dim_1):
 
 
 def _pass_to_graph(ctx, output):
-    output = _pass_for_reverse_ad(ctx, output)
+    pass
     return output
 
+def _ctx_mode(ctx):
+    return all(isinstance(tensor, deepnet.Tensor) for tensor in ctx.tensors())
 
 def _fwdout(ctx, output):
     tan = ctx.apply_jvp()
-    return None
-    output._set_dual_state(tangent_out, True)
-    return output
+    return output.withattrs(tan=tan)
 
 
 def _revout(ctx, output):
     if _diff_ctx(ctx):
         backfns = _get_backfns(ctx.tensors())
         node = Node(ctx, backfns)
-        output = output.withattrs(backfn=node, leaf=False)
-    return output
+        return output.withattrs(backfn=node, leaf=False)
 
 def _diff_ctx(ctx):
     if ctx.tensors():
