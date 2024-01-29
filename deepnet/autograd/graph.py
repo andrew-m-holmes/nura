@@ -1,7 +1,6 @@
 import deepnet
 import numpy as np
 from . import mode
-from typing import Tuple, Union
 
 class Node:
 
