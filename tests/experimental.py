@@ -1,15 +1,15 @@
 import numpy as np
 import deepnet
-
+from deepnet.autograd.functional import grad
 
 def main():
 
-    a = deepnet.rand(3, diff=True).float()
-    b = deepnet.rand(3, diff=True).float()
-    c = deepnet.add(a, b)
-    c.backward(deepnet.ones_like(c))
-    print(a.grad)
-    print(b.grad)
+        a = deepnet.tensor(3., diff=True).float()
+        b = deepnet.tensor(4., diff=True).float()
+        c = deepnet.mul(a, b)
+        e = deepnet.add(c, b)
+        grads = grad((a, b, c), e, deepnet.tensor(1.))
+        print(grads)
 
 if __name__ == "__main__":
     main()

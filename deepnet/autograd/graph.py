@@ -7,21 +7,17 @@ class Node:
     def __init__(self, ctx, nodefns=None):
         self.ctx = ctx
         self.nodefns = nodefns
+        self.tensor = None
 
     def apply(self, grad):
-        if self.nodefns:
-            graddata = self.ctx.apply(grad)
-            grads = self._postpro_apply(graddata)
-            self._apply_nodefns(self.nodefns, grads)
-        else:
-            self.ctx.apply(grad)
+        graddata = self.ctx.apply(grad)
+        gradout = self._tograds(graddata)
+        return gradout
+    
+    def link(self, tensor):
+        self.tensor = tensor
 
-    def _apply_nodefns(self, nodefns , grads):
-        for nodefn, grad in zip(nodefns, grads):
-            if nodefn is not None:
-                nodefn.apply(grad)
-
-    def _postpro_apply(self, gradata): 
+    def _tograds(self, gradata): 
         if isinstance(gradata, np.ndarray):
             gradata = (gradata,)
         return tuple(deepnet.tensor(data) for data in gradata)
@@ -30,19 +26,22 @@ class Node:
         return str(self.ctx.__class__.__name__)
 
 
-class AccumulateGrad:
+class AccumGrad:
 
     def __init__(self, tensor) -> None:
         self.tensor = tensor
 
     def apply(self, grad):
-        if self.tensor.grad is None:
-            self.tensor._grad = deepnet.zeros_like(self.tensor)
         data = grad.data
         if self.tensor.dim != grad.dim and self.tensor.ndim <= grad.ndim:
             data = _reduce_graddata(self.tensor, grad)
-        self.tensor._grad._data += data
+        return data
 
+    @staticmethod
+    def accum(tensor, grad):
+        if tensor.grad is None:
+            tensor._grad = deepnet.ones_like(tensor)
+        tensor._grad._data += grad._data
 
 def _reduce_graddata(tensor, grad):
     sumdims = _sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
@@ -58,13 +57,14 @@ def _sumdims(tdim, gdim, tndim, gndim):
 def _graphout(ctx, rawout):
     out = deepnet.tensor(rawout)
     if mode.gradon() and _candiff(ctx):
-        return _mutateout(ctx, out)
+        out = _mutateout(ctx, out)
+        out.backfn.link(out)
     return out
 
 def _mutateout(ctx, out):
     nodefns = _get_nodefns(ctx.tensors())
     node = Node(ctx, nodefns)
-    return out.withstate(backfn=node, leaf=False)
+    return out.withstate(backfn=node, diff=True, leaf=False)
 
 
 def _candiff(ctx):
@@ -81,6 +81,8 @@ def _get_nodefns(tensors):
 
 def _get_nodefns_helper(tensor):
     if tensor.leaf:
-        ctx = AccumulateGrad(tensor)
-        return Node(ctx, None)
+        ctx = AccumGrad(tensor)
+        node = Node(ctx, None)
+        node.link(tensor)
+        return node
     return tensor.backfn

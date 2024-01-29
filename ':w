@@ -13,16 +13,13 @@ def grad(tensors, out, outgrad):
     while queue:
         node, grad = queue.popleft()
         outgrad = backfn.apply(grad) 
-        if node.tensor in tensormap:
-            tensor = node.tensor
-            graddata = outgrad[0].data if _isleaf(node) else grad.data
-            tgrad = tensormap[tensor]
-            tensormap[tensor] = tgrad.withstate(tgrad.data + graddata)
-        if node.nodefns:
-            nodefns = node.nodefns
-            items = [[n, g] for n, g in zip(nodefns, outgrad)]
-            queue.extend(items)
+        if _isleaf(node) and node.tensor in tensormap:
+            tensor = ctx.tensor
+            graddata = outgrad[0].data
+
+
     return tuple(tensormap.values())
+
 
 def _mapify(tensors):
     if deepnet.istensor(tensors):

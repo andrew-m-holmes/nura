@@ -1,10 +1,11 @@
 import numpy as np
 import deepnet
 
+
 _py_int = int
 _py_float = float
 _py_bool = bool
-
+ 
 
 class dtype:
 

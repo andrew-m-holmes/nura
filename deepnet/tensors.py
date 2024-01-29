@@ -152,6 +152,8 @@ class TensorBase:
         if " dtype" in rep:
             start = rep.index(" dtype")
             rep = rep[:start]
+        if self.ndim == 0:
+            rep = "tensor(" + rep
         return rep + ")"
 
 
@@ -183,14 +185,16 @@ class Tensor(TensorBase):
     def backward(self, grad=None):
         deepnet.backward(self, grad)
 
-    def withstate(self, diff=None, grad=None, backfn=None, leaf=True):
+    def withstate(self, data=None, diff=None, grad=None, backfn=None, leaf=True):
+        if data is None:
+            data = self.data
         if diff is None:
             diff = self.diff
         if grad is None:
             grad = self.grad
         if backfn is None:
             backfn = self.backfn
-        return Tensor(self.data, diff, grad, backfn, leaf, self.dtype)
+        return Tensor(data, diff, grad, backfn, leaf, self.dtype)
 
 
 def tensor(data, diff=False, dtype=None):
