@@ -1,6 +1,6 @@
-import deepnet
-from . import graph as graph
-from deepnet import Tensor
+import numpy as np
+from . import graph
+from deepnet.tensors import Tensor
 from typing import Tuple, Union
 
 
@@ -12,8 +12,10 @@ class Context:
     def save(self, *tensors: Tensor):
         self._tensors = tensors
 
-    def tensors(self) -> Tuple[Tensor, ...]:
-        return self._tensors
+    def tensors(self) -> Union[Tensor, Tuple[Tensor, ...]]:
+        if self._tensors is None:
+            return None
+        return self._tensors if len(self._tensors) > 1 else self._tensors[0]
 
 class BackwardFunction(Context):
 
@@ -24,7 +26,6 @@ class BackwardFunction(Context):
     def apply_jvp(self):
         jvp_fn = self.fncls.jvp
         return jvp_fn(self)
-
 
 class FunctionMeta(type):
 
@@ -39,7 +40,7 @@ class FunctionMeta(type):
 class Function(metaclass=FunctionMeta):
 
     @staticmethod
-    def forward(ctx, *args, **kwargs):
+    def forward(ctx, *args, **kwargs) -> np.ndarray:
         raise NotImplementedError
 
     @staticmethod
@@ -47,7 +48,7 @@ class Function(metaclass=FunctionMeta):
         raise NotImplementedError
 
     @staticmethod
-    def jvp(ctx):
+    def jvp(ctx, *grads) -> np.ndarray:
         raise NotImplementedError
 
     @classmethod

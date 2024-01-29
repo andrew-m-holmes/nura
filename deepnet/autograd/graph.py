@@ -1,25 +1,7 @@
-import numpy as np
-
 import deepnet
+import numpy as np
 from . import mode
-
-
-class Graph:
-
-    _graph = {}
-
-    @classmethod
-    def add(cls, tensor, node):
-        cls._graph[tensor] = node
-
-    @classmethod
-    def delete(cls, tensor):
-        cls._graph.pop(tensor)
-
-    @classmethod
-    def clear(cls):
-        cls._graph.clear()
-
+from typing import Tuple, Union
 
 class Node:
 
@@ -28,15 +10,23 @@ class Node:
         self.nodefns = nodefns
 
     def apply(self, grad):
-        grads = self.ctx.apply(grad)
         if self.nodefns:
+            graddata = self.ctx.apply(grad)
+            grads = self._postpro_apply(graddata)
             self._apply_nodefns(self.nodefns, grads)
+        else:
+            self.ctx.apply(grad)
 
     def _apply_nodefns(self, nodefns , grads):
         for nodefn, grad in zip(nodefns, grads):
             if nodefn is not None:
                 nodefn.apply(grad)
 
+    def _postpro_apply(self, gradata): 
+        if isinstance(gradata, np.ndarray):
+            gradata = (gradata,)
+        return tuple(deepnet.tensor(data) for data in gradata)
+    
     def __repr__(self) -> str:
         return str(self.ctx.__class__.__name__)
 
@@ -48,38 +38,34 @@ class AccumulateGrad:
 
     def apply(self, grad):
         if self.tensor.grad is None:
-            self.tensor.grad = deepnet.zeros_like(self.tensor)
-        grad_data = _process_grad_for_accumulate(self.tensor, grad)
-        self.tensor.grad.data += grad_data.data
+            self.tensor._grad = deepnet.zeros_like(self.tensor)
+        data = grad.data
+        if self.tensor.dim != grad.dim and self.tensor.ndim <= grad.ndim:
+            data = _reduce_graddata(self.tensor, grad)
+        self.tensor._grad._data += data
 
 
-def _process_grad_for_accumulate(tensor, grad):
-    if tensor.dim() != grad.dim() and tensor.ndim() <= grad.ndim():
-        dims = _get_dims_to_sum(tensor.dim(), grad.dim())
-        keepdims = tensor.ndim() == grad.ndim()
-        return np.sum(grad.data, axis=dims, keepdims=keepdims)
-    return grad.data
+def _reduce_graddata(tensor, grad):
+    sumdims = _sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
+    keepdims = tensor.ndim == grad.ndim
+    return np.sum(grad.data, axis=sumdims, keepdims=keepdims)
 
-
-def _get_dims_to_sum(dim_0, dim_1):
-    padded_dim_0 = np.pad(dim_0, (len(dim_1) - len(dim_0), 0), constant_values=0)
-    mask = padded_dim_0 != np.array(dim_1)
-    dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
-    return dims
+def _sumdims(tdim, gdim, tndim, gndim):
+    paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
+    mask = paddim != np.array(gdim)
+    return np.where(mask)
 
 
 def _graphout(ctx, rawout):
     out = deepnet.tensor(rawout)
-    if mode.gradon():
-        return _augmentout(ctx, out)
+    if mode.gradon() and _candiff(ctx):
+        return _mutateout(ctx, out)
     return out
 
-def _augmentout(ctx, out):
-    if _candiff(ctx):
-        nodefns = _get_nodefns(ctx.tensors())
-        node = Node(ctx, nodefns)
-        return out.withstate(backfn=node, leaf=False)
-    return out
+def _mutateout(ctx, out):
+    nodefns = _get_nodefns(ctx.tensors())
+    node = Node(ctx, nodefns)
+    return out.withstate(backfn=node, leaf=False)
 
 
 def _candiff(ctx):
@@ -97,5 +83,5 @@ def _get_nodefns(tensors):
 def _get_nodefns_helper(tensor):
     if tensor.leaf:
         ctx = AccumulateGrad(tensor)
-        return Node(ctx, nodefns=None)
-    return tensor.nodefn
+        return Node(ctx, None)
+    return tensor.backfn

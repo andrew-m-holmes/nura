@@ -1,5 +1,4 @@
 import numpy as np
-import deepnet
 from .tensors import Tensor
 from .autograd.function import Context, Function
 from typing import Any
@@ -15,7 +14,7 @@ class Add(Function):
 
     @staticmethod
     def backward(ctx: Any, grad: Tensor):
-        return grad, grad
+        return grad.data, grad.data
 
     @staticmethod
     def jvp(ctx: Context):
@@ -34,7 +33,7 @@ class Sub(Function):
 
     @staticmethod
     def backward(ctx: Any, grad: Tensor):
-        grad_a = grad
+        grad_a = grad.data
         grad_b = np.negative(grad.data)
         return grad_a, grad_b
 

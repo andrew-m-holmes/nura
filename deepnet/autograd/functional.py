@@ -2,7 +2,6 @@ import deepnet
 import numpy as np
 from types import FunctionType
 
-
 def vjp(primals, cotangent, func, *func_args, use_graph=False):
     _vjp_args_check(primals, cotangent, func, use_graph)
     primals, cotangent = _vjp_preprocess(

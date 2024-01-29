@@ -1,8 +1,6 @@
 import numpy as np
 
 import deepnet
-from deepnet import Tensor
-from deepnet.dtype import dtype
 
 
 def zeros(dim, diff=False, dtype=None):
@@ -67,3 +65,6 @@ def todim(dim):
 
 def is_contiguous(tensor):
     return tensor.data.flags["C_CONTIGUOUS"]
+
+def istensor(obj):
+    return isinstance(obj, deepnet.Tensor)

@@ -1,6 +1,5 @@
-from typing import Tuple
-
 import deepnet
+from typing import Tuple
 
 
 class TensorBase:
@@ -135,19 +134,17 @@ class TensorBase:
     def __rpow__(self, other):
         return deepnet.pow(other, self)
 
-    def __len__(self):
-        return self._data.shape[0]
-
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
 
     def __setitem__(self, _slice, item):
-        pass
+        if issubclass(item, TensorBase):
+            self.data[_slice] = item.data
+        else:
+            self.data[_slice] = item
 
-    def __setattr__(self, name, value):
-        # make instance attrs immutable
-        assert name not in self.__dict__
-        self.__dict__[name] = value
+    def __len__(self):
+        return self._data.shape[0]
 
     def __repr__(self) -> str:
         base = repr(self._data)
@@ -184,7 +181,7 @@ class Tensor(TensorBase):
         return self._leaf
         
     def backward(self, grad=None):
-        raise NotImplementedError
+        deepnet.backward(self, grad)
 
     def withstate(self, diff=None, grad=None, backfn=None, leaf=True):
         if diff is None:
