@@ -194,7 +194,13 @@ class Tensor(TensorBase):
             grad = self.grad
         if backfn is None:
             backfn = self.backfn
-        return Tensor(data, diff, grad, backfn, leaf, self.dtype)
+
+        self._data = data
+        self._diff = diff
+        self._grad = grad
+        self._backfn = backfn
+        self._leaf = leaf
+        return self
 
 
 def tensor(data, diff=False, dtype=None):
