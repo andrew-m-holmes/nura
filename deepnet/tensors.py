@@ -147,14 +147,7 @@ class TensorBase:
         return self._data.shape[0]
 
     def __repr__(self) -> str:
-        base = repr(self._data)
-        rep = base.replace("array", "").replace(",", "").replace(")", "")
-        if " dtype" in rep:
-            start = rep.index(" dtype")
-            rep = rep[:start]
-        rep = "tensor(" + rep
-        return rep + ")"
-
+        return str(self._data)
 
 class Tensor(TensorBase):
 
@@ -201,6 +194,14 @@ class Tensor(TensorBase):
         self._leaf = leaf
         return self
 
+    def __repr__(self):
+        base = super().__repr__()
+        s = "tensor(" + base
+        if self.backfn:
+            s += " backfn="+ str(self.backfn)
+        s += " dtype=" + self.dtype.name()
+        s += ")"
+        return s
 
 def tensor(data, diff=False, dtype=None):
     if dtype is None:

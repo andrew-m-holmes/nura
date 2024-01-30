@@ -1,5 +1,6 @@
 import numpy as np
 from . import graph
+import deepnet
 from deepnet.tensors import Tensor
 from typing import Tuple, Union
 
@@ -12,7 +13,7 @@ class Context:
     def save(self, *tensors: Tensor):
         self._tensors = tensors
 
-    def tensors(self) -> Union[Tensor, Tuple[Tensor, ...]]:
+    def tensors(self) -> Union[Tensor, Tuple[Tensor, ...], None]:
         if self._tensors is None:
             return None
         return self._tensors if len(self._tensors) > 1 else self._tensors[0]
@@ -31,7 +32,7 @@ class FunctionMeta(type):
 
     def __init__(cls, name, bases, attrs):
         backcls = type(
-            name + "Backward", (BackwardFunction,),
+            name.lower(), (BackwardFunction,),
             {"fncls": cls})
         cls.backcls = backcls
         super().__init__(name, bases, attrs)
@@ -55,5 +56,6 @@ class Function(metaclass=FunctionMeta):
     def apply(cls, *args, **kwargs) -> Tensor:
         ctx = cls.backcls()
         rawout = cls.forward(ctx, *args, **kwargs)
-        out = graph._graphout(ctx, rawout)
+        irout = deepnet.tensor(rawout)
+        out = graph.genout(irout, ctx)
         return out
