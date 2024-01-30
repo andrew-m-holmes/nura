@@ -148,12 +148,11 @@ class TensorBase:
 
     def __repr__(self) -> str:
         base = repr(self._data)
-        rep = base.replace("array", "tensor").replace(",", "").replace(")", "")
+        rep = base.replace("array", "").replace(",", "").replace(")", "")
         if " dtype" in rep:
             start = rep.index(" dtype")
             rep = rep[:start]
-        if self.ndim == 0:
-            rep = "tensor(" + rep
+        rep = "tensor(" + rep
         return rep + ")"
 
 
