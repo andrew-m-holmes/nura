@@ -4,6 +4,7 @@ import numpy as np
 
 import deepnet
 
+
 def backward(out, grad):
     assert out.backfn is not None
     queue = deque()
@@ -22,6 +23,7 @@ def backward(out, grad):
             items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
             queue.extend(items)
 
+
 def grad(inpt, out, grad):
     assert out.backfn is not None
     inptmap = mapify(inpt)
@@ -35,12 +37,12 @@ def grad(inpt, out, grad):
         if tensor in inptmap:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
-            inptmap[tensor] = oldgrad.withstate(oldgrad.data + accumgrad.data)
+            oldgrad.mutate(oldgrad.data + accumgrad.data)
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
             queue.extend(items)
-    return list(inptmap.values())
-        
+    return list(t.const() for t in inptmap.values())
+
 
 def mismatch(tensor, grad):
     return tensor.dim != grad.dim and tensor.ndim <= grad.dim
@@ -62,5 +64,4 @@ def sumdims(tdim, gdim, tndim, gndim):
 def mapify(inpt):
     if deepnet.istensor(inpt):
         inpt = (inpt,)
-    return {t: deepnet.zeros_like(t) for t in inpt}
-
+    return {t: deepnet.zeros_like(t).mut() for t in inpt}

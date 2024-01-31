@@ -1,6 +1,6 @@
 import numpy as np
-from . import graph
 import deepnet
+from . import graph
 from deepnet.tensors import Tensor
 from typing import Tuple, Union
 
@@ -18,6 +18,7 @@ class Context:
             return None
         return self._tensors if len(self._tensors) > 1 else self._tensors[0]
 
+
 class BackwardFunction(Context):
 
     def apply(self, *args):
@@ -28,12 +29,11 @@ class BackwardFunction(Context):
         jvp_fn = self.fncls.jvp
         return jvp_fn(self)
 
+
 class FunctionMeta(type):
 
     def __init__(cls, name, bases, attrs):
-        backcls = type(
-            name.lower(), (BackwardFunction,),
-            {"fncls": cls})
+        backcls = type(name.lower(), (BackwardFunction,), {"fncls": cls})
         cls.backcls = backcls
         super().__init__(name, bases, attrs)
 

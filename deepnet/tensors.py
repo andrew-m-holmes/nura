@@ -149,14 +149,16 @@ class TensorBase:
     def __repr__(self) -> str:
         return str(self._data)
 
+
 class Tensor(TensorBase):
 
-    def __init__(self, data, diff, grad, backfn, leaf, dtype) -> None:
+    def __init__(self, data, diff, grad, backfn, leaf, mut, dtype) -> None:
         super().__init__(data, dtype)
         self._diff = diff
         self._grad = grad
         self._backfn = backfn
         self._leaf = leaf
+        self._mut = mut
 
     @property
     def diff(self):
@@ -173,11 +175,21 @@ class Tensor(TensorBase):
     @property
     def leaf(self):
         return self._leaf
-        
-    def backward(self, grad=None):
-        deepnet.backward(self, grad)
 
-    def withstate(self, data=None, diff=None, grad=None, backfn=None, leaf=True):
+    @property
+    def mutable(self):
+        return self._mut
+
+    def backward(self, grad=None):
+        pass
+
+    def const(self):
+        return tensor(self.data, self.diff, False, self.dtype)
+
+    def mut(self):
+        return tensor(self.data, self.diff, True, self.dtype)
+
+    def mutated(self, data=None, diff=None, grad=None, backfn=None, leaf=True, mut=False):
         if data is None:
             data = self.data
         if diff is None:
@@ -186,11 +198,18 @@ class Tensor(TensorBase):
             grad = self.grad
         if backfn is None:
             backfn = self.backfn
+        return Tensor(data, diff, grad, backfn, leaf, mut, self.dtype)
 
-        self._data = data
-        self._diff = diff
-        self._grad = grad
-        self._backfn = backfn
+    def mutate(self, data=None, diff=None, grad=None, backfn=None, leaf=True):
+        assert self.mutable
+        if data is not None:
+            self._data = data
+        if diff is not None:
+            self._diff = diff
+        if grad is not None:
+            self._grad = grad
+        if backfn is not None:
+            self._backfn = backfn
         self._leaf = leaf
         return self
 
@@ -198,15 +217,16 @@ class Tensor(TensorBase):
         base = super().__repr__()
         s = "tensor(" + base
         if self.backfn:
-            s += " backfn="+ str(self.backfn)
+            s += " backfn=" + str(self.backfn)
         s += " dtype=" + self.dtype.name()
         s += ")"
         return s
 
-def tensor(data, diff=False, dtype=None):
+
+def tensor(data, diff=False, mut=False, dtype=None):
     if dtype is None:
         dtype = deepnet.get_dtype(data)
     if diff:
         assert dtype.can_diff
     data = dtype.numpy(data)
-    return Tensor(data, diff, None, None, True, dtype)
+    return Tensor(data, diff, None, None, True, mut, dtype)

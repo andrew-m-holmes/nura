@@ -4,7 +4,7 @@ import numpy as np
 
 def genout(out, ctx):
     node = Node(out, ctx)
-    return out.withstate(backfn=node, diff=True, leaf=False)
+    return out.mutated(backfn=node, diff=True, leaf=False)
 
 
 class Node:
