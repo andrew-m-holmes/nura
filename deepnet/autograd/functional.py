@@ -1,12 +1,15 @@
-from collections import deque
-
 import numpy as np
-
 import deepnet
+from collections import deque
+from deepnet.tensors import Tensor
+from typing import Tuple, Union, List, Optional
 
 
-def backward(out, grad):
+def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
     assert out.backfn is not None
+    if grad is None:
+        assert out.nelem == 1
+        grad = deepnet.oneslike(out)
     queue = deque()
     queue.append([out.backfn, grad])
 
@@ -14,17 +17,19 @@ def backward(out, grad):
         node, grad = queue.popleft()
         nodes = node.nxtnodes()
         tensor = node.tensor
-        if node.tensor.leaf:
+        if tensor.leaf and tensor.mutable:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = tensor.grad
-            newgrad = oldgrad.withstate(oldgrad.data + accumgrad.data)
-            _ = tensor.withstate(newgrad)
+            oldgrad = tensor.grad if tensor.grad else deepnet.oneslike(tensor)
+            newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
+            tensor.mutate(grad=newgrad)
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
             queue.extend(items)
 
 
-def grad(inpt, out, grad):
+def grad(
+    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Tensor
+) -> List[Tensor]:
     assert out.backfn is not None
     inptmap = mapify(inpt)
     queue = deque()
@@ -44,6 +49,15 @@ def grad(inpt, out, grad):
     return list(t.const() for t in inptmap.values())
 
 
+def vjp(
+    inpt: Union[Tensor, Tuple[Tensor, ...]],
+    out: Tensor,
+    cots: Union[Tesnor, Tuple[Tensor, ...]],
+    fn,
+):
+    pass
+
+
 def mismatch(tensor, grad):
     return tensor.dim != grad.dim and tensor.ndim <= grad.dim
 
@@ -52,7 +66,7 @@ def sumgrad(tensor, grad):
     dims = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
     keepdims = tensor.ndim == grad.ndim
     data = np.sum(grad.data, axis=dims, keepdims=keepdims)
-    return grad.withstate(data=data)
+    return grad.mutated(data=data)
 
 
 def sumdims(tdim, gdim, tndim, gndim):
@@ -64,4 +78,4 @@ def sumdims(tdim, gdim, tndim, gndim):
 def mapify(inpt):
     if deepnet.istensor(inpt):
         inpt = (inpt,)
-    return {t: deepnet.zeros_like(t).mut() for t in inpt}
+    return {t: deepnet.zeroslike(t).mut() for t in inpt}

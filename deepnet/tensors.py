@@ -1,12 +1,14 @@
 import deepnet
-from typing import Tuple
+from deepnet.dtype import dtype
+from typing import Tuple, Optional
+from numpy import ndarray
 
 
 class TensorBase:
 
-    def __init__(self, data, dtype) -> None:
-        self._data = data
-        self._dtype = dtype
+    def __init__(self, data, _dtype) -> None:
+        self._data: ndarray = data
+        self._dtype: dtype = _dtype
 
     @property
     def data(self):
@@ -65,8 +67,8 @@ class TensorBase:
     def clone(self):
         return deepnet.clone(self)
 
-    def contiguous(self):
-        return deepnet.to_contiguous(self)
+    def contig(self):
+        return deepnet.tocontig(self)
 
     def sum(self, dims=None, keepdims=False):
         return deepnet.sum(self, dims, keepdims)
@@ -152,17 +154,12 @@ class TensorBase:
 
 class Tensor(TensorBase):
 
-    def __init__(self, data, diff, grad, backfn, leaf, mut, dtype) -> None:
+    def __init__(self, data, mut, grad, backfn, leaf, dtype) -> None:
         super().__init__(data, dtype)
-        self._diff = diff
-        self._grad = grad
-        self._backfn = backfn
-        self._leaf = leaf
-        self._mut = mut
-
-    @property
-    def diff(self):
-        return self._diff
+        self._grad: Tensor = grad
+        self._backfn: Optional = backfn
+        self._mut: bool = mut
+        self._leaf: bool = leaf
 
     @property
     def grad(self):
@@ -180,32 +177,32 @@ class Tensor(TensorBase):
     def mutable(self):
         return self._mut
 
-    def backward(self, grad=None):
-        pass
+    def backward(self, grad: Optional["Tensor"] = None):
+        deepnet.backward(self, grad)
 
     def const(self):
-        return tensor(self.data, self.diff, False, self.dtype)
+        return tensor(self.data, False, self.dtype)
 
     def mut(self):
-        return tensor(self.data, self.diff, True, self.dtype)
+        return tensor(self.data, True, self.dtype)
 
-    def mutated(self, data=None, diff=None, grad=None, backfn=None, leaf=True, mut=False):
+    def mutated(
+        self, data=None, mut=None, grad=None, backfn=None, leaf=True
+    ) -> "Tensor":
         if data is None:
             data = self.data
-        if diff is None:
-            diff = self.diff
+        if mut is None:
+            mut = self.mutable
         if grad is None:
             grad = self.grad
         if backfn is None:
             backfn = self.backfn
-        return Tensor(data, diff, grad, backfn, leaf, mut, self.dtype)
+        return Tensor(data, mut, grad, backfn, leaf, self.dtype)
 
-    def mutate(self, data=None, diff=None, grad=None, backfn=None, leaf=True):
+    def mutate(self, data=None, grad=None, backfn=None, leaf=True) -> "Tensor":
         assert self.mutable
         if data is not None:
             self._data = data
-        if diff is not None:
-            self._diff = diff
         if grad is not None:
             self._grad = grad
         if backfn is not None:
@@ -223,10 +220,10 @@ class Tensor(TensorBase):
         return s
 
 
-def tensor(data, diff=False, mut=False, dtype=None):
+def tensor(data, mut=False, dtype: Optional[dtype] = None) -> Tensor:
     if dtype is None:
-        dtype = deepnet.get_dtype(data)
-    if diff:
-        assert dtype.can_diff
+        dtype = deepnet.dtypeof(data)
+    if mut:
+        assert dtype.candiff()
     data = dtype.numpy(data)
-    return Tensor(data, diff, None, None, True, mut, dtype)
+    return Tensor(data, mut, None, None, True, dtype)

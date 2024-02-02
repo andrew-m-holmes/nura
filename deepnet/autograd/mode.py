@@ -1,21 +1,20 @@
 from contextlib import contextmanager
 
-def gradon():
-    return Autograd._autograd
+
+def usegrad():
+    return Autograd._usegrad
+
 
 class Autograd:
 
-    _autograd = True
+    _usegrad = True
 
 
 @contextmanager
 def autograd(state=True):
-    prev = Autograd._autograd
-    Autograd._autograd= state
+    prev = Autograd._usegrad
+    Autograd._usegrad = state
     try:
         yield
     finally:
-        Autograd._autograd = prev
-
-
-
+        Autograd._usegrad = prev
