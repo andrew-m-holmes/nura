@@ -17,7 +17,7 @@ class Add(Function):
         return grad.data, grad.data
 
     @staticmethod
-    def jvp(ctx: Context):
+    def jvp(ctx: Context, tana, tanb):
         a, b = ctx.tensors()
         tan_out = a.tangent.data + b.tangent.data
         return tan_out

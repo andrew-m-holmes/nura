@@ -33,6 +33,9 @@ class Node:
             return [getnode(t) for t in self.ctx.tensors()]
         return None
 
+    def __call__(self, *args):
+        return self.apply(*args)
+
     def __repr__(self):
         return self._ctx.__class__.__name__
 

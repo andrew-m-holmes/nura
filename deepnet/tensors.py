@@ -1,5 +1,6 @@
 import deepnet
 from deepnet.dtype import dtype
+from deepnet.graph import Node
 from typing import Tuple, Optional
 from numpy import ndarray
 
@@ -157,7 +158,7 @@ class Tensor(TensorBase):
     def __init__(self, data, mut, grad, backfn, leaf, dtype) -> None:
         super().__init__(data, dtype)
         self._grad: Tensor = grad
-        self._backfn: Optional = backfn
+        self._backfn: Optional[Node] = backfn
         self._mut: bool = mut
         self._leaf: bool = leaf
 

@@ -52,17 +52,17 @@ def grad(
 def vjp(
     inpt: Union[Tensor, Tuple[Tensor, ...]],
     out: Tensor,
-    cots: Union[Tesnor, Tuple[Tensor, ...]],
+    cots: Union[Tensor, Tuple[Tensor, ...]],
     fn,
 ):
     pass
 
 
-def mismatch(tensor, grad):
+def mismatch(tensor, grad) -> bool:
     return tensor.dim != grad.dim and tensor.ndim <= grad.dim
 
 
-def sumgrad(tensor, grad):
+def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
     dims = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
     keepdims = tensor.ndim == grad.ndim
     data = np.sum(grad.data, axis=dims, keepdims=keepdims)

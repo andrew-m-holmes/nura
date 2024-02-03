@@ -1,14 +1,15 @@
-import numpy as np
 import deepnet
 from . import graph
 from deepnet.tensors import Tensor
-from typing import Tuple, Union
+from typing import Tuple, Union, Any, Optional
+from numpy import ndarray
 
 
 class Context:
 
-    def __init__(self) -> None:
-        self._tensors = None
+    def __init__(self, fn) -> None:
+        self._fn: Function = fn
+        self._tensors: Optional[Tuple[Tensor, ...]] = None
 
     def save(self, *tensors: Tensor):
         self._tensors = tensors
@@ -18,43 +19,35 @@ class Context:
             return None
         return self._tensors if len(self._tensors) > 1 else self._tensors[0]
 
+    def apply(self, *args: Tensor, rev=True):
+        if rev:
+            return self._fn.backward(self, *args)
+        return self._fn.jvp(self, *args)
 
-class BackwardFunction(Context):
+    def funcname(self):
+        return self._fn.__class__.__name__
 
-    def apply(self, *args):
-        backfn = self.fncls.backward
-        return backfn(self, *args)
-
-    def apply_jvp(self):
-        jvp_fn = self.fncls.jvp
-        return jvp_fn(self)
-
-
-class FunctionMeta(type):
-
-    def __init__(cls, name, bases, attrs):
-        backcls = type(name.lower(), (BackwardFunction,), {"fncls": cls})
-        cls.backcls = backcls
-        super().__init__(name, bases, attrs)
+    def __repr__(self) -> str:
+        return f"{self.funcname()}Ctx"
 
 
-class Function(metaclass=FunctionMeta):
+class Function:
 
     @staticmethod
-    def forward(ctx, *args, **kwargs) -> np.ndarray:
+    def forward(ctx: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
-    def backward(ctx, grad):
+    def backward(ctx: Context, grad: Tensor) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
-    def jvp(ctx, *grads) -> np.ndarray:
+    def jvp(ctx: Context, *grads: Tensor) -> ndarray:
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args, **kwargs) -> Tensor:
-        ctx = cls.backcls()
+    def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
+        ctx = Context(cls)
         rawout = cls.forward(ctx, *args, **kwargs)
         irout = deepnet.tensor(rawout)
         out = graph.genout(irout, ctx)
