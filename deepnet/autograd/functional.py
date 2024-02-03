@@ -17,9 +17,9 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         node, grad = queue.popleft()
         nodes = node.nxtnodes()
         tensor = node.tensor
-        if tensor.leaf and tensor.mutable:
+        if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = tensor.grad if tensor.grad else deepnet.oneslike(tensor)
+            oldgrad = tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
             newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
             tensor.mutate(grad=newgrad)
         if nodes:
@@ -78,4 +78,4 @@ def sumdims(tdim, gdim, tndim, gndim):
 def mapify(inpt):
     if deepnet.istensor(inpt):
         inpt = (inpt,)
-    return {t: deepnet.zeroslike(t).mut() for t in inpt}
+    return {t: deepnet.zeroslike(t) for t in inpt}

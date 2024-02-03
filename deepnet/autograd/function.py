@@ -25,10 +25,10 @@ class Context:
         return self._fn.jvp(self, *args)
 
     def funcname(self):
-        return self._fn.__class__.__name__
+        return self._fn.__name__
 
     def __repr__(self) -> str:
-        return f"{self.funcname()}Ctx"
+        return f"{self.funcname()}Context"
 
 
 class Function:

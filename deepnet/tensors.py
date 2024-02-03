@@ -1,6 +1,6 @@
 import deepnet
 from deepnet.dtype import dtype
-from deepnet.graph import Node
+from deepnet.autograd.graph import Node
 from typing import Tuple, Optional
 from numpy import ndarray
 
@@ -155,12 +155,18 @@ class TensorBase:
 
 class Tensor(TensorBase):
 
-    def __init__(self, data, mut, grad, backfn, leaf, dtype) -> None:
+    _gradtensor = ...
+
+    def __init__(self, data, usegrad, grad, backfn, leaf, dtype) -> None:
         super().__init__(data, dtype)
         self._grad: Tensor = grad
         self._backfn: Optional[Node] = backfn
-        self._mut: bool = mut
+        self._usegrad: bool = usegrad
         self._leaf: bool = leaf
+
+    @property
+    def usegrad(self):
+        return self._usegrad
 
     @property
     def grad(self):
@@ -176,7 +182,12 @@ class Tensor(TensorBase):
 
     @property
     def mutable(self):
-        return self._mut
+        return self._usegrad
+
+    @classmethod
+    def gradtensor(cls):
+        assert cls != Tensor
+        return cls._gradtensor
 
     def backward(self, grad: Optional["Tensor"] = None):
         deepnet.backward(self, grad)
@@ -188,20 +199,20 @@ class Tensor(TensorBase):
         return tensor(self.data, True, self.dtype)
 
     def mutated(
-        self, data=None, mut=None, grad=None, backfn=None, leaf=True
+        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
     ) -> "Tensor":
         if data is None:
             data = self.data
-        if mut is None:
-            mut = self.mutable
+        if usegrad is None:
+            usegrad = self.usegrad
         if grad is None:
             grad = self.grad
         if backfn is None:
             backfn = self.backfn
-        return Tensor(data, mut, grad, backfn, leaf, self.dtype)
+        cls = type(self)
+        return cls(data, usegrad, grad, backfn, leaf)
 
     def mutate(self, data=None, grad=None, backfn=None, leaf=True) -> "Tensor":
-        assert self.mutable
         if data is not None:
             self._data = data
         if grad is not None:
@@ -221,10 +232,87 @@ class Tensor(TensorBase):
         return s
 
 
-def tensor(data, mut=False, dtype: Optional[dtype] = None) -> Tensor:
+class ByteTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.byte)
+
+
+class CharTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.char)
+
+
+class ShortTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.short)
+
+
+class IntTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.int)
+
+
+class LongTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.long)
+
+
+class HalfTensor(Tensor):
+    _gradtensor = True
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.half)
+
+
+class FloatTensor(Tensor):
+    _gradtensor = True
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.float)
+
+
+class DoubleTensor(Tensor):
+    _gradtensor = True
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.double)
+
+
+class BoolTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.bool)
+
+
+def getcls(dtype) -> type:
+    dtypemap = {
+        deepnet.byte: ByteTensor,
+        deepnet.char: CharTensor,
+        deepnet.short: ShortTensor,
+        deepnet.int: IntTensor,
+        deepnet.long: LongTensor,
+        deepnet.half: HalfTensor,
+        deepnet.float: FloatTensor,
+        deepnet.double: DoubleTensor,
+        deepnet.bool: BoolTensor,
+    }
+    return dtypemap[dtype]
+
+
+def tensor(data, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     if dtype is None:
         dtype = deepnet.dtypeof(data)
-    if mut:
-        assert dtype.candiff()
     data = dtype.numpy(data)
-    return Tensor(data, mut, None, None, True, dtype)
+    cls = getcls(dtype)
+    return cls(data, usegrad, None, None, True)

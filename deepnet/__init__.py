@@ -1,5 +1,5 @@
 import numpy as np
-from .tensors import Tensor, tensor
+from .tensors import tensor
 from .utils import *
 from .functional import *
 from .dtype import *

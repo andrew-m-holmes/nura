@@ -147,6 +147,7 @@ class Pow(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         out = np.power(a.data, b.data)
+        ctx.save(a, b)
         ctx.out = out
         return out
 

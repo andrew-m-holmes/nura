@@ -3,11 +3,6 @@ import numpy as np
 from .mode import usegrad
 
 
-def genout(out, ctx):
-    node = Node(out, ctx) if usegrad() and candiff(ctx) else None
-    return out.mutated(backfn=node, mut=True, leaf=False)
-
-
 class Node:
 
     def __init__(self, tensor, ctx):
@@ -33,11 +28,13 @@ class Node:
             return [getnode(t) for t in self.ctx.tensors()]
         return None
 
-    def __call__(self, *args):
-        return self.apply(*args)
-
     def __repr__(self):
-        return self._ctx.__class__.__name__
+        return f"{self._ctx.funcname().lower()}back"
+
+
+def genout(out, ctx):
+    node = Node(out, ctx) if usegrad() and candiff(ctx) else None
+    return out.mutated(backfn=node, usegrad=True, leaf=False)
 
 
 def getnode(tensor):
@@ -47,8 +44,8 @@ def getnode(tensor):
 
 
 def candiff(ctx):
-    if ctx:
-        return all(t.dtype.candiff() for t in ctx.tensors()) and any(
-            t.mut for t in ctx.tensors()
+    if ctx.tensors():
+        return all(t.gradtensor() for t in ctx.tensors()) and any(
+            t.usegrad for t in ctx.tensors()
         )
-    return None
+    return False

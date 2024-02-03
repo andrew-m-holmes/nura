@@ -9,12 +9,8 @@ _py_bool = bool
 
 class dtype:
 
-    _candiff = None
     _wrapping = None
     
-    @classmethod
-    def candiff(cls):
-        return cls._candiff
 
     @classmethod
     def numpy(cls, data):
@@ -31,55 +27,46 @@ class dtype:
 
 class byte(dtype):
 
-    _candiff = False
     _wrapping = np.uint8
 
 
 class char(dtype):
 
-    _candiff = False
     _wrapping = np.int8
 
 
 class short(dtype):
 
-    _candiff = False
     _wrapping = np.int16
 
 
 class int(dtype):
 
-    _candiff = False
     _wrapping = np.int32
 
 
 class long(dtype):
 
-    _candiff = False
     _wrapping = np.int64
 
 
 class half(dtype):
 
-    _candiff = True
     _wrapping = np.float16
 
 
 class float(dtype):
 
-    _candiff = True
     _wrapping = np.float32
 
 
 class double(dtype):
 
-    _candiff = True
     _wrapping = np.float64
 
 
 class bool(dtype):
 
-    _candiff = False
     _wrapping = np.bool_
 
 
@@ -112,11 +99,6 @@ def to(obj, dtype):
     deepnet.istensor(obj)
     data = dtype.numpy(obj.data)
     return deepnet.tensor(data, obj.mutable, dtype)
-
-def typename(obj):
-    assert deepnet.istensor(obj)
-    obj_dtype = obj.dtype
-    return obj_dtype.name().capitalize() + str(obj.__class__.__name__)
 
 
 def dtypeof(data) -> dtype:
