@@ -38,12 +38,12 @@ class Node:
         return None
 
     def __repr__(self):
-        return f"{str(self.ctx).lower()}back" if self.ctx else "accumgrad"
+        return f"{self.ctx.fname.lower()}back" if self.ctx else "accumgrad"
 
 
 def genout(out, ctx):
     node = Node(out, ctx) if usegrad() and candiff(ctx) else None
-    return out.mutated(backfn=node, usegrad=True, leaf=False)
+    return out.mutate(backfn=node, usegrad=True, leaf=False)
 
 
 def getnode(tensor):

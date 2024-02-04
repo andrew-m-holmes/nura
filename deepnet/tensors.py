@@ -119,9 +119,11 @@ class Tensor:
         cls = getcls(self.dtype)
         return cls(data, usegrad, grad, backfn, leaf)
 
-    def mutate(self, data=None, grad=None, backfn=None, leaf=True) -> "Tensor":
+    def mutate(self, data=None, usegrad=None, grad=None, backfn=None, leaf=True) -> "Tensor":
         if data is not None:
             self._data = data
+        if usegrad is not None:
+            self._usegrad = usegrad
         if grad is not None:
             self._grad = grad
         if backfn is not None:
@@ -306,4 +308,6 @@ def tensor(data, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
         dtype = deepnet.dtypeof(data)
     data = dtype.numpy(data)
     cls = getcls(dtype)
+    if usegrad:
+        assert cls.gradtensor()
     return cls(data, usegrad, None, None, True)

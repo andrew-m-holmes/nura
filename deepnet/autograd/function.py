@@ -24,11 +24,12 @@ class Context:
             return self._fn.backward(self, *args)
         return self._fn.jvp(self, *args)
 
-    def funcname(self):
+    @property
+    def fname(self):
         return self._fn.__name__
 
     def __repr__(self) -> str:
-        return f"{self.funcname()}Context"
+        return f"{self.fname}ctx"
 
 
 class Function:
