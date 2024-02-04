@@ -14,6 +14,7 @@ class Add(Function):
 
     @staticmethod
     def backward(ctx: Any, grad: Tensor):
+        del ctx
         return grad.data, grad.data
 
     @staticmethod
@@ -33,9 +34,8 @@ class Sub(Function):
 
     @staticmethod
     def backward(ctx: Any, grad: Tensor):
-        grad_a = grad.data
-        grad_b = np.negative(grad.data)
-        return grad_a, grad_b
+        del ctx
+        return grad.data, np.negative(grad.data)
 
     @staticmethod
     def jvp(ctx: Context):
@@ -80,15 +80,15 @@ class Div(Function):
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        grad_a = 1. / b.data * grad.data
-        grad_b = np.negative(a.data) / b.data ** 2. * grad.data
+        grad_a = 1.0 / b.data * grad.data
+        grad_b = np.negative(a.data) / b.data**2.0 * grad.data
         return grad_a, grad_b
 
     @staticmethod
     def jvp(ctx: Context):
         a, b = ctx.tensors()
         tan_a = a.tangent.data / b.data
-        tan_b = a.data * (np.negative(b.tangent.data) / b.data ** 2)
+        tan_b = a.data * (np.negative(b.tangent.data) / b.data**2)
         tan_out = tan_a + tan_b
         return tan_out
 
@@ -155,7 +155,7 @@ class Pow(Function):
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
         out = ctx.out
-        grad_a =  b.data * np.power(a.data, b.data - 1.) * grad.data
+        grad_a = b.data * np.power(a.data, b.data - 1.0) * grad.data
         grad_b = out * np.log(a.data) * grad.data
         return grad_a, grad_b
 
@@ -163,7 +163,7 @@ class Pow(Function):
     def jvp(ctx: Context):
         a, b = ctx.tensors()
         out = ctx.out
-        tan_a = b.data * np.power(a.data, b.data - 1.) * a.tangent.data
+        tan_a = b.data * np.power(a.data, b.data - 1.0) * a.tangent.data
         tan_b = np.log(a.data) * out * b.tangent.data
         tan_out = tan_a + tan_b
         return tan_out
@@ -203,13 +203,13 @@ class Log(Function):
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a = ctx.tensors()
-        grad_out = 1. / a.data * grad.data
+        grad_out = 1.0 / a.data * grad.data
         return grad_out
 
     @staticmethod
     def jvp(ctx: Context):
         a = ctx.tensors()
-        tan_out = 1. / a.data * a.tangent.data
+        tan_out = 1.0 / a.data * a.tangent.data
         return tan_out
 
 
@@ -274,8 +274,7 @@ class Sum(Function):
         grad_data = grad.data
         if not keepdims:
             grad_data = np.expand_dims(grad_data, axis=dims)
-        grad_out = np.ascontiguousarray(
-            np.broadcast_to(grad_data, a_dim))
+        grad_out = np.ascontiguousarray(np.broadcast_to(grad_data, a_dim))
         return grad_out
 
     @staticmethod
@@ -428,6 +427,25 @@ class Permute(Function):
         dims = ctx.dims
         tan_out = a.tangent.data.transpose(dims)
         return tan_out
+
+
+class Abs(Function):
+
+    @staticmethod
+    def forward(ctx: Context, a: Tensor):
+        ctx.save(a)
+        return np.absolute(a.data)
+
+    @staticmethod
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()
+        mask = np.where(a.data < 0, -1, 1)
+        return mask * grad.data
+
+    @staticmethod
+    def jvp(ctx: Context, tan: Tensor):
+        del ctx
+        return abs(tan.data)
 
 
 class Clone(Function):

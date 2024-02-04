@@ -17,6 +17,10 @@ class Node:
     def ctx(self):
         return self._ctx
 
+    @property
+    def accumnode(self):
+        return self.ctx is None
+
     def apply(self, grad):
         rawgrad = self.ctx.apply(grad)
         if isinstance(rawgrad, np.ndarray):
@@ -25,11 +29,16 @@ class Node:
 
     def nxtnodes(self):
         if self.ctx:
-            return [getnode(t) for t in self.ctx.tensors()]
+            nodes = []
+            for t in self.ctx.tensors():
+                node = getnode(t)
+                if isinstance(node, Node):
+                    nodes.append(node)
+            return nodes
         return None
 
     def __repr__(self):
-        return f"{self._ctx.funcname().lower()}back"
+        return f"{str(self.ctx).lower()}back" if self.ctx else "accumgrad"
 
 
 def genout(out, ctx):
@@ -38,7 +47,7 @@ def genout(out, ctx):
 
 
 def getnode(tensor):
-    if tensor.leaf:
+    if tensor.leaf and tensor.usegrad:
         return Node(tensor, None)
     return tensor.backfn
 

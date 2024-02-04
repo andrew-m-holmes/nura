@@ -17,12 +17,14 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         node, grad = queue.popleft()
         nodes = node.nxtnodes()
         tensor = node.tensor
-        if tensor.leaf:
+        if node.accumnode:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
+            oldgrad = (
+                tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
+            )
             newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
             tensor.mutate(grad=newgrad)
-        if nodes:
+        elif nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
             queue.extend(items)
 
@@ -42,11 +44,11 @@ def grad(
         if tensor in inptmap:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
-            oldgrad.mutate(oldgrad.data + accumgrad.data)
+            oldgrad.mutate(data=oldgrad.data + accumgrad.data)
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
             queue.extend(items)
-    return list(t.const() for t in inptmap.values())
+    return list(t for t in inptmap.values())
 
 
 def vjp(

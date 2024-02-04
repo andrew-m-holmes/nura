@@ -11,7 +11,7 @@ class Tensor:
 
     def __init__(self, data, usegrad, grad, backfn, leaf, _dtype) -> None:
         self._data: ndarray = data
-        self._grad: Tensor = grad
+        self._grad: Optional[Tensor] = grad
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
@@ -116,7 +116,7 @@ class Tensor:
             grad = self.grad
         if backfn is None:
             backfn = self.backfn
-        cls = type(self)
+        cls = getcls(self.dtype)
         return cls(data, usegrad, grad, backfn, leaf)
 
     def mutate(self, data=None, grad=None, backfn=None, leaf=True) -> "Tensor":
@@ -165,15 +165,6 @@ class Tensor:
     def __sub__(self, other):
         return deepnet.sub(self, other)
 
-    def __pos__(self):
-        raise NotImplementedError
-
-    def __neg__(self):
-        return deepnet.mul(self, -1.0)
-
-    def __abs__(self):
-        raise NotImplementedError
-
     def __rsub__(self, other):
         return deepnet.sub(other, self)
 
@@ -200,6 +191,15 @@ class Tensor:
 
     def __rpow__(self, other):
         return deepnet.pow(other, self)
+
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return deepnet.mul(self, -1.0)
+
+    def __abs__(self):
+        return deepnet.abs(self)
 
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
