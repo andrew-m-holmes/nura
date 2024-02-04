@@ -84,7 +84,7 @@ def iscontig(tensor):
 
 
 def istensor(obj):
-    return isinstance(obj, deepnet.Tensor)
+    return isinstance(obj, Tensor)
 
 
 def typename(tensor: Tensor):

@@ -5,10 +5,16 @@ from typing import Tuple, Optional
 from numpy import ndarray
 
 
-class TensorBase:
+class Tensor:
 
-    def __init__(self, data, _dtype) -> None:
+    _gradtensor = ...
+
+    def __init__(self, data, usegrad, grad, backfn, leaf, _dtype) -> None:
         self._data: ndarray = data
+        self._grad: Tensor = grad
+        self._backfn: Optional[Node] = backfn
+        self._usegrad: bool = usegrad
+        self._leaf: bool = leaf
         self._dtype: dtype = _dtype
 
     @property
@@ -30,6 +36,31 @@ class TensorBase:
     @property
     def nelem(self) -> int:
         return self._data.size
+
+    @property
+    def usegrad(self):
+        return self._usegrad
+
+    @property
+    def grad(self):
+        return self._grad
+
+    @property
+    def backfn(self):
+        return self._backfn
+
+    @property
+    def leaf(self):
+        return self._leaf
+
+    @property
+    def mutable(self):
+        return self._usegrad
+
+    @classmethod
+    def gradtensor(cls):
+        assert cls != Tensor
+        return cls._gradtensor
 
     def item(self):
         assert self.nelem == 1
@@ -64,6 +95,39 @@ class TensorBase:
 
     def bool(self):
         return self.to(deepnet.bool)
+
+    def backward(self, grad: Optional["Tensor"] = None):
+        deepnet.backward(self, grad)
+
+    def const(self):
+        return tensor(self.data, False, self.dtype)
+
+    def mut(self):
+        return tensor(self.data, True, self.dtype)
+
+    def mutated(
+        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
+    ) -> "Tensor":
+        if data is None:
+            data = self.data
+        if usegrad is None:
+            usegrad = self.usegrad
+        if grad is None:
+            grad = self.grad
+        if backfn is None:
+            backfn = self.backfn
+        cls = type(self)
+        return cls(data, usegrad, grad, backfn, leaf)
+
+    def mutate(self, data=None, grad=None, backfn=None, leaf=True) -> "Tensor":
+        if data is not None:
+            self._data = data
+        if grad is not None:
+            self._grad = grad
+        if backfn is not None:
+            self._backfn = backfn
+        self._leaf = leaf
+        return self
 
     def clone(self):
         return deepnet.clone(self)
@@ -141,7 +205,7 @@ class TensorBase:
         return deepnet.slice(self, _slice)
 
     def __setitem__(self, _slice, item):
-        if issubclass(item, TensorBase):
+        if deepnet.istensor(item):
             self.data[_slice] = item.data
         else:
             self.data[_slice] = item
@@ -150,80 +214,7 @@ class TensorBase:
         return self._data.shape[0]
 
     def __repr__(self) -> str:
-        return str(self._data)
-
-
-class Tensor(TensorBase):
-
-    _gradtensor = ...
-
-    def __init__(self, data, usegrad, grad, backfn, leaf, dtype) -> None:
-        super().__init__(data, dtype)
-        self._grad: Tensor = grad
-        self._backfn: Optional[Node] = backfn
-        self._usegrad: bool = usegrad
-        self._leaf: bool = leaf
-
-    @property
-    def usegrad(self):
-        return self._usegrad
-
-    @property
-    def grad(self):
-        return self._grad
-
-    @property
-    def backfn(self):
-        return self._backfn
-
-    @property
-    def leaf(self):
-        return self._leaf
-
-    @property
-    def mutable(self):
-        return self._usegrad
-
-    @classmethod
-    def gradtensor(cls):
-        assert cls != Tensor
-        return cls._gradtensor
-
-    def backward(self, grad: Optional["Tensor"] = None):
-        deepnet.backward(self, grad)
-
-    def const(self):
-        return tensor(self.data, False, self.dtype)
-
-    def mut(self):
-        return tensor(self.data, True, self.dtype)
-
-    def mutated(
-        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
-    ) -> "Tensor":
-        if data is None:
-            data = self.data
-        if usegrad is None:
-            usegrad = self.usegrad
-        if grad is None:
-            grad = self.grad
-        if backfn is None:
-            backfn = self.backfn
-        cls = type(self)
-        return cls(data, usegrad, grad, backfn, leaf)
-
-    def mutate(self, data=None, grad=None, backfn=None, leaf=True) -> "Tensor":
-        if data is not None:
-            self._data = data
-        if grad is not None:
-            self._grad = grad
-        if backfn is not None:
-            self._backfn = backfn
-        self._leaf = leaf
-        return self
-
-    def __repr__(self):
-        base = super().__repr__()
+        base = str(self._data)
         s = "tensor(" + base
         if self.backfn:
             s += " backfn=" + str(self.backfn)
