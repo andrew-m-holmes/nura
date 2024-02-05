@@ -1,17 +1,19 @@
 import numpy as np
 import deepnet as dn
-from deepnet.autograd.functional import grad
+from deepnet.autograd.functional import grad, vjp
 
 
 def main():
 
-    a = dn.tensor(5.0, usegrad=True).float()
-    b = dn.tensor(3.0, usegrad=True).float()
-
-    c = a * 3.0 + b
-    grads = grad((a, b, c), c, dn.oneslike(c))
+    def f(a, b, c):
+        return a * b / c
+    
+    a = dn.rand(4).float()
+    b = dn.rand(4).float()
+    c = dn.rand(4).float()
+    cotan = dn.rand(4).float()
+    grads = vjp((a, b, c), cotan, f)
     print(grads)
-
 
 if __name__ == "__main__":
     main()

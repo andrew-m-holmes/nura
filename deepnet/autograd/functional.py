@@ -3,6 +3,7 @@ import deepnet
 from collections import deque
 from deepnet.tensors import Tensor
 from typing import Tuple, Union, List, Optional
+from types import FunctionType
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
@@ -33,6 +34,9 @@ def grad(
     inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Tensor
 ) -> List[Tensor]:
     assert out.backfn is not None
+    if grad is None:
+        assert out.nelem == 1
+        grad = deepnet.oneslike(out)
     inptmap = mapify(inpt)
     queue = deque()
     queue.append([out.backfn, grad])
@@ -52,11 +56,21 @@ def grad(
 
 
 def vjp(
-    inpt: Union[Tensor, Tuple[Tensor, ...]],
-    out: Tensor,
-    cots: Union[Tensor, Tuple[Tensor, ...]],
-    fn,
-):
+    inpt: Union[Tuple[Tensor, ...], Tensor],
+    cotan: Tensor,
+    f: FunctionType,
+    *fargs,
+    **fkwargs,
+) -> List[Tensor]:
+    if deepnet.istensor(inpt):
+        inpt = (inpt,)
+    inpt = tuple(t.mutated(usegrad=True) for t in inpt)
+    with deepnet.autograd(True):
+        out = f(*inpt, *fargs, **fkwargs)
+    grads = grad(inpt, out, cotan)
+    return grads
+
+def jvp(inpt: Union[Tuple[Tensor, ...], Tensor], tans: Union[Tuple[Tensor, ...], Tensor], f: FunctionType, *fargs, **fkwargs):
     pass
 
 
