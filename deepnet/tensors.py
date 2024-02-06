@@ -53,10 +53,6 @@ class Tensor:
     def leaf(self):
         return self._leaf
 
-    @property
-    def mutable(self):
-        return self._usegrad
-
     @classmethod
     def gradtensor(cls):
         assert cls != Tensor
@@ -99,14 +95,8 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         deepnet.backward(self, grad)
 
-    def const(self):
-        return tensor(self.data, False, self.dtype)
-
-    def mut(self):
-        return tensor(self.data, True, self.dtype)
-
     def mutated(
-        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
+        self, data=None, usegrad=None, grad=None, leaf=True
     ) -> "Tensor":
         if data is None:
             data = self.data
@@ -114,12 +104,12 @@ class Tensor:
             usegrad = self.usegrad
         if grad is None:
             grad = self.grad
-        if backfn is None:
-            backfn = self.backfn
         cls = getcls(self.dtype)
-        return cls(data, usegrad, grad, backfn, leaf)
+        return cls(data, usegrad, grad, None, leaf)
 
-    def mutate(self, data=None, usegrad=None, grad=None, backfn=None, leaf=True) -> "Tensor":
+    def mutate(
+        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
+    ) -> "Tensor":
         if data is not None:
             self._data = data
         if usegrad is not None:

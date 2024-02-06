@@ -98,8 +98,7 @@ _dtypemap = {
 def to(obj, dtype):
     deepnet.istensor(obj)
     data = dtype.numpy(obj.data)
-    return deepnet.tensor(data, obj.mutable, dtype)
-
+    return deepnet.tensor(data, obj.usegrad, dtype)
 
 def dtypeof(data) -> dtype:
     if isinstance(data, np.ndarray):

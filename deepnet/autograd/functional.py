@@ -64,6 +64,7 @@ def vjp(
 ) -> List[Tensor]:
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
+    assert (cotan.gradtensor())
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
     with deepnet.autograd(True):
         out = f(*inpt, *fargs, **fkwargs)
@@ -90,9 +91,10 @@ def jvp(
 
     backfn = out.backfn
 
+
 def jvptrace(node):
     stack = []
-    pass 
+    pass
 
 
 def mismatch(tensor, grad) -> bool:
