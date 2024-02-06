@@ -62,8 +62,7 @@ def vjp(
     *fargs,
     **fkwargs,
 ) -> List[Tensor]:
-    if not isinstance(inpt, tuple):
-        inpt = (inpt,)
+    inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
     with deepnet.autograd(True):
@@ -78,7 +77,22 @@ def jvp(
     *fargs,
     **fkwargs,
 ):
-    pass
+
+    inpt = tupify(inpt)
+    tans = tupify(tans)
+    assert all(t.gradtensor() for t in inpt)
+    assert all(t.gradtensor() for t in tans)
+    inpt = tuple(t.mutated(usegrad=True) for t in inpt)
+    tans = tuple(t.mutated(usegrad=False) for t in tans)
+
+    with deepnet.autograd(True):
+        out = f(*input, *fargs, **fkwargs)
+
+    backfn = out.backfn
+
+def jvptrace(node):
+    stack = []
+    pass 
 
 
 def mismatch(tensor, grad) -> bool:
@@ -95,6 +109,7 @@ def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
 def sumdims(tdim, gdim, tndim, gndim):
     paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
     mask = paddim != np.array(gdim)
+
     return tuple(np.where(mask)[0])
 
 
@@ -102,3 +117,9 @@ def mapify(inpt):
     if not isinstance(inpt, tuple):
         inpt = (inpt,)
     return {t: deepnet.zeroslike(t) for t in inpt}
+
+
+def tupify(inpt) -> Tuple[Tensor, ...]:
+    if not isinstance(inpt, tuple):
+        return (inpt,)
+    return inpt

@@ -7,26 +7,30 @@ from numpy import ndarray
 
 class Context:
 
-    def __init__(self, fn) -> None:
-        self._fn: Function = fn
+    def __init__(self, f) -> None:
+        self._f: Function = f
         self._tensors: Optional[Tuple[Tensor, ...]] = None
 
     def save(self, *tensors: Tensor):
         self._tensors = tensors
 
-    def tensors(self) -> Union[Tensor, Tuple[Tensor, ...], None]:
+    def tensors(self) -> Optional[Union[Tensor, Tuple[Tensor, ...]]]:
         if self._tensors is None:
             return None
         return self._tensors if len(self._tensors) > 1 else self._tensors[0]
 
     def apply(self, *args: Tensor, rev=True):
         if rev:
-            return self._fn.backward(self, *args)
-        return self._fn.jvp(self, *args)
+            return self.f.backward(self, *args)
+        return self.f.jvp(self, *args)
+
+    @property
+    def f(self):
+        return self._f
 
     @property
     def fname(self):
-        return self._fn.__name__
+        return self.f.__name__
 
     def __repr__(self) -> str:
         return f"{self.fname}ctx"
