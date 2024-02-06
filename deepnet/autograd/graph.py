@@ -17,10 +17,6 @@ class Node:
     def ctx(self):
         return self._ctx
 
-    @property
-    def accumnode(self):
-        return self.ctx is None
-
     def apply(self, grad):
         rawgrad = self.ctx.apply(grad)
         if isinstance(rawgrad, np.ndarray):

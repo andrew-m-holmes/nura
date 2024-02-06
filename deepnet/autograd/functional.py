@@ -18,7 +18,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         node, grad = queue.popleft()
         nodes = node.nxtnodes()
         tensor = node.tensor
-        if node.accumnode:
+        if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
                 tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
@@ -32,7 +32,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
 def grad(
     inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Tensor
-) -> List[Tensor]:
+) -> Tuple[Tensor, ...]:
     assert out.backfn is not None
     if grad is None:
         assert out.nelem == 1
@@ -52,7 +52,7 @@ def grad(
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
             queue.extend(items)
-    return list(t for t in inptmap.values())
+    return tuple(t for t in inptmap.values())
 
 
 def vjp(
@@ -61,10 +61,10 @@ def vjp(
     f: FunctionType,
     *fargs,
     **fkwargs,
-) -> List[Tensor]:
+) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
-    assert (cotan.gradtensor())
+    assert cotan.gradtensor()
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
     with deepnet.autograd(True):
         out = f(*inpt, *fargs, **fkwargs)
@@ -84,7 +84,6 @@ def jvp(
     assert all(t.gradtensor() for t in inpt)
     assert all(t.gradtensor() for t in tans)
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
-    tans = tuple(t.mutated(usegrad=False) for t in tans)
 
     with deepnet.autograd(True):
         out = f(*input, *fargs, **fkwargs)
@@ -97,7 +96,7 @@ def jvptrace(node):
     pass
 
 
-def mismatch(tensor, grad) -> bool:
+def mismatch(tensor: Tensor, grad) -> bool:
     return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
 
 
