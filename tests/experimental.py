@@ -16,5 +16,12 @@ def main():
     cots = vjp((a, b, c), cot, f)
     print(cots)
 
+    out = f(a, b, c)
+    grads = grad((a, b, c), out, cot * 10)
+    print(grads)
+
+    out.backward(cot * 100) 
+    print(a.grad, b.grad, c.grad)
+
 if __name__ == "__main__":
     main()
