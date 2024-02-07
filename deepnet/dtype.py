@@ -1,16 +1,14 @@
 import numpy as np
-import deepnet
 
 
 _py_int = int
 _py_float = float
 _py_bool = bool
- 
+
 
 class dtype:
 
     _wrapping = None
-    
 
     @classmethod
     def numpy(cls, data):
@@ -70,7 +68,7 @@ class bool(dtype):
     _wrapping = np.bool_
 
 
-_dtypemap = {
+dtypemap = {
     np.uint8: byte,
     np.int8: char,
     np.int16: short,
@@ -95,18 +93,11 @@ _dtypemap = {
 }
 
 
-def to(obj, dtype):
-    deepnet.istensor(obj)
-    data = dtype.numpy(obj.data)
-    return deepnet.tensor(data, obj.usegrad, dtype)
-
 def dtypeof(data) -> dtype:
     if isinstance(data, np.ndarray):
-        return _dtypemap[data.dtype]
+        return dtypemap[data.dtype]
     if isinstance(data, list):
         return dtypeof(np.array(data))
     dtype = type(data)
-    assert dtype in _dtypemap
-    return _dtypemap[dtype]
-
-
+    assert dtype in dtypemap
+    return dtypemap[dtype]

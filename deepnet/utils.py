@@ -1,32 +1,32 @@
 import numpy as np
-import deepnet
-from .tensors import Tensor
+import deepnet as dn
 from typing import Tuple, Optional, TypeGuard
 from deepnet.dtype import dtype
+from deepnet.tensors import Tensor
 
 
 def zeros(dim: Tuple[int, ...], usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     dim = todim(dim)
     zero_arr = np.zeros(dim)
-    return deepnet.tensor(zero_arr, usegrad, dtype)
+    return dn.tensor(zero_arr, usegrad, dtype)
 
 
 def zeroslike(tensor: Tensor, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     data = tensor.data
     zero_arr = np.zeros_like(data)
-    return deepnet.tensor(zero_arr, usegrad, dtype)
+    return dn.tensor(zero_arr, usegrad, dtype)
 
 
 def ones(dim, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     dim = todim(dim)
     ones_arr = np.ones(dim)
-    return deepnet.tensor(ones_arr, usegrad, dtype)
+    return dn.tensor(ones_arr, usegrad, dtype)
 
 
 def oneslike(tensor: Tensor, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     data = tensor.data
     ones_arr = np.ones_like(data)
-    return deepnet.tensor(ones_arr, usegrad, dtype)
+    return dn.tensor(ones_arr, usegrad, dtype)
 
 
 def randn(
@@ -34,7 +34,7 @@ def randn(
 ) -> Tensor:
     dim = todim(dim)
     randn_arr = np.random.randn(*dim)
-    return deepnet.tensor(randn_arr, usegrad, dtype)
+    return dn.tensor(randn_arr, usegrad, dtype)
 
 
 def randnlike(tensor: Tensor, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
@@ -47,7 +47,7 @@ def rand(
 ) -> Tensor:
     dim = todim(dim)
     rand_arr = np.random.rand(*dim)
-    return deepnet.tensor(rand_arr, usegrad, dtype)
+    return dn.tensor(rand_arr, usegrad, dtype)
 
 
 def randlike(tensor: Tensor, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
@@ -58,7 +58,7 @@ def randlike(tensor: Tensor, usegrad=False, dtype: Optional[dtype] = None) -> Te
 def randint(low, high, dim, dtype: Optional[dtype] = None) -> Tensor:
     dim = todim(dim)
     randint_arr = np.random.randint(low, high, dim)
-    return deepnet.tensor(randint_arr, dtype=dtype)
+    return dn.tensor(randint_arr, dtype=dtype)
 
 
 def randintlike(low, high, tensor: Tensor, dtype: Optional[dtype] = None) -> Tensor:
@@ -68,13 +68,19 @@ def randintlike(low, high, tensor: Tensor, dtype: Optional[dtype] = None) -> Ten
 
 def identity(n, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     data = np.identity(n)
-    return deepnet.tensor(data, usegrad, dtype)
+    return dn.tensor(data, usegrad, dtype)
 
 
 def full(dim, num, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
     dim = todim(dim)
     data = np.full(dim, num)
-    return deepnet.tensor(data, usegrad, dtype)
+    return dn.tensor(data, usegrad, dtype)
+
+
+def to(tensor: Tensor, dtype: dtype):
+    assert istensor(tensor)
+    data = dtype.numpy(tensor.data)
+    return dn.tensor(data, tensor.usegrad, dtype)
 
 
 def todim(dim):
