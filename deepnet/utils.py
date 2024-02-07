@@ -1,7 +1,7 @@
 import numpy as np
 import deepnet
 from .tensors import Tensor
-from typing import Tuple, Optional
+from typing import Tuple, Optional, TypeGuard
 from deepnet.dtype import dtype
 
 
@@ -89,7 +89,7 @@ def iscontig(tensor: Tensor) -> bool:
     return tensor.data.flags["C_CONTIGUOUS"]
 
 
-def istensor(obj):
+def istensor(obj) -> TypeGuard[Tensor]:
     return isinstance(obj, Tensor)
 
 

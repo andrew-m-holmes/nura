@@ -1,12 +1,14 @@
 import deepnet
 import numpy as np
-from .mode import usegrad
+from numpy import ndarray
+from deepnet.autograd.mode import usegrad
 
 
 class Node:
 
-    def __init__(self, tensor, ctx):
+    def __init__(self, tensor, f, ctx):
         self._tensor = tensor
+        self._f = f
         self._ctx = ctx
 
     @property
@@ -14,12 +16,16 @@ class Node:
         return self._tensor
 
     @property
+    def f(self):
+        return self._f
+
+    @property
     def ctx(self):
         return self._ctx
 
     def apply(self, grad):
-        rawgrad = self.ctx.apply(grad)
-        if isinstance(rawgrad, np.ndarray):
+        rawgrad = self.f.backward(self.ctx, grad)
+        if isinstance(rawgrad, ndarray):
             rawgrad = (rawgrad,)
         return tuple(deepnet.tensor(arr) for arr in rawgrad)
 
@@ -37,14 +43,14 @@ class Node:
         return f"{self.ctx.fname.lower()}back" if self.ctx else "accumgrad"
 
 
-def genout(out, ctx):
-    node = Node(out, ctx) if usegrad() and candiff(ctx) else None
+def genout(out, f, ctx):
+    node = Node(out, f, ctx) if usegrad() and candiff(ctx) else None
     return out.mutate(backfn=node, usegrad=True, leaf=False)
 
 
 def getnode(tensor):
     if tensor.leaf and tensor.usegrad:
-        return Node(tensor, None)
+        return Node(tensor, None, None)
     return tensor.backfn
 
 

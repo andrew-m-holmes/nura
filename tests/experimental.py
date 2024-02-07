@@ -4,17 +4,17 @@ from deepnet.autograd.functional import grad, vjp
 
 
 def main():
+    
+    a = dn.rand(4, usegrad=True, dtype=dn.float)
+    b = dn.rand(4, usegrad=True, dtype=dn.float)
+    c = dn.rand(1, usegrad=True, dtype=dn.float)
 
     def f(a, b, c):
         return a * b + c
-
-    a = dn.tensor([1.0, 1.0, 1.0], usegrad=True).float()
-    b = dn.tensor([2.0, 2.0, 2.0], usegrad=True).float()
-    c = dn.tensor([5.0], usegrad=True).float()
-    v = dn.ones(3).float()
-    grads = vjp((a, b, c), v, f)
-    print(grads)
-
+    
+    cot = dn.ones(4, dtype=dn.float)
+    cots = vjp((a, b, c), cot, f)
+    print(cots)
 
 if __name__ == "__main__":
     main()

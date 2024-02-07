@@ -1,14 +1,13 @@
 import deepnet
-from . import graph
 from deepnet.tensors import Tensor
+from deepnet.autograd.graph import genout
 from typing import Tuple, Union, Any, Optional
 from numpy import ndarray
 
 
 class Context:
 
-    def __init__(self, f) -> None:
-        self._f: Function = f
+    def __init__(self) -> None:
         self._tensors: Optional[Tuple[Tensor, ...]] = None
 
     def save(self, *tensors: Tensor):
@@ -19,21 +18,8 @@ class Context:
             return None
         return self._tensors if len(self._tensors) > 1 else self._tensors[0]
 
-    def apply(self, *args: Tensor, rev=True):
-        if rev:
-            return self.f.backward(self, *args)
-        return self.f.jvp(self, *args)
-
-    @property
-    def f(self):
-        return self._f
-
-    @property
-    def fname(self):
-        return self.f.__name__
-
     def __repr__(self) -> str:
-        return f"{self.fname}ctx"
+        return self.__class__.__name__
 
 
 class Function:
@@ -52,8 +38,8 @@ class Function:
 
     @classmethod
     def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
-        ctx = Context(cls)
+        ctx = Context()
         rawout = cls.forward(ctx, *args, **kwargs)
         irout = deepnet.tensor(rawout)
-        out = graph.genout(irout, ctx)
+        out = genout(irout, cls, ctx)
         return out

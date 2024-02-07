@@ -110,17 +110,16 @@ def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
 def sumdims(tdim, gdim, tndim, gndim):
     paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
     mask = paddim != np.array(gdim)
-
     return tuple(np.where(mask)[0])
 
 
 def mapify(inpt):
-    if not isinstance(inpt, tuple):
+    if deepnet.istensor(input):
         inpt = (inpt,)
     return {t: deepnet.zeroslike(t) for t in inpt}
 
 
 def tupify(inpt) -> Tuple[Tensor, ...]:
-    if not isinstance(inpt, tuple):
+    if deepnet.istensor(inpt):
         return (inpt,)
     return inpt
