@@ -1,6 +1,6 @@
 import numpy as np
 import deepnet as dn
-from deepnet.autograd.functional import grad, vjp
+from deepnet.autograd.functional import grad, vjp, jvp
 
 
 def main():
@@ -22,6 +22,10 @@ def main():
 
     out.backward(cot * 100) 
     print(a.grad, b.grad, c.grad)
+    print(out)
+    
+    tans = (dn.oneslike(a), dn.oneslike(b), dn.oneslike(c))
+    tan = jvp((a, b, c), tans, f)
 
 if __name__ == "__main__":
     main()

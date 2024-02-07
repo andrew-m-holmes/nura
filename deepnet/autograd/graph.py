@@ -1,7 +1,7 @@
 import deepnet
-import numpy as np
 from numpy import ndarray
 from deepnet.autograd.mode import usegrad
+from typing import List, Optional
 
 
 class Node:
@@ -29,7 +29,7 @@ class Node:
             rawgrad = (rawgrad,)
         return tuple(deepnet.tensor(arr) for arr in rawgrad)
 
-    def nxtnodes(self):
+    def nxtnodes(self) -> Optional[List["Node"]]:
         if self.ctx:
             nodes = []
             for t in self.ctx.tensors():
@@ -40,7 +40,7 @@ class Node:
         return None
 
     def __repr__(self):
-        return f"{self.ctx.fname.lower()}back" if self.ctx else "accumgrad"
+        return f"{self.f.__name__.lower()}"
 
 
 def genout(out, f, ctx):

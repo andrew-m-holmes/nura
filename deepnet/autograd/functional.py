@@ -1,9 +1,10 @@
 import numpy as np
 import deepnet
-from collections import deque
 from deepnet.tensors import Tensor
-from typing import Tuple, Union, List, Optional
+from deepnet.autograd.graph import Node
+from typing import Tuple, Union, Optional, List
 from types import FunctionType
+from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
@@ -78,7 +79,6 @@ def jvp(
     *fargs,
     **fkwargs,
 ):
-
     inpt = tupify(inpt)
     tans = tupify(tans)
     assert all(t.gradtensor() for t in inpt)
@@ -86,14 +86,25 @@ def jvp(
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
 
     with deepnet.autograd(True):
-        out = f(*input, *fargs, **fkwargs)
+        out = f(*inpt, *fargs, **fkwargs)
 
-    backfn = out.backfn
+    trace = jvptrace(out.backfn)
+    print(trace)
 
+def jvptrace(node: Node) -> List[Node]:
+    stack = [node]
+    queue = deque([node])
 
-def jvptrace(node):
-    stack = []
-    pass
+    while queue:
+        node = queue.popleft()
+        nodes = node.nxtnodes()
+        if nodes is None:
+            continue
+        for nxtnode in nodes:
+            if nxtnode.f:
+                queue.append(nxtnode)
+                stack.append(nxtnode)
+    return stack
 
 
 def mismatch(tensor: Tensor, grad) -> bool:
