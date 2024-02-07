@@ -33,7 +33,7 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def jvp(ctx: Context, *grads: Tensor) -> ndarray:
+    def tangent(ctx: Context, *grad: Tensor) -> ndarray:
         raise NotImplementedError
 
     @classmethod

@@ -18,7 +18,7 @@ class Add(Function):
         return grad.data, grad.data
 
     @staticmethod
-    def jvp(ctx: Context, atan: Tensor, btan: Tensor):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         tan = atan.data + btan.data
         return tan
 
@@ -37,7 +37,7 @@ class Sub(Function):
         return grad.data, np.negative(grad.data)
 
     @staticmethod
-    def jvp(ctx: Context, atan: Tensor, btan: Tensor):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         tan = atan.data + np.negative(btan.data)
         return tan
 
@@ -58,7 +58,7 @@ class Mul(Function):
         return agrad, bgrad
 
     @staticmethod
-    def jvp(ctx: Context, atan: Tensor, btan: Tensor):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
         tan = atan.data * b.data + btan.data * a.data
         return tan
@@ -80,7 +80,7 @@ class Div(Function):
         return agrad, bgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a, b = ctx.tensors()
         atan = a.tangent.data / b.data
         btan = a.data * (np.negative(b.tangent.data) / b.data**2)
@@ -105,7 +105,7 @@ class Dot(Function):
         return agrad, bgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a, b = ctx.tensors()
         atan = np.dot(a.tangent, b.data)
         btan = np.dot(a.data, b.tangent)
@@ -129,7 +129,7 @@ class Matmul(Function):
         return agrad, bgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a, b = ctx.tensors()
         atan = a.tangent.data @ b.data
         btan = a.data @ b.tangent.data
@@ -155,7 +155,7 @@ class Pow(Function):
         return agrad, bgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a, b = ctx.tensors()
         out = ctx.out
         atan = b.data * np.power(a.data, b.data - 1.0) * a.tangent.data
@@ -180,7 +180,7 @@ class Exp(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         out = ctx.out
         tan = out * a.tangent.data
@@ -202,7 +202,7 @@ class Log(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         tan = 1.0 / a.data * a.tangent.data
         return tan
@@ -223,7 +223,7 @@ class Sine(Function):
         return agrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         tan = np.cos(a.data) * a.tangent.data
         return tan
@@ -244,7 +244,7 @@ class Cosine(Function):
         return agrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         tan = a.tangent.data * np.negative(np.sin(a.data))
         return tan
@@ -273,7 +273,7 @@ class Sum(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         dims = ctx.dims
         keepdims = ctx.keepdims
@@ -297,7 +297,7 @@ class Squeeze(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         dims = ctx.dims
         tan = a.tangent.data.squeeze(axis=dims)
@@ -320,7 +320,7 @@ class Unsqueeze(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         dims = ctx.dims
         tan = np.expand_dims(a.tangent.data, axis=dims)
@@ -344,7 +344,7 @@ class View(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         dim = ctx.dim
         tan = a.tangent.data.reshape(dim, order="C")
@@ -368,7 +368,7 @@ class Reshape(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         dim = ctx.dim
         tan = a.tangent.data.reshape(dim)
@@ -393,7 +393,7 @@ class Tranpose(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         dim_0 = ctx.dim_0
         dim_1 = ctx.dim_1
@@ -417,7 +417,7 @@ class Permute(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors[0]
         dims = ctx.dims
         tan = a.tangent.data.transpose(dims)
@@ -438,7 +438,7 @@ class Abs(Function):
         return mask * grad.data
 
     @staticmethod
-    def jvp(ctx: Context, tan: Tensor):
+    def tangent(ctx: Context, tan: Tensor):
         del ctx
         return abs(tan.data)
 
@@ -456,7 +456,7 @@ class Clone(Function):
         return (grad,)
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors()
         tan = a.tangent.data.copy()
         return tan
@@ -482,7 +482,7 @@ class Slice(Function):
         return outgrad
 
     @staticmethod
-    def jvp(ctx: Context):
+    def tangent(ctx: Context):
         a = ctx.tensors[0]
         _slice = ctx.slice
         tan = a.tangent.data[_slice]

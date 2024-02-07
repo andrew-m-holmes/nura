@@ -27,7 +27,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
             tensor.mutate(grad=newgrad)
         elif nodes:
-            items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
+            items = [[n, g] for n, g in zip(nodes, node.applyback(grad))]
             queue.extend(items)
 
 
@@ -38,7 +38,9 @@ def grad(
     if grad is None:
         assert out.nelem == 1
         grad = deepnet.oneslike(out)
-    inptmap = mapify(inpt)
+    inpt = tupify(inpt)
+    vals = tuple(deepnet.zeroslike(t) for t in inpt)
+    inptmap = mapify(inpt, vals)
     queue = deque()
     queue.append([out.backfn, grad])
 
@@ -51,25 +53,25 @@ def grad(
             oldgrad = inptmap[tensor]
             oldgrad.mutate(data=oldgrad.data + accumgrad.data)
         if nodes:
-            items = [[n, g] for n, g in zip(nodes, node.apply(grad))]
+            items = [[n, g] for n, g in zip(nodes, node.applyback(grad))]
             queue.extend(items)
     return tuple(t for t in inptmap.values())
 
 
 def vjp(
     inpt: Union[Tuple[Tensor, ...], Tensor],
-    cotan: Tensor,
+    cot: Tensor,
     f: FunctionType,
     *fargs,
     **fkwargs,
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
-    assert cotan.gradtensor()
+    assert cot.gradtensor()
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
     with deepnet.autograd(True):
         out = f(*inpt, *fargs, **fkwargs)
-    return grad(inpt, out, cotan)
+    return grad(inpt, out, cot)
 
 
 def jvp(
@@ -84,28 +86,9 @@ def jvp(
     assert all(t.gradtensor() for t in inpt)
     assert all(t.gradtensor() for t in tans)
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
-
-    with deepnet.autograd(True):
+    inptmap = mapify(inpt, tans)
+    with deepnet.autograd(True, rev=False):
         out = f(*inpt, *fargs, **fkwargs)
-
-    trace = jvptrace(out.backfn)
-    print(trace)
-
-def jvptrace(node: Node) -> List[Node]:
-    stack = [node]
-    queue = deque([node])
-
-    while queue:
-        node = queue.popleft()
-        nodes = node.nxtnodes()
-        if nodes is None:
-            continue
-        for nxtnode in nodes:
-            if nxtnode.f:
-                queue.append(nxtnode)
-                stack.append(nxtnode)
-    return stack
-
 
 def mismatch(tensor: Tensor, grad) -> bool:
     return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
@@ -124,10 +107,8 @@ def sumdims(tdim, gdim, tndim, gndim):
     return tuple(np.where(mask)[0])
 
 
-def mapify(inpt):
-    if deepnet.istensor(input):
-        inpt = (inpt,)
-    return {t: deepnet.zeroslike(t) for t in inpt}
+def mapify(inpt, vals):
+    return {t: v for t, v in zip(inpt, vals)}
 
 
 def tupify(inpt) -> Tuple[Tensor, ...]:

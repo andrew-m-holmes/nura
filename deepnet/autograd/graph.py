@@ -23,11 +23,14 @@ class Node:
     def ctx(self):
         return self._ctx
 
-    def apply(self, grad):
+    def applyback(self, grad):
         rawgrad = self.f.backward(self.ctx, grad)
         if isinstance(rawgrad, ndarray):
             rawgrad = (rawgrad,)
         return tuple(deepnet.tensor(arr) for arr in rawgrad)
+
+    def applytan(self, *grad):
+        pass
 
     def nxtnodes(self) -> Optional[List["Node"]]:
         if self.ctx:
