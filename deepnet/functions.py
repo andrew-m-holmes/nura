@@ -253,77 +253,77 @@ class Cosine(Function):
 class Sum(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dims, keepdims):
+    def forward(ctx: Context, a: Tensor, dim, keepdims):
         ctx.save(a)
-        ctx.a_dim = a.dim()
-        ctx.dims = dims
+        ctx.adim = a.dim()
+        ctx.dim = dim
         ctx.keepdims = keepdims
-        out = np.sum(a.data, dims, keepdims=keepdims)
+        out = np.sum(a.data, dim, keepdims=keepdims)
         return out
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        a_dim = ctx.a_dim
-        dims = ctx.dims
+        adim = ctx.adim
+        dim = ctx.dim
         keepdims = ctx.keepdims
-        grad_data = grad.data
+        graddata = grad.data
         if not keepdims:
-            grad_data = np.expand_dims(grad_data, axis=dims)
-        outgrad = np.ascontiguousarray(np.broadcast_to(grad_data, a_dim))
+            graddata = np.expand_dims(graddata, axis=dim)
+        outgrad = np.ascontiguousarray(np.broadcast_to(graddata, adim))
         return outgrad
 
     @staticmethod
     def tangent(ctx: Context):
         a = ctx.tensors()
-        dims = ctx.dims
+        dim = ctx.dim
         keepdims = ctx.keepdims
-        tan = np.sum(a.tangent.data, axis=dims, keepdims=keepdims)
+        tan = np.sum(a.tangent.data, axis=dim, keepdims=keepdims)
         return tan
 
 
 class Squeeze(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dims: int):
+    def forward(ctx: Context, a: Tensor, dim: int):
         ctx.save(a)
-        ctx.dims = dims
-        out = a.data.squeeze(axis=dims)
+        ctx.dim = dim
+        out = a.data.squeeze(axis=dim)
         return out
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dims = ctx.dims
-        outgrad = np.expand_dims(grad.data, axis=dims)
+        dim = ctx.dim
+        outgrad = np.expand_dims(grad.data, axis=dim)
         return outgrad
 
     @staticmethod
     def tangent(ctx: Context):
         a = ctx.tensors()
-        dims = ctx.dims
-        tan = a.tangent.data.squeeze(axis=dims)
+        dim = ctx.dim
+        tan = a.tangent.data.squeeze(axis=dim)
         return tan
 
 
 class Unsqueeze(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dims: Any):
+    def forward(ctx: Context, a: Tensor, dim: Any):
         ctx.save(a)
-        ctx.dims = dims
-        out = np.expand_dims(a.data, axis=dims)
+        ctx.dim = dim
+        out = np.expand_dims(a.data, axis=dim)
         return out
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dims = ctx.dims
-        outgrad = grad.data.squeeze(axis=dims)
+        dim = ctx.dim
+        outgrad = grad.data.squeeze(axis=dim)
         return outgrad
 
     @staticmethod
     def tangent(ctx: Context):
         a = ctx.tensors()
-        dims = ctx.dims
-        tan = np.expand_dims(a.tangent.data, axis=dims)
+        dim = ctx.dim
+        tan = np.expand_dims(a.tangent.data, axis=dim)
         return tan
 
 
@@ -332,15 +332,15 @@ class View(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim):
         ctx.save(a)
-        ctx.a_dim = a.dim()
+        ctx.adim = a.dim()
         ctx.dim = dim
         out = a.data.reshape(dim, order="C")
         return out
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        a_dim = ctx.a_dim
-        outgrad = grad.data.reshape(a_dim, order="C")
+        adim = ctx.adim
+        outgrad = grad.data.reshape(adim, order="C")
         return outgrad
 
     @staticmethod
@@ -356,15 +356,15 @@ class Reshape(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: Any):
         ctx.save(a)
-        ctx.a_dim = a.dim()
+        ctx.adim = a.dim()
         ctx.dim = dim
         out = a.data.reshape(dim)
         return out
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        a_dim = ctx.a_dim
-        outgrad = grad.data.reshape(a_dim)
+        adim = ctx.adim
+        outgrad = grad.data.reshape(adim)
         return outgrad
 
     @staticmethod
@@ -404,23 +404,23 @@ class Tranpose(Function):
 class Permute(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dims):
+    def forward(ctx: Context, a: Tensor, dim):
         ctx.save(a)
-        ctx.dims = dims
-        out = a.data.transpose(dims)
+        ctx.dim = dim
+        out = a.data.transpose(dim)
         return out
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dims = np.argsort(ctx.dims)
-        outgrad = grad.data.transpose(dims)
+        dim = np.argsort(ctx.dim)
+        outgrad = grad.data.transpose(dim)
         return outgrad
 
     @staticmethod
     def tangent(ctx: Context):
         a = ctx.tensors[0]
-        dims = ctx.dims
-        tan = a.tangent.data.transpose(dims)
+        dim = ctx.dim
+        tan = a.tangent.data.transpose(dim)
         return tan
 
 

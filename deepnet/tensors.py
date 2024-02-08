@@ -1,7 +1,7 @@
 import deepnet
-from deepnet.dtype import dtype
+from deepnet.types import dtype, dim as _dim
 from deepnet.autograd.graph import Node
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Type
 from numpy import ndarray
 
 
@@ -95,9 +95,7 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         deepnet.backward(self, grad)
 
-    def mutated(
-        self, data=None, usegrad=None, grad=None, leaf=True
-    ) -> "Tensor":
+    def mutated(self, data=None, usegrad=None, grad=None, leaf=True) -> "Tensor":
         if data is None:
             data = self.data
         if usegrad is None:
@@ -127,7 +125,7 @@ class Tensor:
     def contig(self):
         return deepnet.tocontig(self)
 
-    def sum(self, dims=None, keepdims=False):
+    def sum(self, dims: Optional[_dim] =None, keepdims=False):
         return deepnet.sum(self, dims, keepdims)
 
     def squeeze(self, dims=None):
@@ -293,7 +291,7 @@ def getcls(dtype) -> type:
     return dtypemap[dtype]
 
 
-def tensor(data, usegrad=False, dtype: Optional[dtype] = None) -> Tensor:
+def tensor(data, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = deepnet.dtypeof(data)
     data = dtype.numpy(data)

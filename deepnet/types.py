@@ -1,9 +1,13 @@
 import numpy as np
+from typing import Type, Any, Tuple, Union
 
 
 _py_int = int
 _py_float = float
 _py_bool = bool
+
+
+dim = Union[Tuple[int, ...], int]
 
 
 class dtype:
@@ -93,7 +97,7 @@ dtypemap = {
 }
 
 
-def dtypeof(data) -> dtype:
+def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
         return dtypemap[data.dtype]
     if isinstance(data, list):

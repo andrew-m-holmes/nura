@@ -1,8 +1,7 @@
 import numpy as np
 import deepnet
 from deepnet.tensors import Tensor
-from deepnet.autograd.graph import Node
-from typing import Tuple, Union, Optional, List
+from typing import Tuple, Union, Optional
 from types import FunctionType
 from collections import deque
 

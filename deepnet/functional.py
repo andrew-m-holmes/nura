@@ -2,6 +2,7 @@ import numpy as np
 import deepnet.utils as utils
 import deepnet.functions as fn
 from deepnet.tensors import Tensor, tensor
+from deepnet.types import dim
 from typing import Union, Tuple, Optional
 
 
@@ -37,6 +38,7 @@ def dot(a: Tensor, b: Tensor):
 
 def matmul(a: Tensor, b: Tensor):
     a, b = atot(a, b)
+    assert a.ndim >= 1 and b.ndim >= 1
     if a.ndim == 1:
         a = unsqueeze(a, 0)
     if b.ndim == 1:
@@ -52,31 +54,31 @@ def pow(a: Tensor, b: Tensor):
 
 
 def exp(a: Tensor):
-    a = atot(a)
-    out = fn.Exp.apply(a)
+    b = atot(a)
+    out = fn.Exp.apply(b)
     return out
 
 
 def log(a: Tensor):
-    a = atot(a)
-    out = fn.Log.apply(a)
+    b = atot(a)
+    out = fn.Log.apply(b)
     return out
 
 
 def sine(a: Tensor):
-    a = atot(a)
-    out = fn.Sine.apply(a)
+    b = atot(a)
+    out = fn.Sine.apply(b)
     return out
 
 
 def cosine(a: Tensor):
-    a = atot(a)
-    out = fn.Cosine.apply(a)
+    b = atot(a)
+    out = fn.Cosine.apply(b)
     return out
 
 
-def sum(a: Tensor, dims: Optional[Union[Tuple[int, ...], int]] = None, keepdims=False):
-    out = fn.Sum.apply(a, dims, keepdims)
+def sum(a: Tensor, dim: Optional[dim] = None, keepdims=False):
+    out = fn.Sum.apply(a, dim, keepdims)
     return out
 
 
@@ -85,16 +87,13 @@ def transpose(a: Tensor, dim_0=-2, dim_1=-1):
     return out
 
 
-def permute(a: Tensor, dims: Optional[Tuple[int, ...]] = None):
-    out = fn.Permute.apply(a, dims)
+def permute(a: Tensor, dim: Optional[dim] = None):
+    out = fn.Permute.apply(a, dim)
     return out
 
 
-def squeeze(a: Tensor, dims: Optional[Union[Tuple[int, ...], int]] = None):
-    if dims is None:
-        a_dim = a.dim
-        dims = tuple(i for i in range(len(a_dim)) if a_dim[i] == 1)
-    out = fn.Squeeze.apply(a, dims=dims)
+def squeeze(a: Tensor, dim: Optional[dim] = None):
+    out = fn.Squeeze.apply(a, dim=dim)
     return out
 
 
@@ -115,8 +114,8 @@ def reshape(a: Tensor, dim: Tuple[int, ...]):
 
 
 def abs(a: Tensor):
-    a = atot(a)
-    return fn.Abs.apply(a)
+    b = atot(a)
+    return fn.Abs.apply(b)
 
 
 def clone(a: Tensor):
