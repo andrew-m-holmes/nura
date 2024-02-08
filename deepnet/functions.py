@@ -80,11 +80,11 @@ class Div(Function):
         return agrad, bgrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
-        atan = a.tangent.data / b.data
-        btan = a.data * (np.negative(b.tangent.data) / b.data**2)
-        tan = atan + btan
+        atandata= atan.data / b.data
+        btandata= a.data * (np.negative(btan.data) / b.data**2)
+        tan = atandata + btandata
         return tan
 
 

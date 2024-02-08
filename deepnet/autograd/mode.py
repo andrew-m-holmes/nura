@@ -2,26 +2,27 @@ from contextlib import contextmanager
 
 
 def usegrad():
-    return Autograd._usegrad
+    return _Autograd._usegrad
+
 
 def revmode():
-    return Autograd._rev
+    return _Autograd._revmode
 
 
-class Autograd:
+class _Autograd:
 
     _usegrad = True
-    _rev = True
+    _revmode = True
 
 
 @contextmanager
 def autograd(state=True, rev=True):
-    prevstate = Autograd._usegrad
-    prevmode = Autograd._rev
-    Autograd._usegrad = state
-    Autograd._rev = rev
+    prevstate = _Autograd._usegrad
+    prevmode = _Autograd._revmode
+    _Autograd._usegrad = state
+    _Autograd._revmode = rev
     try:
         yield
     finally:
-        Autograd._usegrad = prevstate
-        Autograd._rev = prevmode
+        _Autograd._usegrad = prevstate
+        _Autograd._revmode = prevmode

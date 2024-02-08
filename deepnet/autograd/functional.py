@@ -1,8 +1,7 @@
 import numpy as np
 import deepnet
 from deepnet.tensors import Tensor
-from typing import Tuple, Union, Optional
-from types import FunctionType
+from typing import Tuple, Union, Optional, Callable
 from collections import deque
 
 
@@ -31,7 +30,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
 
 def grad(
-    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Tensor
+    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
     assert out.backfn is not None
     if grad is None:
@@ -59,35 +58,55 @@ def grad(
 
 def vjp(
     inpt: Union[Tuple[Tensor, ...], Tensor],
-    cot: Tensor,
-    f: FunctionType,
+    vec: Tensor,
+    f: Callable[..., Tensor],
     *fargs,
     **fkwargs,
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
-    assert cot.gradtensor()
+    assert vec.gradtensor()
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
     with deepnet.autograd(True):
         out = f(*inpt, *fargs, **fkwargs)
-    return grad(inpt, out, cot)
+    return grad(inpt, out, vec)
 
 
 def jvp(
     inpt: Union[Tuple[Tensor, ...], Tensor],
-    tans: Union[Tuple[Tensor, ...], Tensor],
-    f: FunctionType,
+    vec: Union[Tuple[Tensor, ...], Tensor],
+    f: Callable[..., Tensor],
     *fargs,
     **fkwargs,
 ):
     inpt = tupify(inpt)
-    tans = tupify(tans)
+    vec = tupify(vec)
     assert all(t.gradtensor() for t in inpt)
-    assert all(t.gradtensor() for t in tans)
-    inpt = tuple(t.mutated(usegrad=True) for t in inpt)
-    inptmap = mapify(inpt, tans)
+    assert all(t.gradtensor() for t in vec)
+    inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
     with deepnet.autograd(True, rev=False):
         out = f(*inpt, *fargs, **fkwargs)
+    return out.grad
+
+
+def jacrev(
+    input: Union[Tuple[Tensor, ...], Tensor],
+    f: Callable[..., Tensor],
+    *fargs,
+    **fkwargs,
+) -> Tuple[Tensor, Tensor]:
+    pass
+
+def jacfwd(
+    input: Union[Tuple[Tensor, ...], Tensor],
+    f: Callable[..., Tensor],
+    *fargs,
+    **fkwargs,
+) -> Tuple[Tensor, Tensor]:
+    pass
+
+def getjac(inpt, out):
+    pass
 
 def mismatch(tensor: Tensor, grad) -> bool:
     return tensor.dim != grad.dim and tensor.ndim <= grad.ndim

@@ -29,7 +29,7 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def backward(ctx: Context, grad: Tensor) -> ndarray:
+    def backward(ctx: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
