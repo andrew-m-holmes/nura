@@ -1,5 +1,4 @@
 import deepnet
-from numpy import ndarray
 from deepnet.autograd.mode import usegrad, revmode
 from typing import List, Optional
 
@@ -23,15 +22,15 @@ class Node:
     def ctx(self):
         return self._ctx
 
-    def applyback(self, grad):
-        rawgrad = self.f.backward(self.ctx, grad)
-        if not isinstance(rawgrad, tuple):
-            rawgrad = (rawgrad,)
-        return tuple(deepnet.tensor(arr) for arr in rawgrad)
+    def applybackward(self, grad):
+        arr = self.f.backward(self.ctx, grad)
+        if not isinstance(arr, tuple):
+            arr = (arr,)
+        return tuple(deepnet.tensor(a) for a in arr)
 
-    def applytan(self, *grad):
-        rawtan = self.f.tangent(self.ctx, *grad)
-        return deepnet.tensor(rawtan)
+    def applyforward(self, *grad):
+        arr = self.f.tangent(self.ctx, *grad)
+        return deepnet.tensor(arr)
 
     def nxtnodes(self) -> Optional[List["Node"]]:
         if self.ctx is None:
@@ -53,9 +52,9 @@ def genout(out, f, ctx):
         if revmode():
             out.mutate(backfn=node, usegrad=True, leaf=False)
         elif node is not None:
-            tans = gettans(ctx)
-            tan = node.applytan(*tans)
-            out.mutate(usegrad=True, grad=tan, leaf=False)
+            grads = getgrads(ctx)
+            grad = node.applyforward(*grads)
+            out.mutate(usegrad=True, grad=grad, leaf=False)
     return out
 
 
@@ -65,7 +64,7 @@ def getnode(tensor):
     return tensor.backfn
 
 
-def gettans(ctx):
+def getgrads(ctx):
     return tuple(
         t.grad if t.grad is not None else deepnet.zeroslike(t) for t in ctx.tensors()
     )

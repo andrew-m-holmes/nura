@@ -1,7 +1,7 @@
 import deepnet
 from deepnet.types import dtype, _dim
 from deepnet.autograd.graph import Node
-from typing import Tuple, Optional, Type, Any
+from typing import Optional, Type, Any
 from numpy import ndarray
 
 
@@ -26,7 +26,7 @@ class Tensor:
         return self._dtype
 
     @property
-    def dim(self) -> Tuple[int, ...]:
+    def dim(self) -> _dim:
         return self._data.shape
 
     @property

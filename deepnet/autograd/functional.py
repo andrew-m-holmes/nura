@@ -25,7 +25,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
             tensor.mutate(grad=newgrad)
         elif nodes:
-            items = [[n, g] for n, g in zip(nodes, node.applyback(grad))]
+            items = [[n, g] for n, g in zip(nodes, node.applybackward(grad))]
             queue.extend(items)
 
 
@@ -51,7 +51,7 @@ def grad(
             oldgrad = inptmap[tensor]
             oldgrad.mutate(data=oldgrad.data + accumgrad.data)
         if nodes:
-            items = [[n, g] for n, g in zip(nodes, node.applyback(grad))]
+            items = [[n, g] for n, g in zip(nodes, node.applybackward(grad))]
             queue.extend(items)
     return tuple(t for t in inptmap.values())
 
@@ -67,7 +67,7 @@ def vjp(
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
     inpt = tuple(t.mutated(usegrad=True) for t in inpt)
-    with deepnet.autograd(True):
+    with deepnet.autograd(enabled=True, rev=True):
         out = f(*inpt, *fargs, **fkwargs)
     return grad(inpt, out, vec)
 
@@ -84,7 +84,7 @@ def jvp(
     assert all(t.gradtensor() for t in inpt)
     assert all(t.gradtensor() for t in vec)
     inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
-    with deepnet.autograd(True, rev=False):
+    with deepnet.autograd(enabled=True, rev=False):
         out = f(*inpt, *fargs, **fkwargs)
     return out.grad
 

@@ -16,10 +16,10 @@ class _Autograd:
 
 
 @contextmanager
-def autograd(state=True, rev=True):
+def autograd(enabled=True, rev=True):
     prevstate = _Autograd._usegrad
     prevmode = _Autograd._revmode
-    _Autograd._usegrad = state
+    _Autograd._usegrad = enabled
     _Autograd._revmode = rev
     try:
         yield
