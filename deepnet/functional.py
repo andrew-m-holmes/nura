@@ -54,26 +54,26 @@ def pow(a: Union[Tensor, Any], b: Union[Tensor, Any]):
 
 
 def exp(a: Union[Tensor, Any]):
-    b = atot(a)
+    b = atot(a)[0]
     out = fn.Exp.apply(b)
     return out
 
 
 def log(a: Union[Union[Tensor, Any], Any]):
-    b = atot(a)
+    b = atot(a)[0]
     out = fn.Log.apply(b)
     return out
 
 
-def sine(a: Union[Tensor, Any]):
-    b = atot(a)
-    out = fn.Sine.apply(b)
+def sin(a: Union[Tensor, Any]):
+    b = atot(a)[0]
+    out = fn.Sin.apply(b)
     return out
 
 
-def cosine(a: Union[Tensor, Any]):
-    b = atot(a)
-    out = fn.Cosine.apply(b)
+def cos(a: Union[Tensor, Any]):
+    b = atot(a)[0]
+    out = fn.Cos.apply(b)
     return out
 
 
@@ -82,8 +82,8 @@ def sum(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     return out
 
 
-def transpose(a: Tensor, dim_0=-2, dim_1=-1):
-    out = fn.Tranpose.apply(a, dim_0, dim_1)
+def transpose(a: Tensor, dim0=-2, dim1=-1):
+    out = fn.Tranpose.apply(a, dim0, dim1)
     return out
 
 
@@ -114,7 +114,7 @@ def reshape(a: Tensor, newdim: _dim):
 
 
 def abs(a: Union[Tensor, Any]):
-    b = atot(a)
+    b = atot(a)[0]
     return fn.Abs.apply(b)
 
 

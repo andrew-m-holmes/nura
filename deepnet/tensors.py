@@ -140,8 +140,8 @@ class Tensor:
     def reshape(self, dim: _dim):
         return deepnet.reshape(self, dim)
 
-    def transpose(self, dim_0=-2, dim_1=-1):
-        return deepnet.transpose(self, dim_0, dim_1)
+    def transpose(self, dim0=-2, dim1=-1):
+        return deepnet.transpose(self, dim0, dim1)
 
     def permute(self, dim: Optional[_dim] = None):
         return deepnet.permute(self, dim=dim)
@@ -276,7 +276,7 @@ class BoolTensor(Tensor):
         super().__init__(data, usegrad, grad, backfn, leaf, deepnet.bool)
 
 
-def getcls(dtype) -> type:
+def getcls(dtype) -> Type:
     dtypemap = {
         deepnet.byte: ByteTensor,
         deepnet.char: CharTensor,

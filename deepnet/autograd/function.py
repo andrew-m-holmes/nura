@@ -14,10 +14,8 @@ class Context:
     def save(self, *tensors: Tensor):
         self._tensors = tensors
 
-    def tensors(self) -> Union[Tuple[Tensor, ...], Tensor]:
-        if self._tensors is None:
-            return ()
-        return self._tensors if len(self._tensors) > 1 else self._tensors[0]
+    def tensors(self) -> Tuple[Tensor, ...]:
+        return self._tensors if self._tensors else ()
 
     def __setitem__(self, key: Any, value: Any):
         if self._dict is None:
