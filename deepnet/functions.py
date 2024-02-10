@@ -9,18 +9,18 @@ class Add(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
-        out = a.data + b.data
-        return out
+        rawout = a.data + b.data
+        return rawout
 
     @staticmethod
-    def backward(ctx: Any, grad: Tensor):
+    def backward(ctx: Context, grad: Tensor):
         del ctx
         return grad.data, grad.data
 
     @staticmethod
     def tangent(ctx: Context, atan: Tensor, btan: Tensor):
-        tan = atan.data + btan.data
-        return tan
+        rawtan = atan.data + btan.data
+        return rawtan
 
 
 class Sub(Function):
@@ -28,8 +28,8 @@ class Sub(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
-        out = a.data - b.data
-        return out
+        rawout = a.data - b.data
+        return rawout
 
     @staticmethod
     def backward(ctx: Any, grad: Tensor):
@@ -38,8 +38,8 @@ class Sub(Function):
 
     @staticmethod
     def tangent(ctx: Context, atan: Tensor, btan: Tensor):
-        tan = atan.data + np.negative(btan.data)
-        return tan
+        rawtan = atan.data + np.negative(btan.data)
+        return rawtan
 
 
 class Mul(Function):
@@ -47,21 +47,21 @@ class Mul(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
-        out = a.data * b.data
-        return out
+        rawout = a.data * b.data
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        agrad = b.data * grad.data
-        bgrad = a.data * grad.data
-        return agrad, bgrad
+        rawagrad = b.data * grad.data
+        rawbgrad = a.data * grad.data
+        return rawagrad, rawbgrad
 
     @staticmethod
     def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
-        tan = atan.data * b.data + btan.data * a.data
-        return tan
+        rawtan = atan.data * b.data + btan.data * a.data
+        return rawtan
 
 
 class Div(Function):
@@ -69,48 +69,47 @@ class Div(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
-        out = a.data / b.data
-        return out
+        rawout = a.data / b.data
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        agrad = 1.0 / b.data * grad.data
-        bgrad = np.negative(a.data) / b.data**2.0 * grad.data
-        return agrad, bgrad
+        rawagrad = 1.0 / b.data * grad.data
+        rawbgrad = np.negative(a.data) / b.data**2.0 * grad.data
+        return rawagrad, rawbgrad
 
     @staticmethod
     def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
-        atandata= atan.data / b.data
-        btandata= a.data * (np.negative(btan.data) / b.data**2)
-        tan = atandata + btandata
-        return tan
+        rawatan = atan.data / b.data
+        rawbtan = a.data * (np.negative(btan.data) / b.data**2)
+        rawtan = rawatan + rawbtan
+        return rawtan
 
 
-# TODO needs tests
 class Dot(Function):
 
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
-        out = np.dot(a.data, b.data)
-        return out
+        rawout = np.dot(a.data, b.data)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        agrad = np.dot(grad.data, b.data)
-        bgrad = np.dot(a.data, grad.data)
-        return agrad, bgrad
+        rawagrad = np.dot(grad.data, b.data)
+        rawbgrad = np.dot(a.data, grad.data)
+        return rawagrad, rawbgrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
-        atan = np.dot(a.tangent, b.data)
-        btan = np.dot(a.data, b.tangent)
-        tan = atan + btan
-        return tan
+        rawatan = np.dot(atan.data, b.data)
+        rawbtan = np.dot(a.data, btan.data)
+        rawtan = rawatan + rawbtan
+        return rawtan
 
 
 class Matmul(Function):
@@ -118,73 +117,72 @@ class Matmul(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
-        out = a.data @ b.data
-        return out
+        rawout = a.data @ b.data
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        agrad = grad.data @ np.swapaxes(b.data, -2, -1)
-        bgrad = np.swapaxes(a.data, -2, -1) @ grad.data
-        return agrad, bgrad
+        rawagrad = grad.data @ np.swapaxes(b.data, -2, -1)
+        rawbgrad = np.swapaxes(a.data, -2, -1) @ grad.data
+        return rawagrad, rawbgrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
-        atan = a.tangent.data @ b.data
-        btan = a.data @ b.tangent.data
-        tan = atan + btan
-        return tan
+        rawatan = atan.data @ b.data
+        rawbtan = a.data @ btan.data
+        rawtan = rawatan + rawbtan
+        return rawtan
 
 
 class Pow(Function):
 
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor):
-        out = np.power(a.data, b.data)
+        rawout = np.power(a.data, b.data)
         ctx.save(a, b)
-        ctx.out = out
-        return out
+        ctx["rawout"] = rawout
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        out = ctx.out
-        agrad = b.data * np.power(a.data, b.data - 1.0) * grad.data
-        bgrad = out * np.log(a.data) * grad.data
-        return agrad, bgrad
+        rawout = ctx["rawout"]
+        rawagrad = b.data * np.power(a.data, b.data - 1.0) * grad.data
+        rawbgrad = rawout * np.log(a.data) * grad.data
+        return rawagrad, rawbgrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor, btan: Tensor):
         a, b = ctx.tensors()
-        out = ctx.out
-        atan = b.data * np.power(a.data, b.data - 1.0) * a.tangent.data
-        btan = np.log(a.data) * out * b.tangent.data
-        tan = atan + btan
-        return tan
+        rawout = ctx["rawout"]
+        rawatan = b.data * np.power(a.data, b.data - 1.0) * atan.data
+        rawbtan = np.log(a.data) * rawout * btan.data
+        rawtan = rawatan + rawbtan
+        return rawtan
 
 
 class Exp(Function):
 
     @staticmethod
     def forward(ctx: Context, a: Tensor):
-        out = np.exp(a.data)
+        rawout = np.exp(a.data)
         ctx.save(a)
-        ctx.out = out
-        return out
+        ctx["rawout"] = rawout
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        out = ctx.out
-        outgrad = out * grad.data
-        return outgrad
+        rawout = ctx["rawout"]
+        rawoutgrad = rawout * grad.data
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        out = ctx.out
-        tan = out * a.tangent.data
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        rawout = ctx["rawout"]
+        rawtan = rawout * atan.data
+        return rawtan
 
 
 class Log(Function):
@@ -192,20 +190,20 @@ class Log(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor):
         ctx.save(a)
-        out = np.log(a.data)
-        return out
+        rawout = np.log(a.data)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a = ctx.tensors()
-        outgrad = 1.0 / a.data * grad.data
-        return outgrad
+        rawoutgrad = 1.0 / a.data * grad.data
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor):
         a = ctx.tensors()
-        tan = 1.0 / a.data * a.tangent.data
-        return tan
+        rawtan = 1.0 / a.data * atan.data
+        return rawtan
 
 
 class Sine(Function):
@@ -213,20 +211,20 @@ class Sine(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor):
         ctx.save(a)
-        out = np.sin(a.data)
-        return out
+        rawout = np.sin(a.data)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a = ctx.tensors()
-        agrad = grad.data * np.cos(a.data)
-        return agrad
+        rawagrad = grad.data * np.cos(a.data)
+        return rawagrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor):
         a = ctx.tensors()
-        tan = np.cos(a.data) * a.tangent.data
-        return tan
+        rawtan = np.cos(a.data) * atan.data
+        return rawtan
 
 
 class Cosine(Function):
@@ -234,20 +232,20 @@ class Cosine(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor):
         ctx.save(a)
-        out = np.cos(a.data)
-        return out
+        rawout = np.cos(a.data)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a = ctx.tensors()
-        agrad = grad.data * np.negative(np.sin(a.data))
-        return agrad
+        rawagrad = grad.data * np.negative(np.sin(a.data))
+        return rawagrad
 
     @staticmethod
-    def tangent(ctx: Context):
+    def tangent(ctx: Context, atan: Tensor):
         a = ctx.tensors()
-        tan = a.tangent.data * np.negative(np.sin(a.data))
-        return tan
+        rawtan = atan.data * np.negative(np.sin(a.data))
+        return rawtan
 
 
 class Sum(Function):
@@ -255,30 +253,28 @@ class Sum(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim, keepdims):
         ctx.save(a)
-        ctx.adim = a.dim()
-        ctx.dim = dim
-        ctx.keepdims = keepdims
-        out = np.sum(a.data, dim, keepdims=keepdims)
-        return out
+        ctx["dim"] = dim
+        ctx["keepdims"] = keepdims
+        rawout = np.sum(a.data, dim, keepdims=keepdims)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        adim = ctx.adim
-        dim = ctx.dim
-        keepdims = ctx.keepdims
+        a = ctx.tensors()
+        dim = ctx["dim"]
+        keepdims = ctx["keepdims"]
         graddata = grad.data
         if not keepdims:
             graddata = np.expand_dims(graddata, axis=dim)
-        outgrad = np.ascontiguousarray(np.broadcast_to(graddata, adim))
-        return outgrad
+        rawoutgrad = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        dim = ctx.dim
-        keepdims = ctx.keepdims
-        tan = np.sum(a.tangent.data, axis=dim, keepdims=keepdims)
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim = ctx["dim"]
+        keepdims = ctx["keepdims"]
+        rawtan = np.sum(atan.data, axis=dim, keepdims=keepdims)
+        return rawtan
 
 
 class Squeeze(Function):
@@ -286,22 +282,21 @@ class Squeeze(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: int):
         ctx.save(a)
-        ctx.dim = dim
-        out = a.data.squeeze(axis=dim)
-        return out
+        ctx["dim"] = dim
+        rawout = a.data.squeeze(axis=dim)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dim = ctx.dim
-        outgrad = np.expand_dims(grad.data, axis=dim)
-        return outgrad
+        dim = ctx["dim"]
+        rawoutgrad = np.expand_dims(grad.data, axis=dim)
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        dim = ctx.dim
-        tan = a.tangent.data.squeeze(axis=dim)
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim = ctx["dim"]
+        rawtan = atan.data.squeeze(axis=dim)
+        return rawtan
 
 
 class Unsqueeze(Function):
@@ -309,22 +304,21 @@ class Unsqueeze(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: Any):
         ctx.save(a)
-        ctx.dim = dim
-        out = np.expand_dims(a.data, axis=dim)
-        return out
+        ctx["dim"] = dim
+        rawout = np.expand_dims(a.data, axis=dim)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dim = ctx.dim
-        outgrad = grad.data.squeeze(axis=dim)
-        return outgrad
+        dim = ctx["dim"]
+        rawoutgrad = grad.data.squeeze(axis=dim)
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        dim = ctx.dim
-        tan = np.expand_dims(a.tangent.data, axis=dim)
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim = ctx["dim"]
+        rawtan = np.expand_dims(atan.data, axis=dim)
+        return rawtan
 
 
 class View(Function):
@@ -332,23 +326,21 @@ class View(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim):
         ctx.save(a)
-        ctx.adim = a.dim()
-        ctx.dim = dim
-        out = a.data.reshape(dim, order="C")
-        return out
+        ctx["dim"] = dim
+        rawout = a.data.reshape(dim, order="C")
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        adim = ctx.adim
-        outgrad = grad.data.reshape(adim, order="C")
-        return outgrad
+        a = ctx.tensors()
+        rawoutgrad = grad.data.reshape(a.dim, order="C")
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        dim = ctx.dim
-        tan = a.tangent.data.reshape(dim, order="C")
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim = ctx["dim"]
+        rawtan = atan.data.reshape(dim, order="C")
+        return rawtan
 
 
 class Reshape(Function):
@@ -356,49 +348,46 @@ class Reshape(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: Any):
         ctx.save(a)
-        ctx.adim = a.dim()
-        ctx.dim = dim
-        out = a.data.reshape(dim)
-        return out
+        ctx["dim"] = dim
+        rawout = a.data.reshape(dim)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        adim = ctx.adim
-        outgrad = grad.data.reshape(adim)
-        return outgrad
+        a = ctx.tensors()
+        rawoutgrad = grad.data.reshape(a.dim)
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        dim = ctx.dim
-        tan = a.tangent.data.reshape(dim)
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim = ctx["dim"]
+        rawtan = atan.data.reshape(dim)
+        return rawtan
 
 
 class Tranpose(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dim_0: int, dim_1: int):
-        out = a.data.swapaxes(dim_0, dim_1)
+    def forward(ctx: Context, a: Tensor, dim0: int, dim1: int):
+        rawout = a.data.swapaxes(dim0, dim1)
         ctx.save(a)
-        ctx.dim_0 = dim_0
-        ctx.dim_1 = dim_1
-        return out
+        ctx["dim0"] = dim0
+        ctx["dim1"] = dim1
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dim_0 = ctx.dim_0
-        dim_1 = ctx.dim_1
-        outgrad = grad.data.swapaxes(dim_0, dim_1)
-        return outgrad
+        dim0 = ctx["dim1"]
+        dim1 = ctx["dim2"]
+        rawoutgrad = grad.data.swapaxes(dim0, dim1)
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        dim_0 = ctx.dim_0
-        dim_1 = ctx.dim_1
-        tan = a.tangent.data.swapaxes(dim_0, dim_1)
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim0 = ctx["dim"]
+        dim1 = ctx["dim"]
+        rawtan = atan.data.swapaxes(dim0, dim1)
+        return rawtan
 
 
 class Permute(Function):
@@ -406,22 +395,21 @@ class Permute(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim):
         ctx.save(a)
-        ctx.dim = dim
-        out = a.data.transpose(dim)
-        return out
+        ctx["dim"] = dim
+        rawout = a.data.transpose(dim)
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dim = np.argsort(ctx.dim)
-        outgrad = grad.data.transpose(dim)
-        return outgrad
+        dim = np.argsort(ctx["dim"])
+        rawoutgrad = grad.data.transpose(dim)
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors[0]
-        dim = ctx.dim
-        tan = a.tangent.data.transpose(dim)
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        dim = ctx["dim"]
+        rawtan = atan.data.transpose(dim)
+        return rawtan
 
 
 class Abs(Function):
@@ -438,9 +426,9 @@ class Abs(Function):
         return mask * grad.data
 
     @staticmethod
-    def tangent(ctx: Context, tan: Tensor):
+    def tangent(ctx: Context, atan: Tensor):
         del ctx
-        return abs(tan.data)
+        return abs(atan.data)
 
 
 class Clone(Function):
@@ -448,18 +436,18 @@ class Clone(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor):
         ctx.save(a)
-        out = a.data.copy()
-        return out
+        rawout = a.data.copy()
+        return rawout
 
     @staticmethod
-    def backward(ctx: Any, grad: Tensor):
-        return (grad,)
+    def backward(ctx: Context, grad: Tensor):
+        del ctx
+        return grad.data
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors()
-        tan = a.tangent.data.copy()
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        rawtan = atan.data.copy()
+        return rawtan
 
 
 class Slice(Function):
@@ -467,23 +455,22 @@ class Slice(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, _slice: slice):
         ctx.save(a)
-        ctx.slice = _slice
-        ctx.dim = a.dim()
-        out = a.data[_slice]
-        return out
+        ctx["slice"] = _slice
+        ctx["dim"] = a.dim
+        rawout = a.data[_slice]
+        return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a = ctx.tensors()
-        _slice = ctx.slice
+        _slice = ctx["slice"]
         mask = np.zeros_like(a.data)
         mask[_slice] = grad.data
-        outgrad = mask
-        return outgrad
+        rawoutgrad = mask
+        return rawoutgrad
 
     @staticmethod
-    def tangent(ctx: Context):
-        a = ctx.tensors[0]
-        _slice = ctx.slice
-        tan = a.tangent.data[_slice]
-        return tan
+    def tangent(ctx: Context, atan: Tensor):
+        _slice = ctx["slice"]
+        rawtan = atan.data[_slice]
+        return rawtan

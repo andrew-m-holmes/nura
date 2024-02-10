@@ -1,7 +1,7 @@
 import deepnet
 from deepnet.tensors import Tensor
 from deepnet.autograd.graph import genout
-from typing import Tuple, Union, Any, Optional
+from typing import Tuple, Union, Any, Optional, Dict
 from numpy import ndarray
 
 
@@ -9,14 +9,24 @@ class Context:
 
     def __init__(self) -> None:
         self._tensors: Optional[Tuple[Tensor, ...]] = None
+        self._dict: Optional[Dict[Any, Any]] = None
 
     def save(self, *tensors: Tensor):
         self._tensors = tensors
 
-    def tensors(self) -> Optional[Union[Tensor, Tuple[Tensor, ...]]]:
+    def tensors(self) -> Union[Tuple[Tensor, ...], Tensor]:
         if self._tensors is None:
-            return None
+            return ()
         return self._tensors if len(self._tensors) > 1 else self._tensors[0]
+
+    def __setitem__(self, key: Any, value: Any):
+        if self._dict is None:
+            self._dict = dict()
+        self._dict[key] = value
+
+    def __getitem__(self, key: Any) -> Any:
+        assert self._dict is not None
+        return self._dict[key]
 
     def __repr__(self) -> str:
         return self.__class__.__name__

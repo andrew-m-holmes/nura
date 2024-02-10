@@ -1,7 +1,7 @@
 import deepnet
-from deepnet.types import dtype, dim as _dim
+from deepnet.types import dtype, _dim
 from deepnet.autograd.graph import Node
-from typing import Tuple, Optional, Type
+from typing import Tuple, Optional, Type, Any
 from numpy import ndarray
 
 
@@ -125,26 +125,26 @@ class Tensor:
     def contig(self):
         return deepnet.tocontig(self)
 
-    def sum(self, dims: Optional[_dim] =None, keepdims=False):
-        return deepnet.sum(self, dims, keepdims)
+    def sum(self, dim: Optional[_dim] = None, keepdims=False):
+        return deepnet.sum(self, dim, keepdims)
 
-    def squeeze(self, dims=None):
-        return deepnet.squeeze(self, dims)
+    def squeeze(self, dim: Optional[_dim] = None):
+        return deepnet.squeeze(self, dim)
 
-    def unsqueeze(self, dims):
-        return deepnet.unsqueeze(self, dims)
+    def unsqueeze(self, dim: _dim):
+        return deepnet.unsqueeze(self, dim)
 
-    def view(self, dim):
+    def view(self, dim: _dim):
         return deepnet.view(self, dim)
 
-    def reshape(self, dim):
+    def reshape(self, dim: _dim):
         return deepnet.reshape(self, dim)
 
     def transpose(self, dim_0=-2, dim_1=-1):
         return deepnet.transpose(self, dim_0, dim_1)
 
-    def permute(self, dims=None):
-        return deepnet.permute(self, dims=dims)
+    def permute(self, dim: Optional[_dim] = None):
+        return deepnet.permute(self, dim=dim)
 
     def __add__(self, other):
         return deepnet.add(self, other)
@@ -291,7 +291,7 @@ def getcls(dtype) -> type:
     return dtypemap[dtype]
 
 
-def tensor(data, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = deepnet.dtypeof(data)
     data = dtype.numpy(data)

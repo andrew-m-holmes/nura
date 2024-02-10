@@ -1,13 +1,11 @@
 import numpy as np
-from typing import Type, Any, Tuple, Union
+from typing import Type, Any, Tuple
 
 
 _py_int = int
 _py_float = float
 _py_bool = bool
-
-
-dim = Union[Tuple[int, ...], int]
+_dim = Tuple[int, ...]
 
 
 class dtype:
