@@ -25,7 +25,7 @@ class Node:
 
     def applyback(self, grad):
         rawgrad = self.f.backward(self.ctx, grad)
-        if isinstance(rawgrad, ndarray):
+        if not isinstance(rawgrad, tuple):
             rawgrad = (rawgrad,)
         return tuple(deepnet.tensor(arr) for arr in rawgrad)
 

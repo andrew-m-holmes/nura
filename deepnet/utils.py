@@ -2,7 +2,7 @@ import numpy as np
 import deepnet as dn
 from deepnet.types import dtype, _dim
 from deepnet.tensors import Tensor
-from typing import Optional, TypeGuard, Type, Any
+from typing import Optional, TypeGuard, Type, Any, Tuple
 
 
 def zeros(
@@ -99,7 +99,7 @@ def to(tensor: Tensor, dtype: Type[dtype]):
     return dn.tensor(data, tensor.usegrad, dtype)
 
 
-def todim(dim: Any):
+def todim(dim: Any) -> Tuple[int, ...]:
     if dim is None:
         return tuple()
     if isinstance(dim, int):

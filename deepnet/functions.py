@@ -1,6 +1,7 @@
 import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
+from deepnet.types import _dim
 from typing import Any
 
 
@@ -251,7 +252,7 @@ class Cos(Function):
 class Sum(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dim, keepdims):
+    def forward(ctx: Context, a: Tensor, dim: _dim, keepdims: bool):
         ctx.save(a)
         ctx["dim"] = dim
         ctx["keepdims"] = keepdims
@@ -280,7 +281,7 @@ class Sum(Function):
 class Squeeze(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dim: int):
+    def forward(ctx: Context, a: Tensor, dim: _dim):
         ctx.save(a)
         ctx["dim"] = dim
         rawout = a.data.squeeze(axis=dim)
@@ -365,21 +366,21 @@ class Reshape(Function):
         return rawtan
 
 
-class Tranpose(Function):
+class Transpose(Function):
 
     @staticmethod
-    def forward(ctx: Context, a: Tensor, dim: int, dim1: int):
-        rawout = a.data.swapaxes(dim, dim1)
+    def forward(ctx: Context, a: Tensor, dim0: int, dim1: int):
+        rawout = a.data.swapaxes(dim0, dim1)
         ctx.save(a)
-        ctx["dim"] = dim
+        ctx["dim0"] = dim0
         ctx["dim1"] = dim1
         return rawout
 
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
-        dim = ctx["dim1"]
-        dim1 = ctx["dim2"]
-        rawgrad = grad.data.swapaxes(dim, dim1)
+        dim0 = ctx["dim0"]
+        dim1 = ctx["dim1"]
+        rawgrad = grad.data.swapaxes(dim0, dim1)
         return rawgrad
 
     @staticmethod

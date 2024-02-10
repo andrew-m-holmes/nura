@@ -78,12 +78,14 @@ def cos(a: Union[Tensor, Any]):
 
 
 def sum(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    if dim is None:
+        dim = tuple(range(a.ndim))
     out = fn.Sum.apply(a, dim, keepdims)
     return out
 
 
 def transpose(a: Tensor, dim0=-2, dim1=-1):
-    out = fn.Tranpose.apply(a, dim0, dim1)
+    out = fn.Transpose.apply(a, dim0, dim1)
     return out
 
 
@@ -93,6 +95,8 @@ def permute(a: Tensor, dim: Optional[_dim] = None):
 
 
 def squeeze(a: Tensor, dim: Optional[Union[_dim, int]] = None):
+    if dim is None:
+        dim = tuple(np.where(np.array(a.dim) == 1)[0])
     out = fn.Squeeze.apply(a, dim=dim)
     return out
 
