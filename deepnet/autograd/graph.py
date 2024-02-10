@@ -32,7 +32,7 @@ class Node:
         arr = self.f.tangent(self.ctx, *grad)
         return deepnet.tensor(arr)
 
-    def nxtnodes(self) -> Optional[List["Node"]]:
+    def children(self) -> Optional[List["Node"]]:
         if self.ctx is None:
             return None
         nodes = []

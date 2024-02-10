@@ -15,7 +15,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
     while queue:
         node, grad = queue.popleft()
-        nodes = node.nxtnodes()
+        nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
@@ -44,7 +44,7 @@ def grad(
 
     while queue:
         node, grad = queue.popleft()
-        nodes = node.nxtnodes()
+        nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
