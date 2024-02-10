@@ -29,7 +29,7 @@ class Node:
         return tuple(deepnet.tensor(a) for a in arr)
 
     def applyforward(self, *grad):
-        arr = self.f.tangent(self.ctx, *grad)
+        arr = self.f.forward(self.ctx, *grad)
         return deepnet.tensor(arr)
 
     def children(self) -> Optional[List["Node"]]:
