@@ -60,48 +60,53 @@ def vjp(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     vec: Tensor,
     f: Callable[..., Tensor],
-    *fargs,
-    **fkwargs,
-) -> Tuple[Tensor, ...]:
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tuple[Tensor, ...]]:
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
-    inpt = tuple(t.mutated(usegrad=True) for t in inpt)
+    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=False) for t in inpt)
+    vec = vec.mutated(usegrad=False, grad=None, leaf=False)
     with deepnet.autograd(enabled=True, rev=True):
-        out = f(*inpt, *fargs, **fkwargs)
-    return grad(inpt, out, vec)
+        out = f(*inpt, *args, **kwargs)
+        print(out.backfn)
+    grads = grad(inpt, out, vec)
+    return out.mutated(grad=None, usegrad=False, leaf=False), grads
 
 
 def jvp(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     vec: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    *fargs,
-    **fkwargs,
-):
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tensor]:
     inpt = tupify(inpt)
     vec = tupify(vec)
     assert all(t.gradtensor() for t in inpt)
     assert all(t.gradtensor() for t in vec)
     inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
     with deepnet.autograd(enabled=True, rev=False):
-        out = f(*inpt, *fargs, **fkwargs)
-    return out.grad
+        out = f(*inpt, *args, **kwargs)
+        assert out.grad is not None
+    grad = out.grad
+    return out.mutated(grad=None, usegrad=False, leaf=False), grad
 
 
 def jacrev(
     input: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    *fargs,
-    **fkwargs,
+    *args,
+    **kwargs,
 ) -> Tuple[Tensor, Tensor]:
     pass
 
 def jacfwd(
     input: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    *fargs,
-    **fkwargs,
+    *args,
+    **kwargs,
 ) -> Tuple[Tensor, Tensor]:
     pass
 
