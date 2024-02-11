@@ -119,6 +119,9 @@ class Tensor:
         self._leaf = leaf
         return self
 
+    def copy(self) -> "Tensor":
+        return self.mutated(self.data.copy())
+
     def clone(self):
         return deepnet.clone(self)
 
@@ -204,7 +207,10 @@ class Tensor:
         return self._data.shape[0]
 
     def __repr__(self) -> str:
-        base = str(self._data)
+        base = repr(self._data).replace("array(", "").replace(",", "")
+        if " dtype" in base:
+            i = base.index(" dtype")
+            base = base[:i]
         s = "tensor(" + base
         if self.backfn:
             s += " backfn=" + str(self.backfn)
