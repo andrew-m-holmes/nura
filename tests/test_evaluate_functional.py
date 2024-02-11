@@ -12,8 +12,7 @@ def test_add_forward_scalar():
     result_tensor = f.add(a_tensor, b_tensor)
 
     expected = a + b
-    np.testing.assert_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_add_forward_vector():
@@ -25,8 +24,7 @@ def test_add_forward_vector():
     result_tensor = f.add(a_tensor, b_tensor)
 
     expected = a + b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_add_forward_matrix():
@@ -38,8 +36,7 @@ def test_add_forward_matrix():
     result_tensor = f.add(a_tensor, b_tensor)
 
     expected = a + b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sub_forward_scalar():
@@ -51,8 +48,7 @@ def test_sub_forward_scalar():
     result_tensor = f.sub(a_tensor, b_tensor)
 
     expected = a - b
-    np.testing.assert_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sub_forward_vetor():
@@ -64,8 +60,7 @@ def test_sub_forward_vetor():
     result_tensor = f.sub(a_tensor, b_tensor)
 
     expected = a - b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sub_forward_matrix():
@@ -77,8 +72,7 @@ def test_sub_forward_matrix():
     result_tensor = f.sub(a_tensor, b_tensor)
 
     expected = a - b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_mul_forward_scalar():
@@ -90,8 +84,7 @@ def test_mul_forward_scalar():
     result_tensor = f.mul(a_tensor, b_tensor)
 
     expected = a * b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_mul_forward_vetor():
@@ -103,8 +96,7 @@ def test_mul_forward_vetor():
     result_tensor = f.mul(a_tensor, b_tensor)
 
     expected = a * b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_mul_forward_matrix():
@@ -116,8 +108,7 @@ def test_mul_forward_matrix():
     result_tensor = f.mul(a_tensor, b_tensor)
 
     expected = a * b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_div_forward_scalar():
@@ -129,8 +120,7 @@ def test_div_forward_scalar():
     result_tensor = f.div(a_tensor, b_tensor)
 
     expected = a / b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_div_forward_vetor():
@@ -142,8 +132,7 @@ def test_div_forward_vetor():
     result_tensor = f.div(a_tensor, b_tensor)
 
     expected = a / b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_div_forward_matrix():
@@ -155,8 +144,7 @@ def test_div_forward_matrix():
     result_tensor = f.div(a_tensor, b_tensor)
 
     expected = a / b
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_matmul_forward_same_shape():
@@ -168,8 +156,7 @@ def test_matmul_forward_same_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     expected = np.matmul(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_matmul_forward_different_shape():
@@ -181,8 +168,7 @@ def test_matmul_forward_different_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     expected = np.matmul(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_matmul_forward_rank3_same_shape():
@@ -194,8 +180,7 @@ def test_matmul_forward_rank3_same_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     expected = np.matmul(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_matmul_forward_rank3_different_shape():
@@ -207,8 +192,7 @@ def test_matmul_forward_rank3_different_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     expected = np.matmul(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_scalar():
@@ -220,8 +204,7 @@ def test_pow_forward_scalar():
     result_tensor = f.pow(a_tensor, b_tensor)
 
     expected = np.power(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_vector():
@@ -233,8 +216,7 @@ def test_pow_forward_vector():
     result_tensor = f.pow(a_tensor, b_tensor)
 
     expected = np.power(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_matrix():
@@ -246,8 +228,7 @@ def test_pow_forward_matrix():
     result_tensor = f.pow(a_tensor, b_tensor)
 
     expected = np.power(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_vector_exp():
@@ -259,8 +240,7 @@ def test_pow_forward_vector_exp():
     result_tensor = f.pow(a_tensor, b_tensor)
 
     expected = np.power(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_matrix_exp():
@@ -272,8 +252,7 @@ def test_pow_forward_matrix_exp():
     result_tensor = f.pow(a_tensor, b_tensor)
 
     expected = np.power(a, b)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_exp_forward_scalar():
@@ -293,8 +272,7 @@ def test_exp_forward_vector():
     result_tensor = f.exp(a_tensor)
 
     expected = np.exp(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_exp_forward_matrix():
@@ -304,8 +282,7 @@ def test_exp_forward_matrix():
     result_tensor = f.exp(a_tensor)
 
     expected = np.exp(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_log_forward_scalar():
@@ -325,8 +302,7 @@ def test_log_forward_vector():
     result_tensor = f.log(a_tensor)
 
     expected = np.log(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_log_forward_matrix():
@@ -336,8 +312,7 @@ def test_log_forward_matrix():
     result_tensor = f.log(a_tensor)
 
     expected = np.log(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sin_forward_scalar():
@@ -347,8 +322,7 @@ def test_sin_forward_scalar():
     result_tensor = f.sin(a_tensor)
 
     expected = np.sin(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sin_forward_vector():
@@ -358,8 +332,7 @@ def test_sin_forward_vector():
     result_tensor = f.sin(a_tensor)
 
     expected = np.sin(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sin_forward_matrix():
@@ -369,8 +342,7 @@ def test_sin_forward_matrix():
     result_tensor = f.sin(a_tensor)
 
     expected = np.sin(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_cos_forward_scalar():
@@ -380,8 +352,7 @@ def test_cos_forward_scalar():
     result_tensor = f.cos(a_tensor)
 
     expected = np.cos(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_cos_forward_vector():
@@ -391,8 +362,7 @@ def test_cos_forward_vector():
     result_tensor = f.cos(a_tensor)
 
     expected = np.cos(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_cos_forward_matrix():
@@ -402,8 +372,7 @@ def test_cos_forward_matrix():
     result_tensor = f.cos(a_tensor)
 
     expected = np.cos(a)
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_sum_forward_single_dim():
@@ -841,8 +810,7 @@ def test_slice_forward_single_index():
     result_tensor = a_tensor[2, :]
 
     expected = a[2, :]
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_slice_forward_range():
@@ -852,8 +820,7 @@ def test_slice_forward_range():
     result_tensor = a_tensor[2:5, 3:7]
 
     expected = a[2:5, 3:7]
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_slice_forward_step():
@@ -863,8 +830,7 @@ def test_slice_forward_step():
     result_tensor = a_tensor[::2, ::3]
 
     expected = a[::2, ::3]
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_slice_forward_negative_indices():
@@ -874,8 +840,7 @@ def test_slice_forward_negative_indices():
     result_tensor = a_tensor[-3:, -3:]
 
     expected = a[-3:, -3:]
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_slice_forward_mixed_indices():
@@ -885,8 +850,7 @@ def test_slice_forward_mixed_indices():
     result_tensor = a_tensor[1:5, -3]
 
     expected = a[1:5, -3]
-    np.testing.assert_array_almost_equal(
-        result_tensor.data, expected, decimal=5)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def main():
