@@ -1,7 +1,7 @@
 import numpy as np
 import deepnet
 from deepnet.tensors import Tensor
-from typing import Tuple, Union, Optional, Callable
+from typing import List, Tuple, Union, Optional, Callable
 from collections import deque
 
 
@@ -94,23 +94,53 @@ def jvp(
 
 
 def jacrev(
-    input: Union[Tuple[Tensor, ...], Tensor],
+    inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
     pass
+
 
 def jacfwd(
-    input: Union[Tuple[Tensor, ...], Tensor],
+    inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
+    pos: int,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
-    pass
+    inpt = tupify(
+        inpt,
+    )
+    with deepnet.autograd(enabled=False):
+        out = f(*inpt, *args, **kwargs)
+    jac = getjac(inpt, out, pos)
+    perts = getperts(inpt, pos)
+    for col, pert in zip(np.ndindex(inpt[pos].dim), perts):
+        jaccol = genjaccol(inpt, f, pert, pos, *args, **kwargs)
+        jac[..., *col] = jaccol
+    return out, jac
 
-def getjac(inpt, out):
-    pass
+def genjaccol(inpt: Tuple[Tensor, ...], f: Callable[..., Tensor], pert: Tensor, pos: int, *args, **kwargs):
+    vec = tuple(deepnet.zeroslike(t) if i != pos else pert for i, t in enumerate(inpt))
+    _, jaccol = jvp(inpt, vec, f, *args, **kwargs)
+    return jaccol
+
+def getperts(inpt: Tuple[Tensor, ...], pos: int):
+    perts = []
+    zeros = deepnet.zeros(inpt[pos].dim).to(inpt[pos].dtype)
+    for index in np.ndindex(inpt[pos].dim):
+        tmp = zeros.copy()
+        tmp[index] = 1.0
+        perts.append(tmp)
+    return perts
+
+
+def getjac(inpt: Tuple[Tensor, ...], out: Tensor, pos: int) -> Tensor:
+    dim = inpt[pos].dim + out.dim
+    jac = deepnet.zeros(dim).to(out.dtype)
+    return jac
+
 
 def mismatch(tensor: Tensor, grad) -> bool:
     return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
