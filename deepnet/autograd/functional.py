@@ -1,192 +1,139 @@
-import deepnet
 import numpy as np
-from types import FunctionType
+import deepnet
+from deepnet.tensors import Tensor
+from typing import Tuple, Union, Optional, Callable
+from collections import deque
 
 
-def jacobian(input, func):
-    # literally computes the full jacobian matrix for func
-    # which holds the partial derivatives of the func outputs wrt
-    # to every single input to that func
+def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
+    assert out.backfn is not None
+    if grad is None:
+        assert out.nelem == 1
+        grad = deepnet.oneslike(out)
+    queue = deque()
+    queue.append([out.backfn, grad])
+
+    while queue:
+        node, grad = queue.popleft()
+        nodes = node.children()
+        tensor = node.tensor
+        if tensor.leaf:
+            accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
+            oldgrad = (
+                tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
+            )
+            newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
+            tensor.mutate(grad=newgrad)
+        elif nodes:
+            items = [[n, g] for n, g in zip(nodes, node.applybackward(grad))]
+            queue.extend(items)
+
+
+def grad(
+    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
+) -> Tuple[Tensor, ...]:
+    assert out.backfn is not None
+    if grad is None:
+        assert out.nelem == 1
+        grad = deepnet.oneslike(out)
+    inpt = tupify(inpt)
+    vals = tuple(deepnet.zeroslike(t) for t in inpt)
+    inptmap = mapify(inpt, vals)
+    queue = deque()
+    queue.append([out.backfn, grad])
+
+    while queue:
+        node, grad = queue.popleft()
+        nodes = node.children()
+        tensor = node.tensor
+        if tensor in inptmap:
+            accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
+            oldgrad = inptmap[tensor]
+            oldgrad.mutate(data=oldgrad.data + accumgrad.data)
+        if nodes:
+            items = [[n, g] for n, g in zip(nodes, node.applybackward(grad))]
+            queue.extend(items)
+    return tuple(t for t in inptmap.values())
+
+
+def vjp(
+    inpt: Union[Tuple[Tensor, ...], Tensor],
+    vec: Tensor,
+    f: Callable[..., Tensor],
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tuple[Tensor, ...]]:
+    inpt = tupify(inpt)
+    assert all(t.gradtensor() for t in inpt)
+    assert vec.gradtensor()
+    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
+    vec = vec.mutated(usegrad=False, grad=None, leaf=False)
+    with deepnet.autograd(enabled=True, rev=True):
+        out = f(*inpt, *args, **kwargs)
+    grads = grad(inpt, out, vec)
+    return out.mutated(grad=None, usegrad=False, leaf=False), grads
+
+
+def jvp(
+    inpt: Union[Tuple[Tensor, ...], Tensor],
+    vec: Union[Tuple[Tensor, ...], Tensor],
+    f: Callable[..., Tensor],
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tensor]:
+    inpt = tupify(inpt)
+    vec = tupify(vec)
+    assert all(t.gradtensor() for t in inpt)
+    assert all(t.gradtensor() for t in vec)
+    inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
+    with deepnet.autograd(enabled=True, rev=False):
+        out = f(*inpt, *args, **kwargs)
+        assert out.grad is not None
+    grad = out.grad
+    return out.mutated(grad=None, usegrad=False, leaf=False), grad
+
+
+def jacrev(
+    input: Union[Tuple[Tensor, ...], Tensor],
+    f: Callable[..., Tensor],
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tensor]:
     pass
 
+def jacfwd(
+    input: Union[Tuple[Tensor, ...], Tensor],
+    f: Callable[..., Tensor],
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tensor]:
+    pass
 
-def vjp(primals, cotangent, func, *func_args, use_graph=False):
-    _vjp_args_check(primals, cotangent, func, use_graph)
-    primals, cotangent = _vjp_preprocess(
-        primals, cotangent, use_graph)
-    vjp_map = {primal: None for primal in primals}
+def getjac(inpt, out):
+    pass
 
-    with deepnet.use_grad():
-        output = func(*primals, *func_args)
-    stack = [(output.grad_fn, cotangent)]
-    while stack:
-        node, cotangent = stack.pop()
-        if _is_leaf_node(node) and node.context.tensor in vjp_map:
-            if vjp_map[node.context.tensor] is None:
-                vjp_map[node.context.tensor] = cotangent
-            else:
-                vjp_map[node.context.tensor] = _accumulate_grad(
-                    vjp_map[node.context.tensor], cotangent)
-        elif _is_intermediate_node(node):
-            next_nodes, next_cotangents = _process_node(
-                node, cotangent)
-            for node, cotangent in zip(next_nodes, next_cotangents):
-                stack.append((node, cotangent))
-    return _vjp_post_process(vjp_map, output, use_graph)
+def mismatch(tensor: Tensor, grad) -> bool:
+    return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
 
 
-def _vjp_post_process(vjp_map, output, use_graph):
-    for primal, cotangent in vjp_map.items():
-        if primal.dim() != cotangent.dim():
-            cotangent = _reduce_sum_grad(primal, cotangent)
-            cotangent = _broadcast_to_match(primal, cotangent)
-            vjp_map[primal] = cotangent
-    if not use_graph:
-        del output.grad_fn
-        output._set_grad_state(
-            use_grad=False, grad_fn=None, is_leaf=True)
-    return output, tuple(vjp_map.values())
+def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
+    dims = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
+    keepdims = tensor.ndim == grad.ndim
+    data = np.sum(grad.data, axis=dims, keepdims=keepdims)
+    return grad.mutated(data=data)
 
 
-def _vjp_preprocess(primals, cotangent, use_graph):
-    tmp = primals
-    primals = []
-    for primal in tmp:
-        if not use_graph:
-            primal = primal.clone().detach()
-        primal._set_grad_state(
-            use_grad=True, grad_fn=None, is_leaf=True)
-        primals.append(primal)
-    cotangent._set_grad_state(
-        use_grad=True, grad_fn=None, is_leaf=True)
-    return primals, cotangent
+def sumdims(tdim, gdim, tndim, gndim):
+    paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
+    mask = paddim != np.array(gdim)
+    return tuple(np.where(mask)[0])
 
 
-def _vjp_args_check(primals, cotangent, func, use_graph):
-    assert deepnet.is_all_tensor(*primals)
-    assert deepnet.is_tensor(cotangent)
-    assert isinstance(func, FunctionType)
-    assert deepnet.is_py_bool(use_graph)
-    assert all(tensor.dtype.differentiable() for tensor in primals)
-    assert cotangent.dtype.differentiable()
+def mapify(inpt, vals):
+    return {t: v for t, v in zip(inpt, vals)}
 
 
-
-def jvp(primals, tangents, func, *func_args, use_graph=False):
-    _jvp_args_check(primals, tangents, func, use_graph)
-    primals = _jvp_preprocess_primals(primals, tangents, use_graph)
-    with deepnet.forward_ad(), deepnet.set_grad(use_graph):
-        output = func(*primals, *func_args)
-    output, tangent = _jvp_post_process(primals, output)
-    return output, tangent
-
-
-def _jvp_post_process(primals, output):
-    for primal in primals:
-        tensor, tangent = primal.undual(inplace=True)
-    output, output_tangent = output.undual(inplace=True)
-    return output, output_tangent
-
-
-def _jvp_preprocess_primals(primals, tangents, use_graph):
-    tmp = primals
-    primals = []
-    for primal, tangent in zip(tmp, tangents):
-        if not use_graph:
-            primal = primal.clone().detach()
-        primal._set_grad_state(use_grad=use_graph,grad_fn=None,is_leaf=True)
-        tangent._set_grad_state(use_grad=False,grad_fn=None,is_leaf=True)
-        primal._set_dual_state(tangent, in_dual=True)
-        primals.append(primal)
-    return primals
-
-
-def _jvp_args_check(primals, tangents, func, use_graph):
-    assert deepnet.is_all_tensor(*primals)
-    assert deepnet.is_all_tensor(*tangents)
-    assert len(primals) == len(tangents)
-    assert all(primal.dim() == tangent.dim() for primal, tangent in zip(primals, tangents))
-    assert isinstance(func, FunctionType)
-    assert deepnet.is_py_bool(use_graph)
-    assert all(tensor.dtype.differentiable() for tensor in primals)
-    assert all(tangent.dtype.differentiable() for tangent in tangents)
-
-
-def grad(inputs, output, output_grad=None):
-    _grad_args_check(inputs, output, output_grad)
-    if deepnet.is_tensor(inputs):
-        inputs = (inputs,)
-    if output_grad is None:
-        output_grad = deepnet.ones_like(output)
-    grad_map = {tensor: deepnet.zeros_like(tensor) for tensor in inputs}
-    stack = [(output.grad_fn, output_grad)]
-
-    while stack:
-        node, curr_grad = stack.pop()
-        if _is_leaf_node(node) and node.context.tensor in grad_map:
-            tensor = node.context.tensor
-            if tensor.dim() != curr_grad.dim():
-                curr_grad = _reduce_sum_grad(tensor, curr_grad)
-            curr_grad = _broadcast_to_match(tensor, curr_grad)
-            grad_map[tensor] = _accumulate_grad(grad_map[tensor], curr_grad)
-        elif _is_intermediate_node(node):
-            next_nodes, next_grads = _process_node(node, curr_grad)
-            for next_node, next_grad in zip(next_nodes, next_grads):
-                stack.append((next_node, next_grad))
-    return _grad_post_process(grad_map.values())
-
-def _grad_post_process(grads):
-    if len(grads) == 1:
-        return list(grads)[0]
-    return grads
-
-def _grad_args_check(inputs, output, output_grad):
-    assert deepnet.is_tensor(inputs) or deepnet.is_all_tensor(*inputs) 
-    assert deepnet.is_tensor(output)
-    assert all(tensor.dtype.differentiable() for tensor in inputs) 
-    assert output.dtype.differentiable()
-    if output.nelem() > 1:
-        assert output_grad is not None
-        assert deepnet.is_tensor(output_grad)
-        assert output_grad.dim() == output.dim()
-        assert output_grad.dtype.differentiable()
-    assert all(tensor.use_grad for tensor in inputs)
-    assert output.use_grad
-    assert output.grad_fn is not None
-
-def _process_node(node, grad):
-    next_grads = node.context.apply(grad)
-    return node.next_functions, next_grads
-
-
-def _is_leaf_node(node):
-    if node is not None:
-        return repr(node) == "AccumulateGrad"
-    return False
-
-
-def _is_intermediate_node(node):
-    if node is not None:
-        return "Backward" in repr(node)
-    return False
-
-def _accumulate_grad(grad_0, grad_1):
-    grad_0.data += grad_1.data
-    return grad_0
-
-def _reduce_sum_grad(tensor, grad):
-    padded_dim = np.pad(tensor.dim(), pad_width=(grad.ndim() - tensor.ndim(), 0), constant_values=0)
-    mask = padded_dim != np.array(grad.dim())
-    dims = tuple(i for i, bool_ in enumerate(mask) if bool_)
-    keepdims = tensor.ndim() == grad.ndim()
-    with deepnet.no_grad():
-        grad = deepnet.sum(grad, dims, keepdims)
-    return grad
-
-
-def _broadcast_to_match(tensor, grad):
-    if tensor.dim() != grad.dim():
-        grad = deepnet.tensor(
-            np.broadcast_to(grad.data, tensor.dim()))
-    return grad
-
+def tupify(inpt) -> Tuple[Tensor, ...]:
+    if deepnet.istensor(inpt):
+        return (inpt,)
+    return inpt

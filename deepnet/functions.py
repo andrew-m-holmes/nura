@@ -1,444 +1,470 @@
 import numpy as np
-import deepnet
 from .tensors import Tensor
 from .autograd.function import Context, Function
+from deepnet.types import _dim
 from typing import Any
 
 
 class Add(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, b: Tensor):
-        context.save_tensors(a, b)
-        out = deepnet.tensor(a.data + b.data)
-        return out
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        ctx.save(a, b)
+        arr = a.data + b.data
+        return arr
 
     @staticmethod
-    def backward(context: Any, grad: Tensor):
-        return grad, grad
+    def backward(ctx: Context, grad: Tensor):
+        return grad.data, grad.data
 
     @staticmethod
-    def jvp(context: Context):
-        a, b = context.saved_tensors()
-        tan_out = deepnet.tensor(a.tangent.data + b.tangent.data)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        arr = agrad.data + bgrad.data
+        return arr
 
 
 class Sub(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, b: Tensor):
-        context.save_tensors(a, b)
-        out = deepnet.tensor(a.data - b.data)
-        return out
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        ctx.save(a, b)
+        arr = a.data - b.data
+        return arr
 
     @staticmethod
-    def backward(context: Any, grad: Tensor):
-        grad_a = grad
-        grad_b = deepnet.tensor(np.negative(grad.data))
-        return grad_a, grad_b
+    def backward(ctx: Any, grad: Tensor):
+        return grad.data, np.negative(grad.data)
 
     @staticmethod
-    def jvp(context: Context):
-        a, b = context.saved_tensors()
-        tan_b = np.negative(b.tangent.data)
-        tan_out = deepnet.tensor(a.tangent.data + tan_b) 
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        arr = agrad.data + np.negative(bgrad.data)
+        return arr
 
 
 class Mul(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, b: Tensor):
-        context.save_tensors(a, b)
-        out = deepnet.tensor(a.data * b.data)
-        return out
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        ctx.save(a, b)
+        arr = a.data * b.data
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a, b = context.saved_tensors()
-        grad_a = deepnet.tensor(b.data * grad.data)
-        grad_b = deepnet.tensor(a.data * grad.data)
-        return grad_a, grad_b
+    def backward(ctx: Context, grad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = b.data * grad.data
+        arr1 = a.data * grad.data
+        return arr0, arr1
 
     @staticmethod
-    def jvp(context: Context):
-        a, b = context.saved_tensors()
-        tan_a = b.data * a.tangent.data
-        tan_b = a.data * b.tangent.data
-        tan_out = deepnet.tensor(tan_a + tan_b)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        a, b = ctx.tensors()
+        arr = agrad.data * b.data + bgrad.data * a.data
+        return arr
 
 
 class Div(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, b: Tensor):
-        context.save_tensors(a, b)
-        out = deepnet.tensor(a.data / b.data)
-        return out
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        ctx.save(a, b)
+        arr = a.data / b.data
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a, b = context.saved_tensors()
-        grad_a = deepnet.tensor(1. / b.data * grad.data)
-        grad_b = deepnet.tensor(np.negative(a.data) / b.data ** 2. * grad.data)
-        return grad_a, grad_b
+    def backward(ctx: Context, grad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = 1.0 / b.data * grad.data
+        arr1 = np.negative(a.data) / b.data**2.0 * grad.data
+        return arr0, arr1
 
     @staticmethod
-    def jvp(context: Context):
-        a, b = context.saved_tensors()
-        tan_a = a.tangent.data / b.data
-        tan_b = a.data * (np.negative(b.tangent.data) / b.data ** 2)
-        tan_out = deepnet.tensor(tan_a + tan_b)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = agrad.data / b.data
+        arr1 = a.data * (np.negative(bgrad.data) / b.data**2)
+        arr = arr0 + arr1
+        return arr
+
+
+class Dot(Function):
+
+    @staticmethod
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        ctx.save(a, b)
+        arr = np.dot(a.data, b.data)
+        return arr
+
+    @staticmethod
+    def backward(ctx: Context, grad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = np.dot(grad.data, b.data)
+        arr1 = np.dot(a.data, grad.data)
+        return arr0, arr1
+
+    @staticmethod
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = np.dot(agrad.data, b.data)
+        arr1 = np.dot(a.data, bgrad.data)
+        arr = arr0 + arr1
+        return arr
 
 
 class Matmul(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, b: Tensor):
-        context.save_tensors(a, b)
-        out = a.data @ b.data
-        return deepnet.tensor(out)
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        ctx.save(a, b)
+        arr = a.data @ b.data
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a, b = context.saved_tensors()
-        dim_a, dim_b = np.arange(a.ndim()), np.arange(b.ndim())
-        dim_a[-2], dim_a[-1] = dim_a[-1], dim_a[-2]
-        dim_b[-2], dim_b[-1] = dim_b[-1], dim_b[-2]
-        grad_a = deepnet.tensor(grad.data @ b.data.transpose(dim_b))
-        grad_b = deepnet.tensor(a.data.transpose(dim_a) @ grad.data)
-        return grad_a, grad_b
+    def backward(ctx: Context, grad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = grad.data @ np.swapaxes(b.data, -2, -1)
+        arr1 = np.swapaxes(a.data, -2, -1) @ grad.data
+        return arr0, arr1
 
     @staticmethod
-    def jvp(context: Context):
-        a, b = context.saved_tensors()
-        tan_a = a.tangent.data @ b.data
-        tan_b = a.data @ b.tangent.data
-        tan_out = deepnet.tensor(tan_a + tan_b)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        a, b = ctx.tensors()
+        arr0 = agrad.data @ b.data
+        arr1 = a.data @ bgrad.data
+        arr = arr0 + arr1
+        return arr
+
 
 class Pow(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, b: Tensor):
-        out = deepnet.tensor(np.power(a.data, b.data))
-        context.save_tensors(a, b, out)
-        return out
+    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+        arr = np.power(a.data, b.data)
+        ctx.save(a, b)
+        ctx["arr"] = arr
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a, b, out = context.saved_tensors()
-        grad_a = deepnet.tensor(b.data * np.power(a.data, b.data - 1.) * grad.data)
-        grad_b = deepnet.tensor(out.data * np.log(a.data) * grad.data)
-        return grad_a, grad_b
+    def backward(ctx: Context, grad: Tensor):
+        a, b = ctx.tensors()
+        arr = ctx["arr"]
+        arr0 = b.data * np.power(a.data, b.data - 1.0) * grad.data
+        arr1 = arr * np.log(a.data) * grad.data
+        return arr0, arr1
 
     @staticmethod
-    def jvp(context: Context):
-        a, b, out = context.saved_tensors()
-        tan_a = b.data * np.power(a.data, b.data - 1.) * a.tangent.data
-        tan_b = np.log(a.data) * out.data * b.tangent.data
-        tan_out = deepnet.tensor(tan_a + tan_b)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+        a, b = ctx.tensors()
+        arr = ctx["arr"]
+        arr0 = b.data * np.power(a.data, b.data - 1.0) * agrad.data
+        arr1 = np.log(a.data) * arr * bgrad.data
+        return arr0 + arr1
 
 
 class Exp(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor):
-        out = deepnet.tensor(np.exp(a.data))
-        context.save_tensors(a, out)
-        return out
+    def evaluate(ctx: Context, a: Tensor):
+        arr = np.exp(a.data)
+        ctx.save(a)
+        ctx["arr"] = arr
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a, out = context.saved_tensors()
-        grad_out = deepnet.tensor(out.data * grad.data)
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        arr = ctx["arr"]
+        return arr * grad.data
 
     @staticmethod
-    def jvp(context: Context):
-        a, out = context.saved_tensors()
-        tan_out = deepnet.tensor(out.data * a.tangent.data)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        arr = ctx["arr"]
+        return arr * agrad.data
 
 
 class Log(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor):
-        context.save_tensors(a)
-        out = deepnet.tensor(np.log(a.data))
-        return out
+    def evaluate(ctx: Context, a: Tensor):
+        ctx.save(a)
+        arr = np.log(a.data)
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.saved_tensors()[0]
-        grad_out = deepnet.tensor(1. / a.data * grad.data)
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        arr = 1.0 / a.data * grad.data
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        tan_out = deepnet.tensor(1. / a.data * a.tangent.data)
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        a = ctx.tensors()[0]
+        arr = 1.0 / a.data * agrad.data
+        return arr
 
 
-class Sine(Function):
-
-    @staticmethod
-    def forward(context: Context, a: Tensor):
-        context.save_tensors(a)
-        out = deepnet.tensor(np.sin(a.data))
-        return out
+class Sin(Function):
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(grad.data * np.cos(a.data))
-        return (grad_a,)
+    def evaluate(ctx: Context, a: Tensor):
+        ctx.save(a)
+        arr = np.sin(a.data)
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        tan_out = deepnet.tensor(np.cos(a.data) * a.tangent.data)
-        return tan_out
-
-
-class Cosine(Function):
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        arr = grad.data * np.cos(a.data)
+        return arr
 
     @staticmethod
-    def forward(context: Context, a: Tensor):
-        context.save_tensors(a)
-        out = deepnet.tensor(np.cos(a.data))
-        return out
+    def forward(ctx: Context, agrad: Tensor):
+        a = ctx.tensors()[0]
+        arr = np.cos(a.data) * agrad.data
+        return arr
+
+
+class Cos(Function):
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.saved_tensors()[0]
-        grad_a = deepnet.tensor(grad.data * np.negative(np.sin(a.data)))
-        return (grad_a,)
+    def evaluate(ctx: Context, a: Tensor):
+        ctx.save(a)
+        arr = np.cos(a.data)
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        tan_out = deepnet.tensor(a.tangent.data * np.negative(np.sin(a.data)))
-        return tan_out
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        arr = grad.data * np.negative(np.sin(a.data))
+        return arr
+
+    @staticmethod
+    def forward(ctx: Context, agrad: Tensor):
+        a = ctx.tensors()[0]
+        arr = agrad.data * np.negative(np.sin(a.data))
+        return arr
 
 
 class Sum(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims, keepdims):
-        context.save_tensors(a)
-        context.a_dim = a.dim()
-        context.dims = dims
-        context.keepdims = keepdims
-        out = deepnet.tensor(np.sum(a.data, dims, keepdims=keepdims))
-        return out
+    def evaluate(ctx: Context, a: Tensor, dim: _dim, keepdims: bool):
+        ctx.save(a)
+        ctx["dim"] = dim
+        ctx["keepdims"] = keepdims
+        arr = np.sum(a.data, dim, keepdims=keepdims)
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a_dim = context.a_dim
-        dims = context.dims
-        keepdims = context.keepdims
-        grad_data = grad.data
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        dim = ctx["dim"]
+        keepdims = ctx["keepdims"]
+        graddata = grad.data
         if not keepdims:
-            grad_data = np.expand_dims(grad_data, axis=dims)
-        grad_out = deepnet.tensor(np.ascontiguousarray(np.broadcast_to(grad_data, a_dim)))
-        return (grad_out,)
+            graddata = np.expand_dims(graddata, axis=dim)
+        arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dims = context.dims
-        keepdims = context.keepdims
-        tan_out = deepnet.tensor(np.sum(a.tangent.data, axis=dims, keepdims=keepdims))
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        dim = ctx["dim"]
+        keepdims = ctx["keepdims"]
+        arr = np.sum(agrad.data, axis=dim, keepdims=keepdims)
+        return arr
+
 
 class Squeeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims: int):
-        context.save_tensors(a)
-        context.dims = dims
-        out = deepnet.tensor(a.data.squeeze(axis=dims))
-        return out
+    def evaluate(ctx: Context, a: Tensor, dim: _dim):
+        ctx.save(a)
+        ctx["dim"] = dim
+        arr = a.data.squeeze(axis=dim)
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        dims = context.dims
-        grad_out = deepnet.tensor(np.expand_dims(grad.data, axis=dims))
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        dim = ctx["dim"]
+        arr = np.expand_dims(grad.data, axis=dim)
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dims = context.dims
-        tan_out = deepnet.tensor(a.tangent.data.squeeze(axis=dims))
-        return tan_out
+    def forward(ctx: Context, grad: Tensor):
+        dim = ctx["dim"]
+        arr = grad.data.squeeze(axis=dim)
+        return arr
 
 
 class Unsqueeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims: Any):
-        context.save_tensors(a)
-        context.dims = dims
-        out = deepnet.tensor(np.expand_dims(a.data, axis=dims))
-        return out
+    def evaluate(ctx: Context, a: Tensor, dim: Any):
+        ctx.save(a)
+        ctx["dim"] = dim
+        arr = np.expand_dims(a.data, axis=dim)
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        dims = context.dims
-        grad_out = deepnet.tensor(grad.data.squeeze(axis=dims))
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        dim = ctx["dim"]
+        arr = grad.data.squeeze(axis=dim)
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dims = context.dims
-        tan_out = deepnet.tensor(np.expand_dims(a.tangent.data, axis=dims))
-        return tan_out
-
+    def forward(ctx: Context, agrad: Tensor):
+        dim = ctx["dim"]
+        arr = np.expand_dims(agrad.data, axis=dim)
+        return arr
 
 
 class View(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim):
-        context.save_tensors(a)
-        context.a_dim = a.dim()
-        context.dim = dim
-        out = deepnet.tensor(a.data.reshape(dim, order="C"))
-        return out
+    def evaluate(ctx: Context, a: Tensor, dim):
+        ctx.save(a)
+        ctx["dim"] = dim
+        arr = a.data.reshape(dim, order="C")
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a_dim = context.a_dim
-        grad_out = deepnet.tensor(grad.data.reshape(a_dim, order="C"))
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        arr = grad.data.reshape(a.dim, order="C")
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dim = context.dim
-        tan_out = deepnet.tensor(a.tangent.data.reshape(dim, order="C"))
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        dim = ctx["dim"]
+        arr = agrad.data.reshape(dim, order="C")
+        return arr
 
 
 class Reshape(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: Any):
-        context.save_tensors(a)
-        context.a_dim = a.dim()
-        context.dim = dim
-        out = deepnet.tensor(a.data.reshape(dim))
-        return out
+    def evaluate(ctx: Context, a: Tensor, dim: Any):
+        ctx.save(a)
+        ctx["dim"] = dim
+        arr = a.data.reshape(dim)
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a_dim = context.a_dim
-        grad_out = deepnet.tensor(grad.data.reshape(a_dim))
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        arr = grad.data.reshape(a.dim)
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dim = context.dim
-        tan_out = deepnet.tensor(a.tangent.data.reshape(dim))
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        dim = ctx["dim"]
+        arr = agrad.data.reshape(dim)
+        return arr
 
-class Tranpose(Function):
 
-    @staticmethod
-    def forward(context: Context, a: Tensor, dim_0: int, dim_1: int):
-        out = deepnet.tensor(a.data.swapaxes(dim_0, dim_1))
-        context.save_tensors(a)
-        context.dim_0 = dim_0
-        context.dim_1 = dim_1
-        return out
+class Transpose(Function):
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        dim_0 = context.dim_0
-        dim_1 = context.dim_1
-        grad_out = deepnet.tensor(grad.data.swapaxes(dim_0, dim_1))
-        return (grad_out,)
+    def evaluate(ctx: Context, a: Tensor, dim0: int, dim1: int):
+        arr = a.data.swapaxes(dim0, dim1)
+        ctx.save(a)
+        ctx["dim0"] = dim0
+        ctx["dim1"] = dim1
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dim_0 = context.dim_0
-        dim_1 = context.dim_1
-        tan_out = deepnet.tensor(a.tangent.data.swapaxes(dim_0, dim_1))
-        return tan_out
+    def backward(ctx: Context, grad: Tensor):
+        dim0 = ctx["dim0"]
+        dim1 = ctx["dim1"]
+        arr = grad.data.swapaxes(dim0, dim1)
+        return arr
+
+    @staticmethod
+    def forward(ctx: Context, agrad: Tensor):
+        dim0 = ctx["dim0"]
+        dim1 = ctx["dim1"]
+        arr = agrad.data.swapaxes(dim0, dim1)
+        return arr
+
 
 class Permute(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims):
-        context.save_tensors(a)
-        context.dims = dims
-        out = deepnet.tensor(a.data.transpose(dims))
-        return out
+    def evaluate(ctx: Context, a: Tensor, dim):
+        ctx.save(a)
+        ctx["dim"] = dim
+        arr = a.data.transpose(dim)
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        dims = np.argsort(context.dims)
-        grad_out = deepnet.tensor(grad.data.transpose(dims))
-        return (grad_out,)
+    def backward(ctx: Context, grad: Tensor):
+        dim = np.argsort(ctx["dim"])
+        arr = grad.data.transpose(dim)
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        dims = context.dims
-        tan_out = deepnet.tensor(a.tangent.data.transpose(dims))
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        dim = ctx["dim"]
+        arr = agrad.data.transpose(dim)
+        return arr
+
+
+class Abs(Function):
+
+    @staticmethod
+    def evaluate(ctx: Context, a: Tensor):
+        ctx.save(a)
+        return np.absolute(a.data)
+
+    @staticmethod
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        mask = np.where(a.data < 0, -1, 1)
+        return mask * grad.data
+
+    @staticmethod
+    def forward(ctx: Context, agrad: Tensor):
+        return abs(agrad.data)
+
 
 class Clone(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor):
-        context.save_tensors(a)
-        out = deepnet.tensor(a.data.copy())
-        return out
+    def evaluate(ctx: Context, a: Tensor):
+        ctx.save(a)
+        arr = a.data.copy()
+        return arr
 
     @staticmethod
-    def backward(context: Any, grad: Tensor):
-        return (grad,)
+    def backward(ctx: Context, grad: Tensor):
+        return grad.data
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        tan_out = deepnet.tensor(a.tangent.data.copy())
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        arr = agrad.data.copy()
+        return arr
+
 
 class Slice(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, _slice: slice):
-        context.save_tensors(a)
-        context.slice = _slice
-        context.dim = a.dim()
-        out = deepnet.tensor(a.data[_slice])
-        return out
+    def evaluate(ctx: Context, a: Tensor, _slice: slice):
+        ctx.save(a)
+        ctx["slice"] = _slice
+        ctx["dim"] = a.dim
+        arr = a.data[_slice]
+        return arr
 
     @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.saved_tensors()[0]
-        _slice = context.slice
+    def backward(ctx: Context, grad: Tensor):
+        a = ctx.tensors()[0]
+        _slice = ctx["slice"]
         mask = np.zeros_like(a.data)
         mask[_slice] = grad.data
-        grad_out = deepnet.tensor(mask)
-        return (grad_out,)
+        arr = mask
+        return arr
 
     @staticmethod
-    def jvp(context: Context):
-        a = context.saved_tensors()[0]
-        _slice = context.slice
-        tan_out = deepnet.tensor(a.tangent.data[_slice])
-        return tan_out
+    def forward(ctx: Context, agrad: Tensor):
+        _slice = ctx["slice"]
+        arr = agrad.data[_slice]
+        return arr

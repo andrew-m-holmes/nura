@@ -1,61 +1,53 @@
 import deepnet
-from .graph import _pass_to_graph
-from deepnet import Tensor
-from typing import Tuple, Union
+from deepnet.tensors import Tensor
+from deepnet.autograd.graph import genout
+from typing import Tuple, Union, Any, Optional, Dict
+from numpy import ndarray
 
 
 class Context:
 
     def __init__(self) -> None:
-        self._saved_tensors = None
+        self._tensors: Optional[Tuple[Tensor, ...]] = None
+        self._dict: Optional[Dict[Any, Any]] = None
 
-    def save_tensors(self, *tensors):
-        assert deepnet.is_all_tensor(*tensors)
-        self._saved_tensors = tensors
+    def save(self, *tensors: Tensor):
+        self._tensors = tensors
 
-    def saved_tensors(self) -> Tuple[Tensor, ...]:
-        return self._saved_tensors
+    def tensors(self) -> Tuple[Tensor, ...]:
+        return self._tensors if self._tensors else ()
 
+    def __setitem__(self, key: Any, value: Any):
+        if self._dict is None:
+            self._dict = dict()
+        self._dict[key] = value
 
-class BackwardFunction(Context):
+    def __getitem__(self, key: Any) -> Any:
+        assert self._dict is not None
+        return self._dict[key]
 
-    def apply(self, *args):
-        backward_fn = self._forward_cls.backward
-        return backward_fn(self, *args)
-
-    def apply_jvp(self):
-        jvp_fn = self._forward_cls.jvp
-        return jvp_fn(self)
-
-
-class FunctionMeta(type):
-
-    def __init__(cls, name, bases, attrs):
-        backward_cls = type(
-            name + "Backward", (BackwardFunction,),
-            {"_forward_cls": cls})
-        cls._backward_cls = backward_cls
-        super().__init__(name, bases, attrs)
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
 
-class Function(metaclass=FunctionMeta):
+class Function:
 
     @staticmethod
-    def forward(context, *args, **kwargs):
+    def evaluate(ctx: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
-    def backward(context, grad):
+    def backward(ctx: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
-    def jvp(context):
+    def forward(ctx: Context, *grad: Tensor) -> ndarray:
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args, **
-              kwargs) -> Union[Tensor, Tuple[Tensor, ...]]:
-        context = cls._backward_cls()
-        output = cls.forward(context, *args, **kwargs)
-        output = _pass_to_graph(context, output)
-        return output
+    def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
+        ctx = Context()
+        rawout = cls.evaluate(ctx, *args, **kwargs)
+        irout = deepnet.tensor(rawout)
+        out = genout(irout, cls, ctx)
+        return out

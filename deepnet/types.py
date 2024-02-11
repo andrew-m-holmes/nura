@@ -1,26 +1,16 @@
 import numpy as np
-import deepnet
+from typing import Type, Any, Tuple
+
 
 _py_int = int
 _py_float = float
 _py_bool = bool
+_dim = Tuple[int, ...]
 
 
 class dtype:
 
-    _differentiable = None
     _wrapping = None
-
-    @classmethod
-    def differentiable(cls):
-        return cls._differentiable
-
-    @classmethod
-    def cast(cls, tensor):
-        data = tensor.data.astype(cls._wrapping)
-        new_tensor = deepnet.tensor(
-            data, tensor.use_grad, tensor.dtype)
-        return new_tensor
 
     @classmethod
     def numpy(cls, data):
@@ -37,59 +27,50 @@ class dtype:
 
 class byte(dtype):
 
-    _differentiable = False
     _wrapping = np.uint8
 
 
 class char(dtype):
 
-    _differentiable = False
     _wrapping = np.int8
 
 
 class short(dtype):
 
-    _differentiable = False
     _wrapping = np.int16
 
 
 class int(dtype):
 
-    _differentiable = False
     _wrapping = np.int32
 
 
 class long(dtype):
 
-    _differentiable = False
     _wrapping = np.int64
 
 
 class half(dtype):
 
-    _differentiable = True
     _wrapping = np.float16
 
 
 class float(dtype):
 
-    _differentiable = True
     _wrapping = np.float32
 
 
 class double(dtype):
 
-    _differentiable = True
     _wrapping = np.float64
 
 
 class bool(dtype):
 
-    _differentiable = False
     _wrapping = np.bool_
 
 
-_dtype_map = {
+dtypemap = {
     np.uint8: byte,
     np.int8: char,
     np.int16: short,
@@ -114,22 +95,11 @@ _dtype_map = {
 }
 
 
-def typename(obj):
-    assert hasattr(obj, "dtype")
-    obj_dtype = obj.dtype
-    return obj_dtype.name().capitalize() + str(obj.__class__.__name__)
-
-
-def _infer_dtype(data):
+def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
-        return _dtype_map.get(data.dtype)
+        return dtypemap[data.dtype]
     if isinstance(data, list):
-        return _dtype_map.get(
-            _infer_dtype_from_list(data))
-    return _dtype_map.get(type(data))
-
-
-def _infer_dtype_from_list(data):
-    if isinstance(data, list):
-        return _infer_dtype_from_list(data[0])
-    return type(data)
+        return dtypeof(np.array(data))
+    dtype = type(data)
+    assert dtype in dtypemap
+    return dtypemap[dtype]

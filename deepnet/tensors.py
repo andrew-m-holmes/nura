@@ -1,124 +1,150 @@
 import deepnet
-from .dtype import _infer_dtype
-from typing import Tuple
+from deepnet.types import dtype, _dim
+from deepnet.autograd.graph import Node
+from typing import Optional, Type, Any
+from numpy import ndarray
 
 
 class Tensor:
 
-    def __init__(self, data, use_grad, dtype) -> None:
-        self.data = data
-        self.grad = None
-        self.grad_fn = None
-        self.use_grad = use_grad
-        self.tangent = None
-        self.in_dual = False
-        self.is_leaf = True
-        self.dtype = dtype
+    _gradtensor = ...
 
-    def backward(self, grad=None):
-        if grad is None:
-            assert self.nelem() == 1
-            grad = deepnet.ones_like(self)
-        self.grad_fn.apply(grad)
+    def __init__(self, data, usegrad, grad, backfn, leaf, _dtype) -> None:
+        self._data: ndarray = data
+        self._grad: Optional[Tensor] = grad
+        self._backfn: Optional[Node] = backfn
+        self._usegrad: bool = usegrad
+        self._leaf: bool = leaf
+        self._dtype: dtype = _dtype
 
-    def dual(self, tangent=None, inplace=False):
-        return make_dual(self, tangent, inplace)
+    @property
+    def data(self):
+        return self._data
 
-    def undual(self, inplace=False):
-        return undual(self, inplace)
+    @property
+    def dtype(self):
+        return self._dtype
 
-    def dim(self) -> Tuple[int, ...]:
-        return self.data.shape
+    @property
+    def dim(self) -> _dim:
+        return self._data.shape
 
+    @property
     def ndim(self) -> int:
-        return self.data.ndim
+        return self._data.ndim
 
+    @property
     def nelem(self) -> int:
-        return self.data.size
+        return self._data.size
+
+    @property
+    def usegrad(self):
+        return self._usegrad
+
+    @property
+    def grad(self):
+        return self._grad
+
+    @property
+    def backfn(self):
+        return self._backfn
+
+    @property
+    def leaf(self):
+        return self._leaf
+
+    @classmethod
+    def gradtensor(cls):
+        assert cls != Tensor
+        return cls._gradtensor
+
+    def item(self):
+        assert self.nelem == 1
+        return self._data.item()
+
+    def to(self, dtype):
+        return deepnet.to(self, dtype)
 
     def byte(self):
-        return tensor(self.data, False, dtype=deepnet.byte)
+        return self.to(deepnet.byte)
 
     def char(self):
-        return tensor(self.data, False, dtype=deepnet.char)
+        return self.to(deepnet.char)
 
     def short(self):
-        return tensor(self.data, False, dtype=deepnet.short)
+        return self.to(deepnet.short)
 
     def int(self):
-        return tensor(self.data, False, dtype=deepnet.int)
+        return self.to(deepnet.int)
 
     def long(self):
-        return tensor(self.data, False, dtype=deepnet.long)
+        return self.to(deepnet.long)
 
     def half(self):
-        return tensor(self.data, self.use_grad, dtype=deepnet.half)
+        return self.to(deepnet.half)
 
     def float(self):
-        return tensor(self.data, self.use_grad, dtype=deepnet.float)
+        return self.to(deepnet.float)
 
     def double(self):
-        return tensor(self.data, self.use_grad, dtype=deepnet.double)
+        return self.to(deepnet.double)
 
     def bool(self):
-        return tensor(self.data, False, dtype=deepnet.bool)
+        return self.to(deepnet.bool)
 
-    def detach(self):
-        return tensor(self.data, False, dtype=self.dtype)
+    def backward(self, grad: Optional["Tensor"] = None):
+        deepnet.backward(self, grad)
+
+    def mutated(self, data=None, usegrad=None, grad=None, leaf=True) -> "Tensor":
+        if data is None:
+            data = self.data
+        if usegrad is None:
+            usegrad = self.usegrad
+        if grad is None:
+            grad = self.grad
+        cls = getcls(self.dtype)
+        return cls(data, usegrad, grad, None, leaf)
+
+    def mutate(
+        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
+    ) -> "Tensor":
+        if data is not None:
+            self._data = data
+        if usegrad is not None:
+            self._usegrad = usegrad
+        if grad is not None:
+            self._grad = grad
+        if backfn is not None:
+            self._backfn = backfn
+        self._leaf = leaf
+        return self
 
     def clone(self):
         return deepnet.clone(self)
 
-    def zero(self):
-        self.grad = deepnet.zeros_like(self)
+    def contig(self):
+        return deepnet.tocontig(self)
 
-    def sum(self, dims, keepdims):
-        return deepnet.sum(self, dims, keepdims)
+    def sum(self, dim: Optional[_dim] = None, keepdims=False):
+        return deepnet.sum(self, dim, keepdims)
 
-    def squeeze(self, dims=None):
-        return deepnet.squeeze(self, dims)
+    def squeeze(self, dim: Optional[_dim] = None):
+        return deepnet.squeeze(self, dim)
 
-    def unsqueeze(self, dims):
-        return deepnet.unsqueeze(self, dims)
+    def unsqueeze(self, dim: _dim):
+        return deepnet.unsqueeze(self, dim)
 
-    def transpose(self, dim_0=-2, dim_1=-1):
-        return deepnet.transpose(self, dim_0, dim_1)
+    def view(self, dim: _dim):
+        return deepnet.view(self, dim)
 
-    @property
-    def t(self):
-        return deepnet.transpose(self, -2, -1)
-
-    def contiguous(self):
-        return deepnet.to_contiguous(self)
-
-    def reshape(self, dim):
+    def reshape(self, dim: _dim):
         return deepnet.reshape(self, dim)
 
-    def _set_grad_state(self, use_grad, grad_fn, is_leaf):
-        self.use_grad = use_grad
-        self.grad_fn = grad_fn
-        self.is_leaf = is_leaf
+    def transpose(self, dim0=-2, dim1=-1):
+        return deepnet.transpose(self, dim0, dim1)
 
-    def _set_dual_state(self, tangent, in_dual):
-        self.tangent = tangent
-        self.in_dual = in_dual
-
-    def __repr__(self) -> str:
-        base = repr(self.data)
-        name = "tensor" if self.ndim() else "scalar" 
-        rep = base.replace("array", name).replace(")", "")
-        if ", dtype" in rep:
-            start = rep.index(", dtype")
-            rep = rep[:start]
-        if self.use_grad:
-            rep += f", grad_fn={self.grad_fn}"
-        else:
-            rep += f", dtype={self.dtype.name()}"
-        if self.in_dual:
-            rep += f", in_dual={self.in_dual}"
-        rep += ")"
-        return rep
-
+    def permute(self, dim: Optional[_dim] = None):
+        return deepnet.permute(self, dim=dim)
 
     def __add__(self, other):
         return deepnet.add(self, other)
@@ -156,73 +182,120 @@ class Tensor:
     def __rpow__(self, other):
         return deepnet.pow(other, self)
 
-    def __len__(self):
-        return self.data.shape[0]
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return deepnet.mul(self, -1.0)
+
+    def __abs__(self):
+        return deepnet.abs(self)
 
     def __getitem__(self, _slice):
         return deepnet.slice(self, _slice)
 
-def tensor(data, use_grad=False, dtype=None):
-    _tensor_args_check(data, use_grad, dtype)
-    data, dtype = _preprocess_tensor_args(data, dtype)
-    return Tensor(data, use_grad, dtype)
+    def __setitem__(self, _slice, item):
+        if deepnet.istensor(item):
+            self.data[_slice] = item.data
+        else:
+            self.data[_slice] = item
+
+    def __len__(self):
+        return self._data.shape[0]
+
+    def __repr__(self) -> str:
+        base = str(self._data)
+        s = "tensor(" + base
+        if self.backfn:
+            s += " backfn=" + str(self.backfn)
+        s += " dtype=" + self.dtype.name()
+        s += ")"
+        return s
 
 
-def _preprocess_tensor_args(data, dtype):
-    dtype = _infer_dtype(data) if dtype is None else dtype
+class ByteTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.byte)
+
+
+class CharTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.char)
+
+
+class ShortTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.short)
+
+
+class IntTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.int)
+
+
+class LongTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.long)
+
+
+class HalfTensor(Tensor):
+    _gradtensor = True
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.half)
+
+
+class FloatTensor(Tensor):
+    _gradtensor = True
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.float)
+
+
+class DoubleTensor(Tensor):
+    _gradtensor = True
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.double)
+
+
+class BoolTensor(Tensor):
+    _gradtensor = False
+
+    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.bool)
+
+
+def getcls(dtype) -> Type:
+    dtypemap = {
+        deepnet.byte: ByteTensor,
+        deepnet.char: CharTensor,
+        deepnet.short: ShortTensor,
+        deepnet.int: IntTensor,
+        deepnet.long: LongTensor,
+        deepnet.half: HalfTensor,
+        deepnet.float: FloatTensor,
+        deepnet.double: DoubleTensor,
+        deepnet.bool: BoolTensor,
+    }
+    return dtypemap[dtype]
+
+
+def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    if dtype is None:
+        dtype = deepnet.dtypeof(data)
     data = dtype.numpy(data)
-    return data, dtype
-
-
-def _tensor_args_check(data, use_grad, dtype):
-    assert _valid_tensor_data(data)
-    assert deepnet.is_py_bool(use_grad)
-    if dtype is not None:
-        assert deepnet.is_dtype(dtype)
-        if use_grad:
-            assert dtype.differentiable()
-
-
-def _valid_tensor_data(data):
-    return deepnet.is_numpy(data) or deepnet.is_py_list(
-        data) or deepnet.is_py_scalar(data) or deepnet.is_py_bool(data)
-
-
-def make_dual(tensor, tangent=None, inplace=False):
-    _make_dual_args_check(tensor, tangent, inplace)
-    tensor, tangent = _make_dual_helper(tensor, tangent, inplace)
-    tensor._set_dual_state(tangent, True)
-    return tensor
-
-
-def _make_dual_helper(tensor, tangent, inplace):
-    if tangent is None:
-        tangent = deepnet.zeros_like(tensor)
-    if inplace:
-        return tensor, tangent
-    return deepnet.tensor(tensor.data, use_grad=tensor.use_grad), tangent
-
-
-def _make_dual_args_check(tensor, tangent, inplace):
-    assert deepnet.is_tensor(tensor)
-    assert tensor.dtype.differentiable()
-    if tangent is not None:
-        assert deepnet.is_tensor(tangent)
-        assert tensor.dim() == tangent.dim()
-        assert tensor.dtype == tangent.dtype
-    assert deepnet.is_py_bool(inplace)
-
-
-def undual(tensor, inplace=False):
-    _undual_args_check(tensor, inplace)
-    tangent = tensor.tangent
-    if not inplace:
-        tensor = deepnet.tensor(tensor.data, tensor.use_grad)
-    tensor._set_dual_state(None, False)
-    return tensor, tangent
-
-
-def _undual_args_check(tensor, inplace):
-    assert deepnet.is_tensor(tensor)
-    assert deepnet.is_py_bool(inplace)
-    assert tensor.in_dual
+    cls = getcls(dtype)
+    if usegrad:
+        assert cls.gradtensor()
+    return cls(data, usegrad, None, None, True)
