@@ -1,31 +1,42 @@
+import jax
+import jax.numpy as jnp
+import numpy as np
 import deepnet as dn
-from deepnet.autograd.functional import grad, vjp, jvp
-
+from deepnet.autograd.functional import vjp, jvp, grad
 
 def main():
+
+    a = np.random.rand(4)
+    b = np.random.rand(4)
+    c = np.random.rand(1)
+    v = np.ones(4)
+    u = np.ones(1)
     
-    a = dn.rand(4, usegrad=True, dtype=dn.float)
-    b = dn.rand(4, usegrad=True, dtype=dn.float)
-    c = dn.rand(1, usegrad=True, dtype=dn.float)
+    dn_a = dn.tensor(a, usegrad=True)
+    dn_b = dn.tensor(b, usegrad=True)
+    dn_c = dn.tensor(c, usegrad=True)
+    dn_v = dn.tensor(v)
+    dn_u = dn.tensor(u)
 
     def f(a, b, c):
-        return a * b + c
-    
-    cot = dn.ones(4, dtype=dn.float)
-    cots = vjp((a, b, c), cot, f)
-    print(cots)
+        return a * b + c 
 
-    out = f(a, b, c)
-    grads = grad((a, b, c), out, cot * 10)
-    print(grads)
+    primals, tangents = jax.jvp(f, (a, b, c), (v, v, u))
+    print(primals)
+    print(tangents)
 
-    out.backward(cot * 100) 
-    print(a.grad, b.grad, c.grad)
-    print(out)
-    
-    tans = (dn.oneslike(a), dn.oneslike(b), dn.oneslike(c))
-    tan = jvp((a, b, c), tans, f)    
-    print(tan)
+    primals, tangents = jvp((dn_a, dn_b, dn_c), (dn_v, dn_v, dn_u), f)
+    print(primals)
+    print(tangents)
+
+    primals, jax_vjp_f = jax.vjp(f, a, b, c)
+    cotangents = jax_vjp_f(v)
+    print(primals)
+    print(cotangents)
+
+    primals, cotangents = vjp((dn_a, dn_b, dn_c), dn_v, f)
+    print(primals)
+    print(cotangents)
 
 if __name__ == "__main__":
     main()

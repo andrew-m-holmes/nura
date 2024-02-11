@@ -66,11 +66,10 @@ def vjp(
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
-    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=False) for t in inpt)
+    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None, leaf=False)
     with deepnet.autograd(enabled=True, rev=True):
         out = f(*inpt, *args, **kwargs)
-        print(out.backfn)
     grads = grad(inpt, out, vec)
     return out.mutated(grad=None, usegrad=False, leaf=False), grads
 

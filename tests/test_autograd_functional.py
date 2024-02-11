@@ -443,8 +443,9 @@ def test_grad_cos_scalar():
     a_tensor = deepnet.tensor(a, usegrad=True)
     result_tensor = f.cos(a_tensor)
 
-    partial_derivatives = grad(a_tensor, result_tensor)
+    partial_derivatives, *_= grad(a_tensor, result_tensor)
     result_tensor.backward()
+    print(partial_derivatives)
 
     assert np.allclose(
         a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5
@@ -456,8 +457,9 @@ def test_grad_sin_vector():
     a_tensor = deepnet.tensor(a, usegrad=True)
     result_tensor = f.sin(a_tensor)
 
-    partial_derivatives = grad(a_tensor, result_tensor, deepnet.oneslike(result_tensor))
+    partial_derivatives, *_= grad(a_tensor, result_tensor, deepnet.oneslike(result_tensor))
     result_tensor.backward(deepnet.oneslike(result_tensor))
+    print(partial_derivatives)
 
     assert np.allclose(
         a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5
@@ -487,8 +489,9 @@ def test_grad_permute_complex_tensor():
     a_tensor = deepnet.tensor(a, usegrad=True)
     result_tensor = deepnet.permute(a_tensor, (2, 0, 1))
 
-    partial_derivatives = grad(a_tensor, result_tensor, deepnet.oneslike(result_tensor))
+    partial_derivatives, *_ = grad(a_tensor, result_tensor, deepnet.oneslike(result_tensor))
     result_tensor.backward(deepnet.oneslike(result_tensor))
+    print(partial_derivatives)
 
     assert np.allclose(
         a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5
