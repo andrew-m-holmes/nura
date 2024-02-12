@@ -118,6 +118,8 @@ def jacfwd(
     perts = getperts(inpt, pos)
     for col, pert in zip(np.ndindex(inpt[pos].dim), perts):
         jaccol = genjaccol(inpt, f, pert, pos, *args, **kwargs)
+        if mismatch(jac[..., *col], jaccol):
+            jaccol = sumgrad(jac[..., *col], jaccol)
         jac[..., *col] = jaccol
     return out, jac
 

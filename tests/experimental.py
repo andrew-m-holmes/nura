@@ -46,7 +46,7 @@ def main():
     print(primal)
     print(cotangents)
 
-    primal, jac = jacfwd((dn_a, dn_b, dn_c), f, 0)
+    primal, jac = jacfwd((dn_a, dn_b, dn_c), f, 2)
     print(primal)
     print(jac)
 
