@@ -97,11 +97,9 @@ class Tensor:
 
     def mutated(self, data=None, usegrad=None, grad=None, leaf=True) -> "Tensor":
         if data is None:
-            data = self.data
+            data = self.data.copy()
         if usegrad is None:
             usegrad = self.usegrad
-        if grad is None:
-            grad = self.grad
         cls = getcls(self.dtype)
         return cls(data, usegrad, grad, None, leaf)
 
@@ -109,7 +107,7 @@ class Tensor:
         self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
     ) -> "Tensor":
         if data is not None:
-            self._data = data
+            self._data = data.copy()
         if usegrad is not None:
             self._usegrad = usegrad
         if grad is not None:
@@ -120,7 +118,7 @@ class Tensor:
         return self
 
     def copy(self) -> "Tensor":
-        return self.mutated(self.data.copy())
+        return self.mutated()
 
     def clone(self):
         return deepnet.clone(self)

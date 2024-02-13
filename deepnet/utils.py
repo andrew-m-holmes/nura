@@ -92,6 +92,9 @@ def full(dim: Union[_dim, int], num: float, usegrad=False, dtype: Optional[Type[
     data = np.full(dim, num)
     return dn.tensor(data, usegrad, dtype)
 
+def eye(n: int, m: Optional[int] = None, k: Optional[int] = None, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    data = np.eye(n, m, k)
+    return dn.tensor(data, dtype=dtype)
 
 def to(tensor: Tensor, dtype: Type[dtype]):
     assert istensor(tensor)

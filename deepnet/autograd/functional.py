@@ -1,7 +1,7 @@
 import numpy as np
-import deepnet
+import deepnet as dn
 from deepnet.tensors import Tensor
-from typing import List, Tuple, Union, Optional, Callable
+from typing import Dict, Generator, Tuple, Union, Optional, Callable, Any
 from collections import deque
 
 
@@ -9,7 +9,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
     assert out.backfn is not None
     if grad is None:
         assert out.nelem == 1
-        grad = deepnet.oneslike(out)
+        grad = dn.oneslike(out)
     queue = deque()
     queue.append([out.backfn, grad])
 
@@ -19,9 +19,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         tensor = node.tensor
         if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = (
-                tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
-            )
+            oldgrad = tensor.grad if tensor.grad is not None else dn.zeroslike(tensor)
             newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
             tensor.mutate(grad=newgrad)
         elif nodes:
@@ -35,9 +33,9 @@ def grad(
     assert out.backfn is not None
     if grad is None:
         assert out.nelem == 1
-        grad = deepnet.oneslike(out)
+        grad = dn.oneslike(out)
     inpt = tupify(inpt)
-    vals = tuple(deepnet.zeroslike(t) for t in inpt)
+    vals = tuple(dn.zeroslike(t) for t in inpt)
     inptmap = mapify(inpt, vals)
     queue = deque()
     queue.append([out.backfn, grad])
@@ -68,10 +66,11 @@ def vjp(
     assert vec.gradtensor()
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None, leaf=False)
-    with deepnet.autograd(enabled=True, rev=True):
+    with dn.autograd(enabled=True, rev=True):
         out = f(*inpt, *args, **kwargs)
-    grads = grad(inpt, out, vec)
-    return out.mutated(grad=None, usegrad=False, leaf=False), grads
+    out.backward(vec)
+    grads = tuple(t.grad for t in inpt)
+    return out.mutated(usegrad=False, leaf=True), grads
 
 
 def jvp(
@@ -84,22 +83,27 @@ def jvp(
     inpt = tupify(inpt)
     vec = tupify(vec)
     assert all(t.gradtensor() for t in inpt)
-    assert all(t.gradtensor() for t in vec)
+    assert all(v.gradtensor() for v in vec)
     inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
-    with deepnet.autograd(enabled=True, rev=False):
+    with dn.autograd(enabled=True, rev=False):
         out = f(*inpt, *args, **kwargs)
-        assert out.grad is not None
     grad = out.grad
-    return out.mutated(grad=None, usegrad=False, leaf=False), grad
+    return out.mutated(usegrad=False, leaf=True), grad
 
 
 def jacrev(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
+    pos: int,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
-    pass
+    inpt = tupify(inpt)
+    with dn.autograd(enabled=False):
+        out = f(*inpt, *args, **kwargs)
+    tensor = inpt[pos]
+    jac = getjac(tensor, out)
+    perts = getperts(out)
 
 
 def jacfwd(
@@ -112,35 +116,32 @@ def jacfwd(
     inpt = tupify(
         inpt,
     )
-    with deepnet.autograd(enabled=False):
+    with dn.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
-    jac = getjac(inpt, out, pos)
-    perts = getperts(inpt, pos)
+    tensor = inpt[pos]
+    perts = getperts(tensor)
+    jac = getjac(tensor, out)
+    left = tuple(dn.zeroslike(inpt[i]) for i in range(pos))
+    right = tuple(dn.zeroslike(inpt[i]) for i in range(pos + 1, len(inpt)))
     for col, pert in zip(np.ndindex(inpt[pos].dim), perts):
-        jaccol = genjaccol(inpt, f, pert, pos, *args, **kwargs)
-        if mismatch(jac[..., *col], jaccol):
-            jaccol = sumgrad(jac[..., *col], jaccol)
+        vec = left + (pert,) + right
+        _, jaccol = jvp(inpt, vec, f, *args, **kwargs)
         jac[..., *col] = jaccol
     return out, jac
 
-def genjaccol(inpt: Tuple[Tensor, ...], f: Callable[..., Tensor], pert: Tensor, pos: int, *args, **kwargs):
-    vec = tuple(deepnet.zeroslike(t) if i != pos else pert for i, t in enumerate(inpt))
-    _, jaccol = jvp(inpt, vec, f, *args, **kwargs)
-    return jaccol
 
-def getperts(inpt: Tuple[Tensor, ...], pos: int):
-    perts = []
-    zeros = deepnet.zeros(inpt[pos].dim).to(inpt[pos].dtype)
-    for index in np.ndindex(inpt[pos].dim):
-        tmp = zeros.copy()
-        tmp[index] = 1.0
-        perts.append(tmp)
-    return perts
+def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
+    nelem, dim, dtype = tensor.nelem, tensor.dim, tensor.dtype
+    perts = dn.zeros((nelem,) + dim).to(dtype)
+    arange = np.arange(nelem)
+    indices = np.unravel_index(arange, dim)
+    perts[arange, *indices] = 1.0
+    return (perts[i] for i in range(nelem))
 
 
-def getjac(inpt: Tuple[Tensor, ...], out: Tensor, pos: int) -> Tensor:
-    dim = inpt[pos].dim + out.dim
-    jac = deepnet.zeros(dim).to(out.dtype)
+def getjac(tensor: Tensor, out: Tensor) -> Tensor:
+    dim = out.dim + tensor.dim
+    jac = dn.zeros(dim).to(out.dtype)
     return jac
 
 
@@ -161,11 +162,11 @@ def sumdims(tdim, gdim, tndim, gndim):
     return tuple(np.where(mask)[0])
 
 
-def mapify(inpt, vals):
+def mapify(inpt, vals) -> Dict[Tensor, Any]:
     return {t: v for t, v in zip(inpt, vals)}
 
 
 def tupify(inpt) -> Tuple[Tensor, ...]:
-    if deepnet.istensor(inpt):
+    if dn.istensor(inpt):
         return (inpt,)
     return inpt
