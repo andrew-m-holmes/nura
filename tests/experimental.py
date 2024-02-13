@@ -6,10 +6,10 @@ from deepnet.autograd.functional import vjp, jvp, grad, jacrev, jacfwd
 
 def main():
 
-    a = np.random.rand(4)
-    b = np.random.rand(4)
+    a = np.random.rand(2)
+    b = np.random.rand(2)
     c = np.random.rand(1)
-    v = np.ones(4)
+    v = np.ones(2)
     u = np.ones(1)
    
     dn_a = dn.tensor(a, usegrad=True).float()
