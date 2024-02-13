@@ -58,7 +58,7 @@ def main():
 
 
     print("\njacfwd()")
-    primal, jac = jacfwd((dn_a, dn_b, dn_c), f, 0)
+    primal, jac = jacfwd((dn_a, dn_b, dn_c), f, 2)
     print(primal)
     print(jac)
 
@@ -67,7 +67,15 @@ def main():
     print(primal)
     print(tangent)
 
+    print("\njacrev()")
+    primal, jac = jacrev((dn_a, dn_b, dn_c), f, 2)
+    print(primal)
+    print(jac)
 
 
+    print("\nvjp() (for jacrev)")
+    primal, cotangents = vjp((dn_a, dn_b, dn_c), dn_v, f)
+    print(primal)
+    print(cotangents)
 if __name__ == "__main__":
     main()

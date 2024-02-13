@@ -61,6 +61,7 @@ def vjp(
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
+
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
@@ -98,12 +99,18 @@ def jacrev(
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
+
     inpt = tupify(inpt)
     with dn.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
     jac = getjac(tensor, out)
     perts = getperts(out)
+    for row, pert in zip(np.ndindex(out.dim), perts):
+        _, grads = vjp(inpt, pert, f, *args, **kwargs)
+        jacrow = grads[pos]
+        jac[row, ...] = jacrow
+    return out, jac
 
 
 def jacfwd(
@@ -113,9 +120,8 @@ def jacfwd(
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
-    inpt = tupify(
-        inpt,
-    )
+
+    inpt = tupify(inpt)
     with dn.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
@@ -123,7 +129,7 @@ def jacfwd(
     jac = getjac(tensor, out)
     left = tuple(dn.zeroslike(inpt[i]) for i in range(pos))
     right = tuple(dn.zeroslike(inpt[i]) for i in range(pos + 1, len(inpt)))
-    for col, pert in zip(np.ndindex(inpt[pos].dim), perts):
+    for col, pert in zip(np.ndindex(tensor.dim), perts):
         vec = left + (pert,) + right
         _, jaccol = jvp(inpt, vec, f, *args, **kwargs)
         jac[..., *col] = jaccol
