@@ -125,6 +125,10 @@ class Tensor:
         cls = getcls(self.dtype)
         return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
 
+    def detach(self):
+        cls = getcls(self)
+        return cls(self.data, False, None, None, True)
+
     def clone(self):
         return deepnet.clone(self)
 
