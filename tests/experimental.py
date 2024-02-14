@@ -1,5 +1,4 @@
 import jax
-import jax.numpy as jnp
 import numpy as np
 import deepnet as dn
 from deepnet.autograd.functional import vjp, jvp, grad, jacrev, jacfwd
@@ -19,8 +18,11 @@ def main():
     dn_u = dn.tensor(u).float()
 
     def f(a, b, c):
-        return a * b + c 
+        return a * b + c
     
+    # print("inpt: ")
+    # print(dn_a, dn_b, dn_c, dn_v)
+
     primal = f(dn_a, dn_b, dn_c)
     cotangents = grad((dn_a, dn_b, dn_c), primal, dn_v)
     print("\ngrad()")
