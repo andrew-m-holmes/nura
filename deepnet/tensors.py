@@ -3,19 +3,31 @@ from deepnet.types import dtype, _dim
 from deepnet.autograd.graph import Node
 from typing import Optional, Type, Any
 from numpy import ndarray
+from copy import deepcopy
+
+Type[dtype]
 
 
 class Tensor:
 
     _gradtensor = ...
 
-    def __init__(self, data, usegrad, grad, backfn, leaf, _dtype) -> None:
+    def __init__(
+        self,
+        data: ndarray,
+        usegrad: bool,
+        grad: "Tensor",
+        backfn: Node,
+        leaf: bool,
+        _dtype: Type[dtype],
+    ) -> None:
+
         self._data: ndarray = data
         self._grad: Optional[Tensor] = grad
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._dtype: dtype = _dtype
+        self._dtype: Type[dtype] = _dtype
 
     @property
     def data(self):
@@ -95,30 +107,23 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         deepnet.backward(self, grad)
 
-    def mutated(self, data=None, usegrad=None, grad=None, leaf=True) -> "Tensor":
-        if data is None:
-            data = self.data.copy()
-        if usegrad is None:
-            usegrad = self.usegrad
+    def mutated(self, **attrs: Any) -> "Tensor":
         cls = getcls(self.dtype)
-        return cls(data, usegrad, grad, None, leaf)
+        a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
+        return muttensor(a, **attrs)
 
-    def mutate(
-        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
-    ) -> "Tensor":
-        if data is not None:
-            self._data = data.copy()
-        if usegrad is not None:
-            self._usegrad = usegrad
-        if grad is not None:
-            self._grad = grad
-        if backfn is not None:
-            self._backfn = backfn
-        self._leaf = leaf
-        return self
+    def mutate(self, **attrs: Any) -> "Tensor":
+        return muttensor(self, **attrs)
 
     def copy(self) -> "Tensor":
-        return self.mutated()
+        cls = getcls(self.dtype)
+        return cls(self.data.copy(), self.usegrad, None, None, True)
+
+    def deepcopy(self) -> "Tensor":
+        grad = self.grad.copy() if self.grad is not None else None
+        backfn = deepcopy(self.backfn) if self.backfn is not None else None
+        cls = getcls(self.dtype)
+        return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
 
     def clone(self):
         return deepnet.clone(self)
@@ -303,3 +308,18 @@ def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Ten
     if usegrad:
         assert cls.gradtensor()
     return cls(data, usegrad, None, None, True)
+
+
+def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
+    validattrs = {
+        "data": "_data",
+        "usegrad": "_usegrad",
+        "grad": "_grad",
+        "backfn": "_backfn",
+        "leaf": "_leaf",
+        "dtype": "_dtype",
+    }
+    for name, val in attrs.items():
+        if name in validattrs:
+            setattr(tensor, validattrs[name], val)
+    return tensor

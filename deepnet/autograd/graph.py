@@ -43,25 +43,25 @@ class Node:
         return nodes
 
     def __repr__(self):
-        return f"{self.f.__name__.lower()}"
-
-
-def genout(out, f, ctx):
-    if deepnet.usegrad():
-        node = Node(out, f, ctx) if usegrad() and candiff(ctx) else None
-        if revmode():
-            out.mutate(backfn=node, usegrad=True, leaf=False)
-        elif node is not None:
-            grads = getgrads(ctx)
-            grad = node.applyforward(*grads)
-            out.mutate(usegrad=True, grad=grad, leaf=False)
-    return out
-
+        if self.f is not None:
+            return f"{self.f.__name__.lower()}"
+        return "accumgrad"
 
 def getnode(tensor):
     if tensor.leaf and tensor.usegrad:
         return Node(tensor, None, None)
     return tensor.backfn
+
+
+def genout(out, f, ctx):
+    node = Node(out, f, ctx) if usegrad() and candiff(ctx) else None
+    if deepnet.usegrad() and revmode():
+        out.mutate(backfn=node, usegrad=True, leaf=False)
+    elif deepnet.usegrad() and node is not None:
+        grads = getgrads(ctx)
+        grad = node.applyforward(*grads)
+        out.mutate(usegrad=True, grad=grad, leaf=False)
+    return out
 
 
 def getgrads(ctx):

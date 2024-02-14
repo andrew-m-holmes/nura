@@ -20,7 +20,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = tensor.grad if tensor.grad is not None else dn.zeroslike(tensor)
-            newgrad = oldgrad.mutated(oldgrad.data + accumgrad.data)
+            newgrad = oldgrad.mutated(data=(oldgrad.data + accumgrad.data))
             tensor.mutate(grad=newgrad)
         elif nodes:
             items = [[n, g] for n, g in zip(nodes, node.applybackward(grad))]
@@ -54,6 +54,33 @@ def grad(
     return tuple(t for t in inptmap.values())
 
 
+def mapify(inpt, vals) -> Dict[Tensor, Any]:
+    return {t: v for t, v in zip(inpt, vals)}
+
+
+def mismatch(tensor: Tensor, grad) -> bool:
+    return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
+
+
+def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
+    dims = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
+    keepdims = tensor.ndim == grad.ndim
+    data = np.sum(grad.data, axis=dims, keepdims=keepdims)
+    return grad.mutated(data=data)
+
+
+def sumdims(tdim, gdim, tndim, gndim):
+    paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
+    mask = paddim != np.array(gdim)
+    return tuple(np.where(mask)[0])
+
+
+def tupify(inpt) -> Tuple[Tensor, ...]:
+    if dn.istensor(inpt):
+        return (inpt,)
+    return inpt
+
+
 def vjp(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     vec: Tensor,
@@ -66,7 +93,7 @@ def vjp(
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
-    vec = vec.mutated(usegrad=False, grad=None, leaf=False)
+    vec = vec.mutated(usegrad=False, grad=None)
     with dn.autograd(enabled=True, rev=True):
         out = f(*inpt, *args, **kwargs)
     out.backward(vec)
@@ -149,30 +176,3 @@ def getjac(tensor: Tensor, out: Tensor) -> Tensor:
     dim = out.dim + tensor.dim
     jac = dn.zeros(dim).to(out.dtype)
     return jac
-
-
-def mismatch(tensor: Tensor, grad) -> bool:
-    return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
-
-
-def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
-    dims = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
-    keepdims = tensor.ndim == grad.ndim
-    data = np.sum(grad.data, axis=dims, keepdims=keepdims)
-    return grad.mutated(data=data)
-
-
-def sumdims(tdim, gdim, tndim, gndim):
-    paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
-    mask = paddim != np.array(gdim)
-    return tuple(np.where(mask)[0])
-
-
-def mapify(inpt, vals) -> Dict[Tensor, Any]:
-    return {t: v for t, v in zip(inpt, vals)}
-
-
-def tupify(inpt) -> Tuple[Tensor, ...]:
-    if dn.istensor(inpt):
-        return (inpt,)
-    return inpt
