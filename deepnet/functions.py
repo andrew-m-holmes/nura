@@ -74,7 +74,7 @@ class Div(Function):
     @staticmethod
     def backward(ctx: Context, grad: Tensor):
         a, b = ctx.tensors()
-        arr0 = 1.0 / b.data * grad.data
+        arr0 = grad.data / b.data
         arr1 = np.negative(a.data) / b.data**2.0 * grad.data
         return arr0, arr1
 
