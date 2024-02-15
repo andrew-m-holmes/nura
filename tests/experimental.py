@@ -5,79 +5,19 @@ from deepnet.autograd.functional import vjp, jvp, grad, jacrev, jacfwd
 
 def main():
 
-    a = np.random.rand(2)
-    b = np.random.rand(2)
-    c = np.random.rand(1)
-    v = np.ones(2)
-    u = np.ones(1)
-   
-    dn_a = dn.tensor(a, usegrad=True).float()
-    dn_b = dn.tensor(b, usegrad=True).float()
-    dn_c = dn.tensor(c, usegrad=True).float()
-    dn_v = dn.tensor(v).float()
-    dn_u = dn.tensor(u).float()
+    def linear(x, w, b):  
+        return dn.matmul(x, w) + b
 
-    def f(a, b, c):
-        return a * b + c
-    
-    # print("inpt: ")
-    # print(dn_a, dn_b, dn_c, dn_v)
+    inpt = dn.rand((64, 10), usegrad=False).float()
+    w = dn.rand((10, 64), usegrad=True).float()
+    b = dn.rand((64,), usegrad=True).float()
 
-    primal = f(dn_a, dn_b, dn_c)
-    cotangents = grad((dn_a, dn_b, dn_c), primal, dn_v)
-    print("\ngrad()")
-    print(primal)
-    print(cotangents)
+    pred = linear(inpt, w ,b)
+    error = pred.sum()
+    print(error)
+    error.backward()
+    print(w.grad)
+    print(b.grad)
 
-    print("\nbackward()")
-    primal.backward(dn_v)
-    print(dn_a.grad, dn_b.grad, dn_c.grad)
-
-
-    print("\njax.jvp()")
-    primal, tangents = jax.jvp(f, (a, b, c), (v, v, u))
-    print(primal)
-    print(tangents)
-
-
-    print("\njvp()")
-    primal, tangents = jvp((dn_a, dn_b, dn_c), (dn_v, dn_v, dn_u), f)
-    print(primal)
-    print(tangents)
-
-
-    print("\njax.vjp()")
-    primal, jax_vjp_f = jax.vjp(f, a, b, c)
-    cotangents = jax_vjp_f(v)
-    print(primal)
-    print(cotangents)
-
-
-    print("\nvjp()")
-    primal, cotangents = vjp((dn_a, dn_b, dn_c), dn_v, f)
-    print(primal)
-    print(cotangents)
-
-
-    print("\njacfwd()")
-    primal, jac = jacfwd((dn_a, dn_b, dn_c), f, 2)
-    print(primal)
-    print(jac)
-
-    print("\njvp() (for jacfwd)")
-    primal, tangent = jvp((dn_a, dn_b, dn_c), (dn.zeroslike(dn_a), dn.zeroslike(dn_b), dn.oneslike(dn_c)), f)
-    print(primal)
-    print(tangent)
-
-    print("\njacrev()")
-    primal, jac = jacrev((dn_a, dn_b, dn_c), f, 2)
-    print(primal)
-    print(jac)
-
-
-    print("\nvjp() (for jacrev)")
-    primal, cotangents = vjp((dn_a, dn_b, dn_c), dn_v, f)
-    print(primal)
-    print(cotangents)
 if __name__ == "__main__":
     main()
