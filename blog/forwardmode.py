@@ -1,59 +1,57 @@
-import numpy as np 
+import numpy as np
+
 np.set_printoptions(precision=4)
+
 
 class Primal:
 
-    def __init__(self, array, tangent):
-        self.array = array
+    def __init__(self, data, tangent):
+        self.data = data
         self.tangent = tangent
 
     def __add__(self, other):
-        array = self.array + other.array
+        data = self.data + other.data
         tangent = self.tangent + other.tangent
-        return Primal(array, tangent)
+        return Primal(data, tangent)
 
     def __sub__(self, other):
-        array = self.array - other.array
+        data = self.data - other.data
         tangent = self.tangent - other.tangent
-        return Primal(array, tangent)
+        return Primal(data, tangent)
 
     def __mul__(self, other):
-        array = self.array * other.array
-        tangent = self.tangent * other.array + other.tangent * self.array
-        return Primal(array, tangent)
+        data = self.data * other.data
+        tangent = self.tangent * other.data + other.tangent * self.data
+        return Primal(data, tangent)
 
     def __truediv__(self, other):
-        array = self.array / other.array
-        tangent = (self.tangent / other.array) + (-self.array / other.array ** 2) * other.tangent 
-        return Primal(array, tangent)
-
-    def __matmul__(self, other):
-        array = self.array @ other.array
-        tangent = self.tangent @ other.array + self.array @ other.tangent
-        return Primal(array, tangent)
+        data = self.data / other.data
+        tangent = (self.tangent / other.data) + (
+            -self.data / other.data**2
+        ) * other.tangent
+        return Primal(data, tangent)
 
     def __repr__(self):
-        return f"primal: {self.array}, tangent: {self.tangent}"
+        return f"primal: {self.data}, tangent: {self.tangent}"
+
 
 def main():
 
     np.set_printoptions(precision=4)
 
-    a = Primal(np.array(5.), np.array(1.))
-    b = Primal(np.array(15.), np.array(0))
-    print(f"{a = } {b = }")
-    print(f"{a + b = }")
-    print(f"{a - b = }")
-    print(f"{a * b = }")
-    print(f"{b / a = }")
+    def mul_add(a, b, c):
+        return a * b + c
 
-    m1 = Primal(np.random.rand(3, 2), np.ones((3, 2)))
-    m2 = Primal(np.random.rand(2, 1), np.zeros((2, 1)))
-    print(f"{m1 @ m2 = }")
+    def div_sub(a, b, c):
+        return b / c - a
+
+    a = Primal(np.array(3.0), np.array(1.0))
+    b = Primal(np.array(4.0), np.array(0.0))
+    c = Primal(np.array(1.0), np.array(2.0))
+
+    print(f"{mul_add(a, b, c) = }")
+    print(f"{div_sub(a, b, c) = }")
 
 if __name__ == "__main__":
 
     main()
-
-
-
