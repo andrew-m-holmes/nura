@@ -1,51 +1,50 @@
 import deepnet
-from deepnet.autograd.mode import usegrad, revmode
 from typing import List, Optional
 
 
 class Node:
 
-    def __init__(self, tensor, f, ctx):
+    def __init__(self, tensor, function, context):
         self._tensor = tensor
-        self._f = f
-        self._ctx = ctx
+        self._function = function
+        self._context = context
 
     @property
     def tensor(self):
         return self._tensor
 
     @property
-    def f(self):
-        return self._f
+    def function(self):
+        return self._function
 
     @property
-    def ctx(self):
-        return self._ctx
+    def context(self):
+        return self._context
 
-    def applybackward(self, grad):
-        arr = self.f.backward(self.ctx, grad)
-        if not isinstance(arr, tuple):
-            arr = (arr,)
-        return tuple(deepnet.tensor(a) for a in arr)
-
-    def applytangent(self, *grad):
-        arr = self.f.tangent(self.ctx, *grad)
+    def apply(self, *grad, backward=True):
+        if backward:
+            arr = self.function.backward(self.context, *grad)
+            if not isinstance(arr, tuple):
+                arr = (arr,)
+            return tuple(deepnet.tensor(a) for a in arr)
+        arr = self.function.tangent(self.context, *grad)
         return deepnet.tensor(arr)
 
     def children(self) -> Optional[List["Node"]]:
-        if self.ctx is None:
+        if self.context is None:
             return None
         nodes = []
-        for t in self.ctx.tensors():
+        for t in self.context.tensors():
             node = getnode(t)
             if isinstance(node, Node):
                 nodes.append(node)
         return nodes
 
     def __repr__(self):
-        if self.f is not None:
-            return f"{self.f.__name__.lower()}"
-        return "accumgrad"
+        if self.tensor.leaf:
+            return "accumgrad"
+        return f"{self.function.__name__.lower()}"
+
 
 def getnode(tensor):
     if tensor.leaf and tensor.usegrad:
@@ -53,26 +52,29 @@ def getnode(tensor):
     return tensor.backfn
 
 
-def genout(out, f, ctx):
-    node = Node(out, f, ctx) if usegrad() and candiff(ctx) else None
-    if deepnet.usegrad() and revmode():
+def genout(out, function, context):
+    if not candiff(context):
+        return out
+    node = Node(out, function, context)
+    if deepnet.usegrad() and deepnet.reversemode():
         out.mutate(backfn=node, usegrad=True, leaf=False)
-    elif deepnet.usegrad() and node is not None:
-        grads = getgrads(ctx)
-        grad = node.applytangent(*grads)
+    elif deepnet.usegrad() and deepnet.forwardmode():
+        grads = getgrads(context)
+        grad = node.apply(*grads, backward=False)
         out.mutate(usegrad=True, grad=grad, leaf=False)
     return out
 
 
-def getgrads(ctx):
+def getgrads(context):
     return tuple(
-        t.grad if t.grad is not None else deepnet.zeroslike(t) for t in ctx.tensors()
+        t.grad if t.grad is not None else deepnet.zeroslike(t)
+        for t in context.tensors()
     )
 
 
-def candiff(ctx):
-    if ctx.tensors():
-        return all(t.gradtensor() for t in ctx.tensors()) and any(
-            t.usegrad for t in ctx.tensors()
+def candiff(context):
+    if context.tensors():
+        return all(t.gradtensor() for t in context.tensors()) and any(
+            t.usegrad for t in context.tensors()
         )
     return False

@@ -1154,7 +1154,7 @@ def test_slice_backward_mixed_indices():
 
 def main():
 
-    with deepnet.autograd(state=True, rev=True):
+    with deepnet.autograd(enabled=True, reverse=True, forward=False):
 
         # Add Backward Tests
 
