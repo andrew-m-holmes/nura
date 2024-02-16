@@ -33,7 +33,7 @@ class Context:
 class Function:
 
     @staticmethod
-    def evaluate(ctx: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
+    def forward(ctx: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
@@ -41,13 +41,13 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def forward(ctx: Context, *grad: Tensor) -> ndarray:
+    def tangent(ctx: Context, *grad: Tensor) -> ndarray:
         raise NotImplementedError
 
     @classmethod
     def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
         ctx = Context()
-        rawout = cls.evaluate(ctx, *args, **kwargs)
+        rawout = cls.forward(ctx, *args, **kwargs)
         irout = deepnet.tensor(rawout)
         out = genout(irout, cls, ctx)
         return out

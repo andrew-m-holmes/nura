@@ -8,7 +8,7 @@ from typing import Any
 class Add(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
         arr = a.data + b.data
         return arr
@@ -18,7 +18,7 @@ class Add(Function):
         return grad.data, grad.data
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         arr = agrad.data + bgrad.data
         return arr
 
@@ -26,7 +26,7 @@ class Add(Function):
 class Sub(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
         arr = a.data - b.data
         return arr
@@ -36,7 +36,7 @@ class Sub(Function):
         return grad.data, np.negative(grad.data)
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         arr = agrad.data + np.negative(bgrad.data)
         return arr
 
@@ -44,7 +44,7 @@ class Sub(Function):
 class Mul(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
         arr = a.data * b.data
         return arr
@@ -57,7 +57,7 @@ class Mul(Function):
         return arr0, arr1
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         a, b = ctx.tensors()
         arr = agrad.data * b.data + bgrad.data * a.data
         return arr
@@ -66,7 +66,7 @@ class Mul(Function):
 class Div(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
         arr = a.data / b.data
         return arr
@@ -79,7 +79,7 @@ class Div(Function):
         return arr0, arr1
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         a, b = ctx.tensors()
         arr0 = agrad.data / b.data
         arr1 = a.data * (np.negative(bgrad.data) / b.data**2)
@@ -90,7 +90,7 @@ class Div(Function):
 class Dot(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
         arr = np.dot(a.data, b.data)
         return arr
@@ -103,7 +103,7 @@ class Dot(Function):
         return arr0, arr1
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         a, b = ctx.tensors()
         arr0 = np.dot(agrad.data, b.data)
         arr1 = np.dot(a.data, bgrad.data)
@@ -114,7 +114,7 @@ class Dot(Function):
 class Matmul(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         ctx.save(a, b)
         arr = a.data @ b.data
         return arr
@@ -127,7 +127,7 @@ class Matmul(Function):
         return arr0, arr1
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         a, b = ctx.tensors()
         arr0 = agrad.data @ b.data
         arr1 = a.data @ bgrad.data
@@ -138,7 +138,7 @@ class Matmul(Function):
 class Pow(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, b: Tensor):
+    def forward(ctx: Context, a: Tensor, b: Tensor):
         arr = np.power(a.data, b.data)
         ctx.save(a, b)
         ctx["arr"] = arr
@@ -153,7 +153,7 @@ class Pow(Function):
         return arr0, arr1
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor, bgrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor, bgrad: Tensor):
         a, b = ctx.tensors()
         arr = ctx["arr"]
         arr0 = b.data * np.power(a.data, b.data - 1.0) * agrad.data
@@ -164,7 +164,7 @@ class Pow(Function):
 class Exp(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor):
+    def forward(ctx: Context, a: Tensor):
         arr = np.exp(a.data)
         ctx.save(a)
         ctx["arr"] = arr
@@ -176,7 +176,7 @@ class Exp(Function):
         return arr * grad.data
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         arr = ctx["arr"]
         return arr * agrad.data
 
@@ -184,7 +184,7 @@ class Exp(Function):
 class Log(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor):
+    def forward(ctx: Context, a: Tensor):
         ctx.save(a)
         arr = np.log(a.data)
         return arr
@@ -196,7 +196,7 @@ class Log(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         a = ctx.tensors()[0]
         arr = 1.0 / a.data * agrad.data
         return arr
@@ -205,7 +205,7 @@ class Log(Function):
 class Sin(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor):
+    def forward(ctx: Context, a: Tensor):
         ctx.save(a)
         arr = np.sin(a.data)
         return arr
@@ -217,7 +217,7 @@ class Sin(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         a = ctx.tensors()[0]
         arr = np.cos(a.data) * agrad.data
         return arr
@@ -226,7 +226,7 @@ class Sin(Function):
 class Cos(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor):
+    def forward(ctx: Context, a: Tensor):
         ctx.save(a)
         arr = np.cos(a.data)
         return arr
@@ -238,7 +238,7 @@ class Cos(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         a = ctx.tensors()[0]
         arr = agrad.data * np.negative(np.sin(a.data))
         return arr
@@ -247,7 +247,7 @@ class Cos(Function):
 class Sum(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim: _dim, keepdims: bool):
+    def forward(ctx: Context, a: Tensor, dim: _dim, keepdims: bool):
         ctx.save(a)
         ctx["dim"] = dim
         ctx["keepdims"] = keepdims
@@ -266,7 +266,7 @@ class Sum(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         dim = ctx["dim"]
         keepdims = ctx["keepdims"]
         arr = np.sum(agrad.data, axis=dim, keepdims=keepdims)
@@ -276,7 +276,7 @@ class Sum(Function):
 class Squeeze(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim: _dim):
+    def forward(ctx: Context, a: Tensor, dim: _dim):
         ctx.save(a)
         ctx["dim"] = dim
         arr = a.data.squeeze(axis=dim)
@@ -289,7 +289,7 @@ class Squeeze(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, grad: Tensor):
+    def tangent(ctx: Context, grad: Tensor):
         dim = ctx["dim"]
         arr = grad.data.squeeze(axis=dim)
         return arr
@@ -298,7 +298,7 @@ class Squeeze(Function):
 class Unsqueeze(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim: Any):
+    def forward(ctx: Context, a: Tensor, dim: Any):
         ctx.save(a)
         ctx["dim"] = dim
         arr = np.expand_dims(a.data, axis=dim)
@@ -311,7 +311,7 @@ class Unsqueeze(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         dim = ctx["dim"]
         arr = np.expand_dims(agrad.data, axis=dim)
         return arr
@@ -320,7 +320,7 @@ class Unsqueeze(Function):
 class View(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim):
+    def forward(ctx: Context, a: Tensor, dim):
         ctx.save(a)
         ctx["dim"] = dim
         arr = a.data.reshape(dim, order="C")
@@ -333,7 +333,7 @@ class View(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         dim = ctx["dim"]
         arr = agrad.data.reshape(dim, order="C")
         return arr
@@ -342,7 +342,7 @@ class View(Function):
 class Reshape(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim: Any):
+    def forward(ctx: Context, a: Tensor, dim: Any):
         ctx.save(a)
         ctx["dim"] = dim
         arr = a.data.reshape(dim)
@@ -355,7 +355,7 @@ class Reshape(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         dim = ctx["dim"]
         arr = agrad.data.reshape(dim)
         return arr
@@ -364,7 +364,7 @@ class Reshape(Function):
 class Transpose(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim0: int, dim1: int):
+    def forward(ctx: Context, a: Tensor, dim0: int, dim1: int):
         arr = a.data.swapaxes(dim0, dim1)
         ctx.save(a)
         ctx["dim0"] = dim0
@@ -379,7 +379,7 @@ class Transpose(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         dim0 = ctx["dim0"]
         dim1 = ctx["dim1"]
         arr = agrad.data.swapaxes(dim0, dim1)
@@ -389,7 +389,7 @@ class Transpose(Function):
 class Permute(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, dim):
+    def forward(ctx: Context, a: Tensor, dim):
         ctx.save(a)
         ctx["dim"] = dim
         arr = a.data.transpose(dim)
@@ -402,7 +402,7 @@ class Permute(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         dim = ctx["dim"]
         arr = agrad.data.transpose(dim)
         return arr
@@ -411,7 +411,7 @@ class Permute(Function):
 class Abs(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor):
+    def forward(ctx: Context, a: Tensor):
         ctx.save(a)
         return np.absolute(a.data)
 
@@ -422,14 +422,14 @@ class Abs(Function):
         return mask * grad.data
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         return abs(agrad.data)
 
 
 class Clone(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor):
+    def forward(ctx: Context, a: Tensor):
         ctx.save(a)
         arr = a.data.copy()
         return arr
@@ -439,7 +439,7 @@ class Clone(Function):
         return grad.data
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         arr = agrad.data.copy()
         return arr
 
@@ -447,7 +447,7 @@ class Clone(Function):
 class Slice(Function):
 
     @staticmethod
-    def evaluate(ctx: Context, a: Tensor, _slice: slice):
+    def forward(ctx: Context, a: Tensor, _slice: slice):
         ctx.save(a)
         ctx["slice"] = _slice
         ctx["dim"] = a.dim
@@ -464,7 +464,7 @@ class Slice(Function):
         return arr
 
     @staticmethod
-    def forward(ctx: Context, agrad: Tensor):
+    def tangent(ctx: Context, agrad: Tensor):
         _slice = ctx["slice"]
         arr = agrad.data[_slice]
         return arr

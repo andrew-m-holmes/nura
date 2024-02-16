@@ -28,8 +28,8 @@ class Node:
             arr = (arr,)
         return tuple(deepnet.tensor(a) for a in arr)
 
-    def applyforward(self, *grad):
-        arr = self.f.forward(self.ctx, *grad)
+    def applytangent(self, *grad):
+        arr = self.f.tangent(self.ctx, *grad)
         return deepnet.tensor(arr)
 
     def children(self) -> Optional[List["Node"]]:
@@ -59,7 +59,7 @@ def genout(out, f, ctx):
         out.mutate(backfn=node, usegrad=True, leaf=False)
     elif deepnet.usegrad() and node is not None:
         grads = getgrads(ctx)
-        grad = node.applyforward(*grads)
+        grad = node.applytangent(*grads)
         out.mutate(usegrad=True, grad=grad, leaf=False)
     return out
 
