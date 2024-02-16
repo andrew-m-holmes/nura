@@ -24,6 +24,7 @@ class Tensor:
 
         self._data: ndarray = data
         self._grad: Optional[Tensor] = grad
+        self._tan: Optional[Tensor] = None
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
