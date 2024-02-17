@@ -16,7 +16,7 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
 def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
     queue = deque()
-    queue.append([out.backfn, grad])
+    queue.append((out.backfn, grad))
 
     while queue:
         node, grad = queue.popleft()
@@ -57,7 +57,7 @@ def _grad(
     vals = tuple(deepnet.zeroslike(t) for t in inpt)
     inptmap = mapify(inpt, vals)
     queue = deque()
-    queue.append([out.backfn, grad])
+    queue.append((out.backfn, grad))
 
     while queue:
         node, grad = queue.popleft()
@@ -112,7 +112,7 @@ def vjp(
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
-    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
+    inpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=None, leaf=True), inpt))
     vec = vec.mutated(usegrad=False, grad=None)
     out, grads = _vjp(inpt, vec, f, *args, **kwargs)
     return out.mutated(usegrad=False, leaf=True), grads
@@ -128,7 +128,7 @@ def _vjp(
     with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
     _backward(out, vec)
-    grads = tuple(t.grad for t in inpt if deepnet.istensor(t) and t.grad)
+    grads = tuple(map(lambda t: t.grad, inpt))
     return out, grads
 
 
@@ -165,14 +165,15 @@ def _jvp(
 def jacrev(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    pos = 0,
+    pos=0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
-    with deepnet.autograd(enabled=False):
+    inpt = tuple(t.mutated(usegrad=True) for t in inpt)
+    with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
     jac = getjac(tensor, out)
@@ -203,7 +204,8 @@ def jacfwd(
     right = tuple(deepnet.zeroslike(inpt[i]) for i in range(pos + 1, len(inpt)))
     for col, pert in zip(np.ndindex(tensor.dim), perts):
         vec = left + (pert,) + right
-        _, jaccol = jvp(inpt, vec, f, *args, **kwargs)
+        colinpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
+        _, jaccol = _jvp(colinpt, f, *args, **kwargs)
         jac[..., *col] = jaccol
     return out, jac
 
