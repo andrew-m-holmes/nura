@@ -21,7 +21,9 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
-                tensor.grad if deepnet.istensor(tensor.grad) else deepnet.zeroslike(tensor)
+                tensor.grad
+                if deepnet.istensor(tensor.grad)
+                else deepnet.zeroslike(tensor)
             )
             newgrad = oldgrad.mutated(data=(oldgrad.data + accumgrad.data))
             tensor.mutate(grad=newgrad)
@@ -33,11 +35,20 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 def grad(
     inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
+    inpt = tupify(inpt)
+    assert all(t.gradtensor() for t in inpt)
+    assert out.gradtensor()
     assert out.backfn is not None
     if grad is None:
         assert out.nelem == 1
         grad = deepnet.oneslike(out)
-    inpt = tupify(inpt)
+    inptmap = _grad(inpt, out, grad)
+    return tuple(inptmap.values())
+
+
+def _grad(
+    inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
+) -> Dict[Tensor, Tensor]:
     vals = tuple(deepnet.zeroslike(t) for t in inpt)
     inptmap = mapify(inpt, vals)
     queue = deque()
@@ -45,6 +56,7 @@ def grad(
 
     while queue:
         node, grad = queue.popleft()
+        assert deepnet.istensor(grad)
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
@@ -54,7 +66,7 @@ def grad(
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
-    return tuple(t for t in inptmap.values())
+    return inptmap
 
 
 def mapify(inpt, vals) -> Dict[Tensor, Any]:
