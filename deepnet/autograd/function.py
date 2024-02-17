@@ -17,6 +17,13 @@ class Context:
     def tensors(self) -> Tuple[Tensor, ...]:
         return self._tensors if self._tensors else ()
 
+    def usesgrad(self) -> bool:
+        if self._tensors is None:
+            return False
+        return any(t.usegrad for t in self._tensors) and all(
+            t.gradtensor() for t in self._tensors
+        )
+
     def __setitem__(self, key: Any, value: Any):
         if self._dict is None:
             self._dict = dict()

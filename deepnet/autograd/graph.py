@@ -53,7 +53,7 @@ def getnode(tensor):
 
 
 def genout(out, function, context):
-    if not candiff(context):
+    if not context.usesgrad():
         return out
     node = Node(out, function, context)
     if deepnet.usegrad() and deepnet.reversemode():
@@ -72,9 +72,3 @@ def getgrads(context):
     )
 
 
-def candiff(context):
-    if context.tensors():
-        return all(t.gradtensor() for t in context.tensors()) and any(
-            t.usegrad for t in context.tensors()
-        )
-    return False
