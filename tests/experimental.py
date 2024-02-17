@@ -10,11 +10,15 @@ def main():
     def f(a, b, c):
         return a * b + c
 
-    a = dn.full(2, 2.0)
-    b = dn.full(2, 1.)
-    c = dn.tensor(8.)
+    a = dn.rand(2)
+    b = dn.rand(2)
+    c = dn.rand(1)
 
     out, jac = jacrev((a, b, c), f)
+    print(jac)
+
+    jacf = jax.jacrev(f)
+    jac = jacf(a.data, b.data, c.data)
     print(jac)
 
     out, jac = jacfwd((a, b, c), f)

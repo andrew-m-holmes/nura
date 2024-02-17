@@ -67,7 +67,8 @@ def _grad(
         if tensor in inptmap:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
-            oldgrad.mutate(data=oldgrad.data + accumgrad.data)
+            newgrad = oldgrad + accumgrad
+            inptmap[tensor] = newgrad
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
@@ -144,7 +145,8 @@ def jvp(
     vec = tupify(vec)
     assert all(t.gradtensor() for t in inpt)
     assert all(v.gradtensor() for v in vec)
-    inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
+    gen = (v for v in vec)
+    inpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=next(gen)), inpt))
     out, grad = _jvp(inpt, f, *args, **kwargs)
     return out.mutated(usegrad=False, leaf=True), grad
 
@@ -172,7 +174,7 @@ def jacrev(
 
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
-    inpt = tuple(t.mutated(usegrad=True) for t in inpt)
+    inpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=None, leaf=True), inpt))
     with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
@@ -188,7 +190,7 @@ def jacrev(
 def jacfwd(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    pos: int,
+    pos = 0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
@@ -203,8 +205,8 @@ def jacfwd(
     left = tuple(deepnet.zeroslike(inpt[i]) for i in range(pos))
     right = tuple(deepnet.zeroslike(inpt[i]) for i in range(pos + 1, len(inpt)))
     for col, pert in zip(np.ndindex(tensor.dim), perts):
-        vec = left + (pert,) + right
-        colinpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
+        gen = (v for v in (left + (pert,) + right))
+        colinpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=next(gen)), inpt))
         _, jaccol = _jvp(colinpt, f, *args, **kwargs)
         jac[..., *col] = jaccol
     return out, jac
