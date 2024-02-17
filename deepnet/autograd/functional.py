@@ -6,10 +6,15 @@ from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    assert out.backfn is not None
+    assert out.gradtensor() and out.backfn
     if grad is None:
         assert out.nelem == 1
         grad = deepnet.oneslike(out)
+    assert grad.gradtensor()
+    _backward(out, grad)
+
+
+def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
     queue = deque()
     queue.append([out.backfn, grad])
 
