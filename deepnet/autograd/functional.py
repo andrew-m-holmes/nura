@@ -15,12 +15,13 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
     while queue:
         node, grad = queue.popleft()
+        assert deepnet.istensor(grad)
         nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
-                tensor.grad if tensor.grad is not None else deepnet.zeroslike(tensor)
+                tensor.grad if deepnet.istensor(tensor.grad) else deepnet.zeroslike(tensor)
             )
             newgrad = oldgrad.mutated(data=(oldgrad.data + accumgrad.data))
             tensor.mutate(grad=newgrad)
