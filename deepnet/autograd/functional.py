@@ -96,11 +96,22 @@ def vjp(
     assert vec.gradtensor()
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None)
+    out, grads = _vjp(inpt, vec, f, *args, **kwargs)
+    return out.mutated(usegrad=False, leaf=True), grads
+
+
+def _vjp(
+    inpt: Tuple[Tensor, ...],
+    vec: Tensor,
+    f: Callable[..., Tensor],
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tuple[Tensor, ...]]:
     with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
     out.backward(vec)
-    grads = tuple(t.grad for t in inpt)
-    return out.mutated(usegrad=False, leaf=True), grads
+    grads = tuple(t.grad for t in inpt if deepnet.istensor(t) and t.grad)
+    return out, grads
 
 
 def jvp(

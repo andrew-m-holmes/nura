@@ -99,7 +99,7 @@ def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
         return dtypemap[data.dtype]
     if isinstance(data, list):
-        return dtypeof(np.array(data))
+        return dtypemap[np.array(data).dtype]
     dtype = type(data)
     assert dtype in dtypemap
     return dtypemap[dtype]
