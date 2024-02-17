@@ -5,9 +5,6 @@ from typing import Optional, Type, Any
 from numpy import ndarray
 from copy import deepcopy
 
-Type[dtype]
-
-
 class Tensor:
 
     _gradtensor = ...
