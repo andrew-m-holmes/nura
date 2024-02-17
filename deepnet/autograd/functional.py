@@ -30,7 +30,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
                 if deepnet.istensor(tensor.grad)
                 else deepnet.zeroslike(tensor)
             )
-            newgrad = oldgrad.mutated(data=(oldgrad.data + accumgrad.data))
+            newgrad = oldgrad + accumgrad
             tensor.mutate(grad=newgrad)
         elif nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
@@ -127,7 +127,7 @@ def _vjp(
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
     with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
-    out.backward(vec)
+    _backward(out, vec)
     grads = tuple(t.grad for t in inpt if deepnet.istensor(t) and t.grad)
     return out, grads
 
@@ -145,28 +145,40 @@ def jvp(
     assert all(t.gradtensor() for t in inpt)
     assert all(v.gradtensor() for v in vec)
     inpt = tuple(t.mutated(usegrad=True, grad=g) for t, g in zip(inpt, vec))
+    out, grad = _jvp(inpt, f, *args, **kwargs)
+    return out.mutated(usegrad=False, leaf=True), grad
+
+
+def _jvp(
+    inpt: Tuple[Tensor, ...],
+    f: Callable[..., Tensor],
+    *args,
+    **kwargs,
+) -> Tuple[Tensor, Tensor]:
     with deepnet.autograd(enabled=True, reverse=False, forward=True):
         out = f(*inpt, *args, **kwargs)
     grad = out.grad
-    return out.mutated(usegrad=False, leaf=True), grad
+    assert deepnet.istensor(grad)
+    return out, grad
 
 
 def jacrev(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    pos: int,
+    pos = 0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
-    with deepnet.autograd(enabled=False, reverse=True, forward=False):
+    assert all(t.gradtensor() for t in inpt)
+    with deepnet.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
     jac = getjac(tensor, out)
     perts = getperts(out)
     for row, pert in zip(np.ndindex(out.dim), perts):
-        _, grads = vjp(inpt, pert, f, *args, **kwargs)
+        _, grads = _vjp(inpt, pert, f, *args, **kwargs)
         jacrow = grads[pos]
         jac[row, ...] = jacrow
     return out, jac
@@ -181,7 +193,8 @@ def jacfwd(
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
-    with deepnet.autograd(enabled=False, reverse=False, forward=True):
+    assert all(t.gradtensor() for t in inpt)
+    with deepnet.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
     perts = getperts(tensor)
