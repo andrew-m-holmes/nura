@@ -15,7 +15,6 @@ def main():
 
     out, jac = jacrev((a, b, c), f)
     print(jac)
-
     jacf = jax.jacrev(f)
     jac = jacf(a.data, b.data, c.data)
     print(jac)

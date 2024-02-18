@@ -5,6 +5,7 @@ from typing import Optional, Type, Any
 from numpy import ndarray
 from copy import deepcopy
 
+
 class Tensor:
 
     _gradtensor = ...
@@ -21,11 +22,11 @@ class Tensor:
 
         self._data: ndarray = data
         self._grad: Optional[Tensor] = grad
-        self._tan: Optional[Tensor] = None
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
         self._dtype: Type[dtype] = _dtype
+        self._mutable = False
 
     @property
     def data(self):
@@ -62,6 +63,10 @@ class Tensor:
     @property
     def leaf(self):
         return self._leaf
+
+    @property
+    def mutable(self):
+        return self._mutable
 
     @classmethod
     def gradtensor(cls):
@@ -204,6 +209,27 @@ class Tensor:
     def __abs__(self):
         return deepnet.abs(self)
 
+    def __setattr__(self, name, value):
+        validnames = {
+            "_data",
+            "_usegrad",
+            "_grad",
+            "_backfn",
+            "_leaf",
+            "_dtype",
+            "_mutable",
+        }
+        if name not in validnames:
+            raise AttributeError(
+                f"{name} cannot be assigned to {deepnet.typename(self)}"
+            )
+        if name not in self.__dict__:
+            self.__dict__[name] = value
+            return None
+        if name != "_mutable":
+            assert self.mutable
+        self.__dict__[name] = value
+
     def __getitem__(self, slc):
         return deepnet.slice(self, slc)
 
@@ -318,6 +344,7 @@ def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Ten
 
 
 def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
+    tensor._mutable = True
     validattrs = {
         "data": "_data",
         "usegrad": "_usegrad",
@@ -329,4 +356,5 @@ def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
     for name, val in attrs.items():
         if name in validattrs:
             setattr(tensor, validattrs[name], val)
+    tensor._mutable = False
     return tensor
