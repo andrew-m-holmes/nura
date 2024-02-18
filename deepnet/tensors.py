@@ -105,6 +105,11 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         deepnet.backward(self, grad)
 
+    def zerograd(self):
+        assert self.grad is not None
+        muttensor(self, grad=deepnet.zeroslike(self))
+        return self
+
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = getcls(self.dtype)
         a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
@@ -199,14 +204,14 @@ class Tensor:
     def __abs__(self):
         return deepnet.abs(self)
 
-    def __getitem__(self, _slice):
-        return deepnet.slice(self, _slice)
+    def __getitem__(self, slc):
+        return deepnet.slice(self, slc)
 
-    def __setitem__(self, _slice, item):
+    def __setitem__(self, slc, item):
         if deepnet.istensor(item):
-            self.data[_slice] = item.data
+            self.data[slc] = item.data
         else:
-            self.data[_slice] = item
+            self.data[slc] = item
 
     def __len__(self):
         return self._data.shape[0]

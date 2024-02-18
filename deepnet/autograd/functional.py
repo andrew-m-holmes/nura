@@ -180,17 +180,20 @@ def jacrev(
     tensor = inpt[pos]
     jac = getjac(tensor, out)
     perts = getperts(out)
+
     for row, pert in zip(np.ndindex(out.dim), perts):
-        _, grads = _vjp(inpt, pert, f, *args, **kwargs)
+        rowinpt = tuple(map(lambda t: t.mutated(grad=None), inpt))
+        _, grads = _vjp(rowinpt, pert, f, *args, **kwargs)
         jacrow = grads[pos]
-        jac[row, ...] = jacrow
+        slc = row + (...,)
+        jac[slc] = jacrow
     return out, jac
 
 
 def jacfwd(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
-    pos = 0,
+    pos=0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
@@ -204,11 +207,13 @@ def jacfwd(
     jac = getjac(tensor, out)
     left = tuple(deepnet.zeroslike(inpt[i]) for i in range(pos))
     right = tuple(deepnet.zeroslike(inpt[i]) for i in range(pos + 1, len(inpt)))
+
     for col, pert in zip(np.ndindex(tensor.dim), perts):
         gen = (v for v in (left + (pert,) + right))
         colinpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=next(gen)), inpt))
         _, jaccol = _jvp(colinpt, f, *args, **kwargs)
-        jac[..., *col] = jaccol
+        slc = (...,) + col
+        jac[slc] = jaccol
     return out, jac
 
 
@@ -217,7 +222,8 @@ def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
     perts = deepnet.zeros((nelem,) + dim).to(dtype)
     arange = np.arange(nelem)
     indices = np.unravel_index(arange, dim)
-    perts[arange, *indices] = 1.0
+    slc = (arange,) + indices
+    perts[slc] = 1.0
     return (perts[i] for i in range(nelem))
 
 

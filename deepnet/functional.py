@@ -135,8 +135,8 @@ def tocontig(a: Tensor):
     return b.mutated(data=data)
 
 
-def slice(a: Tensor, _slice: slice):
-    out = fn.Slice.apply(a, _slice)
+def slice(a: Tensor, slc: slice):
+    out = fn.Slice.apply(a, slc)
     return out
 
 

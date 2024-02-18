@@ -447,24 +447,24 @@ class Clone(Function):
 class Slice(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, _slice: slice):
+    def forward(context: Context, a: Tensor, slc: slice):
         context.save(a)
-        context["slice"] = _slice
+        context["slice"] = slc
         context["dim"] = a.dim
-        arr = a.data[_slice]
+        arr = a.data[slc]
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        _slice = context["slice"]
+        slc = context["slice"]
         mask = np.zeros_like(a.data)
-        mask[_slice] = grad.data
+        mask[slc] = grad.data
         arr = mask
         return arr
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        _slice = context["slice"]
-        arr = agrad.data[_slice]
+        slc = context["slice"]
+        arr = agrad.data[slc]
         return arr
