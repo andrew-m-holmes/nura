@@ -128,9 +128,8 @@ def _vjp(
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
     with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
-    _backward(out, vec)
-    grads = tuple(map(lambda t: t.grad, inpt))
-    return out, grads
+    inptmap = _grad(inpt, out, vec)
+    return out, tuple(inptmap.values())
 
 
 def jvp(
@@ -159,9 +158,8 @@ def _jvp(
 ) -> Tuple[Tensor, Tensor]:
     with deepnet.autograd(enabled=True, reverse=False, forward=True):
         out = f(*inpt, *args, **kwargs)
-    grad = out.grad
-    assert deepnet.istensor(grad)
-    return out, grad
+    assert out.grad is not None
+    return out, out.grad
 
 
 def jacrev(
