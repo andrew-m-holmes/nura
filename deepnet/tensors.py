@@ -111,9 +111,12 @@ class Tensor:
         deepnet.backward(self, grad)
 
     def zerograd(self):
-        assert self.grad is not None
         muttensor(self, grad=deepnet.zeroslike(self))
         return self
+
+    def zeroedgrad(self):
+        cls = getcls(self)
+        return cls(self.data, self.usegrad, deepnet.zeroslike(self), None, True)
 
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = getcls(self.dtype)
