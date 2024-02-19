@@ -1,94 +1,93 @@
-import numpy as np
+import torch
 
 
 class Primal:
 
-    def __init__(self, data, adjoint=0):
+    def __init__(self, data, adjoint=0.0):
         self.data = data
         self.adjoint = adjoint
-        self.backward = lambda adjoint: None
+
+    def backward(self, adjoint):
+        self.adjoint += adjoint
 
     def __add__(self, other):
-        data = self.data + other.data
-        primal = Primal(data)
+        primal = Primal(self.data + other.data)
 
         def backward(adjoint):
-            self.backward(adjoint)
-            other.backward(adjoint)
-            self.adjoint += adjoint
-            other.adjoint += adjoint
+            primal.adjoint += adjoint
+            self_adjoint = adjoint * 1.0
+            other_adjoint = adjoint * 1.0
+            self.backward(self_adjoint)
+            other.backward(other_adjoint)
 
         primal.backward = backward
         return primal
 
     def __sub__(self, other):
-        data = self.data - other.data
-        primal = Primal(data)
+        primal = Primal(self.data - other.data)
 
         def backward(adjoint):
-            self.backward(adjoint)
-            other.backward(-adjoint)
-            self.adjoint += adjoint
-            other.adjoint += -adjoint
+            primal.adjoint += adjoint
+            self_adjoint = adjoint * 1.0
+            other_adjoint = adjoint * -1.0
+            self.backward(self_adjoint)
+            other.backward(other_adjoint)
 
         primal.backward = backward
         return primal
 
     def __mul__(self, other):
-        data = self.data * other.data
-        primal = Primal(data)
+        primal = Primal(self.data * other.data)
 
         def backward(adjoint):
+            primal.adjoint += adjoint
             self_adjoint = adjoint * other.data
             other_adjoint = adjoint * self.data
             self.backward(self_adjoint)
             other.backward(other_adjoint)
-            self.adjoint += self_adjoint
-            other.adjoint += other_adjoint
 
         primal.backward = backward
         return primal
 
     def __truediv__(self, other):
-        data = self.data / other.data
-        primal = Primal(data)
+        primal = Primal(self.data / other.data)
 
         def backward(adjoint):
-            self_adjoint = adjoint / other.data
-            other_adjoint = adjoint * (-self.data / other.data**2)
+            primal.adjoint += adjoint
+            self_adjoint = adjoint * (1.0 / other.data)
+            other_adjoint = adjoint * (-1.0 * self.data / other.data**2)
             self.backward(self_adjoint)
             other.backward(other_adjoint)
-            self.adjoint += self_adjoint
-            other.adjoint += other_adjoint
 
         primal.backward = backward
         return primal
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"primal: {self.data}, adjoint: {self.adjoint}"
 
 
 def main():
-
-    a = Primal(np.full((2, 2), 9.0)) 
-    b = Primal(np.full((2, 2), 3.0))
-    c = Primal(np.full((2, 2), 2.0))
-
     def mul_add(a, b, c):
-        return a * b + c
+        return a * b + c * a
 
     def div_sub(a, b, c):
         return a / b - c
 
-    output = mul_add(a, b, c)
-    output.backward(np.ones_like(output))
-    print(f"mul_add mul_add(a, b, c) = \n{output}")
-    print(a, b, c, sep="\n")
+    a, b, c = Primal(9.0), Primal(3.0), Primal(-5.0)
+    print(f"{a = }, {b = }, {c = }")
 
-    output = div_sub(a, b, c)
-    output.backward(np.ones_like(output))
-    print(f"div_sub(a, b, c) = \n{output}")
-    print(a, b, c, sep="\n")
+    d = mul_add(a, b, c)
+    d.backward(1.0)
+    print(f"{d = }")
+    print(f"{a.adjoint = }, {b.adjoint = }, {c.adjoint = }")
+
+    a.adjoint, b.adjoint, c.adjoint = 0.0, 0.0, 0.0
+
+    e = div_sub(a, b, c)
+    e.backward(3.0)
+    print(f"{e = }")
+    print(f"{a.adjoint = }, {b.adjoint = }, {c.adjoint = }")
+
 
 if __name__ == "__main__":
     main()
