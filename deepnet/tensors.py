@@ -26,7 +26,6 @@ class Tensor:
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
         self._dtype: Type[dtype] = _dtype
-        self._mutable = False
 
     @property
     def data(self):
@@ -63,10 +62,6 @@ class Tensor:
     @property
     def leaf(self):
         return self._leaf
-
-    @property
-    def mutable(self):
-        return self._mutable
 
     @classmethod
     def gradtensor(cls):
@@ -226,11 +221,6 @@ class Tensor:
             raise AttributeError(
                 f"{name} cannot be assigned to {deepnet.typename(self)}"
             )
-        if name not in self.__dict__:
-            self.__dict__[name] = value
-            return None
-        if name != "_mutable":
-            assert self.mutable
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
@@ -342,12 +332,11 @@ def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Ten
     data = dtype.numpy(data)
     cls = getcls(dtype)
     if usegrad:
-        assert cls.gradtensor()
+        assert cls.gradtensor(), f"{cls.__name__} cannot usegrad"
     return cls(data, usegrad, None, None, True)
 
 
 def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
-    tensor._mutable = True
     validattrs = {
         "data": "_data",
         "usegrad": "_usegrad",
@@ -359,5 +348,4 @@ def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
     for name, val in attrs.items():
         if name in validattrs:
             setattr(tensor, validattrs[name], val)
-    tensor._mutable = False
     return tensor

@@ -21,7 +21,9 @@ def zeroslike(
     return dn.tensor(zero_arr, usegrad, dtype)
 
 
-def ones(dim: Union[_dim, int], usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def ones(
+    dim: Union[_dim, int], usegrad=False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     dim = todim(dim)
     ones_arr = np.ones(dim)
     return dn.tensor(ones_arr, usegrad, dtype)
@@ -69,7 +71,9 @@ def randlike(
     return rand(dim, usegrad, dtype)
 
 
-def randint(low: int, high: int, dim: Union[_dim, int], dtype: Optional[Type[dtype]] = None) -> Tensor:
+def randint(
+    low: int, high: int, dim: Union[_dim, int], dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     dim = todim(dim)
     randint_arr = np.random.randint(low, high, dim)
     return dn.tensor(randint_arr, dtype=dtype)
@@ -87,19 +91,35 @@ def identity(n: int, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tens
     return dn.tensor(data, usegrad, dtype)
 
 
-def full(dim: Union[_dim, int], num: float, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def full(
+    dim: Union[_dim, int],
+    num: float,
+    usegrad=False,
+    dtype: Optional[Type[dtype]] = None,
+) -> Tensor:
     dim = todim(dim)
     data = np.full(dim, num)
     return dn.tensor(data, usegrad, dtype)
 
-def eye(n: int, m: Optional[int] = None, k: Optional[int] = None, dtype: Optional[Type[dtype]] = None) -> Tensor:
+
+def eye(
+    n: int,
+    m: Optional[int] = None,
+    k=0,
+    dtype: Optional[Type[dtype]] = None,
+) -> Tensor:
     data = np.eye(n, m, k)
     return dn.tensor(data, dtype=dtype)
+
 
 def to(tensor: Tensor, dtype: Type[dtype]):
     assert istensor(tensor)
     data = dtype.numpy(tensor.data)
     return dn.tensor(data, tensor.usegrad, dtype)
+
+
+def eq(tensor: Tensor, other: Tensor) -> Tensor:
+    return dn.tensor(np.equal(tensor.data, other.data))
 
 
 def todim(dim: Any) -> Tuple[int, ...]:
