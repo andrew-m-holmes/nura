@@ -113,7 +113,7 @@ def vjp(
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
     assert vec.gradtensor()
-    inpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=None, leaf=True), inpt))
+    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None)
     out, grads = _vjp(inpt, vec, f, *args, **kwargs)
     return out.mutated(usegrad=False, leaf=True), grads
@@ -145,7 +145,7 @@ def jvp(
     assert all(t.gradtensor() for t in inpt)
     assert all(v.gradtensor() for v in vec)
     gen = (v for v in vec)
-    inpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=next(gen)), inpt))
+    inpt = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in inpt)
     out, grad = _jvp(inpt, f, *args, **kwargs)
     return out.mutated(usegrad=False, leaf=True), grad
 
@@ -172,7 +172,7 @@ def jacrev(
 
     inpt = tupify(inpt)
     assert all(t.gradtensor() for t in inpt)
-    inpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=None, leaf=True), inpt))
+    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     with deepnet.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
@@ -208,7 +208,7 @@ def jacfwd(
 
     for col, pert in zip(np.ndindex(tensor.dim), perts):
         gen = (v for v in (left + (pert,) + right))
-        colinpt = tuple(map(lambda t: t.mutated(usegrad=True, grad=next(gen)), inpt))
+        colinpt = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in inpt)
         _, jaccol = _jvp(colinpt, f, *args, **kwargs)
         slc = (...,) + col
         jac[slc] = jaccol
