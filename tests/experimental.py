@@ -22,6 +22,8 @@ def main():
     out, jac = jacfwd((a, b, c), f)
     print(jac)
 
+    print(a == b)
+
 
 if __name__ == "__main__":
     main()

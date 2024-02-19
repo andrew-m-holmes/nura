@@ -126,6 +126,9 @@ def clone(a: Tensor):
     out = fn.Clone.apply(a)
     return out
 
+def eq(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+    a, b = atot(a, b)
+    return tensor(np.equal(a.data,b .data))
 
 def tocontig(a: Tensor):
     if utils.iscontig(a):

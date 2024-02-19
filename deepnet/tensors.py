@@ -207,6 +207,12 @@ class Tensor:
     def __abs__(self):
         return deepnet.abs(self)
 
+    def __eq__(self, other):
+        return deepnet.eq(self, other)
+
+    def __hash__(self):
+        return deepnet.hashtensor(self)
+
     def __setattr__(self, name, value):
         validnames = {
             "_data",

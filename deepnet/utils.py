@@ -118,8 +118,8 @@ def to(tensor: Tensor, dtype: Type[dtype]):
     return dn.tensor(data, tensor.usegrad, dtype)
 
 
-def eq(tensor: Tensor, other: Tensor) -> Tensor:
-    return dn.tensor(np.equal(tensor.data, other.data))
+def hashtensor(tensor: Tensor) -> int:
+    return hash(id(tensor))
 
 
 def todim(dim: Any) -> Tuple[int, ...]:
