@@ -4,14 +4,14 @@ from deepnet.autograd.functional import vjp, jvp, grad
 import numpy as np
 
 
-def test_vjp_basic():
+def test_vjp_basic_v0():
     a = np.random.rand(6, 4)
     b = np.random.rand(4, 10)
     c = np.random.rand(1)
 
-    a_tensor = deepnet.tensor(a)
-    b_tensor = deepnet.tensor(b)
-    c_tensor = deepnet.tensor(c)
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    c_tensor = deepnet.tensor(c, usegrad=True)
     primals = (a_tensor, b_tensor, c_tensor)
     cotangent = deepnet.ones((6, 10))
 
@@ -19,143 +19,189 @@ def test_vjp_basic():
         return f.add(f.matmul(a, b), c)
 
     result_tensor, cotangents = vjp(primals, cotangent, func)
+    output_tensor = func(a_tensor, b_tensor, c_tensor)
+    output_tensor.backward(cotangent)
     expected = np.add(np.matmul(a, b), c)
     assert np.allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
-    for primal, cotangent in zip(primals, cotangents):
+    for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
         assert primal.dim == cotangent.dim
+        assert np.allclose(primals[i].grad.data, cotangent.data)
 
 
-def test_vjp_with_graph():
-    a = np.random.rand(5, 3)
-    b = np.random.rand(3, 7)
-    c = np.random.rand(1)
+def test_vjp_basic_v1():
+  a = np.random.rand(5, 3)
+  b = np.random.rand(3, 7)
+  c = np.random.rand(1)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    c_tensor = deepnet.tensor(c, usegrad=True)
-    primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = deepnet.ones((5, 7))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  c_tensor = deepnet.tensor(c, usegrad=True)
+  primals = (a_tensor, b_tensor, c_tensor)
+  cotangent = deepnet.ones((5, 7))
 
-    def func(a, b, c):
-        return f.add(f.matmul(a, b), c)
+  def func(a, b, c):
+    return f.add(f.matmul(a, b), c)
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.add(np.matmul(a, b), c)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor, c_tensor)
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.add(np.matmul(a, b), c)
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent)
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim  
+    assert np.allclose(primals[i].grad.data, cotangent.data)  
 
 
 def test_vjp_add_sub():
-    a = np.random.rand(4, 4)
-    b = np.random.rand(4, 4)
-    c = np.random.rand(4, 4)
+  a = np.random.rand(4, 4)
+  b = np.random.rand(4, 4)
+  c = np.random.rand(4, 4)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    c_tensor = deepnet.tensor(c, usegrad=True)
-    primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = deepnet.ones((4, 4))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  c_tensor = deepnet.tensor(c, usegrad=True)
+  primals = (a_tensor, b_tensor, c_tensor)
+  cotangent = deepnet.ones((4, 4))
 
-    def func(a, b, c):
-        return f.sub(f.add(a, b), c)
+  def func(a, b, c):
+    return f.sub(f.add(a, b), c)
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.subtract(np.add(a, b), c)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor, c_tensor)
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.subtract(np.add(a, b), c)
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent)
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim  
+    assert np.allclose(primals[i].grad.data, cotangent.data) 
 
 
 def test_vjp_mul_div():
-    a = np.random.rand(5, 5)
-    b = np.random.rand(5, 5)
-    c = np.random.rand(5, 5)
+  a = np.random.rand(5, 5)
+  b = np.random.rand(5, 5)
+  c = np.random.rand(5, 5)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    c_tensor = deepnet.tensor(c, usegrad=True)
-    primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = deepnet.ones((5, 5))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  c_tensor = deepnet.tensor(c, usegrad=True)
+  primals = (a_tensor, b_tensor, c_tensor)
+  cotangent = deepnet.ones((5, 5))
 
-    def func(a, b, c):
-        return f.div(f.mul(a, b), c)
+  def func(a, b, c):
+    return f.div(f.mul(a, b), c)
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.divide(np.multiply(a, b), c)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor, c_tensor)
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.divide(np.multiply(a, b), c)
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent)
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim  
+    assert np.allclose(primals[i].grad.data, cotangent.data) 
 
 
 def test_vjp_matmul_sum():
-    a = np.random.rand(3, 4)
-    b = np.random.rand(4, 3)
+  a = np.random.rand(3, 4)
+  b = np.random.rand(4, 3)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    primals = (a_tensor, b_tensor)
-    cotangent = deepnet.ones((3,))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  primals = (a_tensor, b_tensor)
+  cotangent = deepnet.ones((3,))
 
-    def func(a, b):
-        return f.sum(f.matmul(a, b), dim=0)
+  def func(a, b):
+    return f.sum(f.matmul(a, b), dim=0)
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.sum(np.matmul(a, b), axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor)  
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.sum(np.matmul(a, b), axis=0)
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent) 
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim  
+    assert np.allclose(primals[i].grad.data, cotangent.data)  
 
 
 def test_vjp_add_mul_broadcast():
-    a = np.random.rand(3, 4)
-    b = np.random.rand(
-        4,
-    )
+  a = np.random.rand(3, 4)
+  b = np.random.rand(4,)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    primals = (a_tensor, b_tensor)
-    cotangent = deepnet.ones((3, 4))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  primals = (a_tensor, b_tensor)
+  cotangent = deepnet.ones((3, 4))
 
-    def func(a, b):
-        return f.mul(f.add(a, b), b)
+  def func(a, b):
+    return f.mul(f.add(a, b), b)
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.multiply(np.add(a, b), b)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor) 
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.multiply(np.add(a, b), b)
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent) 
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim  
+    assert np.allclose(primals[i].grad.data, cotangent.data) 
 
 
 def test_vjp_nested_operations_broadcast():
-    a = np.random.rand(5, 6)
-    b = np.random.rand(
-        6,
-    )
+  a = np.random.rand(5, 6)
+  b = np.random.rand(6,)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    primals = (a_tensor, b_tensor)
-    cotangent = deepnet.ones((5, 6))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  primals = (a_tensor, b_tensor)
+  cotangent = deepnet.ones((5, 6))
 
-    def func(a, b):
-        return f.cos(f.div(f.add(a, b), f.sin(b)))
+  def func(a, b):
+    return f.cos(f.div(f.add(a, b), f.sin(b)))
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.cos(np.divide(np.add(a, b), np.sin(b)))
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor)  
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.cos(np.divide(np.add(a, b), np.sin(b)))
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent)  
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim  
+    assert np.allclose(primals[i].grad.data, cotangent.data) 
 
 
 def test_vjp_matmul_add_broadcast():
-    a = np.random.rand(4, 3)
-    b = np.random.rand(3, 5)
-    c = np.random.rand(
-        5,
-    )
+  a = np.random.rand(4, 3)
+  b = np.random.rand(3, 5)
+  c = np.random.rand(5,)
 
-    a_tensor = deepnet.tensor(a, usegrad=True)
-    b_tensor = deepnet.tensor(b, usegrad=True)
-    c_tensor = deepnet.tensor(c, usegrad=True)
-    primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = deepnet.ones((4, 5))
+  a_tensor = deepnet.tensor(a, usegrad=True)
+  b_tensor = deepnet.tensor(b, usegrad=True)
+  c_tensor = deepnet.tensor(c, usegrad=True)
+  primals = (a_tensor, b_tensor, c_tensor)
+  cotangent = deepnet.ones((4, 5))
 
-    def func(a, b, c):
-        return f.add(f.matmul(a, b), c)
+  def func(a, b, c):
+    return f.add(f.matmul(a, b), c)
 
-    result_tensor, cotangents = vjp(primals, cotangent, func)
-    expected = np.add(np.matmul(a, b), c)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+  output_tensor = func(a_tensor, b_tensor, c_tensor) 
+  result_tensor, cotangents = vjp(primals, cotangent, func)
+  expected = np.add(np.matmul(a, b), c)
+  np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+
+  output_tensor.backward(cotangent) 
+
+  for i, (primal, cotangent) in enumerate(zip(primals, cotangents)):
+    assert primal.dim == cotangent.dim 
+    assert np.allclose(primals[i].grad.data, cotangent.data) 
 
 
 def test_jvp_basic():
@@ -506,8 +552,8 @@ def main():
 
     # Basic VJP Tests
 
-    test_vjp_basic()
-    test_vjp_with_graph()
+    test_vjp_basic_v0()
+    test_vjp_basic_v1()
 
     # Composition Function VJP Tests
 
