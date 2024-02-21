@@ -134,7 +134,7 @@ def iscontig(tensor: Tensor) -> bool:
     return tensor.data.flags["C_CONTIGUOUS"]
 
 
-def istensor(obj: Any) -> TypeGuard[Tensor]:
+def istensor(obj: Any) -> bool:
     return isinstance(obj, Tensor)
 
 
