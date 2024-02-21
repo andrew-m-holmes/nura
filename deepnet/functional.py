@@ -32,17 +32,15 @@ def div(a: Union[Tensor, Any], b: Union[Tensor, Any]):
 
 def dot(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = atot(a, b)
+    assert a.ndim >= 1 and b.ndim >= 1
     out = fn.Dot.apply(a, b)
     return out
 
 
 def matmul(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = atot(a, b)
-    assert a.ndim >= 1 and b.ndim >= 1
-    if a.ndim == 1:
-        a = unsqueeze(a, 0)
-    if b.ndim == 1:
-        b = unsqueeze(b, -1)
+    assert a.ndim >= 2 and b.ndim >= 2
+    assert a.dim[-1] == b.dim[-2] 
     out = fn.Matmul.apply(a, b)
     return out
 
@@ -131,8 +129,6 @@ def eq(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
     return tensor(np.equal(a.data,b .data))
 
 def tocontig(a: Tensor):
-    if utils.iscontig(a):
-        return a
     b = a.clone()
     data = np.ascontiguousarray(b.data)
     return b.mutated(data=data)

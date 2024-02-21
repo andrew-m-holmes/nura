@@ -20,7 +20,6 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
     while queue:
         node, grad = queue.popleft()
-        assert deepnet.istensor(grad)
         nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
@@ -54,14 +53,13 @@ def grad(
 def _grad(
     inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
 ) -> Dict[Tensor, Tensor]:
-    vals = tuple(deepnet.zeroslike(t) for t in inpt)
-    inptmap = mapify(inpt, vals)
+    grads = tuple(deepnet.zeroslike(t) for t in inpt)
+    inptmap = mapify(inpt, grads)
     queue = deque()
     queue.append((out.backfn, grad))
 
     while queue:
         node, grad = queue.popleft()
-        assert deepnet.istensor(grad)
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
@@ -75,11 +73,11 @@ def _grad(
     return inptmap
 
 
-def mapify(inpt, vals) -> Dict[Tensor, Any]:
-    return {t: v for t, v in zip(inpt, vals)}
+def mapify(keys, values) -> Dict[Tensor, Any]:
+    return {k: v for k, v in zip(keys, values)}
 
 
-def mismatch(tensor: Tensor, grad) -> bool:
+def mismatch(tensor: Tensor, grad: Tensor) -> bool:
     return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
 
 
@@ -90,7 +88,7 @@ def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
     return grad.mutated(data=data)
 
 
-def sumdims(tdim, gdim, tndim, gndim):
+def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:
     paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
     mask = paddim != np.array(gdim)
     return tuple(np.where(mask)[0])
