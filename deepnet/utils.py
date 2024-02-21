@@ -2,7 +2,7 @@ import numpy as np
 import deepnet as dn
 from deepnet.types import dtype, _dim
 from deepnet.tensors import Tensor
-from typing import Optional, TypeGuard, Type, Any, Tuple, Union
+from typing import Optional, Type, Any, Tuple, Union
 
 
 def zeros(
