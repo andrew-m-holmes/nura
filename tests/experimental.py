@@ -1,29 +1,16 @@
 import numpy as np
-import deepnet as dn
+import deepnet
 import jax
 from deepnet.autograd.functional import vjp, jvp, grad, jacrev, jacfwd, getperts
+import torch
 
 
 def main():
 
-    def f(a, b, c):
-        return a * b + c
-
-    a = dn.rand(3).float()
-    b = dn.rand(3).float()
-    c = dn.ones(1).float()
-
-    out, jac = jacrev((a, b, c), f)
-    print(jac)
-    jacf = jax.jacrev(f)
-    jac = jacf(a.data, b.data, c.data)
-    print(jac)
-
-    out, jac = jacfwd((a, b, c), f)
-    print(jac)
-
-    print(a == b)
-
+    a = deepnet.rand((5, 4, 3), usegrad=True).float()
+    b = a.max()
+    b.backward()
+    print(a.grad)
 
 if __name__ == "__main__":
     main()

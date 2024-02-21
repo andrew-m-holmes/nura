@@ -144,6 +144,9 @@ class Tensor:
     def sum(self, dim: Optional[_dim] = None, keepdims=False):
         return deepnet.sum(self, dim, keepdims)
 
+    def max(self, dim: Optional[_dim] = None, keepdims=False):
+        return deepnet.max(self, dim, keepdims)
+
     def squeeze(self, dim: Optional[_dim] = None):
         return deepnet.squeeze(self, dim)
 

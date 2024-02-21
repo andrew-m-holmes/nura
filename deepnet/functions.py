@@ -15,7 +15,7 @@ class Add(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        return grad.data, grad.data
+        return grad.data.copy(), grad.data.copy()
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
@@ -33,7 +33,7 @@ class Sub(Function):
 
     @staticmethod
     def backward(context: Any, grad: Tensor):
-        return grad.data, np.negative(grad.data)
+        return grad.data.copy(), np.negative(grad.data)
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
@@ -273,6 +273,41 @@ class Sum(Function):
         return arr
 
 
+class Max(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dim: int, keepdims: bool):
+        context.save(a)
+        context["dim"] = dim
+        context["keepdims"] = keepdims
+        arr = np.max(a.data, dim, keepdims=keepdims)
+        return arr
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        dim = tuple(range(a.ndim)) if context["dim"] is None else context["dim"]
+        keepdims = context["keepdims"]
+        graddata = grad.data
+        if not keepdims:
+            graddata = np.expand_dims(graddata, axis=dim)
+        graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        index = np.argmax(a.data)
+        mask = np.zeros(a.nelem)
+        mask[index] = 1.0
+        mask = mask.reshape(a.dim)
+        arr = graddata * mask
+        return arr
+
+    # TODO don't think this right
+    @staticmethod
+    def tangent(context: Context, agrad: Tensor):
+        dim = context["dim"]
+        keepdims = context["keepdims"]
+        arr = np.max(agrad.data, axis=dim, keepdims=keepdims)
+        return arr
+
+
 class Squeeze(Function):
 
     @staticmethod
@@ -436,7 +471,7 @@ class Clone(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        return grad.data
+        return grad.data.copy()
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
@@ -449,7 +484,7 @@ class Slice(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, slc: slice):
         context.save(a)
-        context["slice"] = slc
+        context["slc"] = slc
         context["dim"] = a.dim
         arr = a.data[slc]
         return arr
@@ -457,7 +492,7 @@ class Slice(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        slc = context["slice"]
+        slc = context["slc"]
         mask = np.zeros_like(a.data)
         mask[slc] = grad.data
         arr = mask
@@ -465,6 +500,6 @@ class Slice(Function):
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        slc = context["slice"]
+        slc = context["slc"]
         arr = agrad.data[slc]
         return arr
