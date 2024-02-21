@@ -4,6 +4,8 @@ from deepnet.types import dtype, _dim
 from deepnet.tensors import Tensor
 from typing import Optional, Type, Any, Tuple, Union
 
+#
+
 
 def zeros(
     dim: Union[_dim, int], usegrad=False, dtype: Optional[Type[dtype]] = None
