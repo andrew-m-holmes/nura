@@ -307,6 +307,39 @@ class Max(Function):
         arr = np.max(agrad.data, axis=dim, keepdims=keepdims)
         return arr
 
+class Min(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dim: int, keepdims: bool):
+        context.save(a)
+        context["dim"] = dim
+        context["keepdims"] = keepdims
+        arr = np.min(a.data, dim, keepdims=keepdims)
+        return arr
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        dim = tuple(range(a.ndim)) if context["dim"] is None else context["dim"]
+        keepdims = context["keepdims"]
+        graddata = grad.data
+        if not keepdims:
+            graddata = np.expand_dims(graddata, axis=dim)
+        graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        index = np.argmin(a.data)
+        mask = np.zeros(a.nelem)
+        mask[index] = 1.0
+        mask = mask.reshape(a.dim)
+        arr = graddata * mask
+        return arr
+
+    # TODO don't think this right
+    @staticmethod
+    def tangent(context: Context, agrad: Tensor):
+        dim = context["dim"]
+        keepdims = context["keepdims"]
+        arr = np.min(agrad.data, axis=dim, keepdims=keepdims)
+        return arr
 
 class Squeeze(Function):
 

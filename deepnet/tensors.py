@@ -147,6 +147,9 @@ class Tensor:
     def max(self, dim: Optional[_dim] = None, keepdims=False):
         return deepnet.max(self, dim, keepdims)
 
+    def min(self, dim: Optional[_dim] = None, keepdims=False):
+        return deepnet.min(self, dim, keepdims)
+
     def squeeze(self, dim: Optional[_dim] = None):
         return deepnet.squeeze(self, dim)
 

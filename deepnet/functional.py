@@ -86,6 +86,11 @@ def max(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     out = fn.Max.apply(b, dim, keepdims)
     return out
 
+def min(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    b = atot(a)[0]
+    out = fn.Min.apply(b, dim, keepdims)
+    return out
+
 def transpose(a: Tensor, dim0=-2, dim1=-1):
     out = fn.Transpose.apply(a, dim0, dim1)
     return out

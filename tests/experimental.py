@@ -10,6 +10,10 @@ def main():
     a = deepnet.rand((5, 4, 3), usegrad=True).float()
     b = a.max()
     b.backward()
+    print(b)
+    c = a.min()
+    print(c)
+    c.backward()
     print(a.grad)
 
 if __name__ == "__main__":
