@@ -141,13 +141,13 @@ class Tensor:
     def contig(self):
         return deepnet.tocontig(self)
 
-    def sum(self, dim: Optional[_dim] = None, keepdims=False):
+    def sum(self, dim: Optional[Union[int, _dim]] = None, keepdims=False):
         return deepnet.sum(self, dim, keepdims)
 
-    def max(self, dim: Optional[_dim] = None, keepdims=False):
+    def max(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
         return deepnet.max(self, dim, keepdims)
 
-    def min(self, dim: Optional[_dim] = None, keepdims=False):
+    def min(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
         return deepnet.min(self, dim, keepdims)
 
     def squeeze(self, dim: Optional[_dim] = None):
