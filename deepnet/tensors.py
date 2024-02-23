@@ -1,7 +1,7 @@
 import deepnet
 from deepnet.types import dtype, _dim
 from deepnet.autograd.graph import Node
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Union
 from numpy import ndarray
 from copy import deepcopy
 
@@ -168,10 +168,10 @@ class Tensor:
     def permute(self, dim: Optional[_dim] = None):
         return deepnet.permute(self, dim=dim)
 
-    def any(self, dim: Optional[_dim] = None, keepdims=False):
+    def any(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
         return deepnet.any(self, dim, keepdims)
 
-    def all(self, dim: Optional[_dim] = None, keepdims=False):
+    def all(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
         return deepnet.all(self, dim, keepdims)
 
     def __add__(self, other):

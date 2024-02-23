@@ -104,11 +104,11 @@ def eye(
     return tensor(data, dtype=dtype)
 
 
-def any(a: Tensor, dim: Optional[_dim] = None, keepdims=False):
+def any(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
 
 
-def all(a: Tensor, dim: Optional[_dim] = None, keepdims=False):
+def all(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
 
 
