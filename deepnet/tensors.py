@@ -70,7 +70,7 @@ class Tensor:
 
     def item(self):
         assert self.nelem == 1
-        return self._data.item()
+        return self.data.item()
 
     def to(self, dtype):
         return deepnet.to(self, dtype)
@@ -168,6 +168,12 @@ class Tensor:
     def permute(self, dim: Optional[_dim] = None):
         return deepnet.permute(self, dim=dim)
 
+    def any(self, dim: Optional[_dim] = None, keepdims=False):
+        return deepnet.any(self, dim, keepdims)
+
+    def all(self, dim: Optional[_dim] = None, keepdims=False):
+        return deepnet.all(self, dim, keepdims)
+
     def __add__(self, other):
         return deepnet.add(self, other)
 
@@ -214,10 +220,34 @@ class Tensor:
         return deepnet.abs(self)
 
     def __eq__(self, other):
-        return deepnet.eq(self, other)
+        return deepnet.equal(self, other)
+
+    def __lt__(self, other):
+        return deepnet.less(self, other)
+
+    def __le__(self, other):
+        return deepnet.lesseq(self, other)
+
+    def __gt__(self, other):
+        return deepnet.greater(self, other)
+
+    def __ge__(self, other):
+        return deepnet.greatereq(self, other)
+
+    def __ne__(self, other):
+        return deepnet.notequal(self, other)
 
     def __hash__(self):
         return deepnet.hashtensor(self)
+
+    def __and__(self, other):
+        return deepnet.tensorand(self, other)
+
+    def __or__(self, other):
+        return deepnet.tensoror(self, other)
+
+    def __not__(self):
+        return deepnet.tensornot(self)
 
     def __setattr__(self, name, value):
         validnames = {
@@ -239,13 +269,10 @@ class Tensor:
         return deepnet.slice(self, slc)
 
     def __setitem__(self, slc, item):
-        if deepnet.istensor(item):
-            self.data[slc] = item.data
-        else:
-            self.data[slc] = item
+        self.data[slc] = item.data if deepnet.istensor(item) else item
 
     def __len__(self):
-        return self._data.shape[0]
+        return self.dim[0]
 
     def __repr__(self) -> str:
         base = repr(self._data).replace("array(", "").replace(",", "")
