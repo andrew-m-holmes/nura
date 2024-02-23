@@ -84,12 +84,16 @@ def sum(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
 
 def max(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     b = utils.atot(a)[0]
+    if dim is None:
+        dim = tuple(range(a.ndim))
     out = fn.Max.apply(b, dim, keepdims)
     return out
 
 
 def min(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     b = utils.atot(a)[0]
+    if dim is None:
+        dim = tuple(range(a.ndim))
     out = fn.Min.apply(b, dim, keepdims)
     return out
 
@@ -146,5 +150,3 @@ def tocontig(a: Tensor):
     b = a.clone()
     data = np.ascontiguousarray(b.data)
     return b.mutated(data=data)
-
-
