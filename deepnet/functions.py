@@ -280,35 +280,33 @@ class Max(Function):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
-        arr = np.max(a.data, dim, keepdims=keepdims)
+        arr = np.max(a.data, dim, keepdims=True)
+        context["arr"] = arr
+        if not keepdims:
+            arr = np.squeeze(arr)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = tuple(range(a.ndim)) if context["dim"] is None else context["dim"]
+        dim = context["dim"]
         keepdims = context["keepdims"]
+        arr = context["arr"]
         graddata = grad.data
+        mask = a.data == arr
         if not keepdims:
             graddata = np.expand_dims(graddata, axis=dim)
-        graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        index = np.argmax(a.data)
-        mask = np.zeros(a.nelem)
-        mask[index] = 1.0
-        mask = mask.reshape(a.dim)
-        arr = graddata * mask
-        return arr
+        arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return mask * arr
 
+    # TODO
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
-        index = np.argmax(a.data)
-        mask = np.zeros(a.nelem)
-        mask[index] = 1.0
-        mask = mask.reshape(a.dim)
         dim = context["dim"]
         keepdims = context["keepdims"]
-        arr = np.max(agrad.data * mask, axis=dim, keepdims=keepdims)
+        arr = context["arr"]
+        graddata = agrad.data
         return arr
 
 
@@ -319,29 +317,32 @@ class Min(Function):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
-        arr = np.min(a.data, dim, keepdims=keepdims)
+        arr = np.min(a.data, dim, keepdims=True)
+        context["arr"] = arr
+        if not keepdims:
+            arr = np.squeeze(arr)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = tuple(range(a.ndim)) if context["dim"] is None else context["dim"]
+        dim = context["dim"]
         keepdims = context["keepdims"]
+        arr = context["arr"]
         graddata = grad.data
+        mask = a.data == arr
         if not keepdims:
             graddata = np.expand_dims(graddata, axis=dim)
-        graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        index = np.argmin(a.data)
-        mask = np.zeros(a.nelem)
-        mask[index] = 1.0
-        mask = mask.reshape(a.dim)
-        arr = graddata * mask
-        return arr
+        arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return mask * arr
 
+    # TODO
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
-        index = np.argmin(a.data)
+        dim = tuple(range(a.ndim)) if context["dim"] is None else context["dim"]
+        keepdims = context["keepdims"]
+        index = np.argmin(a.data, axis=dim, keepdims=keepdims)
         mask = np.zeros(a.nelem)
         mask[index] = 1.0
         mask = mask.reshape(a.dim)
@@ -349,6 +350,7 @@ class Min(Function):
         keepdims = context["keepdims"]
         arr = np.min(agrad.data * mask, axis=dim, keepdims=keepdims)
         return arr
+
 
 class Squeeze(Function):
 
