@@ -6,15 +6,16 @@ import torch
 
 
 def main():
+    
+    a = np.random.rand(3, 3, 2)
+    b = np.max(a, axis=2)
+    print(a == b)
 
-    a = deepnet.rand((5, 4, 3), usegrad=True).float()
-    b = a.max()
-    b.backward()
-    print(b)
-    c = a.min()
-    print(c)
-    c.backward()
-    print(a.grad)
+    
+    a = deepnet.rand(2)
+    b = deepnet.rand(2)
+    print(a > b, a == b, a >= b, a < b, a <= b, a != b, not a, a and b, a or b, sep="\n")
+
 
 if __name__ == "__main__":
     main()

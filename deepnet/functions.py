@@ -299,13 +299,18 @@ class Max(Function):
         arr = graddata * mask
         return arr
 
-    # TODO don't think this right
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
+        a = context.tensors()[0]
+        index = np.argmax(a.data)
+        mask = np.zeros(a.nelem)
+        mask[index] = 1.0
+        mask = mask.reshape(a.dim)
         dim = context["dim"]
         keepdims = context["keepdims"]
-        arr = np.max(agrad.data, axis=dim, keepdims=keepdims)
+        arr = np.max(agrad.data * mask, axis=dim, keepdims=keepdims)
         return arr
+
 
 class Min(Function):
 
@@ -333,12 +338,16 @@ class Min(Function):
         arr = graddata * mask
         return arr
 
-    # TODO don't think this right
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
+        a = context.tensors()[0]
+        index = np.argmin(a.data)
+        mask = np.zeros(a.nelem)
+        mask[index] = 1.0
+        mask = mask.reshape(a.dim)
         dim = context["dim"]
         keepdims = context["keepdims"]
-        arr = np.min(agrad.data, axis=dim, keepdims=keepdims)
+        arr = np.min(agrad.data * mask, axis=dim, keepdims=keepdims)
         return arr
 
 class Squeeze(Function):
