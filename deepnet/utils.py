@@ -166,7 +166,7 @@ def atot(*args: Any) -> Union[Tuple[Tensor, ...], Tensor]:
 
 
 def to(a: Tensor, dtype: Type[dtype]):
-    assert istensor(tensor)
+    assert istensor(a)
     data = dtype.numpy(a.data)
     return tensor(data, a.usegrad, dtype)
 
