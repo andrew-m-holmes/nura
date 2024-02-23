@@ -2,7 +2,6 @@ import numpy as np
 import deepnet
 import deepnet.functional as f
 
-
 def test_add_backward_scalar():
     a = np.random.rand()
     b = np.random.rand()
@@ -225,6 +224,57 @@ def test_div_backward_matrix():
 
 # Using symbolic differentiaton as numeric differentiation, gives
 # unwanted results
+
+
+def test_dot_backward_vector_vector():
+    a = np.random.rand(5)
+    b = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    result_tensor.backward()
+    grad_a, grad_b = a_tensor.grad, b_tensor.grad
+
+    expected_grad_a = b
+    expected_grad_b = a
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
+
+
+def test_dot_backward_matrix_vector():
+    a = np.random.rand(3, 5)  
+    b = np.random.rand(5)  
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+    grad_a, grad_b = a_tensor.grad, b_tensor.grad
+
+    expected_grad_a = np.outer(result_tensor.data, b)
+    expected_grad_b = np.dot(a.T, result_tensor.data)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
+
+
+def test_dot_backward_matrix_matrix():
+    a = np.random.rand(3, 4)
+    b = np.random.rand(4, 2)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+    grad_a, grad_b = a_tensor.grad, b_tensor.grad
+
+    expected_grad_a = np.dot(result_tensor.data, b.T)
+    expected_grad_b = np.dot(a.T, result_tensor.data)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
 
 def test_matmul_backward_same_shape():
@@ -642,6 +692,138 @@ def test_sum_backward_higher_rank_tensor():
 
     a_tensor = deepnet.tensor(a, usegrad=True)
     result_tensor = deepnet.sum(a_tensor, (1, 2))
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_max_backward_single_dim():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.max(a_tensor, 1)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_max_backward_multiple_dims():
+    a = np.random.rand(4, 5, 6)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.max(a_tensor, (0, 2))
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_max_backward_keepdims_true():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.max(a_tensor, 1, keepdims=True)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_max_backward_keepdims_false():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.max(a_tensor, 1, keepdims=False)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_max_backward_single_element_tensor():
+    a = np.random.rand(1)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.max(a_tensor, 0)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_max_backward_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.max(a_tensor, (1, 2))
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_min_backward_single_dim():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.min(a_tensor, 1)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_min_backward_multiple_dims():
+    a = np.random.rand(4, 5, 6)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.min(a_tensor, (0, 2))
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_min_backward_keepdims_true():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.min(a_tensor, 1, keepdims=True)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_min_backward_keepdims_false():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.min(a_tensor, 1, keepdims=False)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_min_backward_single_element_tensor():
+    a = np.random.rand(1)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.min(a_tensor, 0)
+    result_tensor.backward(deepnet.oneslike(result_tensor))
+
+    grad_a = a_tensor.grad
+    assert grad_a.dim == a.shape
+
+
+def test_min_backward_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    result_tensor = deepnet.min(a_tensor, (1, 2))
     result_tensor.backward(deepnet.oneslike(result_tensor))
 
     grad_a = a_tensor.grad
@@ -1231,6 +1413,26 @@ def main():
         test_sum_backward_keepdims_false()
         test_sum_backward_keepdims_true()
         test_sum_backward_single_element_tensor()
+
+        # Max Backward Tests
+
+        test_max_backward_single_dim()
+        test_max_backward_multiple_dims()
+        test_max_backward_higher_rank_tensor()
+
+        test_max_backward_keepdims_false()
+        test_max_backward_keepdims_true()
+        test_max_backward_single_element_tensor()
+
+        # Min Backward Tests
+
+        test_min_backward_single_dim()
+        test_min_backward_multiple_dims()
+        test_min_backward_higher_rank_tensor()
+
+        test_min_backward_keepdims_false()
+        test_min_backward_keepdims_true()
+        test_min_backward_single_element_tensor()
 
         # Squeeze Backward Tests
 
