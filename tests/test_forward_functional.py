@@ -471,6 +471,126 @@ def test_sum_forward_higher_rank_tensor():
     assert np.allclose(result_tensor.data, expected)
 
 
+def test_max_forward_single_dim():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.max(a_tensor, 1)
+    expected = np.max(a, axis=1)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_max_forward_multiple_dims():
+    a = np.random.rand(4, 5, 6)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.max(a_tensor, (0, 2))
+    expected = np.max(a, axis=(0, 2))
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_max_forward_keepdims_true():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.max(a_tensor, 1, keepdims=True)
+    expected = np.max(a, axis=1, keepdims=True)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_max_forward_keepdims_false():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.max(a_tensor, 1, keepdims=False)
+    expected = np.max(a, axis=1, keepdims=False)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_max_forward_single_element_tensor():
+    a = np.random.rand(1)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.max(a_tensor, 0)
+    expected = np.max(a, axis=0)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_max_forward_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.max(a_tensor, (1, 2))
+    expected = np.max(a, axis=(1, 2))
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_min_forward_single_dim():
+    a = np.random.rand(3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.min(a_tensor, 1)
+    expected = np.min(a, axis=1)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_min_forward_multiple_dims():
+    a = np.random.rand(4, 5, 6)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.min(a_tensor, (0, 2))
+    expected = np.min(a, axis=(0, 2))
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_min_forward_keepdims_true():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.min(a_tensor, 1, keepdims=True)
+    expected = np.min(a, axis=1, keepdims=True)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_min_forward_keepdims_false():
+    a = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.min(a_tensor, 1, keepdims=False)
+    expected = np.min(a, axis=1, keepdims=False)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_min_forward_single_element_tensor():
+    a = np.random.rand(1)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.min(a_tensor, 0)
+    expected = np.min(a, axis=0)
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
+def test_min_forward_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+
+    a_tensor = deepnet.tensor(a)
+    result_tensor = f.min(a_tensor, (1, 2))
+    expected = np.min(a, axis=(1, 2))
+    assert result_tensor.dim == expected.shape
+    assert np.allclose(result_tensor.data, expected)
+
+
 def test_squeeze_forward_rank1_v0():
     a = np.random.rand(1)
 
@@ -969,6 +1089,26 @@ def main():
     test_sum_forward_single_element_tensor()
     test_sum_forward_keepdims_false()
     test_sum_forward_keepdims_true()
+
+    # Max Tests
+
+    test_max_forward_single_dim()
+    test_max_forward_multiple_dims()
+    test_max_forward_higher_rank_tensor()
+
+    test_max_forward_single_element_tensor()
+    test_max_forward_keepdims_false()
+    test_max_forward_keepdims_true()
+
+    # Min Tests
+
+    test_max_forward_single_dim()
+    test_max_forward_multiple_dims()
+    test_max_forward_higher_rank_tensor()
+
+    test_max_forward_single_element_tensor()
+    test_max_forward_keepdims_false()
+    test_max_forward_keepdims_true()
 
     # Squeeze Tests
 

@@ -702,6 +702,9 @@ def main():
     # Grad Checking JVP Tests
 
     test_jvp_grad_matches_v0()
+    test_jvp_grad_matches_v1()
+    test_jvp_grad_matches_v2()
+    test_jvp_grad_matches_v3()
 
     # Grad Tests
 
