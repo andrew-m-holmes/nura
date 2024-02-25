@@ -98,8 +98,15 @@ class Dot(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr0 = np.dot(grad.data, b.data)
-        arr1 = np.dot(a.data, grad.data)
+        if a.ndim == 1 and b.ndim > 1:
+            arr0 = np.dot(b.data, grad.data)
+            arr1 = np.dot(np.expand_dims(a.data, 1), np.expand_dims(grad.data, 0))
+        elif b.ndim == 1 and a.ndim > 1:
+            arr0 = np.dot(np.expand_dims(grad.data, 1), np.expand_dims(b.data, 0))
+            arr1 = np.dot(a.data.T, grad.data)
+        else:
+            arr0 = np.dot(grad.data, b.data.T)
+            arr1 = np.dot(a.data.T, grad.data)
         return arr0, arr1
 
     @staticmethod
@@ -116,21 +123,21 @@ class Matmul(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         context.save(a, b)
-        arr = a.data @ b.data
+        arr = np.matmul(a.data, b.data)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr0 = grad.data @ np.swapaxes(b.data, -2, -1)
-        arr1 = np.swapaxes(a.data, -2, -1) @ grad.data
+        arr0 = np.matmul(grad.data, np.swapaxes(b.data, -2, -1))
+        arr1 = np.matmul(np.swapaxes(a.data, -2, -1), grad.data)
         return arr0, arr1
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
-        arr0 = agrad.data @ b.data
-        arr1 = a.data @ bgrad.data
+        arr0 = np.matmul(agrad.data, b.data)
+        arr1 = np.matmul(a.data, bgrad.data)
         arr = arr0 + arr1
         return arr
 
