@@ -211,24 +211,88 @@ def test_div_tangent_matrix():
     np.testing.assert_allclose(result_tensor.grad.data, expected, rtol=1e-5, atol=1e-5)
 
 
-# Using symbolic differentiaton as numeric differentiation, gives
-# unwanted results
+def test_dot_tangent_vector_vector():
+    a = np.random.rand(5)
+    b = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(grad=deepnet.tensor(np.ones(5)))
+    b_tensor = deepnet.tensor(b, usegrad=True).mutated(grad=deepnet.tensor(np.ones(5)))
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected_tangent = np.sum(a) + np.sum(b)
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_dot_tangent_matrix_vector():
+    a = np.random.rand(4, 3)
+    b = np.random.rand(3)
+
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((4, 3)))
+    )
+    b_tensor = deepnet.tensor(b, usegrad=True).mutated(grad=deepnet.tensor(np.ones(3)))
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected_tangent = np.dot(np.ones((4, 3)), b) + np.dot(a, np.ones(3))
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_dot_tangent_vector_matrix():
+    a = np.random.rand(3)
+    b = np.random.rand(3, 5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(grad=deepnet.tensor(np.ones(3)))
+    b_tensor = deepnet.tensor(b, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 5)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected_tangent = np.dot(np.ones(3), b) + np.dot(a, np.ones((3, 5)))
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_dot_tangent_matrix_matrix():
+    a = np.random.rand(4, 3)
+    b = np.random.rand(3, 5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((4, 3)))
+    )
+    b_tensor = deepnet.tensor(b, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 5)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected_tangent = np.dot(a, np.ones((3, 5))) + np.dot(np.ones((4, 3)), b)
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
 
 
 def test_matmul_tangent_square_matrices():
-    a = np.random.rand(3, 3)
-    b = np.random.rand(3, 3)
+    a = np.random.rand(5, 5)
+    b = np.random.rand(5, 5)
 
     a_tensor = deepnet.tensor(a, usegrad=True).mutated(
-        grad=deepnet.tensor(np.ones((3, 3)))
+        grad=deepnet.tensor(np.ones((5, 5)))
     )
     b_tensor = deepnet.tensor(b, usegrad=True).mutated(
-        grad=deepnet.tensor(np.ones((3, 3)))
+        grad=deepnet.tensor(np.ones((5, 5)))
     )
     with deepnet.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.matmul(a_tensor, b_tensor)
 
-    expected_tangent = np.matmul(a, np.ones((3, 3))) + np.matmul(np.ones((3, 3)), b)
+    expected_tangent = np.matmul(a, np.ones((5, 5))) + np.matmul(np.ones((5, 5)), b)
     np.testing.assert_allclose(
         result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
     )
@@ -290,6 +354,25 @@ def test_matmul_tangent_higher_rank_different_shape():
     expected_tangent = np.matmul(a, np.ones((2, 3, 5))) + np.matmul(
         np.ones((2, 4, 3)), b
     )
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_matmul_tangent_different_ranks():
+    a = np.random.rand(2, 4, 3)
+    b = np.random.rand(3, 2)
+
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((2, 4, 3)))
+    )
+    b_tensor = deepnet.tensor(b, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 2)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.matmul(a_tensor, b_tensor)
+
+    expected_tangent = np.matmul(a, np.ones((3, 2))) + np.matmul(np.ones((2, 4, 3)), b)
     np.testing.assert_allclose(
         result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
     )
@@ -1169,12 +1252,20 @@ def main():
     test_div_tangent_vector()
     test_div_tangent_matrix()
 
+    # Dot Tangent Tests
+
+    test_dot_tangent_vector_vector()
+    test_dot_tangent_vector_matrix()
+    test_dot_tangent_matrix_vector()
+    test_dot_tangent_matrix_matrix()
+
     # Matmul JVP Tests
 
     test_matmul_tangent_square_matrices()
     test_matmul_tangent_different_shapes()
     test_matmul_tangent_higher_rank_same_shape()
     test_matmul_tangent_higher_rank_different_shape()
+    test_matmul_tangent_different_shapes()
 
     # Pow JVP Tests
 
@@ -1197,7 +1288,7 @@ def main():
     test_log_tangent_vector()
     test_log_tangent_matrix()
 
-    # sin JVP Tests
+    # Sin JVP Tests
 
     test_sin_tangent_scalar()
     test_sin_tangent_vector()
