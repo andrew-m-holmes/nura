@@ -100,9 +100,9 @@ class Dot(Function):
         a, b = context.tensors()
         if a.ndim == 1 and b.ndim > 1:
             arr0 = np.dot(b.data, grad.data)
-            arr1 = np.dot(np.expand_dims(a.data, 1), np.expand_dims(grad.data, 0))
+            arr1 = np.outer(a.data, grad.data)
         elif b.ndim == 1 and a.ndim > 1:
-            arr0 = np.dot(np.expand_dims(grad.data, 1), np.expand_dims(b.data, 0))
+            arr0 = np.outer(grad.data, b.data)
             arr1 = np.dot(a.data.T, grad.data)
         else:
             arr0 = np.dot(grad.data, b.data.T)
