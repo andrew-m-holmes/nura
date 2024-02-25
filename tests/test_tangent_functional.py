@@ -701,6 +701,172 @@ def test_sum_tangent_single_element_rank1():
     )
 
 
+def test_max_tangent_single_dim():
+    a = np.random.rand(3, 4)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 4)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.max(a_tensor, dim=1)
+
+    mask = a == result_tensor.data.reshape(-1, 1)
+    pretangent = np.where(mask, a_tensor.grad.data, -np.inf)
+    expected_tangent = np.max(pretangent, axis=1)
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_max_tangent_multiple_dim():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 4, 5)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.max(a_tensor, dim=(1, 2))
+
+    mask = a == result_tensor.data[..., None, None]
+    pretangent = np.where(mask, a_tensor.grad.data, -np.inf)
+    expected_tangent = np.max(pretangent, axis=(1, 2))
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_max_tangent_keepdims():
+    a = np.random.rand(3, 4)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 4)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.max(a_tensor, dim=1, keepdims=True)
+
+    mask = a == result_tensor.data
+    pretangent = np.where(mask, a_tensor.grad.data, -np.inf)
+    expected_tangent = np.max(pretangent, axis=1, keepdims=True)
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_max_tangent_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((2, 3, 4, 5)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.max(a_tensor, dim=(1, 3))
+
+    mask = a == result_tensor.data.reshape(2, 1, 4, 1)
+    pretangent = np.where(mask, a_tensor.grad.data, -np.inf)
+    expected_tangent = np.max(pretangent, axis=(1, 3))
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_max_tangent_single_element_rank1():
+    a = np.random.rand(1)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(grad=deepnet.tensor(np.ones(1)))
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.max(a_tensor)
+
+    mask = a == result_tensor.data
+    pretangent = np.where(mask, a_tensor.grad.data, -np.inf)
+    expected_tangent = np.max(pretangent)
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_min_tangent_single_dim():
+    a = np.random.rand(3, 4)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 4)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.min(a_tensor, dim=1)
+
+    mask = a == result_tensor.data.reshape(-1, 1)
+    pretangent = np.where(mask, a_tensor.grad.data, np.inf)
+    expected_tangent = np.min(pretangent, axis=1)
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_min_tangent_multiple_dim():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 4, 5)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.min(a_tensor, dim=(1, 2))
+
+    mask = a == result_tensor.data[..., None, None]
+    pretangent = np.where(mask, a_tensor.grad.data, np.inf)
+    expected_tangent = np.min(pretangent, axis=(1, 2))
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_min_tangent_keepdims():
+    a = np.random.rand(3, 4)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((3, 4)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.min(a_tensor, dim=1, keepdims=True)
+
+    mask = a == result_tensor.data
+    pretangent = np.where(mask, a_tensor.grad.data, np.inf)
+    expected_tangent = np.min(pretangent, axis=1, keepdims=True)
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_min_tangent_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(
+        grad=deepnet.tensor(np.ones((2, 3, 4, 5)))
+    )
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.min(a_tensor, dim=(1, 3))
+
+    mask = a == result_tensor.data.reshape(2, 1, 4, 1)
+    pretangent = np.where(mask, a_tensor.grad.data, np.inf)
+    expected_tangent = np.min(pretangent, axis=(1, 3))
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_min_tangent_single_element_rank1():
+    a = np.random.rand(1)
+    a_tensor = deepnet.tensor(a, usegrad=True).mutated(grad=deepnet.tensor(np.ones(1)))
+    with deepnet.autograd(enabled=True, reverse=False, forward=True):
+        result_tensor = f.min(a_tensor)
+
+    mask = a == result_tensor.data
+    pretangent = np.where(mask, a_tensor.grad.data, np.inf)
+    expected_tangent = np.min(pretangent)
+
+    np.testing.assert_allclose(
+        result_tensor.grad.data, expected_tangent, rtol=1e-5, atol=1e-5
+    )
+
+
 def test_squeeze_tangent_rank1_v0():
     a = np.random.rand(1)
 
@@ -1228,25 +1394,25 @@ def test_slice_tangent_mixed_indices():
 
 def main():
 
-    # Add JVP Tests
+    # Add Tangent Tests
 
     test_add_tangent_scalar()
     test_add_tangent_vector()
     test_add_tangent_matrix()
 
-    # Sub JVP Tests
+    # Sub Tangent Tests
 
     test_sub_tangent_scalar()
     test_sub_tangent_vector()
     test_sub_tangent_matrix()
 
-    # Mul JVP Tests
+    # Mul Tangent Tests
 
     test_mul_tangent_scalar()
     test_mul_tangent_vector()
     test_mul_tangent_matrix()
 
-    # Div JVP Tests
+    # Div Tangent Tests
 
     test_div_tangent_scalar()
     test_div_tangent_vector()
@@ -1259,7 +1425,7 @@ def main():
     test_dot_tangent_matrix_vector()
     test_dot_tangent_matrix_matrix()
 
-    # Matmul JVP Tests
+    # Matmul Tangent Tests
 
     test_matmul_tangent_square_matrices()
     test_matmul_tangent_different_shapes()
@@ -1267,7 +1433,7 @@ def main():
     test_matmul_tangent_higher_rank_different_shape()
     test_matmul_tangent_different_shapes()
 
-    # Pow JVP Tests
+    # Pow Tangent Tests
 
     test_pow_tangent_scalar()
     test_pow_tangent_vector()
@@ -1276,31 +1442,31 @@ def main():
     test_pow_tangent_vector_exp()
     test_pow_tangent_matrix_exp()
 
-    # Exp JVP Tests
+    # Exp Tangent Tests
 
     test_exp_tangent_scalar()
     test_exp_tangent_vector()
     test_exp_tangent_matrix()
 
-    # Log JVP Tests
+    # Log Tangent Tests
 
     test_log_tangent_scalar()
     test_log_tangent_vector()
     test_log_tangent_matrix()
 
-    # Sin JVP Tests
+    # Sin Tangent Tests
 
     test_sin_tangent_scalar()
     test_sin_tangent_vector()
     test_sin_tangent_matrix()
 
-    # Cos JVP Tests
+    # Cos Tangent Tests
 
     test_cos_tangent_scalar()
     test_cos_tangent_vector()
     test_cos_tangent_matrix()
 
-    # Sum JVP Tests
+    # Sum Tangent Tests
 
     test_sum_tangent_single_dim()
     test_sum_tangent_multiple_dim()
@@ -1308,7 +1474,23 @@ def main():
     test_sum_tangent_single_element_rank1()
     test_sum_tangent_higher_rank_tensor()
 
-    # Squeeze JVP Tests
+    # Max Tangent Tests
+
+    test_max_tangent_single_dim()
+    test_max_tangent_multiple_dim()
+    test_max_tangent_keepdims()
+    test_max_tangent_single_element_rank1()
+    test_max_tangent_higher_rank_tensor()
+
+    # Min Tangent Tests
+
+    test_min_tangent_single_dim()
+    test_min_tangent_multiple_dim()
+    test_min_tangent_keepdims()
+    test_min_tangent_single_element_rank1()
+    test_min_tangent_higher_rank_tensor()
+
+    # Squeeze Tangent Tests
 
     test_squeeze_tangent_rank1_v0()
     test_squeeze_tangent_rank1_v1()
@@ -1319,7 +1501,7 @@ def main():
     test_squeeze_tangent_multi_v1()
     test_squeeze_tangent_multi_v2()
 
-    # Unsqueeze JVP Tests
+    # Unsqueeze Tangent Tests
 
     test_unsqueeze_tangent_multi_v0()
     test_unsqueeze_tangent_multi_v1()
@@ -1327,7 +1509,7 @@ def main():
     test_unsqueeze_tangent_multi_v3()
     test_unsqueeze_tangent_multi_v4()
 
-    # Transpose JVP Tests
+    # Transpose Tangent Tests
 
     test_transpose_tangent_multi_v0()
     test_transpose_tangent_multi_v1()
@@ -1335,7 +1517,7 @@ def main():
     test_transpose_tangent_multi_v3()
     test_transpose_tangent_multi_v4()
 
-    # Permute JVP Tests
+    # Permute Tangent Tests
 
     test_permute_tangent_rank2_v0()
     test_permute_tangent_rank3_v0()
@@ -1343,7 +1525,7 @@ def main():
     test_permute_tangent_rank4_v0()
     test_permute_tangent_rank4_v1()
 
-    # View JVP Tests
+    # View Tangent Tests
 
     test_view_tangent_rank1_to_rank2()
     test_view_tangent_rank2_to_rank3()
@@ -1354,7 +1536,7 @@ def main():
     test_view_tangent_rank4_to_rank2()
     test_view_tangent_with_negative_dim()
 
-    # Reshape JVP Tests
+    # Reshape Tangent Tests
 
     test_reshape_tangent_rank1_to_rank2()
     test_reshape_tangent_rank2_to_rank3()
@@ -1365,14 +1547,14 @@ def main():
     test_reshape_tangent_rank4_to_rank2()
     test_reshape_tangent_with_negative_dim()
 
-    # Clone JVP Tests
+    # Clone Tangent Tests
 
     test_clone_tangent_scalar()
     test_clone_tangent_vector()
     test_clone_tangent_matrix()
     test_clone_tangent_higher_rank_tensor()
 
-    # Slice JVP Tests
+    # Slice Tangent Tests
 
     test_clone_tangent_scalar()
     test_clone_tangent_vector()
