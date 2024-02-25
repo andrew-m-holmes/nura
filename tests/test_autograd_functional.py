@@ -384,6 +384,115 @@ def test_jvp_sin_permute_sum_broadcast():
     assert result_tensor.dim == output_tangent.dim
 
 
+def test_jvp_grad_matches_v0():
+    a = np.random.rand()
+    b = np.random.rand()
+    c = np.random.rand()
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    c_tensor = deepnet.tensor(c, usegrad=True)
+    primals = (a_tensor, b_tensor, c_tensor)
+    tangents = (
+        deepnet.oneslike(a_tensor),
+        deepnet.zeroslike(b_tensor),
+        deepnet.zeroslike(c_tensor),
+    )
+
+    def func(a, b, c):
+        return f.mul(f.add(a, b), c)
+
+    result_tensor, output_tangent = jvp(primals, tangents, func)
+    output_tensor = func(*primals)
+    output_tensor.backward(deepnet.oneslike(output_tensor))
+    expected = np.multiply(np.add(a, b), c)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, output_tangent.data, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_jvp_grad_matches_v1():
+    a = np.random.rand(3, 4)
+    b = np.random.rand(3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    primals = (a_tensor, b_tensor)
+    tangents = (
+        deepnet.zeroslike(a_tensor),
+        deepnet.oneslike(b_tensor),
+    )
+
+    def func(a, b):
+        return f.div(a, f.exp(b))
+
+    result_tensor, output_tangent = jvp(primals, tangents, func)
+    output_tensor = func(*primals)
+    output_tensor.backward(deepnet.oneslike(output_tensor))
+    np.testing.assert_allclose(
+        result_tensor.data, output_tensor.data, rtol=1e-5, atol=1e-5
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, output_tangent.data, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_jvp_grad_matches_v2():
+    a = np.random.rand(1)
+    b = np.random.rand(1)
+    c = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    c_tensor = deepnet.tensor(c, usegrad=True)
+    primals = (a_tensor, b_tensor, c_tensor)
+    tangents = (
+        deepnet.zeroslike(a_tensor),
+        deepnet.zeroslike(b_tensor),
+        deepnet.oneslike(c_tensor),
+    )
+
+    def func(a, b, c):
+        return f.log(f.pow(f.sin(a), f.sub(b, c)))
+
+    result_tensor, output_tangent = jvp(primals, tangents, func)
+    output_tensor = func(*primals)
+    output_tensor.backward(deepnet.oneslike(output_tensor))
+    np.testing.assert_allclose(
+        result_tensor.data, output_tensor.data, rtol=1e-5, atol=1e-5
+    )
+    np.testing.assert_allclose(
+        c_tensor.grad.data, output_tangent.data, rtol=1e-5, atol=1e-5
+    )
+
+
+def test_jvp_grad_matches_v3():
+    a = np.random.rand(2, 3, 4)
+    b = np.random.rand(2, 3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    primals = (a_tensor, b_tensor)
+    tangents = (
+        deepnet.oneslike(a_tensor),
+        deepnet.zeroslike(b_tensor),
+    )
+
+    def func(a, b):
+        return f.mul(f.cos(a), b)
+
+    result_tensor, output_tangent = jvp(primals, tangents, func)
+    output_tensor = func(*primals)
+    output_tensor.backward(deepnet.oneslike(output_tensor))
+    np.testing.assert_allclose(
+        result_tensor.data, output_tensor.data, rtol=1e-5, atol=1e-5
+    )
+    np.testing.assert_allclose(
+        a_tensor.grad.data, output_tangent.data, rtol=1e-5, atol=1e-5
+    )
+
+
 def test_grad_add_sub():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -589,6 +698,10 @@ def main():
     test_jvp_add_mul_broadcast()
     test_jvp_nested_operations_broadcast()
     test_jvp_sin_permute_sum_broadcast()
+
+    # Grad Checking JVP Tests
+
+    test_jvp_grad_matches_v0()
 
     # Grad Tests
 
