@@ -7,22 +7,20 @@ import torch
 
 def main():
 
-    a = deepnet.rand((64, 3, 5, 4), usegrad=True).float()
-    b = deepnet.rand((4, 3), usegrad=True).float()
+    a = torch.rand(5, 4, 3, 2, requires_grad=True)
+    b = torch.rand(2, 5, requires_grad=True)
+    c = torch.matmul(a, b)
+    c.backward(torch.ones_like(c))
+    print(c.size())
+    print(b.grad)
+
+    a = deepnet.tensor(a.detach().numpy(), usegrad=True)
+    b = deepnet.tensor(b.detach().numpy(), usegrad=True)
     c = deepnet.matmul(a, b)
     c.backward(deepnet.oneslike(c))
+    print(c.dim)
+    print(b.grad)
 
-    a = np.random.rand(4, 3)
-    b = np.random.rand(3)
-    c = np.dot(a, b)
-    g = np.ones_like(c)
-    agrad = np.dot(np.expand_dims(g, -1), np.expand_dims(b, 0))
-    print(agrad.shape)
-
-    a = np.random.rand(3, 1)
-    b = a.T
-    c = np.dot(a, b)
-    print(c.shape)
 
 if __name__ == "__main__":
     main()

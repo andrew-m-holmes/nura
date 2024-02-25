@@ -253,8 +253,25 @@ def test_dot_backward_matrix_vector():
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
     expected_grad_a = np.outer(ones.data, b)
-    print(expected_grad_a)
     expected_grad_b = np.dot(a.T, ones.data)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
+
+
+def test_dot_backward_vector_matrix():
+    a = np.random.rand(7)
+    b = np.random.rand(7, 3)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    ones = deepnet.oneslike(result_tensor)
+    result_tensor.backward(ones)
+    grad_a, grad_b = a_tensor.grad, b_tensor.grad
+
+    expected_grad_a = np.dot(b.data, ones.data)
+    expected_grad_b = np.outer(a.data, ones.data)
     np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
@@ -349,6 +366,27 @@ def test_matmul_backward_rank3_different_shape():
 
     expected_grad_a = np.matmul(ones, b.transpose(0, 2, 1))
     expected_grad_b = np.matmul(a.transpose(0, 2, 1), ones)
+    np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
+
+
+def test_matmul_backward_different_ranks():
+    a = np.random.rand(6, 2, 9, 4, 3)
+    b = np.random.rand(3, 4)
+
+    a_tensor = deepnet.tensor(a, usegrad=True)
+    b_tensor = deepnet.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+
+    ones = np.ones((6, 2, 9, 4, 4))
+    m = deepnet.tensor(ones, dtype=deepnet.float)
+    result_tensor.backward(m)
+    grad_a, grad_b = a_tensor.grad, b_tensor.grad
+
+    expected_grad_a = np.matmul(ones, np.swapaxes(b.data, -2, -1))
+    expected_grad_b = np.sum(
+        np.matmul(np.swapaxes(a.data, -2, -1), ones), axis=(0, 1, 2)
+    )
     np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(grad_b.data, expected_grad_b, rtol=1e-5, atol=1e-5)
 
@@ -1366,6 +1404,7 @@ def main():
 
         test_dot_backward_vector_vector()
         test_dot_backward_matrix_vector()
+        test_dot_backward_vector_matrix()
         test_dot_backward_matrix_matrix()
 
         # Matmul Backward Tests
@@ -1374,6 +1413,7 @@ def main():
         test_matmul_backward_different_shape()
         test_matmul_backward_rank3_same_shape()
         test_matmul_backward_rank3_different_shape()
+        test_matmul_backward_different_ranks()
 
         # Sin Backward Tests
 
