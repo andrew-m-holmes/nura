@@ -147,6 +147,42 @@ def test_div_forward_matrix():
     np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
+def test_dot_forward_vectors():
+    a = np.random.rand(5)
+    b = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a)
+    b_tensor = deepnet.tensor(b)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected = np.dot(a, b)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_dot_forward_matrix_vector():
+    a = np.random.rand(3, 5)
+    b = np.random.rand(5)
+
+    a_tensor = deepnet.tensor(a)
+    b_tensor = deepnet.tensor(b)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected = np.dot(a, b)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_dot_forward_matrix_matrix():
+    a = np.random.rand(3, 4)
+    b = np.random.rand(4, 2)
+
+    a_tensor = deepnet.tensor(a)
+    b_tensor = deepnet.tensor(b)
+    result_tensor = f.dot(a_tensor, b_tensor)
+
+    expected = np.dot(a, b)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
 def test_matmul_forward_same_shape():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
@@ -878,6 +914,12 @@ def main():
     test_div_forward_scalar()
     test_div_forward_vetor()
     test_div_forward_matrix()
+
+    # Dot Test
+
+    test_dot_forward_vectors()
+    test_dot_forward_matrix_vector()
+    test_dot_forward_matrix_matrix()
 
     # Matmul Tests
 
