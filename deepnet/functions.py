@@ -306,15 +306,15 @@ class Max(Function):
         arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
         return mask * arr
 
-    # TODO
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
         dim = context["dim"]
         keepdims = context["keepdims"]
         arr = context["arr"]
-        graddata = agrad.data
-        return arr
+        mask = a.data == arr
+        graddata = np.where(mask, agrad.data, -np.inf)
+        return np.max(graddata, axis=dim, keepdims=keepdims)
 
 
 class Min(Function):
@@ -343,20 +343,15 @@ class Min(Function):
         arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
         return mask * arr
 
-    # TODO
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
-        dim = tuple(range(a.ndim)) if context["dim"] is None else context["dim"]
-        keepdims = context["keepdims"]
-        index = np.argmin(a.data, axis=dim, keepdims=keepdims)
-        mask = np.zeros(a.nelem)
-        mask[index] = 1.0
-        mask = mask.reshape(a.dim)
         dim = context["dim"]
         keepdims = context["keepdims"]
-        arr = np.min(agrad.data * mask, axis=dim, keepdims=keepdims)
-        return arr
+        arr = context["arr"]
+        mask = a.data == arr
+        graddata = np.where(mask, agrad.data, np.inf)
+        return np.min(graddata, axis=dim, keepdims=keepdims)
 
 
 class Squeeze(Function):
