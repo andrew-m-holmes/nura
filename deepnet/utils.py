@@ -103,6 +103,13 @@ def eye(
     data = np.eye(n, m, k)
     return tensor(data, dtype=dtype)
 
+def argmax(a: Tensor, dim: Optional[int]=None, keepdims=False):
+    data = np.argmax(a.data, axis=dim, keepdims=keepdims)
+    return tensor(data)
+
+def argmin(a: Tensor, dim: Optional[int]=None, keepdims=False):
+    data = np.argmin(a.data, axis=dim, keepdims=keepdims)
+    return tensor(data)
 
 def any(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
