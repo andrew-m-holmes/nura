@@ -38,12 +38,10 @@ def main():
     def div_sub(a, b, c):
         return a / b - c
 
-    a, b, c = Primal(9.0, 1.0), Primal(3.0, 0.0), Primal(-5.0, 0.0)
+    a, b, c = Primal(25.0, 1.0), Primal(4.0, 0.0), Primal(-5.0, 0.0)
     print(f"{a = }, {b = }, {c = }")
-
     print(f"{mul_add(a, b, c) = }")
-
-    a.tangent, b.tangent, c.tangent = 0.0, 3.0, 0.0
+    a.tangent, b.tangent, c.tangent = 0.0, 1.0, 0.0
     print(f"{div_sub(a, b, c) = }")
 
 

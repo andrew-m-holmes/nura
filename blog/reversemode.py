@@ -73,18 +73,17 @@ def main():
     def div_sub(a, b, c):
         return a / b - c
 
-    a, b, c = Primal(9.0), Primal(3.0), Primal(-5.0)
-    print(f"{a = }, {b = }, {c = }")
+    a, b, c = Primal(25.0, 1.0), Primal(4.0, 0.0), Primal(-5.0, 0.0)
 
+    print(f"{a = }, {b = }, {c = }")
     d = mul_add(a, b, c)
     d.backward(1.0)
     print(f"{d = }")
     print(f"{a.adjoint = }, {b.adjoint = }, {c.adjoint = }")
 
     a.adjoint, b.adjoint, c.adjoint = 0.0, 0.0, 0.0
-
     e = div_sub(a, b, c)
-    e.backward(3.0)
+    e.backward(1.0)
     print(f"{e = }")
     print(f"{a.adjoint = }, {b.adjoint = }, {c.adjoint = }")
 
