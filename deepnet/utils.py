@@ -5,6 +5,17 @@ from deepnet.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
+def empty(dim: Union[_dim, int], dtype: Optional[Type[dtype]] = None):
+    empty_arr = np.empty(dim)
+    return tensor(empty_arr, dtype=dtype)
+
+
+def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
+    data = a.data
+    empty_arr = np.empty_like(data)
+    return tensor(empty_arr, dtype=dtype)
+
+
 def zeros(
     dim: Union[_dim, int], usegrad=False, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
@@ -103,13 +114,16 @@ def eye(
     data = np.eye(n, m, k)
     return tensor(data, dtype=dtype)
 
-def argmax(a: Tensor, dim: Optional[int]=None, keepdims=False):
+
+def argmax(a: Tensor, dim: Optional[int] = None, keepdims=False):
     data = np.argmax(a.data, axis=dim, keepdims=keepdims)
     return tensor(data)
 
-def argmin(a: Tensor, dim: Optional[int]=None, keepdims=False):
+
+def argmin(a: Tensor, dim: Optional[int] = None, keepdims=False):
     data = np.argmin(a.data, axis=dim, keepdims=keepdims)
     return tensor(data)
+
 
 def any(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
