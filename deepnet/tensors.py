@@ -110,7 +110,7 @@ class Tensor:
         return self
 
     def zeroedgrad(self):
-        cls = getcls(self)
+        cls = getcls(self.dtype)
         return cls(self.data, self.usegrad, deepnet.zeroslike(self), None, True)
 
     def mutated(self, **attrs: Any) -> "Tensor":
@@ -141,7 +141,7 @@ class Tensor:
     def contig(self):
         return deepnet.tocontig(self)
 
-    def sum(self, dim: Optional[Union[_dim , int]] = None, keepdims=False):
+    def sum(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
         return deepnet.sum(self, dim, keepdims)
 
     def max(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):

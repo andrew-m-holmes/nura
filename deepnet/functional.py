@@ -51,6 +51,14 @@ def pow(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     return out
 
 
+def square(a: Union[Tensor, Any]):
+    return pow(a, 2.0)
+
+
+def sqrt(a: Union[Tensor, Any]):
+    return pow(a, 0.5)
+
+
 def exp(a: Union[Tensor, Any]):
     b = utils.atot(a)[0]
     out = functions.Exp.apply(b)
