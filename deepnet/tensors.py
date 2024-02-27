@@ -1,21 +1,31 @@
 import deepnet
 from deepnet.types import dtype, _dim
 from deepnet.autograd.graph import Node
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Union
 from numpy import ndarray
+from copy import deepcopy
 
 
 class Tensor:
 
     _gradtensor = ...
 
-    def __init__(self, data, usegrad, grad, backfn, leaf, _dtype) -> None:
+    def __init__(
+        self,
+        data: ndarray,
+        usegrad: bool,
+        grad: "Tensor",
+        backfn: Node,
+        leaf: bool,
+        _dtype: Type[dtype],
+    ) -> None:
+
         self._data: ndarray = data
         self._grad: Optional[Tensor] = grad
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._dtype: dtype = _dtype
+        self._dtype: Type[dtype] = _dtype
 
     @property
     def data(self):
@@ -60,7 +70,7 @@ class Tensor:
 
     def item(self):
         assert self.nelem == 1
-        return self._data.item()
+        return self.data.item()
 
     def to(self, dtype):
         return deepnet.to(self, dtype)
@@ -95,29 +105,35 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         deepnet.backward(self, grad)
 
-    def mutated(self, data=None, usegrad=None, grad=None, leaf=True) -> "Tensor":
-        if data is None:
-            data = self.data
-        if usegrad is None:
-            usegrad = self.usegrad
-        if grad is None:
-            grad = self.grad
-        cls = getcls(self.dtype)
-        return cls(data, usegrad, grad, None, leaf)
-
-    def mutate(
-        self, data=None, usegrad=None, grad=None, backfn=None, leaf=True
-    ) -> "Tensor":
-        if data is not None:
-            self._data = data
-        if usegrad is not None:
-            self._usegrad = usegrad
-        if grad is not None:
-            self._grad = grad
-        if backfn is not None:
-            self._backfn = backfn
-        self._leaf = leaf
+    def zerograd(self):
+        muttensor(self, grad=deepnet.zeroslike(self))
         return self
+
+    def zeroedgrad(self):
+        cls = getcls(self.dtype)
+        return cls(self.data, self.usegrad, deepnet.zeroslike(self), None, True)
+
+    def mutated(self, **attrs: Any) -> "Tensor":
+        cls = getcls(self.dtype)
+        a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
+        return muttensor(a, **attrs)
+
+    def mutate(self, **attrs: Any) -> "Tensor":
+        return muttensor(self, **attrs)
+
+    def copy(self) -> "Tensor":
+        cls = getcls(self.dtype)
+        return cls(self.data.copy(), self.usegrad, None, None, True)
+
+    def deepcopy(self) -> "Tensor":
+        grad = self.grad.copy() if self.grad is not None else None
+        backfn = deepcopy(self.backfn) if self.backfn is not None else None
+        cls = getcls(self.dtype)
+        return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
+
+    def detach(self):
+        cls = getcls(self)
+        return cls(self.data, False, None, None, True)
 
     def clone(self):
         return deepnet.clone(self)
@@ -125,8 +141,14 @@ class Tensor:
     def contig(self):
         return deepnet.tocontig(self)
 
-    def sum(self, dim: Optional[_dim] = None, keepdims=False):
+    def sum(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
         return deepnet.sum(self, dim, keepdims)
+
+    def max(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+        return deepnet.max(self, dim, keepdims)
+
+    def min(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+        return deepnet.min(self, dim, keepdims)
 
     def squeeze(self, dim: Optional[_dim] = None):
         return deepnet.squeeze(self, dim)
@@ -145,6 +167,12 @@ class Tensor:
 
     def permute(self, dim: Optional[_dim] = None):
         return deepnet.permute(self, dim=dim)
+
+    def any(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+        return deepnet.any(self, dim, keepdims)
+
+    def all(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+        return deepnet.all(self, dim, keepdims)
 
     def __add__(self, other):
         return deepnet.add(self, other)
@@ -191,20 +219,66 @@ class Tensor:
     def __abs__(self):
         return deepnet.abs(self)
 
-    def __getitem__(self, _slice):
-        return deepnet.slice(self, _slice)
+    def __eq__(self, other):
+        return deepnet.equal(self, other)
 
-    def __setitem__(self, _slice, item):
-        if deepnet.istensor(item):
-            self.data[_slice] = item.data
-        else:
-            self.data[_slice] = item
+    def __lt__(self, other):
+        return deepnet.less(self, other)
+
+    def __le__(self, other):
+        return deepnet.lesseq(self, other)
+
+    def __gt__(self, other):
+        return deepnet.greater(self, other)
+
+    def __ge__(self, other):
+        return deepnet.greatereq(self, other)
+
+    def __ne__(self, other):
+        return deepnet.notequal(self, other)
+
+    def __hash__(self):
+        return deepnet.hashtensor(self)
+
+    def __and__(self, other):
+        return deepnet.tensorand(self, other)
+
+    def __or__(self, other):
+        return deepnet.tensoror(self, other)
+
+    def __not__(self):
+        return deepnet.tensornot(self)
+
+    def __setattr__(self, name, value):
+        validnames = {
+            "_data",
+            "_usegrad",
+            "_grad",
+            "_backfn",
+            "_leaf",
+            "_dtype",
+            "_mutable",
+        }
+        if name not in validnames:
+            raise AttributeError(
+                f"{name} cannot be assigned to {deepnet.typename(self)}"
+            )
+        self.__dict__[name] = value
+
+    def __getitem__(self, slc):
+        return deepnet.slice(self, slc)
+
+    def __setitem__(self, slc, item):
+        self.data[slc] = item.data if deepnet.istensor(item) else item
 
     def __len__(self):
-        return self._data.shape[0]
+        return self.dim[0]
 
     def __repr__(self) -> str:
-        base = str(self._data)
+        base = repr(self._data).replace("array(", "").replace(",", "")
+        if " dtype" in base:
+            i = base.index(" dtype")
+            base = base[:i]
         s = "tensor(" + base
         if self.backfn:
             s += " backfn=" + str(self.backfn)
@@ -297,5 +371,20 @@ def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Ten
     data = dtype.numpy(data)
     cls = getcls(dtype)
     if usegrad:
-        assert cls.gradtensor()
+        assert cls.gradtensor(), f"{cls.__name__} cannot usegrad"
     return cls(data, usegrad, None, None, True)
+
+
+def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
+    validattrs = {
+        "data": "_data",
+        "usegrad": "_usegrad",
+        "grad": "_grad",
+        "backfn": "_backfn",
+        "leaf": "_leaf",
+        "dtype": "_dtype",
+    }
+    for name, val in attrs.items():
+        if name in validattrs:
+            setattr(tensor, validattrs[name], val)
+    return tensor

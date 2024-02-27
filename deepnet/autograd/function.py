@@ -17,6 +17,13 @@ class Context:
     def tensors(self) -> Tuple[Tensor, ...]:
         return self._tensors if self._tensors else ()
 
+    def usesgrad(self) -> bool:
+        if self._tensors is None:
+            return False
+        return any(t.usegrad for t in self._tensors) and all(
+            t.gradtensor() for t in self._tensors
+        )
+
     def __setitem__(self, key: Any, value: Any):
         if self._dict is None:
             self._dict = dict()
@@ -33,21 +40,21 @@ class Context:
 class Function:
 
     @staticmethod
-    def evaluate(ctx: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
+    def forward(context: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
-    def backward(ctx: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
+    def backward(context: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
-    def forward(ctx: Context, *grad: Tensor) -> ndarray:
+    def tangent(context: Context, *grad: Tensor) -> ndarray:
         raise NotImplementedError
 
     @classmethod
     def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
-        ctx = Context()
-        rawout = cls.evaluate(ctx, *args, **kwargs)
+        context = Context()
+        rawout = cls.forward(context, *args, **kwargs)
         irout = deepnet.tensor(rawout)
-        out = genout(irout, cls, ctx)
+        out = genout(irout, cls, context)
         return out
