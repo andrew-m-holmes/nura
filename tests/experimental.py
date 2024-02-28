@@ -8,18 +8,22 @@ import deepnet.nn as nn
 
 def main():
 
-    mod = nn.Module()
-    tensor = deepnet.tensor(5.0, usegrad=False)
-    param = nn.Parameter(tensor)
-
     class Linear(nn.Module):
+        pass
+
+    class ReLU(nn.Module):
+        pass
+
+    class Model(nn.Module):
 
         def __init__(self) -> None:
             super().__init__()
-            self.weight = param
+            self.linear = Linear()
+            self.relu = ReLU()
 
-    linear = Linear()
-    print(linear.params())
+    model = Model()
+    print(list(model.mods()))
+    print(list(model.params()))
 
 
 if __name__ == "__main__":
