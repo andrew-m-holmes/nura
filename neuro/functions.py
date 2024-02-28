@@ -1,7 +1,7 @@
 import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
-from deepnet.types import _dim
+from neuro.types import _dim
 from typing import Any
 
 

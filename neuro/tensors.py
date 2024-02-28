@@ -1,6 +1,6 @@
-import deepnet
-from deepnet.types import dtype, _dim
-from deepnet.autograd.graph import Node
+import neuro
+from neuro.types import dtype, _dim
+from neuro.autograd.graph import Node
 from typing import Optional, Type, Any, Union
 from numpy import ndarray
 from copy import deepcopy
@@ -73,45 +73,45 @@ class Tensor:
         return self.data.item()
 
     def to(self, dtype):
-        return deepnet.to(self, dtype)
+        return neuro.to(self, dtype)
 
     def byte(self):
-        return self.to(deepnet.byte)
+        return self.to(neuro.byte)
 
     def char(self):
-        return self.to(deepnet.char)
+        return self.to(neuro.char)
 
     def short(self):
-        return self.to(deepnet.short)
+        return self.to(neuro.short)
 
     def int(self):
-        return self.to(deepnet.int)
+        return self.to(neuro.int)
 
     def long(self):
-        return self.to(deepnet.long)
+        return self.to(neuro.long)
 
     def half(self):
-        return self.to(deepnet.half)
+        return self.to(neuro.half)
 
     def float(self):
-        return self.to(deepnet.float)
+        return self.to(neuro.float)
 
     def double(self):
-        return self.to(deepnet.double)
+        return self.to(neuro.double)
 
     def bool(self):
-        return self.to(deepnet.bool)
+        return self.to(neuro.bool)
 
     def backward(self, grad: Optional["Tensor"] = None):
-        deepnet.backward(self, grad)
+        neuro.backward(self, grad)
 
     def zerograd(self):
-        muttensor(self, grad=deepnet.zeroslike(self))
+        muttensor(self, grad=neuro.zeroslike(self))
         return self
 
     def zeroedgrad(self):
         cls = getcls(self.dtype)
-        return cls(self.data, self.usegrad, deepnet.zeroslike(self), None, True)
+        return cls(self.data, self.usegrad, neuro.zeroslike(self), None, True)
 
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = getcls(self.dtype)
@@ -136,118 +136,118 @@ class Tensor:
         return cls(self.data, False, None, None, True)
 
     def clone(self):
-        return deepnet.clone(self)
+        return neuro.clone(self)
 
     def contig(self):
-        return deepnet.tocontig(self)
+        return neuro.tocontig(self)
 
     def sum(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.sum(self, dim, keepdims)
+        return neuro.sum(self, dim, keepdims)
 
     def max(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.max(self, dim, keepdims)
+        return neuro.max(self, dim, keepdims)
 
     def min(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.min(self, dim, keepdims)
+        return neuro.min(self, dim, keepdims)
 
     def squeeze(self, dim: Optional[_dim] = None):
-        return deepnet.squeeze(self, dim)
+        return neuro.squeeze(self, dim)
 
     def unsqueeze(self, dim: _dim):
-        return deepnet.unsqueeze(self, dim)
+        return neuro.unsqueeze(self, dim)
 
     def view(self, dim: _dim):
-        return deepnet.view(self, dim)
+        return neuro.view(self, dim)
 
     def reshape(self, dim: _dim):
-        return deepnet.reshape(self, dim)
+        return neuro.reshape(self, dim)
 
     def transpose(self, dim0=-2, dim1=-1):
-        return deepnet.transpose(self, dim0, dim1)
+        return neuro.transpose(self, dim0, dim1)
 
     def permute(self, dim: Optional[_dim] = None):
-        return deepnet.permute(self, dim=dim)
+        return neuro.permute(self, dim=dim)
 
     def any(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.any(self, dim, keepdims)
+        return neuro.any(self, dim, keepdims)
 
     def all(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.all(self, dim, keepdims)
+        return neuro.all(self, dim, keepdims)
 
     def __add__(self, other):
-        return deepnet.add(self, other)
+        return neuro.add(self, other)
 
     def __radd__(self, other):
-        return deepnet.add(self, other)
+        return neuro.add(self, other)
 
     def __sub__(self, other):
-        return deepnet.sub(self, other)
+        return neuro.sub(self, other)
 
     def __rsub__(self, other):
-        return deepnet.sub(other, self)
+        return neuro.sub(other, self)
 
     def __mul__(self, other):
-        return deepnet.mul(self, other)
+        return neuro.mul(self, other)
 
     def __rmul__(self, other):
-        return deepnet.mul(self, other)
+        return neuro.mul(self, other)
 
     def __truediv__(self, other):
-        return deepnet.div(self, other)
+        return neuro.div(self, other)
 
     def __rtruediv__(self, other):
-        return deepnet.div(other, self)
+        return neuro.div(other, self)
 
     def __matmul__(self, other):
-        return deepnet.matmul(self, other)
+        return neuro.matmul(self, other)
 
     def __rmatmul__(self, other):
-        return deepnet.matmul(other, self)
+        return neuro.matmul(other, self)
 
     def __pow__(self, other):
-        return deepnet.pow(self, other)
+        return neuro.pow(self, other)
 
     def __rpow__(self, other):
-        return deepnet.pow(other, self)
+        return neuro.pow(other, self)
 
     def __pos__(self):
         return self
 
     def __neg__(self):
-        return deepnet.mul(self, -1.0)
+        return neuro.mul(self, -1.0)
 
     def __abs__(self):
-        return deepnet.abs(self)
+        return neuro.abs(self)
 
     def __eq__(self, other):
-        return deepnet.equal(self, other)
+        return neuro.equal(self, other)
 
     def __lt__(self, other):
-        return deepnet.less(self, other)
+        return neuro.less(self, other)
 
     def __le__(self, other):
-        return deepnet.lesseq(self, other)
+        return neuro.lesseq(self, other)
 
     def __gt__(self, other):
-        return deepnet.greater(self, other)
+        return neuro.greater(self, other)
 
     def __ge__(self, other):
-        return deepnet.greatereq(self, other)
+        return neuro.greatereq(self, other)
 
     def __ne__(self, other):
-        return deepnet.notequal(self, other)
+        return neuro.notequal(self, other)
 
     def __hash__(self):
-        return deepnet.hashtensor(self)
+        return neuro.hashtensor(self)
 
     def __and__(self, other):
-        return deepnet.tensorand(self, other)
+        return neuro.tensorand(self, other)
 
     def __or__(self, other):
-        return deepnet.tensoror(self, other)
+        return neuro.tensoror(self, other)
 
     def __not__(self):
-        return deepnet.tensornot(self)
+        return neuro.tensornot(self)
 
     def __setattr__(self, name, value):
         validnames = {
@@ -261,15 +261,15 @@ class Tensor:
         }
         if name not in validnames:
             raise AttributeError(
-                f"{name} cannot be assigned to {deepnet.typename(self)}"
+                f"{name} cannot be assigned to {neuro.typename(self)}"
             )
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
-        return deepnet.slice(self, slc)
+        return neuro.slice(self, slc)
 
     def __setitem__(self, slc, item):
-        self.data[slc] = item.data if deepnet.istensor(item) else item
+        self.data[slc] = item.data if neuro.istensor(item) else item
 
     def __len__(self):
         return self.dim[0]
@@ -291,83 +291,83 @@ class ByteTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.byte)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.byte)
 
 
 class CharTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.char)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.char)
 
 
 class ShortTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.short)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.short)
 
 
 class IntTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.int)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.int)
 
 
 class LongTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.long)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.long)
 
 
 class HalfTensor(Tensor):
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.half)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.half)
 
 
 class FloatTensor(Tensor):
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.float)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.float)
 
 
 class DoubleTensor(Tensor):
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.double)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.double)
 
 
 class BoolTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.bool)
+        super().__init__(data, usegrad, grad, backfn, leaf, neuro.bool)
 
 
 def getcls(dtype) -> Type:
     dtypemap = {
-        deepnet.byte: ByteTensor,
-        deepnet.char: CharTensor,
-        deepnet.short: ShortTensor,
-        deepnet.int: IntTensor,
-        deepnet.long: LongTensor,
-        deepnet.half: HalfTensor,
-        deepnet.float: FloatTensor,
-        deepnet.double: DoubleTensor,
-        deepnet.bool: BoolTensor,
+        neuro.byte: ByteTensor,
+        neuro.char: CharTensor,
+        neuro.short: ShortTensor,
+        neuro.int: IntTensor,
+        neuro.long: LongTensor,
+        neuro.half: HalfTensor,
+        neuro.float: FloatTensor,
+        neuro.double: DoubleTensor,
+        neuro.bool: BoolTensor,
     }
     return dtypemap[dtype]
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = deepnet.dtypeof(data)
+        dtype = neuro.dtypeof(data)
     data = dtype.numpy(data)
     cls = getcls(dtype)
     if usegrad:

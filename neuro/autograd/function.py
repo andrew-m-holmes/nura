@@ -1,6 +1,6 @@
-import deepnet
-from deepnet.tensors import Tensor
-from deepnet.autograd.graph import genout
+import neuro
+from neuro.tensors import Tensor
+from neuro.autograd.graph import genout
 from typing import Tuple, Union, Any, Optional, Dict
 from numpy import ndarray
 
@@ -55,6 +55,6 @@ class Function:
     def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
-        irout = deepnet.tensor(rawout)
+        irout = neuro.tensor(rawout)
         out = genout(irout, cls, context)
         return out

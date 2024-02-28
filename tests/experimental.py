@@ -1,9 +1,9 @@
 import numpy as np
-import deepnet
+import neuro
 import jax
-from deepnet.autograd.functional import vjp, jvp, grad, jacrev, jacfwd, getperts
+from neuro.autograd.functional import vjp, jvp, grad, jacrev, jacfwd, getperts
 import torch
-import deepnet.nn as nn
+import neuro.nn as nn
 
 
 def main():

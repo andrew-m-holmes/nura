@@ -1,8 +1,8 @@
 import numpy as np
-import deepnet.utils as utils
-import deepnet.functions as functions
-from deepnet.tensors import Tensor
-from deepnet.types import _dim
+import neuro.utils as utils
+import neuro.functions as functions
+from neuro.tensors import Tensor
+from neuro.types import _dim
 from typing import Union, Optional, Any
 
 

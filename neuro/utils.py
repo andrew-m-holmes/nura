@@ -1,7 +1,7 @@
 import numpy as np
-import deepnet
-from deepnet.types import dtype, _dim
-from deepnet.tensors import Tensor, tensor
+import neuro
+from neuro.types import dtype, _dim
+from neuro.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
@@ -138,7 +138,7 @@ def hashtensor(a: Tensor) -> int:
 
 
 def equal(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
-    a, b = deepnet.atot(a, b)
+    a, b = neuro.atot(a, b)
     return tensor(np.equal(a.data, b.data))
 
 
