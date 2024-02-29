@@ -28,7 +28,7 @@ jobs:
         python -m pip install -r dev-requirements.txt
     - name: Format with autopep8
       run: |
-        autopep8 -r --in-place --max-line-length 80 deepnet
+        autopep8 -r --in-place --max-line-length 80 neuro
     - name: Lint with Ruff
       run: |
         ruff check --fix --ignore F --output-format=github .
