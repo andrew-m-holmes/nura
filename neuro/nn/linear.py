@@ -1,5 +1,5 @@
 import neuro.utils as utils
-from neuro.nn import Module, Parameter
+from neuro.nn.module import Module, Parameter
 from neuro.tensors import Tensor
 from neuro.types import dtype, float
 from neuro.nn.functional import linear

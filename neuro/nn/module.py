@@ -79,17 +79,11 @@ class Module:
     def __setattr__(self, name, value):
         if isinstance(value, Module):
             self._mods[name.replace("_", "")] = value
-            self.__dict__[name] = value
         elif isinstance(value, Parameter):
             self._params[name.replace("_", "")] = value
-            self.__dict__[name] = value
         elif isinstance(value, Buffer):
             self._buffs[name.replace("_", "")] = value
-            self.__dict__[name] = value
-        else:
-            names = {"_mods", "_params", "_buffs", "_active", "_args", "_kwargs"}
-            assert name in names, f"invalid attr: {name}"
-            self.__dict__[name] = value
+        self.__dict__[name] = value
 
     def __repr__(self) -> str:
         return self.__class__.__name__
