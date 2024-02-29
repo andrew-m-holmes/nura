@@ -62,8 +62,16 @@ class Module:
     def buffs(self) -> Iterator[Tuple[str, Optional[Buffer]]]:
         return iter((n, b) for n, b in self._buffs.items())
 
-    def allmods(self):
-        pass
+    def allmods(self, s="", mem=set()) -> Iterator[Tuple[str, "Module"]]:
+        if self not in mem:
+            mem.add(self)
+            if not s:
+                s = self.name().lower()
+            yield s, self
+            for n, m in self.mods():
+                if m is None:
+                    continue    
+                yield from m.allmods(f"{s}.{n}", mem)
 
     def train(self):
         self._trainable = True

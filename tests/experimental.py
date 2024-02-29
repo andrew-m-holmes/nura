@@ -5,18 +5,29 @@ import numpy as np
 
 def main():
 
-    linear = nn.Linear(3, 5, bias=True)
-    inpt = neuro.rand((2, 3)).float()
-    out = neuro.sum(linear(inpt))
-    out.backward()
-    assert linear.weight.tensor.grad is not None 
-    assert linear.bias.tensor.grad is not None 
+    class Foo(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
 
-    linear = nn.Linear(3, 5, bias=False)
-    out = neuro.sum(linear(inpt))
-    out.backward()
-    assert linear.weight.tensor.grad is not None 
-    assert linear.bias is None 
+    class Bar(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.foo = Foo()
+
+    class Baz(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.bar = Bar()
+
+    class Model(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.baz = Baz()
+
+    model = Model()
+    for mod in model.allmods():
+        print(mod)
+
 
 if __name__ == "__main__":
     main()
