@@ -53,25 +53,38 @@ class Module:
     def forward(self):
         raise NotImplemented
 
-    def mods(self) -> Iterator[Tuple[str, Optional["Module"]]]:
+    def mods(self, s="") -> Iterator[Tuple[str, "Module"]]:
+        if not s:
+            s = self.name().lower()
+        yield s, self
+
+        for n, m in self.instmods():
+            if m is None:
+                continue
+            yield from m.mods(f"{s}.{n}")
+
+    def instmods(self) -> Iterator[Tuple[str, Optional["Module"]]]:
         return iter((n, m) for n, m in self._mods.items())
 
     def params(self) -> Iterator[Tuple[str, Optional[Parameter]]]:
+        yield from self.instparams()
+        for _, m in self.instmods():
+            if m is None:
+                continue
+            yield from m.params()
+
+    def instparams(self) -> Iterator[Tuple[str, Optional[Parameter]]]:
         return iter((n, p) for n, p in self._params.items())
 
     def buffs(self) -> Iterator[Tuple[str, Optional[Buffer]]]:
-        return iter((n, b) for n, b in self._buffs.items())
+        yield from self.instbuffs()
+        for _, m in self.instmods():
+            if m is None:
+                continue
+            yield from m.buffs()
 
-    def allmods(self, s="", mem=set()) -> Iterator[Tuple[str, "Module"]]:
-        if self not in mem:
-            mem.add(self)
-            if not s:
-                s = self.name().lower()
-            yield s, self
-            for n, m in self.mods():
-                if m is None:
-                    continue    
-                yield from m.allmods(f"{s}.{n}", mem)
+    def instbuffs(self) -> Iterator[Tuple[str, Optional[Buffer]]]:
+        return iter((n, b) for n, b in self._buffs.items())
 
     def train(self):
         self._trainable = True
