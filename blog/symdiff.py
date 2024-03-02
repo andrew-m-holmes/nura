@@ -12,7 +12,8 @@ def main():
             return x * 2 + 5
         return x / 2 + 5
 
-    dfdx = diff(f)
+    x = symbols("x")
+    dfdx = diff(f(x))
     print(dfdx)
 
 
