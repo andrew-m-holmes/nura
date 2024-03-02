@@ -8,56 +8,56 @@ class Variable:
         self.adjoint += adjoint
 
     def __add__(self, other):
-        primal = Variable(self.primal + other.primal)
+        variable = Variable(self.primal + other.primal)
 
         def backward(adjoint):
-            primal.adjoint += adjoint
+            variable.adjoint += adjoint
             self_adjoint = adjoint * 1.0
             other_adjoint = adjoint * 1.0
             self.backward(self_adjoint)
             other.backward(other_adjoint)
 
-        primal.backward = backward
-        return primal
+        variable.backward = backward
+        return variable
 
     def __sub__(self, other):
-        primal = Variable(self.primal - other.primal)
+        variable = Variable(self.primal - other.primal)
 
         def backward(adjoint):
-            primal.adjoint += adjoint
+            variable.adjoint += adjoint
             self_adjoint = adjoint * 1.0
             other_adjoint = adjoint * -1.0
             self.backward(self_adjoint)
             other.backward(other_adjoint)
 
-        primal.backward = backward
-        return primal
+        variable.backward = backward
+        return variable
 
     def __mul__(self, other):
-        primal = Variable(self.primal * other.primal)
+        variable = Variable(self.primal * other.primal)
 
         def backward(adjoint):
-            primal.adjoint += adjoint
+            variable.adjoint += adjoint
             self_adjoint = adjoint * other.primal
             other_adjoint = adjoint * self.primal
             self.backward(self_adjoint)
             other.backward(other_adjoint)
 
-        primal.backward = backward
-        return primal
+        variable.backward = backward
+        return variable
 
     def __truediv__(self, other):
-        primal = Variable(self.primal / other.primal)
+        variable = Variable(self.primal / other.primal)
 
         def backward(adjoint):
-            primal.adjoint += adjoint
+            variable.adjoint += adjoint
             self_adjoint = adjoint * (1.0 / other.primal)
             other_adjoint = adjoint * (-1.0 * self.primal / other.primal**2)
             self.backward(self_adjoint)
             other.backward(other_adjoint)
 
-        primal.backward = backward
-        return primal
+        variable.backward = backward
+        return variable
 
     def __repr__(self) -> str:
         return f"primal: {self.primal}, adjoint: {self.adjoint}"
