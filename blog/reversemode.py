@@ -1,17 +1,14 @@
-import torch
+class Variable:
 
-
-class Primal:
-
-    def __init__(self, data, adjoint=0.0):
-        self.data = data
+    def __init__(self, primal, adjoint=0.0):
+        self.primal = primal
         self.adjoint = adjoint
 
     def backward(self, adjoint):
         self.adjoint += adjoint
 
     def __add__(self, other):
-        primal = Primal(self.data + other.data)
+        primal = Variable(self.primal + other.primal)
 
         def backward(adjoint):
             primal.adjoint += adjoint
@@ -24,7 +21,7 @@ class Primal:
         return primal
 
     def __sub__(self, other):
-        primal = Primal(self.data - other.data)
+        primal = Variable(self.primal - other.primal)
 
         def backward(adjoint):
             primal.adjoint += adjoint
@@ -37,12 +34,12 @@ class Primal:
         return primal
 
     def __mul__(self, other):
-        primal = Primal(self.data * other.data)
+        primal = Variable(self.primal * other.primal)
 
         def backward(adjoint):
             primal.adjoint += adjoint
-            self_adjoint = adjoint * other.data
-            other_adjoint = adjoint * self.data
+            self_adjoint = adjoint * other.primal
+            other_adjoint = adjoint * self.primal
             self.backward(self_adjoint)
             other.backward(other_adjoint)
 
@@ -50,12 +47,12 @@ class Primal:
         return primal
 
     def __truediv__(self, other):
-        primal = Primal(self.data / other.data)
+        primal = Variable(self.primal / other.primal)
 
         def backward(adjoint):
             primal.adjoint += adjoint
-            self_adjoint = adjoint * (1.0 / other.data)
-            other_adjoint = adjoint * (-1.0 * self.data / other.data**2)
+            self_adjoint = adjoint * (1.0 / other.primal)
+            other_adjoint = adjoint * (-1.0 * self.primal / other.primal**2)
             self.backward(self_adjoint)
             other.backward(other_adjoint)
 
@@ -63,7 +60,7 @@ class Primal:
         return primal
 
     def __repr__(self) -> str:
-        return f"primal: {self.data}, adjoint: {self.adjoint}"
+        return f"primal: {self.primal}, adjoint: {self.adjoint}"
 
 
 def main():
@@ -73,7 +70,7 @@ def main():
     def div_sub(a, b, c):
         return a / b - c
 
-    a, b, c = Primal(25.0, 1.0), Primal(4.0, 0.0), Primal(-5.0, 0.0)
+    a, b, c = Variable(25.0, 1.0), Variable(4.0, 0.0), Variable(-5.0, 0.0)
 
     print(f"{a = }, {b = }, {c = }")
     d = mul_add(a, b, c)
