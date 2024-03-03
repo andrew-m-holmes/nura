@@ -41,6 +41,7 @@ def main():
 
     plt.xlim(min(x), max(x))
     plt.ylim(min(y), max(y))
+    plt.show()
     plt.savefig("./images/derivatives.png", dpi=300)
 
 
