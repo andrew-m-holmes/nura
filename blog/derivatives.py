@@ -32,7 +32,7 @@ def main():
     plt.plot(x, y, label="cos(x)", color="dodgerblue")
     plt.plot(x, true_tangent, label=f"Tangent", color="red")
     plt.plot(x, forward_tangent, label="Forward Difference", color="aquamarine")
-    plt.plot(x, backward_tangent, label="Backward Difference", color="orchid")
+    plt.plot(x, backward_tangent, label="Backward Difference", color="lightcoral")
     plt.plot(x, central_tangent, label="Central Difference", color="blueviolet")
     plt.legend()
 
