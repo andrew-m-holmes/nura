@@ -14,8 +14,8 @@ class Tensor:
         self,
         data: ndarray,
         usegrad: bool,
-        grad: "Tensor",
-        backfn: Node,
+        grad: Optional["Tensor"],
+        backfn: Optional[Node],
         leaf: bool,
         _dtype: Type[dtype],
     ) -> None:
@@ -260,9 +260,7 @@ class Tensor:
             "_mutable",
         }
         if name not in validnames:
-            raise AttributeError(
-                f"{name} cannot be assigned to {neuro.typename(self)}"
-            )
+            raise AttributeError(f"{name} cannot be assigned to {neuro.typename(self)}")
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
@@ -366,6 +364,9 @@ def getcls(dtype) -> Type:
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    if neuro.istensor(data):
+        print("warning, creating Tensor using tensor")
+        data = data.data
     if dtype is None:
         dtype = neuro.dtypeof(data)
     data = dtype.numpy(data)

@@ -1,50 +1,104 @@
+import numpy as np
+import neuro
 from neuro.tensors import Tensor
-from typing import Iterator, Optional, OrderedDict, Tuple, Any, Dict
+from typing import Iterator, Optional, OrderedDict, Tuple, Any, Type, Union
+from neuro.types import dtype
 from collections import OrderedDict
-from neuro.utils import empty
+from copy import copy
+from numpy import ndarray
 
 
-class Parameter:
+class Parameter(Tensor):
 
-    def __init__(self, tensor: Optional[Tensor] = None) -> None:
-        self._tensor: Tensor = (
-            empty(0) if tensor is None else tensor.mutated(usegrad=True)
+    def __init__(
+        self,
+        data: Optional[Union[Tensor, ndarray]] = None,
+        usesgrad=True,
+        dtype: Optional[Type[dtype]] = None,
+    ) -> None:
+
+        if data is None:
+            data = np.empty(0)
+        if isinstance(data, Tensor):
+            data = data.data
+        if dtype is None:
+            dtype = neuro.float
+        super().__init__(
+            data, usegrad=usesgrad, grad=None, backfn=None, leaf=True, _dtype=dtype
         )
 
-    @property
-    def tensor(self):
-        return self._tensor
+    def to(self, dtype: Type[dtype]):
+        return Parameter(self.data, self.usegrad, dtype)
+
+    def half(self):
+        return Parameter(self.data, self.usegrad, neuro.half)
+
+    def float(self):
+        return Parameter(self.data, self.usegrad, neuro.float)
+
+    def double(self):
+        return Parameter(self.data, self.usegrad, neuro.double)
 
     def __repr__(self) -> str:
-        return repr(self._tensor).replace("tensor", "param")
+        return super().__repr__().replace("tensor", "param")
 
 
-class Buffer:
+class Buffer(Tensor):
 
-    def __init__(self, tensor: Optional[Tensor] = None) -> None:
-        self._tensor: Tensor = (
-            empty(0) if tensor is None else tensor.mutated(usegrad=False)
+    def __init__(
+        self,
+        data: Optional[Union[Tensor, ndarray]] = None,
+        dtype: Optional[Type[dtype]] = None,
+    ) -> None:
+        if data is None:
+            data = np.empty(0)
+        if isinstance(data, Tensor):
+            data = data.data
+        if dtype is None:
+            dtype = neuro.float
+        super().__init__(
+            data, usegrad=False, grad=None, backfn=None, leaf=True, _dtype=dtype
         )
 
-    @property
-    def tensor(self):
-        return self._tensor
+    def to(self, dtype: Type[dtype]):
+        return Buffer(self.data, dtype)
+
+    def half(self):
+        return Buffer(self.data, neuro.half)
+
+    def float(self):
+        return Buffer(self.data, neuro.float)
+
+    def double(self):
+        return Buffer(self.data, neuro.double)
 
     def __repr__(self) -> str:
-        return repr(self._tensor).replace("tensor", "buff")
+        return super().__repr__().replace("tensor", "buff")
 
 
 class Module:
 
     def __init__(self, *args, **kwargs) -> None:
-        self._mods: OrderedDict[str, Optional["Module"]] = OrderedDict()
-        self._params: OrderedDict[str, Optional[Parameter]] = OrderedDict()
-        self._buffs: OrderedDict[str, Optional[Buffer]] = OrderedDict()
-        self._active: bool = True
+        self._mods: OrderedDict[str, "Module"] = OrderedDict()
+        self._params: OrderedDict[str, Parameter] = OrderedDict()
+        self._buffs: OrderedDict[str, Buffer] = OrderedDict()
+        self._training: bool = True
 
     @property
-    def active(self):
-        return self._active
+    def mods(self) -> OrderedDict[str, "Module"]:
+        return self._mods
+
+    @property
+    def params(self) -> OrderedDict[str, Parameter]:
+        return self._params
+
+    @property
+    def buffs(self) -> OrderedDict[str, Buffer]:
+        return self._buffs
+
+    @property
+    def training(self) -> bool:
+        return self._training
 
     @classmethod
     def name(cls) -> str:
@@ -53,58 +107,101 @@ class Module:
     def forward(self):
         raise NotImplemented
 
-    def mods(self, s="") -> Iterator[Tuple[str, "Module"]]:
+    def itermods(self, s="") -> Iterator[Tuple[str, "Module"]]:
         if not s:
             s = self.name().lower()
         yield s, self
+        for n, m in self.mods.items():
+            yield from m.itermods(f"{s}.{n}")
 
-        for n, m in self.instmods():
-            if m is None:
-                continue
-            yield from m.mods(f"{s}.{n}")
+    def iterparams(self) -> Iterator[Tuple[str, Parameter]]:
+        yield from iter(self.params.items())
+        for m in self.mods.values():
+            yield from m.iterparams()
 
-    def instmods(self) -> Iterator[Tuple[str, Optional["Module"]]]:
-        return iter((n, m) for n, m in self._mods.items())
+    def iterbuffs(self) -> Iterator[Tuple[str, Buffer]]:
+        yield from iter(self.buffs.items())
+        for m in self.mods.values():
+            yield from m.iterbuffs()
 
-    def params(self) -> Iterator[Tuple[str, Optional[Parameter]]]:
-        yield from self.instparams()
-        for _, m in self.instmods():
-            if m is None:
-                continue
-            yield from m.params()
+    def hasmods(self) -> bool:
+        return len(self.mods) > 0
 
-    def instparams(self) -> Iterator[Tuple[str, Optional[Parameter]]]:
-        return iter((n, p) for n, p in self._params.items())
+    def hasparams(self) -> bool:
+        return len(self.params) > 0
 
-    def buffs(self) -> Iterator[Tuple[str, Optional[Buffer]]]:
-        yield from self.instbuffs()
-        for _, m in self.instmods():
-            if m is None:
-                continue
-            yield from m.buffs()
+    def hasbuffs(self) -> bool:
+        return len(self.buffs) > 0
 
-    def instbuffs(self) -> Iterator[Tuple[str, Optional[Buffer]]]:
-        return iter((n, b) for n, b in self._buffs.items())
-
-    def train(self):
-        self._trainable = True
+    def train(self) -> "Module":
+        self._training = True
         return self
 
-    def eval(self):
-        self._trainable = False
+    def eval(self) -> "Module":
+        self._training = False
         return self
+
+    def to(self, dtype: Type[dtype]):
+        params = map(lambda item: (item[0], item[1].to(dtype)), self.params.items())
+        self._params = OrderedDict(params)
+        buffs = map(lambda item: (item[0], item[1].to(dtype)), self.buffs.items())
+        self._buffs = OrderedDict(buffs)
+        for m in self.mods.values():
+            m.half()
+        return self
+
+    def half(self) -> "Module":
+        return self.to(neuro.half)
+
+    def float(self) -> "Module":
+        return self.to(neuro.float)
+
+    def double(self) -> "Module":
+        return self.to(neuro.double)
+
+    def mutate(self, **attrs) -> "Module":
+        return mutmodule(self, **attrs)
+
+    def mutated(self, **attrs) -> "Module":
+        mod = copy(self)
+        return mutmodule(mod, **attrs)
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
     def __setattr__(self, name, value):
         if isinstance(value, Module):
-            self._mods[name.replace("_", "")] = value
+            self._mods[name] = value
         elif isinstance(value, Parameter):
-            self._params[name.replace("_", "")] = value
+            self._params[name] = value
         elif isinstance(value, Buffer):
-            self._buffs[name.replace("_", "")] = value
+            self._buffs[name] = value
         self.__dict__[name] = value
 
-    def __repr__(self) -> str:
-        return self.__class__.__name__
+    def __repr__(self):
+        return self.name()
+
+    def display(self, n=1) -> str:
+        strs = [repr(self)]
+        if n == 1:
+            strs.append(": [ \n")
+        else:
+            strs.append("\n")
+        for i, m in enumerate(self.mods.values()):
+            strs.extend(f"{'   ' * n}[{i}]: {m.display(n + 1)}")
+        if n == 1:
+            strs.append("]")
+        return "".join(strs)
+
+
+def mutmodule(module: Module, **attrs: Any) -> Module:
+    validattrs = {
+        "mods": "_mods",
+        "params": "_params",
+        "buffs": "_params",
+        "training": "_training",
+    }
+    for name, val in attrs.items():
+        if name in validattrs:
+            setattr(module, validattrs[name], val)
+    return module
