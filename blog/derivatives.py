@@ -14,7 +14,7 @@ def main():
         return slope * (x - x0) + y0
 
     x = np.linspace(0, 4, 150)
-    h = 0.7
+    h = 0.5
     x0 = 2.0
     y0 = f(x0)
     true_dx = df(x0)
