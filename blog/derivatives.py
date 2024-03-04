@@ -13,7 +13,7 @@ def main():
     def tangent_line(x, x0, y0, slope):
         return slope * (x - x0) + y0
 
-    x = np.linspace(0, 4, 150)
+    x = np.linspace(0, 4, 150).astype(np.float32)
     h = 0.5
     x0 = 2.0
     y0 = f(x0)
