@@ -179,19 +179,10 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self):
-        return self.name()
+        pass
 
-    def display(self, n=1) -> str:
-        strs = [repr(self)]
-        if n == 1:
-            strs.append(": [ \n")
-        else:
-            strs.append("\n")
-        for i, m in enumerate(self.mods.values()):
-            strs.extend(f"{'   ' * n}[{i}]: {m.display(n + 1)}")
-        if n == 1:
-            strs.append("]")
-        return "".join(strs)
+    def xrepr(self):
+        pass
 
 
 def mutmodule(module: Module, **attrs: Any) -> Module:
