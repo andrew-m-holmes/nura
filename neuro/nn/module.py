@@ -178,11 +178,15 @@ class Module:
             self._buffs[name] = value
         self.__dict__[name] = value
 
-    def __repr__(self):
-        pass
+    def __repr__(self) -> str:
+        return self.xrepr()
 
-    def xrepr(self):
-        pass
+    def xrepr(self) -> str:
+        strs = [self.name(), "\n"]
+        for n, m in self.mods.items():
+            strs.append(f"{n}: ")
+            strs.extend(m.xrepr())
+        return "".join(strs)
 
 
 def mutmodule(module: Module, **attrs: Any) -> Module:
