@@ -18,7 +18,8 @@ def main():
 
     param = nn.parameter(neuro.empty(0), neuro.float)
     print(param.to(neuro.double))
-    print(param.int())
+    param.mutate(usegrad=False)
+    print(type(param.mutated(usegrad=True)))
 
 
 if __name__ == "__main__":

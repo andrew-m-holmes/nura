@@ -1,5 +1,5 @@
 import neuro
-from typing import Type, Optional
+from typing import Type, Optional, Any
 from numpy import ndarray
 from neuro.tensors import Tensor
 from neuro.types import dtype
@@ -15,6 +15,12 @@ class Parameter(Tensor):
     def to(self, dtype: Optional[Type[dtype]] = None) -> "Parameter":
         a = super().to(dtype)
         return parameter(a)
+
+    def zeroedgrad(self):
+        return parameter(super().zeroedgrad())
+
+    def mutated(self, **attrs: Any) -> "Parameter":
+        return parameter(super().mutated(**attrs))
 
 
 def parameter(a: Tensor, dtype: Optional[Type[dtype]] = None) -> Parameter:

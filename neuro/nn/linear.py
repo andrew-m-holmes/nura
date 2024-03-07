@@ -16,10 +16,6 @@ class Linear(Module):
 
         if dtype is None:
             dtype = neuro.float
-        self._weight = Parameter(neuro.randn((outdim, indim)), dtype)
-        self._bias: Optional[Parameter] = (
-            Parameter(neuro.randn(outdim), dtype) if bias else None
-        )
         self._indim: int = indim
         self._outdim: int = outdim
         self._dtype = dtype
