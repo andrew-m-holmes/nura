@@ -1,7 +1,8 @@
-import neuro.utils as utils
-from neuro.nn.module import Module, Parameter
+import neuro
+from neuro.nn.parameter import Parameter
+from neuro.nn.module import Module
 from neuro.tensors import Tensor
-from neuro.types import dtype, float
+from neuro.types import dtype
 from neuro.nn.functional import linear
 from typing import Type, Optional
 
@@ -14,10 +15,10 @@ class Linear(Module):
         super().__init__()
 
         if dtype is None:
-            dtype = float
-        self._weight: Parameter = Parameter(utils.randn((outdim, indim)), dtype=dtype)
+            dtype = neuro.float
+        self._weight = Parameter(neuro.randn((outdim, indim)), dtype)
         self._bias: Optional[Parameter] = (
-            Parameter(utils.randn(outdim), dtype=dtype) if bias else None
+            Parameter(neuro.randn(outdim), dtype) if bias else None
         )
         self._indim: int = indim
         self._outdim: int = outdim
@@ -39,9 +40,5 @@ class Linear(Module):
     def outdim(self):
         return self._outdim
 
-    def forward(self, inpt: Tensor):
-        return linear(inpt, self.weight, self.bias)
-
-    def __repr__(self) -> str:
-        indim, outdim, bias = self.indim, self.outdim, self.bias is not None
-        return f"{super().__repr__()}({indim=} {outdim=} {bias=})"
+    def forward(self, x: Tensor):
+        return linear(x, self.weight, self.bias)
