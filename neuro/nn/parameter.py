@@ -1,3 +1,4 @@
+import neuro
 from typing import Type, Optional
 from numpy import ndarray
 from neuro.tensors import Tensor
@@ -13,12 +14,12 @@ class Parameter(Tensor):
 
     def to(self, dtype: Optional[Type[dtype]] = None) -> "Parameter":
         a = super().to(dtype)
-        return parameter(a, dtype)
+        return parameter(a)
 
 
 def parameter(a: Tensor, dtype: Optional[Type[dtype]] = None) -> Parameter:
-    assert a.gradtensor()
-    data = a.data
+    validtypes = (neuro.half, neuro.float, neuro.double)
     if dtype is None:
         dtype = a.dtype
-    return Parameter(data, dtype)
+    assert dtype in validtypes
+    return Parameter(dtype.numpy(a.data), dtype)
