@@ -1,23 +1,24 @@
-from typing import Optional
+from typing import Type, Optional
+from numpy import ndarray
 from neuro.tensors import Tensor
-from neuro.utils import empty
+from neuro.types import dtype
 
 
-class Parameter:
+class Parameter(Tensor):
 
-    def __init__(self, tensor: Optional[Tensor] = None, keepsgrad=True) -> None:
-        self._tensor: Tensor = (
-            empty(0) if tensor is None else tensor.mutated(usegrad=keepsgrad)
+    def __init__(self, data: ndarray, dtype: Type[dtype]) -> None:
+        super().__init__(
+            data, usegrad=True, grad=None, backfn=None, leaf=True, _dtype=dtype
         )
-        self._keepsgrad: bool = keepsgrad
 
-    @property
-    def tensor(self):
-        return self._tensor
+    def to(self, dtype: Optional[Type[dtype]] = None) -> "Parameter":
+        a = super().to(dtype)
+        return parameter(a, dtype)
 
-    @property
-    def keepsgrad(self):
-        return self._keepsgrad
 
-    def __repr__(self) -> str:
-        return f"param: {self.tensor}"
+def parameter(a: Tensor, dtype: Optional[Type[dtype]] = None) -> Parameter:
+    assert a.gradtensor()
+    data = a.data
+    if dtype is None:
+        dtype = a.dtype
+    return Parameter(data, dtype)

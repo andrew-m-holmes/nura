@@ -13,10 +13,8 @@ def main():
             self.lin2 = nn.Linear(10, 10)
             self.lin3 = nn.Linear(10, 10)
             self.lin3.lin = nn.Linear(10, 10, bias=False)
-            self.bro = nn.Buffer()
 
     model = Model()
-    print(model)
 
 
 if __name__ == "__main__":
