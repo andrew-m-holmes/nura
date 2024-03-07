@@ -14,37 +14,19 @@ class Module:
         self._parameters: OrderedDict[str, Parameter] = OrderedDict()
         self._buffers: OrderedDict[str, Tensor] = OrderedDict()
         self._training: bool = True
+        self._args = args
+        self._kwargs = kwargs
 
     @property
     def training(self) -> bool:
         return self._training
 
-    @classmethod
-    def name(cls) -> str:
-        return cls.__name__
-
     def forward(self):
         raise NotImplemented
 
-    def to(self, dtype: Type[dtype]):
-        for n, p in self.parameters():
-            self._parameters[n] = p.to(dtype)
-        for _, m in self.modules():
-            m.to(dtype)
-        return self
-
-    def half(self):
-        return self.to(neuro.half)
-
-    def float(self):
-        return self.to(neuro.float)
-
-    def double(self):
-        return self.to(neuro.double)
-
     def modules(self, s="") -> Iterator[Tuple[str, "Module"]]:
         if not s:
-            s = self.name().lower()
+            s = self.__class__.__name__.lower()
         yield s, self
         for n, m in self._modules.items():
             yield from m.modules(f"{s}.{n}")
@@ -76,7 +58,7 @@ class Module:
         return self.xrepr()
 
     def xrepr(self) -> str:
-        strs = [self.name(), "\n"]
+        strs = [self.__class__.__name__, "\n"]
         for n, m in self._modules.items():
             strs.append(f"{n}: ")
             strs.extend(m.xrepr())
