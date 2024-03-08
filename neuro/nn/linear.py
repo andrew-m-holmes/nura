@@ -40,5 +40,5 @@ class Linear(Module):
     def outdim(self):
         return self._outdim
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         return linear(x, self.weight, self.bias)
