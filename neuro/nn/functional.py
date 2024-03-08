@@ -3,8 +3,8 @@ from neuro.tensors import Tensor
 from typing import Optional
 
 
-def linear(inpt: Tensor, weight: Tensor, bias: Optional[Tensor] = None):
-    out = function.Matmul.apply(inpt, weight.transpose())
-    if bias is not None:
-        out = out + bias
+def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
+    out = function.Matmul.apply(x, w.transpose())
+    if b is not None:
+        out = out + b
     return out

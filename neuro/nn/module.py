@@ -3,7 +3,7 @@ from neuro.types import dtype
 from neuro.nn.parameter import Parameter, param
 from neuro.tensors import Tensor
 from collections import OrderedDict
-from typing import Optional, Type, Iterator
+from typing import Optional, Type, Iterator, Tuple, Any
 
 
 class Module:
@@ -12,7 +12,7 @@ class Module:
         self._mods: OrderedDict[str, "Module"] = OrderedDict()
         self._params: OrderedDict[str, Parameter] = OrderedDict()
         self._training: bool = True
-        self._dtype: Optional[dtype] = None
+        self._dtype: Optional[Type[dtype]] = None
 
     @property
     def training(self) -> bool:
@@ -22,25 +22,25 @@ class Module:
     def dtype(self):
         return self._dtype
 
-    def forward(self):
+    def forward(self) -> Any:
         raise NotImplemented
 
-    def mods(self):
+    def mods(self) -> Iterator["Module"]:
         yield from self._mods.values()
         for m in self._mods.values():
             yield from m.mods()
 
-    def namedmods(self):
+    def namedmods(self) -> Iterator[Tuple[str, "Module"]]:
         yield from self._mods.items()
         for m in self._mods.values():
             yield from m.namedmods()
 
-    def params(self):
+    def params(self) -> Iterator[Parameter]:
         yield from self._params.values()
         for m in self._mods.values():
             yield from m.params()
 
-    def namedparams(self):
+    def namedparams(self) -> Iterator[Tuple[str, Parameter]]:
         yield from self._params.items()
         for m in self._mods.values():
             yield from m.namedparams()

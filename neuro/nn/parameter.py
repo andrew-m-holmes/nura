@@ -8,6 +8,8 @@ from numpy import ndarray
 
 class Parameter(Tensor):
 
+    _gradtensor = True
+
     def __init__(
         self,
         data: ndarray,
@@ -29,4 +31,6 @@ def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
         dtype = a.dtype
     assert dtype in validtypes
     data = dtype.numpy(a.data)
-    return Parameter(data, usegrad, None, None, True)
+    p = Parameter(data, usegrad, None, None, True)
+    p._dtype = dtype
+    return p

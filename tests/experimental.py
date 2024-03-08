@@ -1,20 +1,14 @@
 import neuro
+import neuro.nn as nn
 
 
 def main():
 
-    # class Model(nn.Module):
-    #
-    #     def __init__(self) -> None:
-    #         super().__init__()
-    #         self.lin1 = nn.Linear(10, 10)
-    #         self.lin2 = nn.Linear(10, 10)
-    #         self.lin3 = nn.Linear(10, 10)
-    #         self.lin3.lin = nn.Linear(10, 10, bias=False)
-    #
-    # model = Model()
 
-    neuro.tensor
+    linear = nn.Linear(4, 5, bias=True)
+    x = neuro.rand((1, 4))
+    y = linear(x).sum()
+    y.backward()
 
 
 if __name__ == "__main__":
