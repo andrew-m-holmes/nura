@@ -1,7 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import MaxNLocator
 
 
 def bowl(x, y):
@@ -31,7 +29,7 @@ y_vals = np.linspace(-10, 10, 400)
 x_vals, y_vals = np.meshgrid(x_vals, y_vals)
 z_vals = bowl(x_vals, y_vals)
 
-fig = plt.figure(figsize=(12, 9))
+fig = plt.figure(figsize=(12, 30))
 ax = fig.add_subplot(111, projection="3d")
 ax.set_facecolor("black")
 ax.plot_surface(x_vals, y_vals, z_vals, cmap="cool", edgecolor="none", alpha=0.7)
