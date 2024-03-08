@@ -1,11 +1,11 @@
 import numpy as np
 import neuro
-from neuro.types import dtype, _dim
+from neuro.types import dtype, dim, dimlike
 from neuro.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
-def empty(dim: Union[_dim, int], dtype: Optional[Type[dtype]] = None):
+def empty(dim: Union[dim, int], dtype: Optional[Type[dtype]] = None):
     empty_arr = np.empty(dim)
     return tensor(empty_arr, dtype=dtype)
 
@@ -16,9 +16,7 @@ def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
     return tensor(empty_arr, dtype=dtype)
 
 
-def zeros(
-    dim: Union[_dim, int], usegrad=False, dtype: Optional[Type[dtype]] = None
-) -> Tensor:
+def zeros(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     dim = todim(dim)
     zero_arr = np.zeros(dim)
     return tensor(zero_arr, usegrad, dtype)
@@ -30,9 +28,7 @@ def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
     return tensor(zero_arr, usegrad, dtype)
 
 
-def ones(
-    dim: Union[_dim, int], usegrad=False, dtype: Optional[Type[dtype]] = None
-) -> Tensor:
+def ones(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     dim = todim(dim)
     ones_arr = np.ones(dim)
     return tensor(ones_arr, usegrad, dtype)
@@ -45,7 +41,7 @@ def oneslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
 
 
 def randn(
-    dim: Optional[Union[_dim, int]] = None,
+    dim: Optional[dimlike] = None,
     usegrad=False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
@@ -60,7 +56,7 @@ def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
 
 
 def rand(
-    dim: Optional[Union[_dim, int]] = None,
+    dim: Optional[dimlike] = None,
     usegrad=False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
@@ -75,7 +71,7 @@ def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
 
 
 def randint(
-    low: int, high: int, dim: Union[_dim, int], dtype: Optional[Type[dtype]] = None
+    low: int, high: int, dim: dimlike, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
     dim = todim(dim)
     randint_arr = np.random.randint(low, high, dim)
@@ -95,7 +91,7 @@ def identity(n: int, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tens
 
 
 def full(
-    dim: Union[_dim, int],
+    dim: dimlike,
     num: float,
     usegrad=False,
     dtype: Optional[Type[dtype]] = None,
@@ -115,21 +111,21 @@ def eye(
     return tensor(data, dtype=dtype)
 
 
-def argmax(a: Tensor, dim: Optional[int] = None, keepdims=False):
-    data = np.argmax(a.data, axis=dim, keepdims=keepdims)
+def argmax(a: Tensor, pos: Optional[int] = None, keepdims=False):
+    data = np.argmax(a.data, axis=pos, keepdims=keepdims)
     return tensor(data)
 
 
-def argmin(a: Tensor, dim: Optional[int] = None, keepdims=False):
-    data = np.argmin(a.data, axis=dim, keepdims=keepdims)
+def argmin(a: Tensor, pos: Optional[int] = None, keepdims=False):
+    data = np.argmin(a.data, axis=pos, keepdims=keepdims)
     return tensor(data)
 
 
-def any(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+def any(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
 
 
-def all(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+def all(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
 
 
@@ -192,7 +188,7 @@ def to(a: Tensor, dtype: Type[dtype]):
     return tensor(data, a.usegrad, dtype)
 
 
-def todim(dim: Any) -> Tuple[int, ...]:
+def todim(dim: Any) -> dim:
     if dim is None:
         return tuple()
     if isinstance(dim, int):

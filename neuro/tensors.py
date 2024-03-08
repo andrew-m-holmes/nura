@@ -1,14 +1,16 @@
 import neuro
-from neuro.types import dtype, _dim
+import neuro.types as types
+from neuro.types import dtype, dim, dimlike
 from neuro.autograd.graph import Node
-from typing import Optional, Type, Any, Union
+from typing import Optional, Type, Any
 from numpy import ndarray
 from copy import deepcopy
 
 
 class Tensor:
 
-    _gradtensor = ...
+    _dtype: Optional[Type[dtype]] = None
+    _gradtensor: Optional[bool] = None
 
     def __init__(
         self,
@@ -17,7 +19,6 @@ class Tensor:
         grad: Optional["Tensor"],
         backfn: Optional[Node],
         leaf: bool,
-        _dtype: Type[dtype],
     ) -> None:
 
         self._data: ndarray = data
@@ -25,7 +26,6 @@ class Tensor:
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._dtype: Type[dtype] = _dtype
 
     @property
     def data(self):
@@ -36,7 +36,12 @@ class Tensor:
         return self._dtype
 
     @property
-    def dim(self) -> _dim:
+    def gradtensor(self):
+        assert type(self) != Tensor
+        return self._gradtensor
+
+    @property
+    def dim(self) -> dim:
         return self._data.shape
 
     @property
@@ -62,11 +67,6 @@ class Tensor:
     @property
     def leaf(self):
         return self._leaf
-
-    @classmethod
-    def gradtensor(cls):
-        assert cls != Tensor
-        return cls._gradtensor
 
     def item(self):
         assert self.nelem == 1
@@ -110,11 +110,11 @@ class Tensor:
         return self
 
     def zeroedgrad(self):
-        cls = getcls(self.dtype)
+        cls = type(self)
         return cls(self.data, self.usegrad, neuro.zeroslike(self), None, True)
 
     def mutated(self, **attrs: Any) -> "Tensor":
-        cls = getcls(self.dtype)
+        cls = type(self)
         a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
         return muttensor(a, **attrs)
 
@@ -122,17 +122,17 @@ class Tensor:
         return muttensor(self, **attrs)
 
     def copy(self) -> "Tensor":
-        cls = getcls(self.dtype)
+        cls = type(self)
         return cls(self.data.copy(), self.usegrad, None, None, True)
 
     def deepcopy(self) -> "Tensor":
         grad = self.grad.copy() if self.grad is not None else None
         backfn = deepcopy(self.backfn) if self.backfn is not None else None
-        cls = getcls(self.dtype)
+        cls = type(self)
         return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
 
     def detach(self):
-        cls = getcls(self)
+        cls = type(self)
         return cls(self.data, False, None, None, True)
 
     def clone(self):
@@ -141,37 +141,37 @@ class Tensor:
     def contig(self):
         return neuro.tocontig(self)
 
-    def sum(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    def sum(self, dim: Optional[dimlike] = None, keepdims=False):
         return neuro.sum(self, dim, keepdims)
 
-    def max(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    def max(self, dim: Optional[dimlike] = None, keepdims=False):
         return neuro.max(self, dim, keepdims)
 
-    def min(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    def min(self, dim: Optional[dimlike] = None, keepdims=False):
         return neuro.min(self, dim, keepdims)
 
-    def squeeze(self, dim: Optional[_dim] = None):
+    def squeeze(self, dim: Optional[dimlike] = None):
         return neuro.squeeze(self, dim)
 
-    def unsqueeze(self, dim: _dim):
+    def unsqueeze(self, dim: dimlike):
         return neuro.unsqueeze(self, dim)
 
-    def view(self, dim: _dim):
+    def view(self, dim: types.dim):
         return neuro.view(self, dim)
 
-    def reshape(self, dim: _dim):
+    def reshape(self, dim: types.dim):
         return neuro.reshape(self, dim)
 
     def transpose(self, dim0=-2, dim1=-1):
         return neuro.transpose(self, dim0, dim1)
 
-    def permute(self, dim: Optional[_dim] = None):
+    def permute(self, dim: Optional[types.dim] = None):
         return neuro.permute(self, dim=dim)
 
-    def any(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    def any(self, dim: Optional[dimlike] = None, keepdims=False):
         return neuro.any(self, dim, keepdims)
 
-    def all(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+    def all(self, dim: Optional[dimlike] = None, keepdims=False):
         return neuro.all(self, dim, keepdims)
 
     def __add__(self, other):
@@ -280,72 +280,81 @@ class Tensor:
         s = "tensor(" + base
         if self.backfn:
             s += " backfn=" + str(self.backfn)
-        s += " dtype=" + self.dtype.name()
+        if self.dtype is not None:
+            s += " dtype=" + self.dtype.name()
         s += ")"
         return s
 
 
 class ByteTensor(Tensor):
+    _dtype = types.byte
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.byte)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class CharTensor(Tensor):
+    _dtype = types.char
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.char)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class ShortTensor(Tensor):
+    _dtype = types.short
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.short)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class IntTensor(Tensor):
+    _dtype = types.int
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.int)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class LongTensor(Tensor):
+    _dtype = types.long
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.long)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class HalfTensor(Tensor):
+    _dtype = types.half
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.half)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class FloatTensor(Tensor):
+    _dtype = types.float
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.float)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class DoubleTensor(Tensor):
+    _dtype = types.double
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.double)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class BoolTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, neuro.bool)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 def getcls(dtype) -> Type:
@@ -372,7 +381,7 @@ def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Ten
     data = dtype.numpy(data)
     cls = getcls(dtype)
     if usegrad:
-        assert cls.gradtensor(), f"{cls.__name__} cannot usegrad"
+        assert cls.gradtensor, f"{cls.__name__} cannot usegrad"
     return cls(data, usegrad, None, None, True)
 
 

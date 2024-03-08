@@ -1,11 +1,12 @@
 import numpy as np
-from typing import Type, Any, Tuple
+from typing import Type, Any, Tuple, Union
 
 
 _py_int = int
 _py_float = float
 _py_bool = bool
-_dim = Tuple[int, ...]
+dim = Tuple[int, ...]
+dimlike = Union[Tuple[int, ...], int]
 
 
 class dtype:
@@ -70,32 +71,30 @@ class bool(dtype):
     _wrapping = np.bool_
 
 
-dtypemap = {
-    np.uint8: byte,
-    np.int8: char,
-    np.int16: short,
-    np.int32: int,
-    _py_int: int,
-    np.int64: long,
-    np.float16: half,
-    np.float32: float,
-    _py_float: float,
-    np.float64: double,
-    np.bool_: bool,
-    _py_bool: bool,
-    np.dtype(np.uint8): byte,
-    np.dtype(np.int8): char,
-    np.dtype(np.int16): short,
-    np.dtype(np.int32): int,
-    np.dtype(np.int64): long,
-    np.dtype(np.float16): half,
-    np.dtype(np.float32): float,
-    np.dtype(np.float64): double,
-    np.dtype(np.bool_): bool,
-}
-
-
 def dtypeof(data: Any) -> Type[dtype]:
+    dtypemap = {
+        np.uint8: byte,
+        np.int8: char,
+        np.int16: short,
+        np.int32: int,
+        _py_int: int,
+        np.int64: long,
+        np.float16: half,
+        np.float32: float,
+        _py_float: float,
+        np.float64: double,
+        np.bool_: bool,
+        _py_bool: bool,
+        np.dtype(np.uint8): byte,
+        np.dtype(np.int8): char,
+        np.dtype(np.int16): short,
+        np.dtype(np.int32): int,
+        np.dtype(np.int64): long,
+        np.dtype(np.float16): half,
+        np.dtype(np.float32): float,
+        np.dtype(np.float64): double,
+        np.dtype(np.bool_): bool,
+    }
     if isinstance(data, np.ndarray):
         return dtypemap[data.dtype]
     if isinstance(data, list):

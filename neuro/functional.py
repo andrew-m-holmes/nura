@@ -2,7 +2,7 @@ import numpy as np
 import neuro.utils as utils
 import neuro.functions as functions
 from neuro.tensors import Tensor
-from neuro.types import _dim
+from neuro.types import dim
 from typing import Union, Optional, Any
 
 
@@ -83,14 +83,14 @@ def cos(a: Union[Tensor, Any]):
     return out
 
 
-def sum(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+def sum(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
     if dim is None:
         dim = tuple(range(a.ndim))
     out = functions.Sum.apply(a, dim, keepdims)
     return out
 
 
-def max(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+def max(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
     b = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
@@ -98,7 +98,7 @@ def max(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
     return out
 
 
-def min(a: Tensor, dim: Optional[Union[_dim, int]] = None, keepdims=False):
+def min(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
     b = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
@@ -111,29 +111,29 @@ def transpose(a: Tensor, dim0=-2, dim1=-1):
     return out
 
 
-def permute(a: Tensor, dim: Optional[_dim] = None):
+def permute(a: Tensor, dim: Optional[dim] = None):
     out = functions.Permute.apply(a, dim)
     return out
 
 
-def squeeze(a: Tensor, dim: Optional[Union[_dim, int]] = None):
+def squeeze(a: Tensor, dim: Optional[Union[dim, int]] = None):
     if dim is None:
         dim = tuple(np.where(np.array(a.dim) == 1)[0])
     out = functions.Squeeze.apply(a, dim=dim)
     return out
 
 
-def unsqueeze(a: Tensor, dim: Union[_dim, int]):
+def unsqueeze(a: Tensor, dim: Union[dim, int]):
     out = functions.Unsqueeze.apply(a, dim)
     return out
 
 
-def view(a: Tensor, dim: _dim):
+def view(a: Tensor, dim: dim):
     out = functions.View.apply(a, dim)
     return out
 
 
-def reshape(a: Tensor, newdim: _dim):
+def reshape(a: Tensor, newdim: dim):
     a = tocontig(a)
     out = functions.Reshape.apply(a, newdim)
     return out

@@ -1,7 +1,7 @@
 import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
-from neuro.types import _dim
+from neuro.types import dim
 from typing import Any
 
 
@@ -254,7 +254,7 @@ class Cos(Function):
 class Sum(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: _dim, keepdims: bool):
+    def forward(context: Context, a: Tensor, dim: dim, keepdims: bool):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
@@ -357,7 +357,7 @@ class Min(Function):
 class Squeeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: _dim):
+    def forward(context: Context, a: Tensor, dim: dim):
         context.save(a)
         context["dim"] = dim
         arr = a.data.squeeze(axis=dim)
