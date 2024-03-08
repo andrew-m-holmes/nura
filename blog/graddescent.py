@@ -1,60 +1,56 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
-def bowl(x, y):
-    return x**2 + y**2
+def func(x1, x2):
+    return x1**2 + x2**2
 
 
-def dfbowl(x, y):
-    return 2 * x, 2 * y
+def grad_func(x1, x2):
+    grad_x1 = 2 * x1
+    grad_x2 = 2 * x2
+    return np.array([grad_x1, grad_x2])
 
 
-alpha = 0.1
-steps = 25
-x0, y0 = -8.0, 4.0
+def gradient_descent(grad, start, learn_rate, n_iter=50, tol=1e-06):
+    path = []
+    x = start
+    for _ in range(n_iter):
+        grad_eval = grad(x[0], x[1])
+        x_new = x - learn_rate * grad_eval
+        if np.all(np.abs(x_new - x) <= tol):
+            break
+        x = x_new
+        path.append(x)
+    return np.array(path)
 
-descent = [(x0, y0)]
-x, y = x0, y0
-for _ in range(steps):
-    dx, dy = dfbowl(x, y)
-    x, y = x - alpha * dx, y - alpha * dy
-    descent.append((x, y))
 
-xs, ys = zip(*descent)
-zs = [bowl(x, y) for x, y in descent]
+start = np.array([0.8, 0.8])
+path = gradient_descent(grad_func, start, 0.1)
 
-x_vals = np.linspace(-10, 10, 400)
-y_vals = np.linspace(-10, 10, 400)
-x_vals, y_vals = np.meshgrid(x_vals, y_vals)
-z_vals = bowl(x_vals, y_vals)
+x1 = np.linspace(-1, 1, 400)
+x2 = np.linspace(-1, 1, 400)
+x1, x2 = np.meshgrid(x1, x2)
+z = func(x1, x2)
+levels = np.linspace(0, max(z.flatten()), 40)
 
-fig = plt.figure(figsize=(12, 30))
-ax = fig.add_subplot(111, projection="3d")
+sns.set_theme(style="darkgrid")
+fig, ax = plt.subplots(figsize=(8, 6))
+contour = ax.contour(x1, x2, z, levels=levels, cmap="cool")
+ax.plot(path[:, 0], path[:, 1], "r.-", label="Gradient Descent Path")
+
 ax.set_facecolor("black")
-ax.plot_surface(x_vals, y_vals, z_vals, cmap="cool", edgecolor="none", alpha=0.7)
+fig.patch.set_facecolor("black")
 ax.grid(False)
 
-ax.plot(xs, ys, zs, color="red", marker="o", label="Loss")
-
-ax.xaxis.set_major_locator(plt.MaxNLocator(5))
-ax.yaxis.set_major_locator(plt.MaxNLocator(5))
-ax.zaxis.set_major_locator(plt.MaxNLocator(5))
-
-ax.xaxis.pane.fill = False
-ax.yaxis.pane.fill = False
-ax.zaxis.pane.fill = False
-ax.xaxis.pane.set_edgecolor("black")
-ax.yaxis.pane.set_edgecolor("black")
-ax.zaxis.pane.set_edgecolor("black")
-
-ax.set_xlabel("$x$", color="white")
-ax.set_ylabel("$y$", color="white")
-
+ax.set_xlabel("$x_1$", color="white")
+ax.set_ylabel("$x_2$", color="white")
 ax.tick_params(axis="x", colors="white")
 ax.tick_params(axis="y", colors="white")
-ax.tick_params(axis="z", colors="white")
+ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 
-plt.legend()
-plt.savefig("./images/descent.png", dpi=300)
-plt.show()
+ax.legend(facecolor="black", edgecolor="white", framealpha=1)
+plt.setp(plt.gca().get_legend().get_texts(), color="white")
+plt.savefig("./images/descent.png")
