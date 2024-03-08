@@ -72,35 +72,35 @@ class Tensor:
         assert self.nelem == 1
         return self.data.item()
 
-    def to(self, dtype):
+    def to(self, dtype: Type[types.dtype]):
         return neuro.to(self, dtype)
 
     def byte(self):
-        return self.to(neuro.byte)
+        return self.to(types.byte)
 
     def char(self):
-        return self.to(neuro.char)
+        return self.to(types.char)
 
     def short(self):
-        return self.to(neuro.short)
+        return self.to(types.short)
 
     def int(self):
-        return self.to(neuro.int)
+        return self.to(types.int)
 
     def long(self):
-        return self.to(neuro.long)
+        return self.to(types.long)
 
     def half(self):
-        return self.to(neuro.half)
+        return self.to(types.half)
 
     def float(self):
-        return self.to(neuro.float)
+        return self.to(types.float)
 
     def double(self):
-        return self.to(neuro.double)
+        return self.to(types.double)
 
     def bool(self):
-        return self.to(neuro.bool)
+        return self.to(types.bool)
 
     def backward(self, grad: Optional["Tensor"] = None):
         neuro.backward(self, grad)

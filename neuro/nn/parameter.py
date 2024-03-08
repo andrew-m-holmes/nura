@@ -1,31 +1,32 @@
 import neuro
-from typing import Type, Optional, Any
-from numpy import ndarray
-from neuro.tensors import Tensor
 from neuro.types import dtype
+from neuro.tensors import Tensor
+from neuro.autograd.graph import Node
+from typing import Optional, Type
+from numpy import ndarray
 
 
 class Parameter(Tensor):
 
-    def __init__(self, data: ndarray, dtype: Type[dtype]) -> None:
-        super().__init__(
-            data, usegrad=True, grad=None, backfn=None, leaf=True, _dtype=dtype
-        )
+    def __init__(
+        self,
+        data: ndarray,
+        usegrad=True,
+        grad: Optional["Tensor"] = None,
+        backfn: Optional[Node] = None,
+        leaf=True,
+    ) -> None:
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
-    def to(self, dtype: Optional[Type[dtype]] = None) -> "Parameter":
-        a = super().to(dtype)
-        return parameter(a)
-
-    def zeroedgrad(self):
-        return parameter(super().zeroedgrad())
-
-    def mutated(self, **attrs: Any) -> "Parameter":
-        return parameter(super().mutated(**attrs))
+    def to(self, dtype: Type[dtype]):
+        return param(super().to(dtype), self.usegrad, dtype)
 
 
-def parameter(a: Tensor, dtype: Optional[Type[dtype]] = None) -> Parameter:
+def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
     validtypes = (neuro.half, neuro.float, neuro.double)
     if dtype is None:
+        assert a.dtype is not None
         dtype = a.dtype
     assert dtype in validtypes
-    return Parameter(dtype.numpy(a.data), dtype)
+    data = dtype.numpy(a.data)
+    return Parameter(data, usegrad, None, None, True)
