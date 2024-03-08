@@ -53,4 +53,4 @@ ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 
 ax.legend(facecolor="black", edgecolor="white", framealpha=1)
 plt.setp(plt.gca().get_legend().get_texts(), color="white")
-plt.savefig("./images/descent.png")
+plt.savefig("./images/descent.png", dpi=300)
