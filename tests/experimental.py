@@ -10,25 +10,21 @@ def main():
             super().__init__()
             self.lin1 = nn.Linear(4, 5, bias=True)
             self.lin2 = nn.Linear(5, 8, bias=True)
-            self.lin2.lin = nn.Linear(4, 5)
-            self.lst = []
 
         def forward(self, x):
             return self.lin2(self.lin1(x)).sum()
 
-    model = Model()
-    hfmodel = model.half()
-    fpmodel = model.float()
-    dbmodel = model.double()
-    print(model)
-    print(hfmodel)
-    print(fpmodel)
-    print(dbmodel)
-    model.lst.append(10)
-    print(f"{hfmodel.lst is dbmodel.lst = }")
-    print(f"{fpmodel.lin1 is model.lin1 = }")
-    print(f"{fpmodel.lin2.lin is dbmodel.lin2.lin = }")
-
+    x = neuro.randint(-5, 5, (1, 3), dtype=neuro.float).mutated(usegrad=True)
+    z = nn.relu(x)
+    print(z)
+    w = nn.sigmoid(x)
+    print(w)
+    y = nn.tanh(x)
+    print(y)
+    a = nn.softmax(x)
+    print(a)
+    z.backward(neuro.oneslike(z))
+    print(x.grad)
 
 if __name__ == "__main__":
     main()
