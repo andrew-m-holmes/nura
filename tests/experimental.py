@@ -14,15 +14,9 @@ def main():
         def forward(self, x):
             return self.lin2(self.lin1(x)).sum()
 
-    model = Model()
-    x = neuro.rand((1, 4))
-    y = model(x)
+    a = neuro.rand((3, 4), usegrad=True).float()
+    y = nn.sigmoid(a)
     print(y)
-    y.backward()
-    for n, p in model.namedparams():
-        print(n)
-        assert p.grad is not None
-
 
 
 if __name__ == "__main__":
