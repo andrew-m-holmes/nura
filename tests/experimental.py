@@ -10,13 +10,14 @@ def main():
             super().__init__()
             self.lin1 = nn.Linear(4, 5, bias=True)
             self.lin2 = nn.Linear(5, 8, bias=True)
+            self.lin2.lin21 = nn.Linear(4, 5, bias=True)
+            self.lin2.lin21.lin221 = nn.Linear(4, 5, bias=False)
 
         def forward(self, x):
             return self.lin2(self.lin1(x)).sum()
 
-    a = neuro.rand((3, 4), usegrad=True).float()
-    y = nn.sigmoid(a)
-    print(y)
+    model = Model()
+    print(model)
 
 
 if __name__ == "__main__":

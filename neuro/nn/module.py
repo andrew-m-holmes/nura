@@ -12,14 +12,14 @@ class Module:
         self._mods: OrderedDict[str, "Module"] = OrderedDict()
         self._params: OrderedDict[str, Parameter] = OrderedDict()
         self._training: bool = True
-        self._dtype: Optional[Type[dtype]] = None
+        self._dtype: Type[dtype] = types.float
 
     @property
     def training(self) -> bool:
         return self._training
 
     @property
-    def dtype(self):
+    def dtype(self) -> Type[dtype]:
         return self._dtype
 
     def forward(self) -> Any:
@@ -67,11 +67,19 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        return self.xrepr()
+        return self.repr()
+
+    def repr(self, pad=3) -> str:
+        strs = [self.xrepr()]
+        if hasmods := len(self._mods):
+            strs.append(" (")
+        strs.append("\n")
+        for n, m in self._mods.items():
+            strs.append(f"{' ' * pad}({n}): ")
+            strs.extend(m.repr(pad + 3))
+        if hasmods:
+            strs.append(f"{' ' * (pad - 3)})\n")
+        return "".join(strs)
 
     def xrepr(self) -> str:
-        strs = [self.__class__.__name__, "\n"]
-        for n, m in self._mods.items():
-            strs.append(f"{n}: ")
-            strs.extend(m.xrepr())
-        return "".join(strs)
+        return self.__class__.__name__

@@ -4,7 +4,7 @@ from neuro.nn.parameter import Parameter
 from neuro.tensors import Tensor
 from neuro.types import dtype
 from neuro.nn.functional import linear
-from typing import Type, Optional
+from typing import Type
 
 
 class Linear(Module):
@@ -14,7 +14,7 @@ class Linear(Module):
         indim: int,
         outdim: int,
         bias=True,
-        dtype: Optional[Type[dtype]] = neuro.float,
+        dtype: Type[dtype] = neuro.float,
     ) -> None:
 
         super().__init__()
@@ -42,3 +42,9 @@ class Linear(Module):
 
     def forward(self, x: Tensor) -> Tensor:
         return linear(x, self.weight, self.bias)
+
+    def xrepr(self) -> str:
+        inout = (self.indim, self.outdim)
+        bias = True if self.bias is not None else False
+        dtype = self.dtype.name()
+        return f"{self.__class__.__name__}({inout=} {bias=} {dtype=})"

@@ -278,7 +278,7 @@ class Tensor:
             i = base.index(" dtype")
             base = base[:i]
         s = "tensor(" + base
-        if self.backfn:
+        if self.backfn is not None:
             s += " backfn=" + str(self.backfn)
         if self.dtype is not None:
             s += " dtype=" + self.dtype.name()

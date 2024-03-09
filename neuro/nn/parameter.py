@@ -23,13 +23,16 @@ class Parameter(Tensor):
     def to(self, dtype: Type[dtype]):
         return param(super().to(dtype), self.usegrad, dtype)
 
+    def __repr__(self) -> str:
+        return super().__repr__().replace("tensor", "param")
+
 
 def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
     validtypes = (neuro.half, neuro.float, neuro.double)
     if dtype is None:
         assert a.dtype is not None
         dtype = a.dtype
-    assert dtype in validtypes
+    assert dtype in validtypes, f"Parameter cannot type {dtype.name()}"
     data = dtype.numpy(a.data)
     p = Parameter(data, usegrad, None, None, True)
     p._dtype = dtype

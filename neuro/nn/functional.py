@@ -14,3 +14,6 @@ def sigmoid(z: Tensor):
     nz = fn.Neg.apply(z)
     out = 1 / (1 + fn.Exp.apply(nz))
     return out
+
+def tanh(z: Tensor):
+    pass
