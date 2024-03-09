@@ -3,7 +3,8 @@ from neuro.types import dtype
 from neuro.nn.parameter import Parameter, param
 from neuro.tensors import Tensor
 from collections import OrderedDict
-from typing import Optional, Type, Iterator, Tuple, Any
+from typing import Type, Iterator, Tuple, Any
+from copy import copy, deepcopy
 
 
 class Module:
@@ -45,8 +46,28 @@ class Module:
         for m in self._mods.values():
             yield from m.namedparams()
 
-    def param(self, a: Tensor, dtype: Optional[Type[types.dtype]] = None) -> Parameter:
-        return param(a, True, dtype)
+    def param(self, a: Tensor) -> Parameter:
+        return param(a, True, self.dtype)
+
+    def to(self, dtype: Type[types.dtype]):
+        mod = self.copy()
+        mod._dtype = dtype
+        mod._params = OrderedDict()
+        mod._mods = OrderedDict()
+        for n, p in self._params.items():
+            setattr(mod, n, p.to(dtype))
+        for n, m in self._mods.items():
+            setattr(mod, n, m.to(dtype))
+        return mod
+
+    def half(self):
+        return self.to(types.half)
+
+    def float(self):
+        return self.to(types.float)
+
+    def double(self):
+        return self.to(types.double)
 
     def train(self):
         self._training = True
@@ -55,6 +76,12 @@ class Module:
     def eval(self):
         self._training = False
         return self
+
+    def copy(self):
+        return copy(self)
+
+    def deepcopy(self):
+        return deepcopy(self)
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
