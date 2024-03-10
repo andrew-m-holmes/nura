@@ -1,26 +1,30 @@
-import numpy as np
-import deepnet
-import jax
-from deepnet.autograd.functional import vjp, jvp, grad, jacrev, jacfwd, getperts
-import torch
-import deepnet.nn as nn
+import nura
+import nura.nn as nn
 
 
 def main():
 
-    mod = nn.Module()
-    tensor = deepnet.tensor(5.0, usegrad=False)
-    param = nn.Parameter(tensor)
-
-    class Linear(nn.Module):
+    class Model(nn.Module):
 
         def __init__(self) -> None:
             super().__init__()
-            self.weight = param
+            self.lin1 = nn.Linear(4, 5, bias=True)
+            self.lin2 = nn.Linear(5, 8, bias=True)
 
-    linear = Linear()
-    print(linear.params())
+        def forward(self, x):
+            return self.lin2(self.lin1(x)).sum()
 
+    x = nura.randint(-5, 5, (1, 3), dtype=nura.float).mutated(usegrad=True)
+    z = nn.relu(x)
+    print(z)
+    w = nn.sigmoid(x)
+    print(w)
+    y = nn.tanh(x)
+    print(y)
+    a = nn.softmax(x)
+    print(a)
+    z.backward(nura.oneslike(z))
+    print(x.grad)
 
 if __name__ == "__main__":
     main()

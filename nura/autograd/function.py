@@ -1,6 +1,6 @@
-import deepnet
-from deepnet.tensors import Tensor
-from deepnet.autograd.graph import genout
+import nura
+from nura.tensors import Tensor
+from nura.autograd.graph import genout
 from typing import Tuple, Union, Any, Optional, Dict
 from numpy import ndarray
 
@@ -21,7 +21,7 @@ class Context:
         if self._tensors is None:
             return False
         return any(t.usegrad for t in self._tensors) and all(
-            t.gradtensor() for t in self._tensors
+            t.gradtensor for t in self._tensors
         )
 
     def __setitem__(self, key: Any, value: Any):
@@ -55,6 +55,6 @@ class Function:
     def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
-        irout = deepnet.tensor(rawout)
+        irout = nura.tensor(rawout)
         out = genout(irout, cls, context)
         return out

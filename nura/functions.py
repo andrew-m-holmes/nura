@@ -1,7 +1,7 @@
 import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
-from deepnet.types import _dim
+from nura.types import dim
 from typing import Any
 
 
@@ -254,7 +254,7 @@ class Cos(Function):
 class Sum(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: _dim, keepdims: bool):
+    def forward(context: Context, a: Tensor, dim: dim, keepdims: bool):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
@@ -357,7 +357,7 @@ class Min(Function):
 class Squeeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: _dim):
+    def forward(context: Context, a: Tensor, dim: dim):
         context.save(a)
         context["dim"] = dim
         arr = a.data.squeeze(axis=dim)
@@ -499,12 +499,46 @@ class Abs(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        mask = np.where(a.data < 0, -1, 1)
-        return mask * grad.data
+        mask = np.sign(a.data)
+        return grad.data * mask
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        return abs(agrad.data)
+        a = context.tensors()[0]
+        mask = np.sign(a.data)
+        return agrad.data * mask
+
+
+class Pos(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save(a)
+        return a.data.copy()
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        return grad.data.copy()
+
+    @staticmethod
+    def tangent(context: Context, agrad: Tensor):
+        return agrad.data.copy()
+
+
+class Neg(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save(a)
+        return np.negative(a.data)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        return grad.data * -1.0
+
+    @staticmethod
+    def tangent(context: Context, agrad: Tensor):
+        return agrad.data * -1.0
 
 
 class Clone(Function):

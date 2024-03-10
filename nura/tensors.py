@@ -1,23 +1,24 @@
-import deepnet
-from deepnet.types import dtype, _dim
-from deepnet.autograd.graph import Node
-from typing import Optional, Type, Any, Union
+import nura
+import nura.types as types
+from nura.types import dtype, dim, dimlike
+from nura.autograd.graph import Node
+from typing import Optional, Type, Any
 from numpy import ndarray
 from copy import deepcopy
 
 
 class Tensor:
 
-    _gradtensor = ...
+    _dtype: Optional[Type[dtype]] = None
+    _gradtensor: Optional[bool] = None
 
     def __init__(
         self,
         data: ndarray,
         usegrad: bool,
-        grad: "Tensor",
-        backfn: Node,
+        grad: Optional["Tensor"],
+        backfn: Optional[Node],
         leaf: bool,
-        _dtype: Type[dtype],
     ) -> None:
 
         self._data: ndarray = data
@@ -25,7 +26,6 @@ class Tensor:
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._dtype: Type[dtype] = _dtype
 
     @property
     def data(self):
@@ -36,7 +36,12 @@ class Tensor:
         return self._dtype
 
     @property
-    def dim(self) -> _dim:
+    def gradtensor(self):
+        assert type(self) != Tensor
+        return self._gradtensor
+
+    @property
+    def dim(self) -> dim:
         return self._data.shape
 
     @property
@@ -63,58 +68,57 @@ class Tensor:
     def leaf(self):
         return self._leaf
 
-    @classmethod
-    def gradtensor(cls):
-        assert cls != Tensor
-        return cls._gradtensor
+    @property
+    def T(self):
+        return self.transpose()
 
     def item(self):
         assert self.nelem == 1
         return self.data.item()
 
-    def to(self, dtype):
-        return deepnet.to(self, dtype)
+    def to(self, dtype: Type[types.dtype]):
+        return nura.to(self, dtype)
 
     def byte(self):
-        return self.to(deepnet.byte)
+        return self.to(types.byte)
 
     def char(self):
-        return self.to(deepnet.char)
+        return self.to(types.char)
 
     def short(self):
-        return self.to(deepnet.short)
+        return self.to(types.short)
 
     def int(self):
-        return self.to(deepnet.int)
+        return self.to(types.int)
 
     def long(self):
-        return self.to(deepnet.long)
+        return self.to(types.long)
 
     def half(self):
-        return self.to(deepnet.half)
+        return self.to(types.half)
 
     def float(self):
-        return self.to(deepnet.float)
+        return self.to(types.float)
 
     def double(self):
-        return self.to(deepnet.double)
+        return self.to(types.double)
 
     def bool(self):
-        return self.to(deepnet.bool)
+        return self.to(types.bool)
 
     def backward(self, grad: Optional["Tensor"] = None):
-        deepnet.backward(self, grad)
+        nura.backward(self, grad)
 
     def zerograd(self):
-        muttensor(self, grad=deepnet.zeroslike(self))
+        muttensor(self, grad=nura.zeroslike(self))
         return self
 
     def zeroedgrad(self):
-        cls = getcls(self.dtype)
-        return cls(self.data, self.usegrad, deepnet.zeroslike(self), None, True)
+        cls = type(self)
+        return cls(self.data, self.usegrad, nura.zeroslike(self), None, True)
 
     def mutated(self, **attrs: Any) -> "Tensor":
-        cls = getcls(self.dtype)
+        cls = type(self)
         a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
         return muttensor(a, **attrs)
 
@@ -122,132 +126,132 @@ class Tensor:
         return muttensor(self, **attrs)
 
     def copy(self) -> "Tensor":
-        cls = getcls(self.dtype)
+        cls = type(self)
         return cls(self.data.copy(), self.usegrad, None, None, True)
 
     def deepcopy(self) -> "Tensor":
         grad = self.grad.copy() if self.grad is not None else None
         backfn = deepcopy(self.backfn) if self.backfn is not None else None
-        cls = getcls(self.dtype)
+        cls = type(self)
         return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
 
     def detach(self):
-        cls = getcls(self)
+        cls = type(self)
         return cls(self.data, False, None, None, True)
 
     def clone(self):
-        return deepnet.clone(self)
+        return nura.clone(self)
 
     def contig(self):
-        return deepnet.tocontig(self)
+        return nura.tocontig(self)
 
-    def sum(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.sum(self, dim, keepdims)
+    def sum(self, dim: Optional[dimlike] = None, keepdims=False):
+        return nura.sum(self, dim, keepdims)
 
-    def max(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.max(self, dim, keepdims)
+    def max(self, dim: Optional[dimlike] = None, keepdims=False):
+        return nura.max(self, dim, keepdims)
 
-    def min(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.min(self, dim, keepdims)
+    def min(self, dim: Optional[dimlike] = None, keepdims=False):
+        return nura.min(self, dim, keepdims)
 
-    def squeeze(self, dim: Optional[_dim] = None):
-        return deepnet.squeeze(self, dim)
+    def squeeze(self, dim: Optional[dimlike] = None):
+        return nura.squeeze(self, dim)
 
-    def unsqueeze(self, dim: _dim):
-        return deepnet.unsqueeze(self, dim)
+    def unsqueeze(self, dim: dimlike):
+        return nura.unsqueeze(self, dim)
 
-    def view(self, dim: _dim):
-        return deepnet.view(self, dim)
+    def view(self, dim: types.dim):
+        return nura.view(self, dim)
 
-    def reshape(self, dim: _dim):
-        return deepnet.reshape(self, dim)
+    def reshape(self, dim: types.dim):
+        return nura.reshape(self, dim)
 
     def transpose(self, dim0=-2, dim1=-1):
-        return deepnet.transpose(self, dim0, dim1)
+        return nura.transpose(self, dim0, dim1)
 
-    def permute(self, dim: Optional[_dim] = None):
-        return deepnet.permute(self, dim=dim)
+    def permute(self, dim: Optional[types.dim] = None):
+        return nura.permute(self, dim=dim)
 
-    def any(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.any(self, dim, keepdims)
+    def any(self, dim: Optional[dimlike] = None, keepdims=False):
+        return nura.any(self, dim, keepdims)
 
-    def all(self, dim: Optional[Union[_dim, int]] = None, keepdims=False):
-        return deepnet.all(self, dim, keepdims)
+    def all(self, dim: Optional[dimlike] = None, keepdims=False):
+        return nura.all(self, dim, keepdims)
 
     def __add__(self, other):
-        return deepnet.add(self, other)
+        return nura.add(self, other)
 
     def __radd__(self, other):
-        return deepnet.add(self, other)
+        return nura.add(self, other)
 
     def __sub__(self, other):
-        return deepnet.sub(self, other)
+        return nura.sub(self, other)
 
     def __rsub__(self, other):
-        return deepnet.sub(other, self)
+        return nura.sub(other, self)
 
     def __mul__(self, other):
-        return deepnet.mul(self, other)
+        return nura.mul(self, other)
 
     def __rmul__(self, other):
-        return deepnet.mul(self, other)
+        return nura.mul(self, other)
 
     def __truediv__(self, other):
-        return deepnet.div(self, other)
+        return nura.div(self, other)
 
     def __rtruediv__(self, other):
-        return deepnet.div(other, self)
+        return nura.div(other, self)
 
     def __matmul__(self, other):
-        return deepnet.matmul(self, other)
+        return nura.matmul(self, other)
 
     def __rmatmul__(self, other):
-        return deepnet.matmul(other, self)
+        return nura.matmul(other, self)
 
     def __pow__(self, other):
-        return deepnet.pow(self, other)
+        return nura.pow(self, other)
 
     def __rpow__(self, other):
-        return deepnet.pow(other, self)
+        return nura.pow(other, self)
 
     def __pos__(self):
         return self
 
     def __neg__(self):
-        return deepnet.mul(self, -1.0)
+        return nura.mul(self, -1.0)
 
     def __abs__(self):
-        return deepnet.abs(self)
+        return nura.abs(self)
 
     def __eq__(self, other):
-        return deepnet.equal(self, other)
+        return nura.equal(self, other)
 
     def __lt__(self, other):
-        return deepnet.less(self, other)
+        return nura.less(self, other)
 
     def __le__(self, other):
-        return deepnet.lesseq(self, other)
+        return nura.lesseq(self, other)
 
     def __gt__(self, other):
-        return deepnet.greater(self, other)
+        return nura.greater(self, other)
 
     def __ge__(self, other):
-        return deepnet.greatereq(self, other)
+        return nura.greatereq(self, other)
 
     def __ne__(self, other):
-        return deepnet.notequal(self, other)
+        return nura.notequal(self, other)
 
     def __hash__(self):
-        return deepnet.hashtensor(self)
+        return nura.hashtensor(self)
 
     def __and__(self, other):
-        return deepnet.tensorand(self, other)
+        return nura.tensorand(self, other)
 
     def __or__(self, other):
-        return deepnet.tensoror(self, other)
+        return nura.tensoror(self, other)
 
     def __not__(self):
-        return deepnet.tensornot(self)
+        return nura.tensornot(self)
 
     def __setattr__(self, name, value):
         validnames = {
@@ -260,16 +264,14 @@ class Tensor:
             "_mutable",
         }
         if name not in validnames:
-            raise AttributeError(
-                f"{name} cannot be assigned to {deepnet.typename(self)}"
-            )
+            raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
-        return deepnet.slice(self, slc)
+        return nura.slice(self, slc)
 
     def __setitem__(self, slc, item):
-        self.data[slc] = item.data if deepnet.istensor(item) else item
+        self.data[slc] = item.data if nura.istensor(item) else item
 
     def __len__(self):
         return self.dim[0]
@@ -280,98 +282,110 @@ class Tensor:
             i = base.index(" dtype")
             base = base[:i]
         s = "tensor(" + base
-        if self.backfn:
+        if self.backfn is not None:
             s += " backfn=" + str(self.backfn)
-        s += " dtype=" + self.dtype.name()
+        if self.dtype is not None:
+            s += " dtype=" + self.dtype.name()
         s += ")"
         return s
 
 
 class ByteTensor(Tensor):
+    _dtype = types.byte
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.byte)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class CharTensor(Tensor):
+    _dtype = types.char
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.char)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class ShortTensor(Tensor):
+    _dtype = types.short
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.short)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class IntTensor(Tensor):
+    _dtype = types.int
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.int)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class LongTensor(Tensor):
+    _dtype = types.long
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.long)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class HalfTensor(Tensor):
+    _dtype = types.half
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.half)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class FloatTensor(Tensor):
+    _dtype = types.float
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.float)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class DoubleTensor(Tensor):
+    _dtype = types.double
     _gradtensor = True
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.double)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 class BoolTensor(Tensor):
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf, deepnet.bool)
+        super().__init__(data, usegrad, grad, backfn, leaf)
 
 
 def getcls(dtype) -> Type:
     dtypemap = {
-        deepnet.byte: ByteTensor,
-        deepnet.char: CharTensor,
-        deepnet.short: ShortTensor,
-        deepnet.int: IntTensor,
-        deepnet.long: LongTensor,
-        deepnet.half: HalfTensor,
-        deepnet.float: FloatTensor,
-        deepnet.double: DoubleTensor,
-        deepnet.bool: BoolTensor,
+        nura.byte: ByteTensor,
+        nura.char: CharTensor,
+        nura.short: ShortTensor,
+        nura.int: IntTensor,
+        nura.long: LongTensor,
+        nura.half: HalfTensor,
+        nura.float: FloatTensor,
+        nura.double: DoubleTensor,
+        nura.bool: BoolTensor,
     }
     return dtypemap[dtype]
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    if nura.istensor(data):
+        print("warning, creating Tensor using tensor")
+        data = data.data
     if dtype is None:
-        dtype = deepnet.dtypeof(data)
+        dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
     cls = getcls(dtype)
     if usegrad:
-        assert cls.gradtensor(), f"{cls.__name__} cannot usegrad"
+        assert cls.gradtensor, f"{cls.__name__} cannot usegrad"
     return cls(data, usegrad, None, None, True)
 
 

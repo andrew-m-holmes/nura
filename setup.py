@@ -5,7 +5,7 @@ with open("./requirements.txt", mode="r") as file:
     requirements = [line.strip() for line in lines]
 
 setup(
-    name="deepnet",
+    name="neuro",
     version="0.1.0",
     author="Andrew Holmes",
     author_email="andrewholmes011002@gmail.com",

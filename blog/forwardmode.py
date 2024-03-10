@@ -1,33 +1,33 @@
-class Primal:
+class Variable:
 
-    def __init__(self, data, tangent):
-        self.data = data
+    def __init__(self, primal, tangent):
+        self.primal = primal
         self.tangent = tangent
 
     def __add__(self, other):
-        data = self.data + other.data
+        primal = self.primal + other.primal
         tangent = self.tangent + other.tangent
-        return Primal(data, tangent)
+        return Variable(primal, tangent)
 
     def __sub__(self, other):
-        data = self.data - other.data
+        primal = self.primal - other.primal
         tangent = self.tangent - other.tangent
-        return Primal(data, tangent)
+        return Variable(primal, tangent)
 
     def __mul__(self, other):
-        data = self.data * other.data
-        tangent = self.tangent * other.data + other.tangent * self.data
-        return Primal(data, tangent)
+        primal = self.primal * other.primal
+        tangent = self.tangent * other.primal + other.tangent * self.primal
+        return Variable(primal, tangent)
 
     def __truediv__(self, other):
-        data = self.data / other.data
-        tangent = (self.tangent / other.data) + (
-            -self.data / other.data**2
+        primal = self.primal / other.primal
+        tangent = (self.tangent / other.primal) + (
+            -self.primal / other.primal**2
         ) * other.tangent
-        return Primal(data, tangent)
+        return Variable(primal, tangent)
 
     def __repr__(self):
-        return f"primal: {self.data}, tangent: {self.tangent}"
+        return f"primal: {self.primal}, tangent: {self.tangent}"
 
 
 def main():
@@ -38,7 +38,7 @@ def main():
     def div_sub(a, b, c):
         return a / b - c
 
-    a, b, c = Primal(25.0, 1.0), Primal(4.0, 0.0), Primal(-5.0, 0.0)
+    a, b, c = Variable(25.0, 1.0), Variable(4.0, 0.0), Variable(-5.0, 0.0)
     print(f"{a = }, {b = }, {c = }")
     print(f"{mul_add(a, b, c) = }")
     a.tangent, b.tangent, c.tangent = 0.0, 1.0, 0.0
