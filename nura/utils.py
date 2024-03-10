@@ -1,7 +1,7 @@
 import numpy as np
-import neuro
-from neuro.types import dtype, dim, dimlike
-from neuro.tensors import Tensor, tensor
+import nura
+from nura.types import dtype, dim, dimlike
+from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
@@ -134,7 +134,7 @@ def hashtensor(a: Tensor) -> int:
 
 
 def equal(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
-    a, b = neuro.atot(a, b)
+    a, b = nura.atot(a, b)
     return tensor(np.equal(a.data, b.data))
 
 

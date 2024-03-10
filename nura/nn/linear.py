@@ -1,8 +1,8 @@
-import neuro
-from neuro.nn.module import Module
-from neuro.tensors import Tensor
-from neuro.types import dtype
-from neuro.nn.functional import linear
+import nura
+from nura.nn.module import Module
+from nura.tensors import Tensor
+from nura.types import dtype
+from nura.nn.functional import linear
 from typing import Type
 
 
@@ -13,13 +13,13 @@ class Linear(Module):
         indim: int,
         outdim: int,
         bias=True,
-        dtype: Type[dtype] = neuro.float,
+        dtype: Type[dtype] = nura.float,
     ) -> None:
 
         super().__init__()
         self._dtype = dtype
-        self._weight = self.param(neuro.randn((outdim, indim)))
-        self._bias = self.param(neuro.randn(outdim)) if bias else None
+        self._weight = self.param(nura.randn((outdim, indim)))
+        self._bias = self.param(nura.randn(outdim)) if bias else None
         self._indim: int = indim
         self._outdim: int = outdim
 

@@ -1,7 +1,7 @@
-import neuro.types as types
-from neuro.types import dtype
-from neuro.nn.parameter import Parameter, param
-from neuro.tensors import Tensor
+import nura.types as types
+from nura.types import dtype
+from nura.nn.parameter import Parameter, param
+from nura.tensors import Tensor
 from collections import OrderedDict
 from typing import Type, Iterator, Tuple, Any
 from copy import copy, deepcopy

@@ -1,7 +1,7 @@
-import neuro
-import neuro.types as types
-from neuro.types import dtype, dim, dimlike
-from neuro.autograd.graph import Node
+import nura
+import nura.types as types
+from nura.types import dtype, dim, dimlike
+from nura.autograd.graph import Node
 from typing import Optional, Type, Any
 from numpy import ndarray
 from copy import deepcopy
@@ -77,7 +77,7 @@ class Tensor:
         return self.data.item()
 
     def to(self, dtype: Type[types.dtype]):
-        return neuro.to(self, dtype)
+        return nura.to(self, dtype)
 
     def byte(self):
         return self.to(types.byte)
@@ -107,15 +107,15 @@ class Tensor:
         return self.to(types.bool)
 
     def backward(self, grad: Optional["Tensor"] = None):
-        neuro.backward(self, grad)
+        nura.backward(self, grad)
 
     def zerograd(self):
-        muttensor(self, grad=neuro.zeroslike(self))
+        muttensor(self, grad=nura.zeroslike(self))
         return self
 
     def zeroedgrad(self):
         cls = type(self)
-        return cls(self.data, self.usegrad, neuro.zeroslike(self), None, True)
+        return cls(self.data, self.usegrad, nura.zeroslike(self), None, True)
 
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = type(self)
@@ -140,118 +140,118 @@ class Tensor:
         return cls(self.data, False, None, None, True)
 
     def clone(self):
-        return neuro.clone(self)
+        return nura.clone(self)
 
     def contig(self):
-        return neuro.tocontig(self)
+        return nura.tocontig(self)
 
     def sum(self, dim: Optional[dimlike] = None, keepdims=False):
-        return neuro.sum(self, dim, keepdims)
+        return nura.sum(self, dim, keepdims)
 
     def max(self, dim: Optional[dimlike] = None, keepdims=False):
-        return neuro.max(self, dim, keepdims)
+        return nura.max(self, dim, keepdims)
 
     def min(self, dim: Optional[dimlike] = None, keepdims=False):
-        return neuro.min(self, dim, keepdims)
+        return nura.min(self, dim, keepdims)
 
     def squeeze(self, dim: Optional[dimlike] = None):
-        return neuro.squeeze(self, dim)
+        return nura.squeeze(self, dim)
 
     def unsqueeze(self, dim: dimlike):
-        return neuro.unsqueeze(self, dim)
+        return nura.unsqueeze(self, dim)
 
     def view(self, dim: types.dim):
-        return neuro.view(self, dim)
+        return nura.view(self, dim)
 
     def reshape(self, dim: types.dim):
-        return neuro.reshape(self, dim)
+        return nura.reshape(self, dim)
 
     def transpose(self, dim0=-2, dim1=-1):
-        return neuro.transpose(self, dim0, dim1)
+        return nura.transpose(self, dim0, dim1)
 
     def permute(self, dim: Optional[types.dim] = None):
-        return neuro.permute(self, dim=dim)
+        return nura.permute(self, dim=dim)
 
     def any(self, dim: Optional[dimlike] = None, keepdims=False):
-        return neuro.any(self, dim, keepdims)
+        return nura.any(self, dim, keepdims)
 
     def all(self, dim: Optional[dimlike] = None, keepdims=False):
-        return neuro.all(self, dim, keepdims)
+        return nura.all(self, dim, keepdims)
 
     def __add__(self, other):
-        return neuro.add(self, other)
+        return nura.add(self, other)
 
     def __radd__(self, other):
-        return neuro.add(self, other)
+        return nura.add(self, other)
 
     def __sub__(self, other):
-        return neuro.sub(self, other)
+        return nura.sub(self, other)
 
     def __rsub__(self, other):
-        return neuro.sub(other, self)
+        return nura.sub(other, self)
 
     def __mul__(self, other):
-        return neuro.mul(self, other)
+        return nura.mul(self, other)
 
     def __rmul__(self, other):
-        return neuro.mul(self, other)
+        return nura.mul(self, other)
 
     def __truediv__(self, other):
-        return neuro.div(self, other)
+        return nura.div(self, other)
 
     def __rtruediv__(self, other):
-        return neuro.div(other, self)
+        return nura.div(other, self)
 
     def __matmul__(self, other):
-        return neuro.matmul(self, other)
+        return nura.matmul(self, other)
 
     def __rmatmul__(self, other):
-        return neuro.matmul(other, self)
+        return nura.matmul(other, self)
 
     def __pow__(self, other):
-        return neuro.pow(self, other)
+        return nura.pow(self, other)
 
     def __rpow__(self, other):
-        return neuro.pow(other, self)
+        return nura.pow(other, self)
 
     def __pos__(self):
         return self
 
     def __neg__(self):
-        return neuro.mul(self, -1.0)
+        return nura.mul(self, -1.0)
 
     def __abs__(self):
-        return neuro.abs(self)
+        return nura.abs(self)
 
     def __eq__(self, other):
-        return neuro.equal(self, other)
+        return nura.equal(self, other)
 
     def __lt__(self, other):
-        return neuro.less(self, other)
+        return nura.less(self, other)
 
     def __le__(self, other):
-        return neuro.lesseq(self, other)
+        return nura.lesseq(self, other)
 
     def __gt__(self, other):
-        return neuro.greater(self, other)
+        return nura.greater(self, other)
 
     def __ge__(self, other):
-        return neuro.greatereq(self, other)
+        return nura.greatereq(self, other)
 
     def __ne__(self, other):
-        return neuro.notequal(self, other)
+        return nura.notequal(self, other)
 
     def __hash__(self):
-        return neuro.hashtensor(self)
+        return nura.hashtensor(self)
 
     def __and__(self, other):
-        return neuro.tensorand(self, other)
+        return nura.tensorand(self, other)
 
     def __or__(self, other):
-        return neuro.tensoror(self, other)
+        return nura.tensoror(self, other)
 
     def __not__(self):
-        return neuro.tensornot(self)
+        return nura.tensornot(self)
 
     def __setattr__(self, name, value):
         validnames = {
@@ -264,14 +264,14 @@ class Tensor:
             "_mutable",
         }
         if name not in validnames:
-            raise AttributeError(f"{name} cannot be assigned to {neuro.typename(self)}")
+            raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
-        return neuro.slice(self, slc)
+        return nura.slice(self, slc)
 
     def __setitem__(self, slc, item):
-        self.data[slc] = item.data if neuro.istensor(item) else item
+        self.data[slc] = item.data if nura.istensor(item) else item
 
     def __len__(self):
         return self.dim[0]
@@ -363,25 +363,25 @@ class BoolTensor(Tensor):
 
 def getcls(dtype) -> Type:
     dtypemap = {
-        neuro.byte: ByteTensor,
-        neuro.char: CharTensor,
-        neuro.short: ShortTensor,
-        neuro.int: IntTensor,
-        neuro.long: LongTensor,
-        neuro.half: HalfTensor,
-        neuro.float: FloatTensor,
-        neuro.double: DoubleTensor,
-        neuro.bool: BoolTensor,
+        nura.byte: ByteTensor,
+        nura.char: CharTensor,
+        nura.short: ShortTensor,
+        nura.int: IntTensor,
+        nura.long: LongTensor,
+        nura.half: HalfTensor,
+        nura.float: FloatTensor,
+        nura.double: DoubleTensor,
+        nura.bool: BoolTensor,
     }
     return dtypemap[dtype]
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
-    if neuro.istensor(data):
+    if nura.istensor(data):
         print("warning, creating Tensor using tensor")
         data = data.data
     if dtype is None:
-        dtype = neuro.dtypeof(data)
+        dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
     cls = getcls(dtype)
     if usegrad:

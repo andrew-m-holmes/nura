@@ -1,6 +1,6 @@
 import numpy as np
-from neuro.autograd.function import Function, Context
-from neuro.tensors import Tensor
+from nura.autograd.function import Function, Context
+from nura.tensors import Tensor
 
 
 class ReLU(Function):

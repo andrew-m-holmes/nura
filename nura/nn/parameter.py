@@ -1,7 +1,7 @@
-import neuro
-from neuro.types import dtype
-from neuro.tensors import Tensor
-from neuro.autograd.graph import Node
+import nura
+from nura.types import dtype
+from nura.tensors import Tensor
+from nura.autograd.graph import Node
 from typing import Optional, Type
 from numpy import ndarray
 
@@ -28,7 +28,7 @@ class Parameter(Tensor):
 
 
 def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
-    validtypes = (neuro.half, neuro.float, neuro.double)
+    validtypes = (nura.half, nura.float, nura.double)
     if dtype is None:
         assert a.dtype is not None
         dtype = a.dtype

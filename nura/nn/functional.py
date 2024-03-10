@@ -1,8 +1,8 @@
-import neuro.functions as fn
-import neuro.nn.functions as nnfn
-from neuro.tensors import Tensor
-from neuro.utils import atot
-from neuro.types import dim, dimlike
+import nura.functions as fn
+import nura.nn.functions as nnfn
+from nura.tensors import Tensor
+from nura.utils import atot
+from nura.types import dim, dimlike
 from typing import Optional
 
 

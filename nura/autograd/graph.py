@@ -1,4 +1,4 @@
-import neuro
+import nura
 from typing import List, Optional
 
 
@@ -26,9 +26,9 @@ class Node:
             arr = self.function.backward(self.context, *grad)
             if not isinstance(arr, tuple):
                 arr = (arr,)
-            return tuple(neuro.tensor(a) for a in arr)
+            return tuple(nura.tensor(a) for a in arr)
         arr = self.function.tangent(self.context, *grad)
-        return neuro.tensor(arr)
+        return nura.tensor(arr)
 
     def children(self) -> Optional[List["Node"]]:
         if self.context is None:
@@ -56,9 +56,9 @@ def genout(out, function, context):
     if not context.usesgrad():
         return out
     node = Node(out, function, context)
-    if neuro.usegrad() and neuro.reversemode():
+    if nura.usegrad() and nura.reversemode():
         out.mutate(backfn=node, usegrad=True, leaf=False)
-    elif neuro.usegrad() and neuro.forwardmode():
+    elif nura.usegrad() and nura.forwardmode():
         grads = getgrads(context)
         grad = node.apply(*grads, backward=False)
         out.mutate(usegrad=True, grad=grad, leaf=False)
@@ -67,7 +67,7 @@ def genout(out, function, context):
 
 def getgrads(context):
     return tuple(
-        t.grad if t.grad is not None else neuro.zeroslike(t)
+        t.grad if t.grad is not None else nura.zeroslike(t)
         for t in context.tensors()
     )
 

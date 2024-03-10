@@ -1,7 +1,7 @@
 import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
-from neuro.types import dim
+from nura.types import dim
 from typing import Any
 
 

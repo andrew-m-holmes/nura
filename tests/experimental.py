@@ -1,5 +1,5 @@
-import neuro
-import neuro.nn as nn
+import nura
+import nura.nn as nn
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
         def forward(self, x):
             return self.lin2(self.lin1(x)).sum()
 
-    x = neuro.randint(-5, 5, (1, 3), dtype=neuro.float).mutated(usegrad=True)
+    x = nura.randint(-5, 5, (1, 3), dtype=nura.float).mutated(usegrad=True)
     z = nn.relu(x)
     print(z)
     w = nn.sigmoid(x)
@@ -23,7 +23,7 @@ def main():
     print(y)
     a = nn.softmax(x)
     print(a)
-    z.backward(neuro.oneslike(z))
+    z.backward(nura.oneslike(z))
     print(x.grad)
 
 if __name__ == "__main__":

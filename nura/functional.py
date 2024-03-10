@@ -1,8 +1,8 @@
 import numpy as np
-import neuro.utils as utils
-import neuro.functions as fn
-from neuro.tensors import Tensor
-from neuro.types import dim
+import nura.utils as utils
+import nura.functions as fn
+from nura.tensors import Tensor
+from nura.types import dim
 from typing import Union, Optional, Any
 
 
