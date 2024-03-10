@@ -68,6 +68,10 @@ class Tensor:
     def leaf(self):
         return self._leaf
 
+    @property
+    def T(self):
+        return self.transpose()
+
     def item(self):
         assert self.nelem == 1
         return self.data.item()

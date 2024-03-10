@@ -80,10 +80,9 @@ def mismatch(tensor: Tensor, grad: Tensor) -> bool:
 
 
 def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
-    dims = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
+    dim = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
     keepdims = tensor.ndim == grad.ndim
-    data = np.sum(grad.data, axis=dims, keepdims=keepdims)
-    return grad.mutated(data=data)
+    return grad.sum(dim=dim, keepdims=keepdims) 
 
 
 def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:
@@ -112,7 +111,7 @@ def vjp(
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None)
     out, grads = _vjp(inpt, vec, f, *args, **kwargs)
-    return out.mutated(usegrad=False, leaf=True), grads
+    return out.mutated(usegrad=False, backfn=None, leaf=True), grads
 
 
 def _vjp(
