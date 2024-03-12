@@ -29,7 +29,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
                 tensor.grad if nura.istensor(tensor.grad) else nura.zeroslike(tensor)
             )
             newgrad = oldgrad + accumgrad
-            tensor.mutate(grad=newgrad)
+            tensor.mutate(grad=newgrad.to(tensor.dtype))
         elif nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)

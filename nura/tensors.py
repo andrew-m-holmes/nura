@@ -157,11 +157,11 @@ class Tensor:
     def squeeze(self, dim: Optional[dimlike] = None):
         return nura.squeeze(self, dim)
 
-    def unsqueeze(self, dim: dimlike):
+    def unsqueeze(self, dim: Optional[dimlike] = None):
         return nura.unsqueeze(self, dim)
 
-    def view(self, dim: types.dim):
-        return nura.view(self, dim)
+    def view(self, newdim: types.dim):
+        return nura.view(self, newdim)
 
     def reshape(self, dim: types.dim):
         return nura.reshape(self, dim)
@@ -169,8 +169,8 @@ class Tensor:
     def transpose(self, dim0=-2, dim1=-1):
         return nura.transpose(self, dim0, dim1)
 
-    def permute(self, dim: Optional[types.dim] = None):
-        return nura.permute(self, dim=dim)
+    def permute(self, dims: Optional[types.dim] = None):
+        return nura.permute(self, dims=dims)
 
     def any(self, dim: Optional[dimlike] = None, keepdims=False):
         return nura.any(self, dim, keepdims)

@@ -67,8 +67,5 @@ def genout(out, function, context):
 
 def getgrads(context):
     return tuple(
-        t.grad if t.grad is not None else nura.zeroslike(t)
-        for t in context.tensors()
+        t.grad if t.grad is not None else nura.zeroslike(t) for t in context.tensors()
     )
-
-

@@ -267,7 +267,7 @@ class Sum(Function):
         dim = context["dim"]
         keepdims = context["keepdims"]
         graddata = grad.data
-        if not keepdims:
+        if not keepdims and a.dim != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
         arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
         return arr
@@ -301,7 +301,7 @@ class Max(Function):
         arr = context["arr"]
         graddata = grad.data
         mask = a.data == arr
-        if not keepdims:
+        if not keepdims and a.dim != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
         arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
         return mask * arr
@@ -338,7 +338,7 @@ class Min(Function):
         arr = context["arr"]
         graddata = grad.data
         mask = a.data == arr
-        if not keepdims:
+        if not keepdims and a.dim != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
         arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
         return mask * arr
