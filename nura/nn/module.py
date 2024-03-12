@@ -3,7 +3,7 @@ from nura.types import dtype
 from nura.nn.parameter import Parameter, param
 from nura.tensors import Tensor
 from collections import OrderedDict
-from typing import Type, Iterator, Tuple, Any
+from typing import Type, Iterator, Tuple, Any, Optional
 from copy import copy, deepcopy
 
 
@@ -13,7 +13,7 @@ class Module:
         self._mods: OrderedDict[str, "Module"] = OrderedDict()
         self._params: OrderedDict[str, Parameter] = OrderedDict()
         self._training: bool = True
-        self._dtype: Type[dtype] = types.float
+        self._dtype: Optional[Type[dtype]] = None
 
     @property
     def training(self) -> bool:
@@ -21,6 +21,7 @@ class Module:
 
     @property
     def dtype(self) -> Type[dtype]:
+        assert self._dtype is not None
         return self._dtype
 
     def forward(self) -> Any:

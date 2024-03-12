@@ -8,7 +8,7 @@ class ReLU(Function):
     @staticmethod
     def forward(context: Context, z: Tensor):
         context.save(z)
-        return np.where(z.data > 0, z.data, 0.0)
+        return np.where(z.data > 0, z.data, 0)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):

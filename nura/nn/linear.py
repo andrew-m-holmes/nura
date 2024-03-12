@@ -3,7 +3,7 @@ from nura.nn.module import Module
 from nura.tensors import Tensor
 from nura.types import dtype
 from nura.nn.functional import linear
-from typing import Type
+from typing import Type, Optional
 
 
 class Linear(Module):
@@ -13,15 +13,17 @@ class Linear(Module):
         indim: int,
         outdim: int,
         bias=True,
-        dtype: Type[dtype] = nura.float,
+        dtype: Optional[Type[dtype]] = None,
     ) -> None:
 
         super().__init__()
+        if dtype is None:
+            dtype = nura.float
+        self._indim = indim
+        self._outdim = outdim
         self._dtype = dtype
         self._weight = self.param(nura.randn((outdim, indim)))
         self._bias = self.param(nura.randn(outdim)) if bias else None
-        self._indim: int = indim
-        self._outdim: int = outdim
 
     @property
     def weight(self):
@@ -40,6 +42,9 @@ class Linear(Module):
         return self._outdim
 
     def forward(self, x: Tensor) -> Tensor:
+        assert (
+            x.dtype is self.dtype
+        ), f"expected tensor of type {self.dtype.name()}, received {nura.typename(x)}"
         return linear(x, self.weight, self.bias)
 
     def xrepr(self) -> str:
