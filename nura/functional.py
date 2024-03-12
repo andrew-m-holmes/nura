@@ -2,7 +2,7 @@ import numpy as np
 import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor
-from nura.types import dim
+from nura.types import dim, dimlike
 from typing import Union, Optional, Any
 
 
@@ -83,14 +83,14 @@ def cos(a: Union[Tensor, Any]):
     return out
 
 
-def sum(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
+def sum(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     if dim is None:
         dim = tuple(range(a.ndim))
     out = fn.Sum.apply(a, dim, keepdims)
     return out
 
 
-def max(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
+def max(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     b = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
@@ -98,7 +98,7 @@ def max(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
     return out
 
 
-def min(a: Tensor, dim: Optional[Union[dim, int]] = None, keepdims=False):
+def min(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     if dim is None:
         dim = tuple(range(a.ndim))
     a = utils.atot(a)[0]
@@ -111,25 +111,27 @@ def transpose(a: Tensor, dim0=-2, dim1=-1):
     return out
 
 
-def permute(a: Tensor, dim: Optional[dim] = None):
-    out = fn.Permute.apply(a, dim)
+def permute(a: Tensor, dims: Optional[dim] = None):
+    out = fn.Permute.apply(a, dims)
     return out
 
 
-def squeeze(a: Tensor, dim: Optional[Union[dim, int]] = None):
+def squeeze(a: Tensor, dim: Optional[dimlike] = None):
     if dim is None:
         dim = tuple(np.where(np.array(a.dim) == 1)[0])
     out = fn.Squeeze.apply(a, dim=dim)
     return out
 
 
-def unsqueeze(a: Tensor, dim: Union[dim, int]):
+def unsqueeze(a: Tensor, dim: Optional[dimlike] = None):
+    if dim is None:
+        dim = 0
     out = fn.Unsqueeze.apply(a, dim)
     return out
 
 
-def view(a: Tensor, dim: dim):
-    out = fn.View.apply(a, dim)
+def view(a: Tensor, newdim: dim):
+    out = fn.View.apply(a, newdim)
     return out
 
 

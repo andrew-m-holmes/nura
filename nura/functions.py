@@ -1,7 +1,7 @@
 import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
-from nura.types import dim
+from nura.types import dim, dimlike
 from typing import Any
 
 
@@ -254,7 +254,7 @@ class Cos(Function):
 class Sum(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: dim, keepdims: bool):
+    def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
@@ -283,7 +283,7 @@ class Sum(Function):
 class Max(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: int, keepdims: bool):
+    def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
@@ -320,7 +320,7 @@ class Max(Function):
 class Min(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: int, keepdims: bool):
+    def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
         context["dim"] = dim
         context["keepdims"] = keepdims
@@ -357,7 +357,7 @@ class Min(Function):
 class Squeeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: dim):
+    def forward(context: Context, a: Tensor, dim: dimlike):
         context.save(a)
         context["dim"] = dim
         arr = a.data.squeeze(axis=dim)
@@ -379,7 +379,7 @@ class Squeeze(Function):
 class Unsqueeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: Any):
+    def forward(context: Context, a: Tensor, dim: dimlike):
         context.save(a)
         context["dim"] = dim
         arr = np.expand_dims(a.data, axis=dim)
@@ -401,10 +401,10 @@ class Unsqueeze(Function):
 class View(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim):
+    def forward(context: Context, a: Tensor, newdim: dim):
         context.save(a)
-        context["dim"] = dim
-        arr = a.data.reshape(dim, order="C")
+        context["newdim"] = newdim
+        arr = a.data.reshape(newdim, order="C")
         return arr
 
     @staticmethod
@@ -415,18 +415,18 @@ class View(Function):
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        dim = context["dim"]
-        arr = agrad.data.reshape(dim, order="C")
+        newdim = context["newdim"]
+        arr = agrad.data.reshape(newdim, order="C")
         return arr
 
 
 class Reshape(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: Any):
+    def forward(context: Context, a: Tensor, newdim: dim):
         context.save(a)
-        context["dim"] = dim
-        arr = a.data.reshape(dim)
+        context["newdim"] = newdim
+        arr = a.data.reshape(newdim)
         return arr
 
     @staticmethod
@@ -437,8 +437,8 @@ class Reshape(Function):
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        dim = context["dim"]
-        arr = agrad.data.reshape(dim)
+        newdim = context["newdim"]
+        arr = agrad.data.reshape(newdim)
         return arr
 
 
@@ -470,22 +470,22 @@ class Transpose(Function):
 class Permute(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim):
+    def forward(context: Context, a: Tensor, dims: dimlike):
         context.save(a)
-        context["dim"] = dim
-        arr = a.data.transpose(dim)
+        context["dims"] = dims
+        arr = a.data.transpose(dims)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        dim = np.argsort(context["dim"])
-        arr = grad.data.transpose(dim)
+        dims = np.argsort(context["dims"])
+        arr = grad.data.transpose(dims)
         return arr
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        dim = context["dim"]
-        arr = agrad.data.transpose(dim)
+        dims = context["dims"]
+        arr = agrad.data.transpose(dims)
         return arr
 
 
@@ -555,8 +555,7 @@ class Clone(Function):
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        arr = agrad.data.copy()
-        return arr
+        return agrad.data.copy()
 
 
 class Slice(Function):

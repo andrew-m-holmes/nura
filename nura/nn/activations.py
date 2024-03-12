@@ -35,25 +35,25 @@ class Sigmoid(Module):
 
 class Softmax(Module):
 
-    def __init__(self, pos=-1, eps=1e-6) -> None:
+    def __init__(self, dim=-1, eps=1e-6) -> None:
         super().__init__()
-        self._pos = pos
+        self._dim = dim
         self._eps = eps
 
     @property
-    def pos(self):
-        return self._pos
+    def dim(self):
+        return self._dim
 
     @property
     def eps(self):
         return self._eps
 
     def forward(self, a: Tensor):
-        return nnfn.softmax(a, self.pos, self.eps)
+        return nnfn.softmax(a, self.dim, self.eps)
 
     def xrepr(self) -> str:
-        pos, eps = self.pos, self.eps
-        return f"{super().xrepr()}({pos=} {eps=})"
+        dim, eps = self.dim, self.eps
+        return f"{super().xrepr()}({dim=} {eps=})"
 
 
 class Tanh(Module):

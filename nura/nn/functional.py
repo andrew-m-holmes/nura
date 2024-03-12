@@ -36,8 +36,8 @@ def relu(z: Tensor):
     return out
 
 
-def softmax(a: Tensor, pos=-1, eps=1e-6):
+def softmax(a: Tensor, dim=-1, eps=1e-6):
     a = atot(a)[0]
     e = fn.Exp.apply(a)
-    out = e / (fn.Sum.apply(e, pos, keepdims=False) + eps)
+    out = e / (fn.Sum.apply(e, dim, keepdims=False) + eps)
     return out
