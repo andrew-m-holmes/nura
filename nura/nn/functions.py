@@ -13,13 +13,13 @@ class ReLU(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
-        mask = np.where(z.data > 0, 1.0, 0.0)
+        mask = np.where(z.data > 0, 1, 0)
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         z = context.tensors()[0]
-        mask = np.where(z.data > 0, 1.0, 0.0)
+        mask = np.where(z.data > 0, 1, 0)
         return mask * zgrad.data
 
 
