@@ -1,5 +1,7 @@
 import nura
 import nura.nn as nn
+import torch
+import torch.nn as tnn
 
 
 def main():

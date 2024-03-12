@@ -172,10 +172,10 @@ class Tensor:
         return nura.permute(self, dims=dims)
 
     def any(self, dim: Optional[dimlike] = None, keepdims=False):
-        return nura.any(self, dim, keepdims)
+        return nura.tensorany(self, dim, keepdims)
 
     def all(self, dim: Optional[dimlike] = None, keepdims=False):
-        return nura.all(self, dim, keepdims)
+        return nura.tensorall(self, dim, keepdims)
 
     def __add__(self, other):
         return nura.add(self, other)

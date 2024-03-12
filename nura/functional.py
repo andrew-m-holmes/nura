@@ -33,6 +33,7 @@ def div(a: Union[Tensor, Any], b: Union[Tensor, Any]):
 def dot(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
     assert a.ndim >= 1 and b.ndim >= 1
+    assert utils.typesmatch(a, b)
     out = fn.Dot.apply(a, b)
     return out
 
@@ -41,6 +42,7 @@ def matmul(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
     assert a.ndim >= 2 and b.ndim >= 2
     assert a.dim[-1] == b.dim[-2]
+    assert utils.typesmatch(a, b)
     out = fn.Matmul.apply(a, b)
     return out
 

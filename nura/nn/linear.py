@@ -42,9 +42,6 @@ class Linear(Module):
         return self._outdim
 
     def forward(self, x: Tensor) -> Tensor:
-        assert (
-            x.dtype is self.dtype
-        ), f"expected tensor of type {self.dtype.name()}, received {nura.typename(x)}"
         return linear(x, self.weight, self.bias)
 
     def xrepr(self) -> str:

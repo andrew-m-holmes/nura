@@ -121,11 +121,11 @@ def argmin(a: Tensor, pos: Optional[int] = None, keepdims=False):
     return tensor(data)
 
 
-def any(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+def tensorany(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
 
 
-def all(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
 
 
@@ -180,6 +180,11 @@ def tensornot(a: Union[Tensor, Any]) -> Tensor:
 
 def atot(*args: Any) -> Union[Tuple[Tensor, ...], Tensor]:
     return tuple(a if istensor(a) else tensor(a) for a in args)
+
+
+def typesmatch(*tensors: Tensor) -> bool:
+    assert all(t.dtype is not None for t in tensors)
+    return len(set(t.dtype for t in tensors)) == 1
 
 
 def to(a: Tensor, dtype: Type[dtype]):
