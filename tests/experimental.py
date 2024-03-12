@@ -21,7 +21,7 @@ def main():
             return out
 
     model = Model()
-    x = nura.rand((1, 4)).float()
+    x = nura.rand((1, 4))
     out = model(x)
     loss = out.sum() / nura.rand().double()
     loss.backward()
