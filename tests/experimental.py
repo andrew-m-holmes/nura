@@ -9,14 +9,18 @@ def main():
         def __init__(self) -> None:
             super().__init__()
             self.lin1 = nn.Linear(4, 5, bias=True)
+            self.relu = nn.ReLU()
             self.lin2 = nn.Linear(5, 8, bias=True)
+            self.softmax = nn.Softmax()
 
         def forward(self, x):
-            return self.lin2(self.lin1(x)).sum()
+            x = self.relu(self.lin1(x))
+            out = self.softmax(self.lin2(x))
+            return out
 
     model = Model()
-    test = model.mutated(training=False)
-    print(test.training)
+    x = nura.rand((1, 4)).float()
+    out = model(x)
 
 
 if __name__ == "__main__":

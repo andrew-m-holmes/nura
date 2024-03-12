@@ -2,7 +2,6 @@ import nura.functions as fn
 import nura.nn.functions as nnfn
 from nura.tensors import Tensor
 from nura.utils import atot
-from nura.types import dim, dimlike
 from typing import Optional
 
 
@@ -37,10 +36,8 @@ def relu(z: Tensor):
     return out
 
 
-def softmax(a: Tensor, dim: Optional[dimlike] = None, eps=1e-6):
-    if dim is None:
-        dim = tuple(range(a.ndim))
+def softmax(a: Tensor, pos=-1, eps=1e-6):
     a = atot(a)[0]
     e = fn.Exp.apply(a)
-    out = e / (fn.Sum.apply(e, dim, keepdims=False) + eps)
+    out = e / (fn.Sum.apply(e, pos, keepdims=False) + eps)
     return out
