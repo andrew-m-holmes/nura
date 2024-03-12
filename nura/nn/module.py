@@ -48,6 +48,7 @@ class Module:
             yield from m.namedparams()
 
     def param(self, a: Tensor) -> Parameter:
+        assert self.dtype is not None
         return param(a, True, self.dtype)
 
     def to(self, dtype: Type[types.dtype]):

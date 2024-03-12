@@ -32,7 +32,7 @@ def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
         assert a.dtype is not None
         dtype = a.dtype
-    assert dtype in validtypes, f"Parameter cannot type {dtype.name()}"
+    assert dtype in validtypes, f"Parameter cannot be type {dtype.name()}"
     data = dtype.numpy(a.data)
     p = Parameter(data, usegrad, None, None, True)
     p._dtype = dtype

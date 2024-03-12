@@ -23,8 +23,9 @@ def main():
     model = Model()
     x = nura.rand((1, 4))
     out = model(x)
-    loss = out.sum() / nura.rand().double()
+    loss = out.sum() / nura.rand()
     loss.backward()
+    print(loss)
 
 
 if __name__ == "__main__":
