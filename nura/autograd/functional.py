@@ -23,6 +23,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
+            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
                 tensor.grad if nura.istensor(tensor.grad) else nura.zeroslike(tensor)
@@ -61,6 +62,7 @@ def _grad(
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
+            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
@@ -82,7 +84,7 @@ def mismatch(tensor: Tensor, grad: Tensor) -> bool:
 def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
     dim = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
     keepdims = tensor.ndim == grad.ndim
-    return grad.sum(dim=dim, keepdims=keepdims) 
+    return grad.sum(dim=dim, keepdims=keepdims)
 
 
 def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:
@@ -212,6 +214,7 @@ def jacfwd(
 
 def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
     nelem, dim, dtype = tensor.nelem, tensor.dim, tensor.dtype
+    assert dtype is not None
     perts = nura.zeros((nelem,) + dim).to(dtype)
     arange = np.arange(nelem)
     indices = np.unravel_index(arange, dim)
@@ -222,5 +225,6 @@ def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
 
 def getjac(tensor: Tensor, out: Tensor) -> Tensor:
     dim = out.dim + tensor.dim
+    assert out.dtype is not None
     jac = nura.zeros(dim).to(out.dtype)
     return jac
