@@ -136,8 +136,7 @@ class Tensor:
         return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
 
     def detach(self):
-        cls = type(self)
-        return cls(self.data, False, None, None, True)
+        return tensor(self.data, False, self.dtype)
 
     def clone(self):
         return nura.clone(self)
