@@ -14,17 +14,10 @@ def main():
         def forward(self, x):
             return self.lin2(self.lin1(x)).sum()
 
-    x = nura.randint(-5, 5, (1, 3), dtype=nura.float).mutated(usegrad=True)
-    z = nn.relu(x)
-    print(z)
-    w = nn.sigmoid(x)
-    print(w)
-    y = nn.tanh(x)
-    print(y)
-    a = nn.softmax(x)
-    print(a)
-    z.backward(nura.oneslike(z))
-    print(x.grad)
+    model = Model()
+    test = model.mutated(training=False)
+    print(test.training)
+
 
 if __name__ == "__main__":
     main()

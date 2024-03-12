@@ -70,12 +70,17 @@ class Module:
         return self.to(types.double)
 
     def train(self):
-        self._training = True
-        return self
+        return self.mutated(_training=True)
 
     def eval(self):
-        self._training = False
-        return self
+        return self.mutated(_training=False)
+
+    def mutate(self, **attrs):
+        return mutmod(self, **attrs)
+
+    def mutated(self, **attrs):
+        mod = self.copy()
+        return mutmod(mod, **attrs)
 
     def copy(self):
         return copy(self)
@@ -110,3 +115,16 @@ class Module:
 
     def xrepr(self) -> str:
         return self.__class__.__name__
+
+
+def mutmod(mod: Module, **attrs):
+    validattrs = {
+        "mods": "_mods",
+        "params": "_params",
+        "training": "_training",
+        "dtype": "_dtype",
+    }
+    for k, v in attrs.items():
+        assert k in validattrs
+        setattr(mod, k, v)
+    return mod
