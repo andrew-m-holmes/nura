@@ -11,9 +11,9 @@ def main():
 
         def __init__(self) -> None:
             super().__init__()
-            self.fc1 = nn.Linear(3, 5, bias=True)
-            self.fc2 = nn.Linear(5, 3, bias=True)
-            self.fc3 = nn.Linear(3, 1, bias=False)
+            self.fc1 = self.linear(3, 5, bias=True)
+            self.fc2 = self.linear(5, 3, bias=True)
+            self.fc3 = self.linear(3, 1, bias=False)
             self.relu = nn.ReLU()
             self.sig = nn.Sigmoid()
 

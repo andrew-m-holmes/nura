@@ -1,9 +1,10 @@
+import nura.nn as nn
 import nura.types as types
 from nura.types import dtype
 from nura.nn.parameter import Parameter, param
 from nura.tensors import Tensor
 from collections import OrderedDict
-from typing import Type, Iterator, Tuple, Any
+from typing import Type, Iterator, Tuple, Any, Optional
 from copy import copy, deepcopy
 
 
@@ -47,6 +48,22 @@ class Module:
 
     def param(self, a: Tensor, dtype: Type[dtype]) -> Parameter:
         return param(a, self.training, dtype)
+
+    @staticmethod
+    def linear(indim: int, outdim: int, bias=True, dtype: Optional[Type[dtype]] = None):
+        return nn.Linear(indim, outdim, bias, dtype)
+
+    @staticmethod
+    def sigmoid():
+        return nn.Sigmoid()
+
+    @staticmethod
+    def tanh():
+        return nn.Tanh()
+
+    @staticmethod
+    def softmax(dim=-1):
+        return nn.Softmax(dim)
 
     def to(self, dtype: Type[dtype]):
         params = OrderedDict()

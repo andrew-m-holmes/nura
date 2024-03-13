@@ -28,7 +28,6 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
-            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
                 tensor.grad if nura.istensor(tensor.grad) else nura.zeroslike(tensor)
@@ -44,11 +43,17 @@ def grad(
     inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
-    assert out.gradtensor
-    assert out.backfn is not None
+    if not (all(t.gradtensor for t in inpt) and out.gradtensor):
+        raise ValueError("Received Tensor(s) that doesn't use gradients")
+    if out.backfn is None:
+        raise ValueError(
+            "Cannot backpropagate gradients for Tensor with no backward function"
+        )
     if grad is None:
-        assert out.nelem == 1
+        if out.nelem != 1:
+            raise RuntimeError(
+                f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
+            )
         grad = nura.oneslike(out)
     inptmap = _grad(inpt, out, grad)
     return tuple(inptmap.values())
@@ -67,7 +72,6 @@ def _grad(
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
-            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
