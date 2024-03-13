@@ -32,13 +32,8 @@ class Tensor:
         return self._data
 
     @property
-    def dtype(self):
-        return self._dtype
-
-    @property
-    def gradtensor(self):
-        assert type(self) != Tensor
-        return self._gradtensor
+    def dtype(self) -> Type[dtype]:
+        return types.dtypeof(self.data)
 
     @property
     def dim(self) -> dim:
@@ -71,6 +66,10 @@ class Tensor:
     @property
     def T(self):
         return self.transpose()
+
+    @classmethod
+    def gradtensor(cls):
+        return cls._gradtensor
 
     def item(self):
         assert self.nelem == 1
@@ -110,8 +109,7 @@ class Tensor:
         nura.backward(self, grad)
 
     def zerograd(self):
-        muttensor(self, grad=nura.zeroslike(self))
-        return self
+        return muttensor(self, grad=nura.zeroslike(self))
 
     def zeroedgrad(self):
         cls = type(self)
@@ -214,10 +212,10 @@ class Tensor:
         return nura.pow(other, self)
 
     def __pos__(self):
-        return self
+        return nura.pos(self)
 
     def __neg__(self):
-        return nura.mul(self, -1.0)
+        return nura.neg(self)
 
     def __abs__(self):
         return nura.abs(self)
@@ -354,6 +352,7 @@ class DoubleTensor(Tensor):
 
 
 class BoolTensor(Tensor):
+    _dtype = types.bool
     _gradtensor = False
 
     def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
@@ -376,15 +375,14 @@ def getcls(dtype) -> Type:
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
-    if nura.istensor(data):
-        print("warning, creating Tensor using tensor")
-        data = data.data
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
     cls = getcls(dtype)
-    if usegrad:
-        assert cls.gradtensor, f"{cls.__name__} cannot usegrad"
+    if usegrad and not cls.gradtensor():
+        raise ValueError(
+            f"Only Tensors of type float or double can use gradient, received {dtype.name()}"
+        )
     return cls(data, usegrad, None, None, True)
 
 
@@ -398,6 +396,7 @@ def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
         "dtype": "_dtype",
     }
     for name, val in attrs.items():
-        if name in validattrs:
-            setattr(tensor, validattrs[name], val)
+        if name not in validattrs:
+            raise AttributeError(f"{name} is not a member of {nura.typename(tensor)}")
+        setattr(tensor, validattrs[name], val)
     return tensor

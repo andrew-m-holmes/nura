@@ -6,11 +6,11 @@ from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    assert out.gradtensor and out.backfn
+    assert out.gradtensor() and out.backfn
     if grad is None:
         assert out.nelem == 1
         grad = nura.oneslike(out)
-    assert grad.gradtensor
+    assert grad.gradtensor()
     _backward(out, grad)
 
 
@@ -39,8 +39,8 @@ def grad(
     inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
-    assert out.gradtensor
+    assert all(t.gradtensor() for t in inpt)
+    assert out.gradtensor()
     assert out.backfn is not None
     if grad is None:
         assert out.nelem == 1
@@ -108,8 +108,8 @@ def vjp(
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
 
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
-    assert vec.gradtensor
+    assert all(t.gradtensor() for t in inpt)
+    assert vec.gradtensor()
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None)
     out, grads = _vjp(inpt, vec, f, *args, **kwargs)
@@ -139,8 +139,8 @@ def jvp(
 
     inpt = tupify(inpt)
     vec = tupify(vec)
-    assert all(t.gradtensor for t in inpt)
-    assert all(v.gradtensor for v in vec)
+    assert all(t.gradtensor() for t in inpt)
+    assert all(v.gradtensor() for v in vec)
     gen = (v for v in vec)
     inpt = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in inpt)
     out, grad = _jvp(inpt, f, *args, **kwargs)
@@ -168,7 +168,7 @@ def jacrev(
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
+    assert all(t.gradtensor() for t in inpt)
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     with nura.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
@@ -194,7 +194,7 @@ def jacfwd(
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
+    assert all(t.gradtensor() for t in inpt)
     with nura.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
