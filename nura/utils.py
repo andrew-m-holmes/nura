@@ -166,7 +166,7 @@ def where(
 
 def poswhere(logical: Union[Tensor, bool]) -> Tensor:
     data = logical.data if isinstance(logical, Tensor) else logical
-    return tensor(np.where(data))
+    return tensor(np.where(data)[0])
 
 
 def nonzero(a: Tensor):

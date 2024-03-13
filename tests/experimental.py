@@ -24,7 +24,8 @@ def main():
             return out
 
     model = Model()
-    x = nura.rand((1, 3))
+    x = nura.rand((1, 3)).sum()
+    x.backward()
     out = model(x)
     out.backward()
     print(model)

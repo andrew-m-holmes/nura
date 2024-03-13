@@ -7,7 +7,7 @@ from collections import deque
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
     if out.backfn is None:
-        raise ValueError(
+        raise RuntimeError(
             "Cannot backpropagate gradients for Tensor with no backward function"
         )
     if grad is None:
@@ -17,6 +17,10 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             )
         grad = nura.oneslike(out)
     _backward(out, grad)
+
+
+def nobackfn(tensor: Tensor) -> Optional[RuntimeError]:
+    return None
 
 
 def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
@@ -223,7 +227,6 @@ def jacfwd(
 
 def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
     nelem, dim, dtype = tensor.nelem, tensor.dim, tensor.dtype
-    assert dtype is not None
     perts = nura.zeros((nelem,) + dim).to(dtype)
     arange = np.arange(nelem)
     indices = np.unravel_index(arange, dim)
@@ -234,6 +237,5 @@ def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
 
 def getjac(tensor: Tensor, out: Tensor) -> Tensor:
     dim = out.dim + tensor.dim
-    assert out.dtype is not None
     jac = nura.zeros(dim).to(out.dtype)
     return jac
