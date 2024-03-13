@@ -8,25 +8,25 @@ from typing import Union, Optional, Any
 
 def add(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    out = fn.Add.apply(a, b)
+    out = fn._Add.apply(a, b)
     return out
 
 
 def sub(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    out = fn.Sub.apply(a, b)
+    out = fn._Sub.apply(a, b)
     return out
 
 
 def mul(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    out = fn.Mul.apply(a, b)
+    out = fn._Mul.apply(a, b)
     return out
 
 
 def div(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    out = fn.Div.apply(a, b)
+    out = fn._Div.apply(a, b)
     return out
 
 
@@ -34,7 +34,7 @@ def dot(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
     assert a.ndim >= 1 and b.ndim >= 1
     assert utils.typesmatch(a, b)
-    out = fn.Dot.apply(a, b)
+    out = fn._Dot.apply(a, b)
     return out
 
 
@@ -43,13 +43,13 @@ def matmul(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     assert a.ndim >= 2 and b.ndim >= 2
     assert a.dim[-1] == b.dim[-2]
     assert utils.typesmatch(a, b)
-    out = fn.Matmul.apply(a, b)
+    out = fn._Matmul.apply(a, b)
     return out
 
 
 def pow(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    out = fn.Pow.apply(a, b)
+    out = fn._Pow.apply(a, b)
     return out
 
 
@@ -63,32 +63,32 @@ def sqrt(a: Union[Tensor, Any]):
 
 def exp(a: Union[Tensor, Any]):
     a = utils.atot(a)[0]
-    out = fn.Exp.apply(a)
+    out = fn._Exp.apply(a)
     return out
 
 
 def log(a: Union[Union[Tensor, Any], Any]):
     a = utils.atot(a)[0]
-    out = fn.Log.apply(a)
+    out = fn._Log.apply(a)
     return out
 
 
 def sin(a: Union[Tensor, Any]):
     a = utils.atot(a)[0]
-    out = fn.Sin.apply(a)
+    out = fn._Sin.apply(a)
     return out
 
 
 def cos(a: Union[Tensor, Any]):
     a = utils.atot(a)[0]
-    out = fn.Cos.apply(a)
+    out = fn._Cos.apply(a)
     return out
 
 
 def sum(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     if dim is None:
         dim = tuple(range(a.ndim))
-    out = fn.Sum.apply(a, dim, keepdims)
+    out = fn._Sum.apply(a, dim, keepdims)
     return out
 
 
@@ -96,7 +96,7 @@ def max(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     b = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
-    out = fn.Max.apply(b, dim, keepdims)
+    out = fn._Max.apply(b, dim, keepdims)
     return out
 
 
@@ -104,67 +104,67 @@ def min(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     if dim is None:
         dim = tuple(range(a.ndim))
     a = utils.atot(a)[0]
-    out = fn.Min.apply(a, dim, keepdims)
+    out = fn._Min.apply(a, dim, keepdims)
     return out
 
 
 def transpose(a: Tensor, dim0=-2, dim1=-1):
-    out = fn.Transpose.apply(a, dim0, dim1)
+    out = fn._Transpose.apply(a, dim0, dim1)
     return out
 
 
 def permute(a: Tensor, dims: Optional[dim] = None):
-    out = fn.Permute.apply(a, dims)
+    out = fn._Permute.apply(a, dims)
     return out
 
 
 def squeeze(a: Tensor, dim: Optional[dimlike] = None):
     if dim is None:
         dim = tuple(np.where(np.array(a.dim) == 1)[0])
-    out = fn.Squeeze.apply(a, dim=dim)
+    out = fn._Squeeze.apply(a, dim=dim)
     return out
 
 
 def unsqueeze(a: Tensor, dim: Optional[dimlike] = None):
     if dim is None:
         dim = 0
-    out = fn.Unsqueeze.apply(a, dim)
+    out = fn._Unsqueeze.apply(a, dim)
     return out
 
 
 def view(a: Tensor, newdim: dim):
-    out = fn.View.apply(a, newdim)
+    out = fn._View.apply(a, newdim)
     return out
 
 
 def reshape(a: Tensor, newdim: dim):
     a = tocontig(a)
-    out = fn.Reshape.apply(a, newdim)
+    out = fn._Reshape.apply(a, newdim)
     return out
 
 
 def abs(a: Union[Tensor, Any]):
     a = utils.atot(a)[0]
-    return fn.Abs.apply(a)
+    return fn._Abs.apply(a)
 
 
 def pos(a: Union[Tensor, Any]):
     a = utils.atot(a)[0]
-    return fn.Pos.apply(a)
+    return fn._Pos.apply(a)
 
 
 def neg(a: Union[Tensor, Any]):
     a = utils.atot(a)[0]
-    return fn.Neg.apply(a)
+    return fn._Neg.apply(a)
 
 
 def clone(a: Tensor):
-    out = fn.Clone.apply(a)
+    out = fn._Clone.apply(a)
     return out
 
 
 def slice(a: Tensor, slc: slice):
-    out = fn.Slice.apply(a, slc)
+    out = fn._Slice.apply(a, slc)
     return out
 
 

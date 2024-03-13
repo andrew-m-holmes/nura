@@ -6,11 +6,16 @@ from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    assert out.gradtensor and out.backfn
+    if out.backfn is None:
+        raise ValueError(
+            "Cannot backpropagate gradients for Tensor with no backward function"
+        )
     if grad is None:
-        assert out.nelem == 1
+        if out.nelem != 1:
+            raise RuntimeError(
+                f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
+            )
         grad = nura.oneslike(out)
-    assert grad.gradtensor
     _backward(out, grad)
 
 

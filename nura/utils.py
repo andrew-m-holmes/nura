@@ -14,7 +14,7 @@ def empty(dim: dimlike, dtype: Optional[Type[dtype]] = None):
 
 def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
-        dtype = nura.float
+        dtype = nura.float if dtype is nura.bool else a.dtype
     data = a.data
     empty_arr = np.empty_like(data)
     return tensor(empty_arr, dtype=dtype)
@@ -30,7 +30,7 @@ def zeros(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
 
 def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = nura.float if dtype is nura.bool else a.dtype
     data = a.data
     zero_arr = np.zeros_like(data)
     return tensor(zero_arr, usegrad, dtype)
@@ -46,7 +46,7 @@ def ones(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Te
 
 def oneslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = nura.float if dtype is nura.bool else a.dtype
     data = a.data
     ones_arr = np.ones_like(data)
     return tensor(ones_arr, usegrad, dtype)
@@ -66,7 +66,11 @@ def randn(
 
 def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = (
+            nura.float
+            if a.dtype not in (nura.half, nura.float, nura.double)
+            else a.dtype
+        )
     dim = a.dim
     return randn(dim, usegrad, dtype)
 
@@ -85,7 +89,11 @@ def rand(
 
 def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = (
+            nura.float
+            if a.dtype not in (nura.half, nura.float, nura.double)
+            else a.dtype
+        )
     dim = a.dim
     return rand(dim, usegrad, dtype)
 
@@ -104,12 +112,18 @@ def randintlike(
     low: int, high: int, a: Tensor, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
     if dtype is None:
-        dtype = nura.int
+        dtype = (
+            nura.int
+            if dtype in (nura.half, nura.float, nura.double, nura.bool)
+            else a.dtype
+        )
     dim = a.dim
     return randint(low, high, dim, dtype)
 
 
 def identity(n: int, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    if dtype is None:
+        dtype = nura.float
     data = np.identity(n)
     return tensor(data, usegrad, dtype)
 
@@ -140,14 +154,24 @@ def eye(
 
 
 def where(
-    condition: Union[Tensor, bool],
+    logical: Union[Tensor, bool],
     x: Union[Tensor, float, int, bool],
     y: Union[Tensor, float, int, bool],
-):
-    data = condition.data if isinstance(condition, Tensor) else condition
+) -> Tensor:
+    data = logical.data if isinstance(logical, Tensor) else logical
     xdata = x.data if isinstance(x, Tensor) else x
     ydata = y.data if isinstance(y, Tensor) else y
     return tensor(np.where(data, xdata, ydata))
+
+
+def poswhere(logical: Union[Tensor, bool]) -> Tensor:
+    data = logical.data if isinstance(logical, Tensor) else logical
+    return tensor(np.where(data))
+
+
+def nonzero(a: Tensor):
+    data = np.nonzero(a.data)
+    return tensor(data)
 
 
 def argmax(a: Tensor, pos: Optional[int] = None, keepdims=False):

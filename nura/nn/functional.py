@@ -1,5 +1,5 @@
 import nura.functional as f
-import nura.nn.functions as nnfn
+import nura.nn.functions as fn
 from nura.tensors import Tensor
 from nura.utils import atot
 from typing import Optional
@@ -12,25 +12,25 @@ def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
     return out
 
 
-def sigmoid(z: Tensor, eps=1e-6):
-    out = 1.0 / (1.0 + f.exp(-z) + eps)
+def sigmoid(z: Tensor):
+    out = 1.0 / (1.0 + f.exp(-z))
     return out
 
 
-def tanh(z: Tensor, eps=1e-6):
+def tanh(z: Tensor):
     e = f.exp(z)
     ne = f.exp(-z)
-    out = (e - ne) / (e + ne + eps)
+    out = (e - ne) / (e + ne)
     return out
 
 
 def relu(z: Tensor):
     z = atot(z)[0]
-    out = nnfn.ReLU.apply(z)
+    out = fn._ReLU.apply(z)
     return out
 
 
-def softmax(a: Tensor, dim=-1, eps=1e-6):
+def softmax(a: Tensor, dim=-1):
     e = f.exp(a)
-    out = e / (e.sum(dim, keepdims=False) + eps)
+    out = e / (e.sum(dim, keepdims=False))
     return out

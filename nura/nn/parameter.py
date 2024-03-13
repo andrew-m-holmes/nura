@@ -8,8 +8,6 @@ from numpy import ndarray
 
 class Parameter(Tensor):
 
-    _gradtensor = True
-
     def __init__(
         self,
         data: ndarray,
@@ -30,10 +28,11 @@ class Parameter(Tensor):
 def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
     validtypes = (nura.half, nura.float, nura.double)
     if dtype is None:
-        assert a.dtype is not None
         dtype = a.dtype
-    assert dtype in validtypes, f"Parameter cannot be type {dtype.name()}"
+    if dtype not in validtypes:
+        raise ValueError(
+            f"Parameters can only be of floating-point types, received {dtype.name()}"
+        )
     data = dtype.numpy(a.data)
     p = Parameter(data, usegrad, None, None, True)
-    p._dtype = dtype
     return p

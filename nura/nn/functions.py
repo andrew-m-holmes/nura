@@ -3,7 +3,7 @@ from nura.autograd.function import Function, Context
 from nura.tensors import Tensor
 
 
-class ReLU(Function):
+class _ReLU(Function):
 
     @staticmethod
     def forward(context: Context, z: Tensor):
@@ -23,9 +23,9 @@ class ReLU(Function):
         return mask * zgrad.data
 
 
-class LeakyReLU(Function):
+class _LeakyReLU(Function):
     pass
 
 
-class GeLU(Function):
+class _GeLU(Function):
     pass

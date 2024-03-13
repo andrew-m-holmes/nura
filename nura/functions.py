@@ -5,7 +5,7 @@ from nura.types import dim, dimlike
 from typing import Any
 
 
-class Add(Function):
+class _Add(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -23,7 +23,7 @@ class Add(Function):
         return arr
 
 
-class Sub(Function):
+class _Sub(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -41,7 +41,7 @@ class Sub(Function):
         return arr
 
 
-class Mul(Function):
+class _Mul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -63,7 +63,7 @@ class Mul(Function):
         return arr
 
 
-class Div(Function):
+class _Div(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -87,7 +87,7 @@ class Div(Function):
         return arr
 
 
-class Dot(Function):
+class _Dot(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -118,7 +118,7 @@ class Dot(Function):
         return arr
 
 
-class Matmul(Function):
+class _Matmul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -142,7 +142,7 @@ class Matmul(Function):
         return arr
 
 
-class Pow(Function):
+class _Pow(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -168,7 +168,7 @@ class Pow(Function):
         return arr0 + arr1
 
 
-class Exp(Function):
+class _Exp(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -188,7 +188,7 @@ class Exp(Function):
         return arr * agrad.data
 
 
-class Log(Function):
+class _Log(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -209,7 +209,7 @@ class Log(Function):
         return arr
 
 
-class Sin(Function):
+class _Sin(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -230,7 +230,7 @@ class Sin(Function):
         return arr
 
 
-class Cos(Function):
+class _Cos(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -251,7 +251,7 @@ class Cos(Function):
         return arr
 
 
-class Sum(Function):
+class _Sum(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
@@ -280,7 +280,7 @@ class Sum(Function):
         return arr
 
 
-class Max(Function):
+class _Max(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
@@ -317,7 +317,7 @@ class Max(Function):
         return np.max(graddata, axis=dim, keepdims=keepdims)
 
 
-class Min(Function):
+class _Min(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
@@ -354,7 +354,7 @@ class Min(Function):
         return np.min(graddata, axis=dim, keepdims=keepdims)
 
 
-class Squeeze(Function):
+class _Squeeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike):
@@ -376,7 +376,7 @@ class Squeeze(Function):
         return arr
 
 
-class Unsqueeze(Function):
+class _Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike):
@@ -398,7 +398,7 @@ class Unsqueeze(Function):
         return arr
 
 
-class View(Function):
+class _View(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, newdim: dim):
@@ -420,7 +420,7 @@ class View(Function):
         return arr
 
 
-class Reshape(Function):
+class _Reshape(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, newdim: dim):
@@ -442,7 +442,7 @@ class Reshape(Function):
         return arr
 
 
-class Transpose(Function):
+class _Transpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim0: int, dim1: int):
@@ -467,7 +467,7 @@ class Transpose(Function):
         return arr
 
 
-class Permute(Function):
+class _Permute(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: dimlike):
@@ -489,7 +489,7 @@ class Permute(Function):
         return arr
 
 
-class Abs(Function):
+class _Abs(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -509,7 +509,7 @@ class Abs(Function):
         return agrad.data * mask
 
 
-class Pos(Function):
+class _Pos(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -525,7 +525,7 @@ class Pos(Function):
         return agrad.data.copy()
 
 
-class Neg(Function):
+class _Neg(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -541,7 +541,7 @@ class Neg(Function):
         return agrad.data * -1.0
 
 
-class Clone(Function):
+class _Clone(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -558,7 +558,7 @@ class Clone(Function):
         return agrad.data.copy()
 
 
-class Slice(Function):
+class _Slice(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, slc: slice):

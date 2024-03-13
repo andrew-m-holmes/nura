@@ -17,58 +17,35 @@ class ReLU(Module):
 
 class Sigmoid(Module):
 
-    def __init__(self, eps=1e-6) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self._eps = eps
-
-    @property
-    def eps(self):
-        return self._eps
 
     def forward(self, z: Tensor):
-        return nnfn.sigmoid(z, self.eps)
-
-    def xrepr(self) -> str:
-        eps = self.eps
-        return f"{super().xrepr()}({eps=})"
+        return nnfn.sigmoid(z)
 
 
 class Softmax(Module):
 
-    def __init__(self, dim=-1, eps=1e-6) -> None:
+    def __init__(self, dim=-1) -> None:
         super().__init__()
         self._dim = dim
-        self._eps = eps
 
     @property
     def dim(self):
         return self._dim
 
-    @property
-    def eps(self):
-        return self._eps
-
     def forward(self, a: Tensor):
-        return nnfn.softmax(a, self.dim, self.eps)
+        return nnfn.softmax(a, self.dim)
 
     def xrepr(self) -> str:
-        dim, eps = self.dim, self.eps
-        return f"{super().xrepr()}({dim=} {eps=})"
+        dim = self.dim
+        return f"{super().xrepr()}({dim=})"
 
 
 class Tanh(Module):
 
-    def __init__(self, eps=1e-6) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self._eps = eps
-
-    @property
-    def eps(self):
-        return self._eps
 
     def forward(self, z: Tensor):
-        return nnfn.tanh(z, self.eps)
-
-    def xrepr(self) -> str:
-        eps = self.eps
-        return f"{super().xrepr()}({eps=})"
+        return nnfn.tanh(z)

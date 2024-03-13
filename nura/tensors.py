@@ -9,8 +9,6 @@ from copy import deepcopy
 
 class Tensor:
 
-    _gradtensor: Optional[bool] = None
-
     def __init__(
         self,
         data: ndarray,
@@ -274,15 +272,15 @@ class Tensor:
         return self.dim[0]
 
     def __repr__(self) -> str:
-        base = repr(self._data).replace("array(", "").replace(",", "")
-        if " dtype" in base:
-            i = base.index(" dtype")
-            base = base[:i]
-        strings = ["tensor(", base]
+        s = repr(self._data).replace("array(", "").replace(",", "")
+        if " dtype" in s:
+            i = s.index(" dtype")
+            s = s[:i]
+        strs = ["tensor(", s]
         if self.backfn is not None:
-            strings.append(f" backfn={repr(self.backfn)}")
-        strings.append(f" dtype={self.dtype.name()})")
-        return "".join(strings)
+            strs.append(f" backfn={repr(self.backfn)}")
+        strs.append(f" dtype={self.dtype.name()})")
+        return "".join(strs)
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
@@ -304,10 +302,10 @@ def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
         "backfn": "_backfn",
         "leaf": "_leaf",
     }
-    for name, val in attrs.items():
-        if name not in validattrs:
+    for k, v in attrs.items():
+        if k not in validattrs:
             raise AttributeError(
-                f"{name} is not a mutable member of {nura.typename(tensor)}"
+                f"{k} is not a mutable member of {nura.typename(tensor)}"
             )
-        setattr(tensor, validattrs[name], val)
+        setattr(tensor, validattrs[k], v)
     return tensor
