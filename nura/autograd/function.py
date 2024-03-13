@@ -21,7 +21,7 @@ class Context:
         if self._tensors is None:
             return False
         return any(t.usegrad for t in self._tensors) and all(
-            t.gradtensor() for t in self._tensors
+            t.gradtensor for t in self._tensors
         )
 
     def __setitem__(self, key: Any, value: Any):

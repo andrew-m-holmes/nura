@@ -239,4 +239,4 @@ def istensor(obj: Any) -> bool:
 
 
 def typename(a: Tensor) -> str:
-    return a.__class__.__name__
+    return f"{a.dtype.name().capitalize()}{a.__class__.__name__}"

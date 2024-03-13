@@ -9,7 +9,6 @@ from copy import deepcopy
 
 class Tensor:
 
-    _dtype: Optional[Type[dtype]] = None
     _gradtensor: Optional[bool] = None
 
     def __init__(
@@ -67,9 +66,9 @@ class Tensor:
     def T(self):
         return self.transpose()
 
-    @classmethod
-    def gradtensor(cls):
-        return cls._gradtensor
+    @property
+    def gradtensor(self):
+        return self.dtype in (types.half, types.float, types.double)
 
     def item(self):
         assert self.nelem == 1
@@ -257,8 +256,6 @@ class Tensor:
             "_grad",
             "_backfn",
             "_leaf",
-            "_dtype",
-            "_mutable",
         }
         if name not in validnames:
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
@@ -278,112 +275,22 @@ class Tensor:
         if " dtype" in base:
             i = base.index(" dtype")
             base = base[:i]
-        s = "tensor(" + base
+        strings = ["tensor(", base]
         if self.backfn is not None:
-            s += " backfn=" + str(self.backfn)
-        if self.dtype is not None:
-            s += " dtype=" + self.dtype.name()
-        s += ")"
-        return s
-
-
-class ByteTensor(Tensor):
-    _dtype = types.byte
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class CharTensor(Tensor):
-    _dtype = types.char
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class ShortTensor(Tensor):
-    _dtype = types.short
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class IntTensor(Tensor):
-    _dtype = types.int
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class LongTensor(Tensor):
-    _dtype = types.long
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class HalfTensor(Tensor):
-    _dtype = types.half
-    _gradtensor = True
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class FloatTensor(Tensor):
-    _dtype = types.float
-    _gradtensor = True
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class DoubleTensor(Tensor):
-    _dtype = types.double
-    _gradtensor = True
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class BoolTensor(Tensor):
-    _dtype = types.bool
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-def getcls(dtype) -> Type:
-    dtypemap = {
-        nura.byte: ByteTensor,
-        nura.char: CharTensor,
-        nura.short: ShortTensor,
-        nura.int: IntTensor,
-        nura.long: LongTensor,
-        nura.half: HalfTensor,
-        nura.float: FloatTensor,
-        nura.double: DoubleTensor,
-        nura.bool: BoolTensor,
-    }
-    return dtypemap[dtype]
+            strings.append(f" backfn={repr(self.backfn)}")
+        strings.append(f" dtype={self.dtype.name()})")
+        return "".join(strings)
 
 
 def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
-    cls = getcls(dtype)
-    if usegrad and not cls.gradtensor():
+    if usegrad and dtype not in (nura.half, nura.float, nura.double):
         raise ValueError(
-            f"Only Tensors of type float or double can use gradient, received {dtype.name()}"
+            f"Only Tensors floating-point tensors can use gradient, received {dtype.name()}"
         )
-    return cls(data, usegrad, None, None, True)
+    return Tensor(data, usegrad, None, None, True)
 
 
 def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
@@ -393,10 +300,11 @@ def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
         "grad": "_grad",
         "backfn": "_backfn",
         "leaf": "_leaf",
-        "dtype": "_dtype",
     }
     for name, val in attrs.items():
         if name not in validattrs:
-            raise AttributeError(f"{name} is not a member of {nura.typename(tensor)}")
+            raise AttributeError(
+                f"{name} is not a mutable member of {nura.typename(tensor)}"
+            )
         setattr(tensor, validattrs[name], val)
     return tensor
