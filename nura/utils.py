@@ -5,7 +5,7 @@ from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
-def empty(dim: Union[dim, int], dtype: Optional[Type[dtype]] = None):
+def empty(dim: dimlike, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
         dtype = nura.float
     empty_arr = np.empty(dim)
@@ -137,6 +137,17 @@ def eye(
         dtype = nura.float
     data = np.eye(n, m, k)
     return tensor(data, dtype=dtype)
+
+
+def where(
+    condition: Union[Tensor, bool],
+    x: Union[Tensor, float, int, bool],
+    y: Union[Tensor, float, int, bool],
+):
+    data = condition.data if isinstance(condition, Tensor) else condition
+    xdata = x.data if isinstance(x, Tensor) else x
+    ydata = y.data if isinstance(y, Tensor) else y
+    return tensor(np.where(data, xdata, ydata))
 
 
 def argmax(a: Tensor, pos: Optional[int] = None, keepdims=False):

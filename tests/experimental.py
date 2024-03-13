@@ -6,9 +6,7 @@ import torch.nn as tnn
 
 def main():
 
-    a = nura.tensor(1.0, usegrad=True)
-    b = a.bool()
-    print(b.usegrad)
+    a = nura.rand((4, 4))
 
 
 if __name__ == "__main__":

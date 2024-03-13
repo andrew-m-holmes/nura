@@ -27,12 +27,8 @@ class Tensor:
         self._leaf: bool = leaf
 
     @property
-    def data(self):
+    def data(self) -> ndarray:
         return self._data
-
-    @property
-    def dtype(self) -> Type[dtype]:
-        return types.dtypeof(self.data)
 
     @property
     def dim(self) -> dim:
@@ -47,31 +43,38 @@ class Tensor:
         return self._data.size
 
     @property
-    def usegrad(self):
+    def usegrad(self) -> bool:
         return self._usegrad
 
     @property
-    def grad(self):
+    def grad(self) -> Optional["Tensor"]:
         return self._grad
 
     @property
-    def backfn(self):
+    def backfn(self) -> Optional[Node]:
         return self._backfn
 
     @property
-    def leaf(self):
+    def leaf(self) -> bool:
         return self._leaf
+
+    @property
+    def dtype(self) -> Type[dtype]:
+        return types.dtypeof(self.data)
+
+    @property
+    def gradtensor(self) -> bool:
+        return self.dtype in (types.half, types.float, types.double)
 
     @property
     def T(self):
         return self.transpose()
 
-    @property
-    def gradtensor(self):
-        return self.dtype in (types.half, types.float, types.double)
-
     def item(self):
-        assert self.nelem == 1
+        if self.nelem != 1:
+            raise RuntimeError(
+                f"Cannot retrieve a single element from a Tensor with {self.nelem} elements"
+            )
         return self.data.item()
 
     def to(self, dtype: Type[types.dtype]):
