@@ -216,7 +216,8 @@ def typesmatch(*tensors: Tensor) -> bool:
 
 
 def to(a: Tensor, dtype: Type[dtype]):
-    assert istensor(a)
+    if not istensor(a):
+        raise ValueError(f"Expected Tensor, received {a.__class__.__name__}")
     data = dtype.numpy(a.data)
     return tensor(data, a.usegrad, dtype)
 

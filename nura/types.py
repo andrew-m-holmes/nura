@@ -100,5 +100,6 @@ def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, list):
         return dtypemap[np.array(data).dtype]
     dtype = type(data)
-    assert dtype in dtypemap
+    if dtype not in dtypemap:
+        raise KeyError(f"Couldn't find {dtype} in dtype table")
     return dtypemap[dtype]
