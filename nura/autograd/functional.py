@@ -6,29 +6,11 @@ from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    if err := backwarderr(out, grad):
+    if err := _backwarderr(out, grad):
         raise err
     if grad is None:
         grad = nura.oneslike(out)
     _backward(out, grad)
-
-
-def backwarderr(
-    out: Tensor, grad: Optional[Tensor] = None
-) -> Optional[Union[RuntimeError, ValueError]]:
-    if out.backfn is None:
-        return RuntimeError(
-            "Cannot backpropagate gradients for Tensor with no backward function"
-        )
-    if grad is None and out.nelem != 1:
-        return RuntimeError(
-            f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
-        )
-    elif grad is not None and not grad.gradtensor:
-        return ValueError(
-            f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
-        )
-    return None
 
 
 def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
@@ -51,21 +33,31 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             queue.extend(items)
 
 
+def _backwarderr(
+    out: Tensor, grad: Optional[Tensor] = None
+) -> Optional[Union[RuntimeError, ValueError]]:
+    if out.backfn is None:
+        return RuntimeError(
+            "Cannot backpropagate gradients for Tensor with no backward function"
+        )
+    if grad is None and out.nelem != 1:
+        return RuntimeError(
+            f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
+        )
+    elif grad is not None and not grad.gradtensor:
+        return ValueError(
+            f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
+        )
+    return None
+
+
 def grad(
     inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
-    if not (all(t.gradtensor for t in inpt) and out.gradtensor):
-        raise ValueError("Received Tensor(s) that doesn't use gradients")
-    if out.backfn is None:
-        raise ValueError(
-            "Cannot backpropagate gradients for Tensor with no backward function"
-        )
+    if err := _graderr(inpt, out, grad):
+        raise err
     if grad is None:
-        if out.nelem != 1:
-            raise RuntimeError(
-                f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
-            )
         grad = nura.oneslike(out)
     inptmap = _grad(inpt, out, grad)
     return tuple(inptmap.values())
@@ -92,6 +84,28 @@ def _grad(
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
     return inptmap
+
+
+def _graderr(
+    inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
+) -> Optional[Union[RuntimeError, ValueError]]:
+    if not all(t.gradtensor for t in inpt):
+        return ValueError(
+            "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
+        )
+    if out.backfn is None:
+        return ValueError(
+            "Cannot backpropagate gradients for Tensor with no backward function"
+        )
+    if grad is None and out.nelem != 1:
+        return RuntimeError(
+            f"A gradient (grad) must be passed if the output Tensor (out) has more than one elements, received Tensor with {out.nelem}"
+        )
+    elif grad is not None and not grad.gradtensor:
+        return ValueError(
+            f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
+        )
+    return None
 
 
 def mapify(keys, values) -> Dict[Tensor, Any]:
@@ -144,10 +158,24 @@ def _vjp(
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
+    if err := _vjperr(inpt, vec):
+        raise err
     with nura.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
     inptmap = _grad(inpt, out, vec)
     return out, tuple(inptmap.values())
+
+
+def _vjperr(inpt: Tuple[Tensor, ...], vec: Tensor) -> Optional[ValueError]:
+    if not all(t.gradtensor for t in inpt):
+        return ValueError(
+            "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
+        )
+    if not vec.gradtensor:
+        return ValueError(
+            f"Expected Tensor passed to 'vec' to be a floating-point type, received {vec.dtype.name()}"
+        )
+    return None
 
 
 def jvp(
@@ -160,8 +188,8 @@ def jvp(
 
     inpt = tupify(inpt)
     vec = tupify(vec)
-    assert all(t.gradtensor for t in inpt)
-    assert all(v.gradtensor for v in vec)
+    if err := _jvperr(inpt, vec):
+        raise err
     gen = (v for v in vec)
     inpt = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in inpt)
     out, grad = _jvp(inpt, f, *args, **kwargs)
@@ -180,6 +208,18 @@ def _jvp(
     return out, out.grad
 
 
+def _jvperr(inpt: Tuple[Tensor, ...], vec: Tuple[Tensor, ...]) -> Optional[ValueError]:
+    if not all(t.gradtensor for t in inpt):
+        return ValueError(
+            "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
+        )
+    if not all(v.gradtensor for v in vec):
+        return ValueError(
+            "One or more Tensors passed to argument 'vec' cannot be used to compute jvp() because they're not a floating-point type"
+        )
+    return None
+
+
 def jacrev(
     inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
@@ -189,7 +229,8 @@ def jacrev(
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
+    if err := _jacerr(inpt):
+        raise err
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     with nura.autograd(enabled=True, reverse=True, forward=False):
         out = f(*inpt, *args, **kwargs)
@@ -215,7 +256,8 @@ def jacfwd(
 ) -> Tuple[Tensor, Tensor]:
 
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
+    if err := _jacerr(inpt):
+        raise err
     with nura.autograd(enabled=False):
         out = f(*inpt, *args, **kwargs)
     tensor = inpt[pos]
@@ -231,6 +273,14 @@ def jacfwd(
         slc = (...,) + col
         jac[slc] = jaccol
     return out, jac
+
+
+def _jacerr(inpt: Tuple[Tensor, ...]) -> Optional[ValueError]:
+    if not all(t.gradtensor for t in inpt):
+        return ValueError(
+            "Cannot compute Jacobian because one or more Tensors passed to 'inpt' are not a floating-point type"
+        )
+    return None
 
 
 def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
