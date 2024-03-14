@@ -6,20 +6,28 @@ from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    if out.backfn is None:
-        raise RuntimeError(
-            "Cannot backpropagate gradients for Tensor with no backward function"
-        )
+    if err := backwarderr(out, grad):
+        raise err
     if grad is None:
-        if out.nelem != 1:
-            raise RuntimeError(
-                f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
-            )
         grad = nura.oneslike(out)
     _backward(out, grad)
 
 
-def nobackfn(tensor: Tensor) -> Optional[RuntimeError]:
+def backwarderr(
+    out: Tensor, grad: Optional[Tensor] = None
+) -> Optional[Union[RuntimeError, ValueError]]:
+    if out.backfn is None:
+        return RuntimeError(
+            "Cannot backpropagate gradients for Tensor with no backward function"
+        )
+    if grad is None and out.nelem != 1:
+        return RuntimeError(
+            f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
+        )
+    elif grad is not None and not grad.gradtensor:
+        return ValueError(
+            f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
+        )
     return None
 
 
