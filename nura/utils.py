@@ -246,7 +246,6 @@ def atot(*args: Any) -> Union[Tuple[Tensor, ...], Tensor]:
 
 
 def typesmatch(*tensors: Tensor) -> bool:
-    assert all(t.dtype is not None for t in tensors)
     return len(set(t.dtype for t in tensors)) == 1
 
 
