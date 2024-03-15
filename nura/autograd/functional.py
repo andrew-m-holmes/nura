@@ -262,13 +262,13 @@ def jacfwd(
     tensor = inpt[pos]
     perts = getperts(tensor)
     jac = getjac(tensor, out)
-    left = tuple(nura.zeroslike(inpt[i]) for i in range(pos))
-    right = tuple(nura.zeroslike(inpt[i]) for i in range(pos + 1, len(inpt)))
-
+    colinpt = [
+        t.mutated(usegrad=True, grad=nura.zeroslike(t)) if i != pos else t
+        for i, t in enumerate(inpt)
+    ]
     for col, pert in zip(np.ndindex(tensor.dim), perts):
-        gen = (v for v in (left + (pert,) + right))
-        colinpt = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in inpt)
-        _, jaccol = _jvp(colinpt, f, *args, **kwargs)
+        colinpt[pos] = colinpt[pos].mutated(usegrad=True, grad=pert)
+        _, jaccol = _jvp(tuple(colinpt), f, *args, **kwargs)
         slc = (...,) + col
         jac[slc] = jaccol
     return out, jac
