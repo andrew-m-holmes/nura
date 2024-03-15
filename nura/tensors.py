@@ -125,7 +125,7 @@ class Tensor:
 
     def copy(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data.copy(), self.usegrad, None, None, True)
+        return cls(self.data.copy(), self.usegrad, self.grad, None, True)
 
     def deepcopy(self) -> "Tensor":
         grad = self.grad.copy() if self.grad is not None else None
@@ -139,7 +139,7 @@ class Tensor:
     def clone(self):
         return nura.clone(self)
 
-    def contig(self):
+    def contiguous(self):
         return nura.tocontig(self)
 
     def sum(self, dim: Optional[dimlike] = None, keepdims=False):

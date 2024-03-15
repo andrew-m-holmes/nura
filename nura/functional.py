@@ -32,29 +32,12 @@ def div(a: Union[Tensor, Any], b: Union[Tensor, Any]):
 
 def dot(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    if err := _doterr(a, b):
-        raise err
     out = fn._Dot.apply(a, b)
     return out
 
 
-def _doterr(a: Tensor, b: Tensor) -> Optional[RuntimeError]:
-    if not a.ndim:
-        return RuntimeError("Cannot compute dot() with scalar in argument 'a'")
-    if not b.ndim:
-        return RuntimeError("Cannot compute dot() with scalar in argument 'b'")
-    if not utils.typesmatch(a, b):
-        raise RuntimeError(
-            f"Cannot compute dot() with type mismatch {a.dtype.name()} != {b.dtype.name()}"
-        )
-    return None
-
-
 def matmul(a: Union[Tensor, Any], b: Union[Tensor, Any]):
     a, b = utils.atot(a, b)
-    assert a.ndim >= 2 and b.ndim >= 2
-    assert a.dim[-1] == b.dim[-2]
-    assert utils.typesmatch(a, b)
     out = fn._Matmul.apply(a, b)
     return out
 

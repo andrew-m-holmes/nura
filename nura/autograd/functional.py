@@ -79,7 +79,7 @@ def _grad(
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
-            inptmap[tensor] = newgrad
+            inptmap[tensor] = newgrad.to(tensor.dtype)
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
@@ -143,8 +143,8 @@ def vjp(
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
 
     inpt = tupify(inpt)
-    assert all(t.gradtensor for t in inpt)
-    assert vec.gradtensor
+    if err := _vjperr(inpt, vec):
+        raise err
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None)
     out, grads = _vjp(inpt, vec, f, *args, **kwargs)
@@ -239,8 +239,7 @@ def jacrev(
     perts = getperts(out)
 
     for row, pert in zip(np.ndindex(out.dim), perts):
-        rowinpt = tuple(map(lambda t: t.mutated(grad=None), inpt))
-        _, grads = _vjp(rowinpt, pert, f, *args, **kwargs)
+        _, grads = _vjp(inpt, pert, f, *args, **kwargs)
         jacrow = grads[pos]
         slc = row + (...,)
         jac[slc] = jacrow
