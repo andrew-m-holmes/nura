@@ -49,7 +49,7 @@ Thank you in advance for any contributions made!
 
 ---
 
-## CCntact
+## Contact
 
 - **LinkedIn**: [Andrew Holmes](https://www.linkedin.com/in/andrewmicholmes/)
 - **Email**: andrewholmes01100@gmail.com
