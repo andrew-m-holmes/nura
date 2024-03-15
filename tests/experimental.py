@@ -22,21 +22,14 @@ def main():
             out = self.sig(self.fc3(x))
             return out
 
-    model = Model()
-    x = nura.rand((1, 3))
-    out = model(x)
-    out.backward()
-
-    def fn(a, b):
-        return a * b
-
-    a = nura.rand(3)
-    b = nura.randnlike(a)
-
-    out, jac = jacfwd((a, b), fn, pos=0)
-    print(jac)
-    out, jac = jacrev((a, b), fn, pos=0)
-    print(jac)
+    x = nura.rand(3, usegrad=True)
+    a = nn.gelu(x)
+    print(a)
+    a.backward(nura.oneslike(a))
+    c = nn.elu(a)
+    c.backward(nura.oneslike(c))
+    d = nn.relu6(c)
+    d.backward(nura.oneslike(d))
 
 
 if __name__ == "__main__":
