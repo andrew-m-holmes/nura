@@ -22,15 +22,6 @@ def main():
             out = self.sig(self.fc3(x))
             return out
 
-    x = nura.rand(3, usegrad=True)
-    a = nn.gelu(x)
-    print(a)
-    a.backward(nura.oneslike(a))
-    c = nn.elu(a)
-    c.backward(nura.oneslike(c))
-    d = nn.relu6(c)
-    d.backward(nura.oneslike(d))
-
 
 if __name__ == "__main__":
     main()

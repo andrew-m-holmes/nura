@@ -1,6 +1,6 @@
 import nura
 import nura.types as types
-from nura.types import dtype, dim, dimlike
+from nura.types import dtype, dim, dimlike, tensorlike
 from nura.autograd.graph import Node
 from typing import Optional, Type, Any
 from numpy import ndarray
@@ -283,7 +283,9 @@ class Tensor:
         return "".join(strs)
 
 
-def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def tensor(
+    data: tensorlike, usegrad=False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)

@@ -1,10 +1,14 @@
 import numpy as np
-from typing import Type, Any, Tuple, Union
+from numpy import ndarray
+from typing import Type, Any, Tuple, Union, List
 
 
 _py_int = int
 _py_float = float
 _py_bool = bool
+_lists = Union[List[int], List[float], List[bool]]
+_scalars = Union[int, float, bool]
+tensorlike = Union[ndarray, _lists, _scalars]
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
 
@@ -14,7 +18,7 @@ class dtype:
     _wrapping = None
 
     @classmethod
-    def numpy(cls, data):
+    def numpy(cls, data) -> ndarray:
         if not isinstance(data, np.ndarray):
             data = np.array(data, cls._wrapping)
         if np.dtype(data.dtype) is not np.dtype(cls._wrapping):
@@ -22,7 +26,7 @@ class dtype:
         return data
 
     @classmethod
-    def name(cls):
+    def name(cls) -> str:
         return cls.__name__
 
 
