@@ -639,6 +639,86 @@ def test_min_forward_higher_rank_tensor():
     assert np.allclose(result_tensor.data, expected)
 
 
+def test_abs_forward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.absolute(a)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_abs_forward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.absolute(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_abs_forward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.absolute(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_pos_forward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = np.positive(a)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_pos_forward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = np.positive(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_pos_forward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = np.positive(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_neg_forward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = np.negative(a)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_neg_forward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = np.negative(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_neg_forward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = np.negative(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
 def test_squeeze_forward_rank1_v0():
     a = np.random.rand(1)
 
@@ -965,86 +1045,6 @@ def test_reshape_forward_with_negative_dim():
     a_tensor = nura.tensor(a)
     result_tensor = nura.reshape(a_tensor, (-1, 5))
     assert result_tensor.dim == (12, 5)
-
-
-def test_abs_forward_scalar():
-    a = np.random.rand() * np.random.choice([-1, 1])
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.abs(a_tensor)
-    expected = np.absolute(a)
-    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_abs_forward_vector():
-    a = np.random.rand(5) * np.random.choice([-1, 1])
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.abs(a_tensor)
-    expected = np.absolute(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_abs_forward_matrix():
-    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.abs(a_tensor)
-    expected = np.absolute(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_pos_forward_scalar():
-    a = np.random.rand() * np.random.choice([-1, 1])
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.pos(a_tensor)
-    expected = np.positive(a)
-    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_pos_forward_vector():
-    a = np.random.rand(5) * np.random.choice([-1, 1])
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.pos(a_tensor)
-    expected = np.positive(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_pos_forward_matrix():
-    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.pos(a_tensor)
-    expected = np.positive(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_neg_forward_scalar():
-    a = np.random.rand() * np.random.choice([-1, 1])
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.neg(a_tensor)
-    expected = np.negative(a)
-    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_neg_forward_vector():
-    a = np.random.rand(5) * np.random.choice([-1, 1])
-
-    a_tensor = nura.tensor(a)
-    result_tensor = f.neg(a_tensor)
-    expected = np.negative(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
-
-
-def test_neg_forward_matrix():
-    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
-    a_tensor = nura.tensor(a)
-    result_tensor = f.neg(a_tensor)
-    expected = np.negative(a)
-    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_clone_forward_scalar():

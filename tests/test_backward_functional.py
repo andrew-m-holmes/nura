@@ -954,6 +954,135 @@ def test_min_backward_higher_rank_tensor():
     assert grad_a.dim == a.shape
 
 
+def test_abs_backward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.abs(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.absolute(a + h) - np.absolute(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_abs_backward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.abs(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.absolute(a + h) - np.absolute(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_abs_backward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.abs(a_tensor)
+    ones = np.ones((3, 3))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.absolute(a + h) - np.absolute(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_pos_backward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.pos(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.positive(a + h) - np.positive(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_pos_backward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.pos(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.positive(a + h) - np.positive(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_pos_backward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.pos(a_tensor)
+    ones = np.ones((3, 3))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.positive(a + h) - np.positive(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_neg_backward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.neg(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.negative(a + h) - np.negative(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_neg_backward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.neg(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.negative(a + h) - np.negative(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_neg_backward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.neg(a_tensor)
+    ones = np.ones((3, 3))
+    m = nura.tensor(ones, dtype=nura.float)
+
+    result_tensor.backward(m)
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.negative(a + h) - np.negative(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
 def test_squeeze_backward_rank1_v0():
     a = np.random.rand(1)
 
