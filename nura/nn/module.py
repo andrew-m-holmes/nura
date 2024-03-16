@@ -1,10 +1,8 @@
 import nura.types as types
 from nura.types import dtype
-from nura.nn.parameter import Parameter, param
-from nura.tensors import Tensor
+from nura.nn.parameter import Parameter
 from collections import OrderedDict
 from typing import Type, Iterator, Tuple, Any
-from copy import copy, deepcopy
 
 
 class Module:
@@ -45,9 +43,6 @@ class Module:
         for m in self._mods.values():
             yield from m.namedparams()
 
-    def param(self, a: Tensor, dtype: Type[dtype]) -> Parameter:
-        return param(a, self.training, dtype)
-
     def to(self, dtype: Type[dtype]):
         params = OrderedDict()
         mods = OrderedDict()
@@ -55,8 +50,9 @@ class Module:
             params[n] = p.to(dtype)
         for n, m in self._mods.items():
             mods[n] = m.to(dtype)
-        mod = mutmod(self.copy(), mods=mods, params=params, training=self.training)
-        return mod
+        self._mods = mods
+        self._params = params
+        return self
 
     def half(self):
         return self.to(types.half)
@@ -68,23 +64,12 @@ class Module:
         return self.to(types.double)
 
     def train(self):
-        return self.mutated(training=True)
+        self._training = True
+        return self
 
     def eval(self):
-        return self.mutated(training=False)
-
-    def mutate(self, **attrs):
-        return mutmod(self, **attrs)
-
-    def mutated(self, **attrs):
-        mod = self.copy()
-        return mutmod(mod, **attrs)
-
-    def copy(self):
-        return copy(self)
-
-    def deepcopy(self):
-        return deepcopy(self)
+        self._training = False
+        return self
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)

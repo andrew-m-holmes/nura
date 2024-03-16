@@ -22,6 +22,9 @@ def main():
             out = self.sig(self.fc3(x))
             return out
 
+        x = nura.rand().usesgrad()
+        x.bool()
+
 
 if __name__ == "__main__":
     main()

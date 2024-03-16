@@ -1,20 +1,20 @@
 import numpy as np
-import nura
-from nura.types import dtype, dim, dimlike
+import nura.types as types
+from nura.types import dtype, dim, dimlike, tensorlike
 from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
 def empty(dim: dimlike, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     empty_arr = np.empty(dim)
     return tensor(empty_arr, dtype=dtype)
 
 
 def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
-        dtype = nura.float if dtype is nura.bool else a.dtype
+        dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
     empty_arr = np.empty_like(data)
     return tensor(empty_arr, dtype=dtype)
@@ -22,7 +22,7 @@ def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
 
 def zeros(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     dim = todim(dim)
     zero_arr = np.zeros(dim)
     return tensor(zero_arr, usegrad, dtype)
@@ -30,7 +30,7 @@ def zeros(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
 
 def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float if dtype is nura.bool else a.dtype
+        dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
     zero_arr = np.zeros_like(data)
     return tensor(zero_arr, usegrad, dtype)
@@ -38,7 +38,7 @@ def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
 
 def ones(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     dim = todim(dim)
     ones_arr = np.ones(dim)
     return tensor(ones_arr, usegrad, dtype)
@@ -46,7 +46,7 @@ def ones(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Te
 
 def oneslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float if dtype is nura.bool else a.dtype
+        dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
     ones_arr = np.ones_like(data)
     return tensor(ones_arr, usegrad, dtype)
@@ -58,7 +58,7 @@ def randn(
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     dim = todim(dim)
     randn_arr = np.random.randn(*dim)
     return tensor(randn_arr, usegrad, dtype)
@@ -67,8 +67,8 @@ def randn(
 def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = (
-            nura.float
-            if a.dtype not in (nura.half, nura.float, nura.double)
+            types.float
+            if a.dtype not in (types.half, types.float, types.double)
             else a.dtype
         )
     dim = a.dim
@@ -81,7 +81,7 @@ def rand(
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     dim = todim(dim)
     rand_arr = np.random.rand(*dim)
     return tensor(rand_arr, usegrad, dtype)
@@ -90,8 +90,8 @@ def rand(
 def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = (
-            nura.float
-            if a.dtype not in (nura.half, nura.float, nura.double)
+            types.float
+            if a.dtype not in (types.half, types.float, types.double)
             else a.dtype
         )
     dim = a.dim
@@ -102,7 +102,7 @@ def randint(
     low: int, high: int, dim: dimlike, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
     if dtype is None:
-        dtype = nura.int
+        dtype = types.int
     dim = todim(dim)
     randint_arr = np.random.randint(low, high, dim)
     return tensor(randint_arr, dtype=dtype)
@@ -113,8 +113,8 @@ def randintlike(
 ) -> Tensor:
     if dtype is None:
         dtype = (
-            nura.int
-            if dtype in (nura.half, nura.float, nura.double, nura.bool)
+            types.int
+            if dtype in (types.half, types.float, types.double, types.bool)
             else a.dtype
         )
     dim = a.dim
@@ -123,7 +123,7 @@ def randintlike(
 
 def identity(n: int, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     data = np.identity(n)
     return tensor(data, usegrad, dtype)
 
@@ -135,7 +135,7 @@ def full(
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     dim = todim(dim)
     data = np.full(dim, num)
     return tensor(data, usegrad, dtype)
@@ -148,7 +148,7 @@ def eye(
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
-        dtype = nura.float
+        dtype = types.float
     data = np.eye(n, m, k)
     return tensor(data, dtype=dtype)
 
@@ -169,9 +169,9 @@ def poswhere(logical: Union[Tensor, bool]) -> Tensor:
     return tensor(np.where(data)[0])
 
 
-def nonzero(a: Tensor):
-    data = np.nonzero(a.data)
-    return tensor(data)
+def nonzero(a: Tensor) -> Tuple[Tensor, ...]:
+    arrs = np.nonzero(a.data)
+    return tuple(map(tensor, arrs))
 
 
 def argmax(a: Tensor, pos: Optional[int] = None, keepdims=False):
@@ -196,47 +196,47 @@ def hashtensor(a: Tensor) -> int:
     return hash(id(a))
 
 
-def equal(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
-    a, b = nura.atot(a, b)
+def equal(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+    a, b = atot(a, b)
     return tensor(np.equal(a.data, b.data))
 
 
-def less(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def less(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.less(a.data, b.data))
 
 
-def lesseq(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def lesseq(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.less_equal(a.data, b.data))
 
 
-def greater(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def greater(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.greater(a.data, b.data))
 
 
-def greatereq(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def greatereq(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.greater_equal(a.data, b.data))
 
 
-def notequal(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def notequal(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.not_equal(a.data, b.data))
 
 
-def tensorand(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def tensorand(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(a.data and b.data)
 
 
-def tensoror(a: Union[Tensor, Any], b: Union[Tensor, Any]) -> Tensor:
+def tensoror(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
     a, b = atot(a, b)
     return tensor(a.data or b.data)
 
 
-def tensornot(a: Union[Tensor, Any]) -> Tensor:
+def tensornot(a: Union[Tensor, tensorlike]) -> Tensor:
     b = atot(a)[0]
     return tensor(not b.data)
 
@@ -252,6 +252,10 @@ def typesmatch(*tensors: Tensor) -> bool:
 def to(a: Tensor, dtype: Type[dtype]):
     if not istensor(a):
         raise ValueError(f"Expected Tensor, received {a.__class__.__name__}")
+    if a.usesgrad and dtype not in (types.half, types.float, types.double):
+        raise RuntimeError(
+            f"Can't cast Tensor using gradient to type that doesn't, try Tensor.detach()"
+        )
     data = dtype.numpy(a.data)
     return tensor(data, a.usegrad, dtype)
 

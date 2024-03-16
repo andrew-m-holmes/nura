@@ -133,7 +133,7 @@ def view(a: Tensor, newdim: dim):
 
 
 def reshape(a: Tensor, newdim: dim):
-    a = tocontig(a)
+    a = tocontiguous(a)
     out = fn._Reshape.apply(a, newdim)
     return out
 
@@ -163,7 +163,7 @@ def slice(a: Tensor, slc: slice):
     return out
 
 
-def tocontig(a: Tensor):
+def tocontiguous(a: Tensor):
     cloned = a.clone()
     data = np.ascontiguousarray(cloned.data)
     return cloned.mutated(data=data)

@@ -107,6 +107,14 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         nura.backward(self, grad)
 
+    def cleargrad(self):
+        self._grad = None
+        return self
+
+    def clearedgrad(self):
+        cls = type(self)
+        return cls(self.data, self.usegrad, None, self.backfn, self.leaf)
+
     def zerograd(self):
         self._grad = nura.zeroslike(self)
         return self
@@ -121,8 +129,7 @@ class Tensor:
 
     def usedgrad(self):
         cls = type(self)
-        a = cls(self.data, True, self.grad, self.backfn, self.leaf)
-        return a
+        return cls(self.data, True, self.grad, self.backfn, self.leaf)
 
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = type(self)
@@ -143,7 +150,7 @@ class Tensor:
         return nura.clone(self)
 
     def contiguous(self):
-        return nura.tocontig(self)
+        return nura.tocontiguous(self)
 
     def sum(self, dim: Optional[dimlike] = None, keepdims=False):
         return nura.sum(self, dim, keepdims)
@@ -297,8 +304,4 @@ def tensor(
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
-    if usegrad and dtype not in (nura.half, nura.float, nura.double):
-        raise ValueError(
-            f"Only floating-point Tensors can use gradient, received {dtype.name()}"
-        )
     return Tensor(data, usegrad, None, None, True)
