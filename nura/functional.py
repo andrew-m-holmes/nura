@@ -1,7 +1,7 @@
 import numpy as np
 import nura.utils as utils
 import nura.functions as fn
-from nura.tensors import Tensor
+from nura.tensors import Tensor, tensor
 from nura.types import dim, dimlike, tensorlike
 from typing import Union, Optional
 
@@ -49,11 +49,11 @@ def pow(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
 
 
 def square(a: Union[Tensor, tensorlike]):
-    return pow(a, 2.0)
+    return fn._Pow.apply(a, tensor(2.0))
 
 
 def sqrt(a: Union[Tensor, tensorlike]):
-    return pow(a, 0.5)
+    return fn._Pow.apply(a, tensor(0.5))
 
 
 def exp(a: Union[Tensor, tensorlike]):

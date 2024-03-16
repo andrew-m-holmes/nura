@@ -291,6 +291,54 @@ def test_pow_forward_matrix_exp():
     np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
+def test_square_scalar():
+    a = np.random.rand()
+    a_tensor = nura.tensor(a)
+    result_tensor = f.square(a_tensor)
+    expected = a**2
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_square_vector():
+    a = np.random.rand(5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.square(a_tensor)
+    expected = np.square(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_square_matrix():
+    a = np.random.rand(3, 3)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.square(a_tensor)
+    expected = np.square(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_sqrt_scalar():
+    a = np.random.rand()
+    a_tensor = nura.tensor(a)
+    result_tensor = f.sqrt(a_tensor)
+    expected = np.sqrt(a)
+    np.testing.assert_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_sqrt_vector():
+    a = np.random.rand(5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.sqrt(a_tensor)
+    expected = np.sqrt(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
+def test_sqrt_matrix():
+    a = np.random.rand(3, 3)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.sqrt(a_tensor)
+    expected = np.sqrt(a)
+    np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
+
+
 def test_exp_forward_scalar():
     a = np.random.rand()
 
