@@ -1,6 +1,7 @@
 import nura.nn.functional as nnfn
 from nura.nn.module import Module
 from nura.tensors import Tensor
+from typing import Optional
 
 
 class ReLU(Module):
@@ -11,8 +12,41 @@ class ReLU(Module):
     def forward(self, x: Tensor):
         return nnfn.relu(x)
 
-    def __repr__(self) -> str:
-        return f"{super().__repr__()}()"
+
+class ReLU6(Module):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, x: Tensor):
+        return nnfn.relu6(x)
+
+
+class LeakyReLU(Module):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, x: Tensor):
+        return nnfn.leakyrelu(x)
+
+
+class ELU(Module):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, x: Tensor):
+        return nnfn.elu(x)
+
+
+class GELU(Module):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, x: Tensor):
+        return nnfn.gelu(x)
 
 
 class Sigmoid(Module):
@@ -49,3 +83,12 @@ class Tanh(Module):
 
     def forward(self, z: Tensor):
         return nnfn.tanh(z)
+
+
+class SelfAttention(Module):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
+        return nnfn.selfattn(q, k, v, mask)

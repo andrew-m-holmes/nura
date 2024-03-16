@@ -2,7 +2,7 @@ import nura.functional as f
 import nura.nn.functions as fn
 from nura.tensors import Tensor
 from nura.utils import atot
-from typing import Optional
+from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
@@ -60,3 +60,14 @@ def softmax(a: Tensor, dim=-1):
     e = f.exp(a)
     out = e / (e.sum(dim, keepdims=False))
     return out
+
+
+def selfattn(
+    q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
+) -> Tuple[Tensor, Tensor]:
+    scaled = f.matmul(q, k.T) / f.sqrt(k.dim[-1])
+    # if mask is not None:
+    #     scaled = where(scaled & mask, -1e9, scaled)
+    attn = softmax(scaled, dim=-1)
+    context = f.matmul(attn, v)
+    return context, attn
