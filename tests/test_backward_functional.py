@@ -488,6 +488,92 @@ def test_pow_backward_matrix_exp():
     np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
 
+def test_square_backward_scalar():
+    a = np.random.rand()
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.square(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.square(a + h) - np.square(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_square_backward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.square(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.square(a + h) - np.square(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_square_backward_matrix():
+    a = np.random.rand(5, 5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.square(a_tensor)
+    ones = np.ones((5, 5))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.square(a + h) - np.square(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_sqrt_backward_scalar():
+    a = np.random.rand()
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.sqrt(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.sqrt(a + h) - np.sqrt(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_sqrt_backward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.sqrt(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.sqrt(a + h) - np.sqrt(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_sqrt_backward_matrix():
+    a = np.random.rand(5, 5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.sqrt(a_tensor)
+    ones = np.ones((5, 5))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.sqrt(a + h) - np.sqrt(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
 def test_exp_backward_scalar():
     a = np.random.rand()
 
