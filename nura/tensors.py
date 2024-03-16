@@ -109,29 +109,39 @@ class Tensor:
         nura.backward(self, grad)
 
     def zerograd(self):
-        return muttensor(self, grad=nura.zeroslike(self))
+        self._grad = nura.zeroslike(self)
+        return self
 
     def zeroedgrad(self):
         cls = type(self)
         return cls(self.data, self.usegrad, nura.zeroslike(self), None, True)
 
+    def usesgrad(self):
+        self._usegrad = True
+        return self
+
+    def usedgrad(self):
+        cls = type(self)
+        a = cls(self.data, True, self.grad, self.backfn, self.leaf)
+        return a
+
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = type(self)
-        a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
-        return muttensor(a, **attrs)
+        t = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
+        for k, v in attrs.items():
+            setattr(t, f"_{k}", v)
+        return t
 
     def mutate(self, **attrs: Any) -> "Tensor":
-        return muttensor(self, **attrs)
+        for k, v in attrs.items():
+            setattr(self, f"_{k}", v)
+        return self
 
     def copy(self) -> "Tensor":
-        cls = type(self)
-        return cls(self.data.copy(), self.usegrad, self.grad, None, True)
+        return self.mutated(data=self.data.copy())
 
     def deepcopy(self) -> "Tensor":
-        grad = self.grad.copy() if self.grad is not None else None
-        backfn = deepcopy(self.backfn) if self.backfn is not None else None
-        cls = type(self)
-        return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
+        return deepcopy(self)
 
     def detach(self):
         return tensor(self.data, False, self.dtype)
@@ -166,8 +176,8 @@ class Tensor:
     def transpose(self, dim0=-2, dim1=-1):
         return nura.transpose(self, dim0, dim1)
 
-    def permute(self, dims: Optional[types.dim] = None):
-        return nura.permute(self, dims=dims)
+    def permute(self, dims: types.dim):
+        return nura.permute(self, dims)
 
     def any(self, dim: Optional[dimlike] = None, keepdims=False):
         return nura.tensorany(self, dim, keepdims)
@@ -251,15 +261,20 @@ class Tensor:
         return nura.tensornot(self)
 
     def __setattr__(self, name, value):
-        validnames = {
+        validattrs = (
             "_data",
             "_usegrad",
             "_grad",
             "_backfn",
             "_leaf",
-        }
-        if name not in validnames:
+        )
+        if name not in validattrs:
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
+        gradtypes = (types.half, types.float, types.double)
+        if name == "_usegrad" and value and self.dtype not in gradtypes:
+            raise ValueError(
+                f"Only floating-point Tensors can use gradient, received {dtype.name()}"
+            )
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
@@ -291,23 +306,6 @@ def tensor(
     data = dtype.numpy(data)
     if usegrad and dtype not in (nura.half, nura.float, nura.double):
         raise ValueError(
-            f"Only Tensors floating-point tensors can use gradient, received {dtype.name()}"
+            f"Only floating-point Tensors can use gradient, received {dtype.name()}"
         )
     return Tensor(data, usegrad, None, None, True)
-
-
-def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
-    validattrs = {
-        "data": "_data",
-        "usegrad": "_usegrad",
-        "grad": "_grad",
-        "backfn": "_backfn",
-        "leaf": "_leaf",
-    }
-    for k, v in attrs.items():
-        if k not in validattrs:
-            raise AttributeError(
-                f"{k} is not a mutable member of {nura.typename(tensor)}"
-            )
-        setattr(tensor, validattrs[k], v)
-    return tensor

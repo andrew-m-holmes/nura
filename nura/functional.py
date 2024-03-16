@@ -108,7 +108,7 @@ def transpose(a: Tensor, dim0=-2, dim1=-1):
     return out
 
 
-def permute(a: Tensor, dims: Optional[dim] = None):
+def permute(a: Tensor, dims: dim):
     out = fn._Permute.apply(a, dims)
     return out
 

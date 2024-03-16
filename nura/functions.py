@@ -470,7 +470,7 @@ class _Transpose(Function):
 class _Permute(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dims: dimlike):
+    def forward(context: Context, a: Tensor, dims: dim):
         context.save(a)
         context["dims"] = dims
         arr = a.data.transpose(dims)
