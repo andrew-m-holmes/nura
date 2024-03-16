@@ -43,7 +43,7 @@ class Node:
     def __repr__(self):
         if self.tensor.leaf:
             return "accumgrad"
-        return f"{self.function.__name__.lower()}"
+        return f"{self.function.__name__}"
 
 
 def getnode(tensor):

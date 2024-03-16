@@ -1,5 +1,6 @@
-import nura
 import nura.types as types
+from nura.nn import parameter
+from nura.utils import randn
 from nura.nn.module import Module
 from nura.tensors import Tensor
 from nura.types import dtype
@@ -19,12 +20,12 @@ class Linear(Module):
 
         super().__init__()
         if dtype is None:
-            dtype = nura.float
+            dtype = types.float
         self._indim = indim
         self._outdim = outdim
         self._dtype = dtype
-        self._weight = self.param(nura.randn((outdim, indim)), dtype=dtype)
-        self._bias = self.param(nura.randn(outdim), dtype=dtype) if bias else None
+        self._weight = parameter(randn((outdim, indim)), True, dtype)
+        self._bias = parameter(randn(outdim), True, dtype) if bias else None
 
     @property
     def weight(self):

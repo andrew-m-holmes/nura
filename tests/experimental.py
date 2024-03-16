@@ -1,7 +1,6 @@
 import nura
 import nura.nn as nn
-from nura.autograd.functional import jacrev, jacfwd
-import numpy as np
+import torch
 
 
 def main():
@@ -10,20 +9,17 @@ def main():
 
         def __init__(self) -> None:
             super().__init__()
-            self.fc1 = nn.Linear(3, 5, bias=True)
-            self.fc2 = nn.Linear(5, 3, bias=True)
-            self.fc3 = nn.Linear(3, 1, bias=False)
-            self.relu = nn.ReLU()
-            self.sig = nn.Sigmoid()
+            self.linear = nn.Linear(3, 8)
 
-        def forward(self, x: nura.Tensor):
-            x = self.relu(self.fc1(x))
-            x = self.relu(self.fc2(x))
-            out = self.sig(self.fc3(x))
-            return out
+        def forward(self, x):
+            return self.linear(x)
 
-        x = nura.rand().usesgrad()
-        x.bool()
+    model = Model()
+    x = nura.randn().usesgrad()
+    a = nn.relu(x).backward()
+    b = nn.relu6(x).backward()
+    c = nn.leakyrelu(x).backward()
+    d = nn.gelu(x).backward()
 
 
 if __name__ == "__main__":

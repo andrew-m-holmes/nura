@@ -98,16 +98,3 @@ class Module:
 
     def xrepr(self) -> str:
         return f"{self.__class__.__name__}()"
-
-
-def mutmod(mod: Module, **attrs):
-    validattrs = {
-        "mods": "_mods",
-        "params": "_params",
-        "training": "_training",
-    }
-    for k, v in attrs.items():
-        if k not in validattrs:
-            raise AttributeError(f"{k} is not a mutable member of {mod.name()}")
-        setattr(mod, k, v)
-    return mod

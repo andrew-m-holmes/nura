@@ -19,13 +19,13 @@ class Parameter(Tensor):
         super().__init__(data, usegrad, grad, backfn, leaf)
 
     def to(self, dtype: Type[dtype]):
-        return param(super().to(dtype), self.usegrad, dtype)
+        return parameter(super().to(dtype), self.usegrad, dtype)
 
     def __repr__(self) -> str:
         return super().__repr__().replace("tensor", "param")
 
 
-def param(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
+def parameter(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
     validtypes = (nura.half, nura.float, nura.double)
     if dtype is None:
         dtype = a.dtype
