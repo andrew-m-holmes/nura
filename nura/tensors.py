@@ -4,7 +4,6 @@ from nura.types import dtype, dim, dimlike, tensorlike
 from nura.autograd.graph import Node
 from typing import Optional, Type, Any
 from numpy import ndarray
-from copy import deepcopy
 
 
 class Tensor:
@@ -136,12 +135,6 @@ class Tensor:
         for k, v in attrs.items():
             setattr(self, f"_{k}", v)
         return self
-
-    def copy(self) -> "Tensor":
-        return self.mutated(data=self.data.copy())
-
-    def deepcopy(self) -> "Tensor":
-        return deepcopy(self)
 
     def detach(self):
         return tensor(self.data, False, self.dtype)
