@@ -237,7 +237,7 @@ def test_gelu_backward_scalar():
             * (1 + np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * np.power(z, 3))))
         )
 
-    z = np.random.randn()  # Random scalar
+    z = np.random.randn()
     z_tensor = nura.tensor(z, usegrad=True)
     result_tensor = f.gelu(z_tensor)
     result_tensor.backward()
@@ -255,7 +255,7 @@ def test_gelu_backward_vector():
             * (1 + np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * np.power(z, 3))))
         )
 
-    z = np.random.randn(5)  # Random vector
+    z = np.random.randn(5)
     z_tensor = nura.tensor(z, usegrad=True)
     result_tensor = f.gelu(z_tensor)
     result_tensor.backward(nura.tensor(np.ones_like(z)))
@@ -273,7 +273,7 @@ def test_gelu_backward_matrix():
             * (1 + np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * np.power(z, 3))))
         )
 
-    z = np.random.randn(3, 3)  # Random matrix
+    z = np.random.randn(3, 3)
     z_tensor = nura.tensor(z, usegrad=True)
     result_tensor = f.gelu(z_tensor)
     result_tensor.backward(nura.tensor(np.ones_like(z)))
