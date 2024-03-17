@@ -47,7 +47,7 @@ def elu(z: Tensor, alpha=1.0):
 def gelu(z: Tensor):
     piconst = 0.79788456
     const = 0.044715
-    inner = piconst * (z + const * (z * z * z))  # avoid invalid log in pow backward
+    inner = piconst * (z + const * f.pow(z, 3.0))  # avoid invalid log in pow backward
     out = 0.5 * z * (1 + tanh(inner))
     return out
 
