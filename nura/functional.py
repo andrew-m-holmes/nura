@@ -1,4 +1,3 @@
-import numpy as np
 import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
@@ -7,25 +6,29 @@ from typing import Optional
 
 
 def add(a: Tensor, b: Tensor | Scalar):
-    b = utils.atot(b)[0]
+    if not isinstance(b, Tensor):
+        b = tensor(b)
     out = fn._Add.apply(a, b)
     return out
 
 
 def sub(a: Tensor, b: Tensor | Scalar):
-    b = utils.atot(b)[0]
+    if not isinstance(b, Tensor):
+        b = tensor(b)
     out = fn._Sub.apply(a, b)
     return out
 
 
 def mul(a: Tensor, b: Tensor | Scalar):
-    b = utils.atot(b)[0]
+    if not isinstance(b, Tensor):
+        b = tensor(b)
     out = fn._Mul.apply(a, b)
     return out
 
 
 def div(a: Tensor, b: Tensor | Scalar):
-    b = utils.atot(b)[0]
+    if not isinstance(b, Tensor):
+        b = tensor(b)
     out = fn._Div.apply(a, b)
     return out
 
@@ -134,12 +137,10 @@ def abs(a: Tensor):
 
 
 def pos(a: Tensor):
-    a = utils.atot(a)[0]
     return fn._Pos.apply(a)
 
 
 def neg(a: Tensor):
-    a = utils.atot(a)[0]
     return fn._Neg.apply(a)
 
 
