@@ -8,7 +8,7 @@ class _ReLU(Function):
     @staticmethod
     def forward(context: Context, z: Tensor):
         context.save(z)
-        return np.where(z.data > 0, z.data, 0)
+        return np.maximum(z.data, 0)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
@@ -49,7 +49,7 @@ class _LeakyReLU(Function):
     def forward(context: Context, z: Tensor, slope: float):
         context.save(z)
         context["slope"] = slope
-        return np.where(z.data >= 0, z.data, slope * z.data)
+        return np.maximum(z.data * slope, z.data)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):

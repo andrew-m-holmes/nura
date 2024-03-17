@@ -49,10 +49,12 @@ def pow(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
 
 
 def square(a: Union[Tensor, tensorlike]):
+    a = utils.atot(a)[0]
     return fn._Pow.apply(a, tensor(2.0))
 
 
 def sqrt(a: Union[Tensor, tensorlike]):
+    a = utils.atot(a)[0]
     return fn._Pow.apply(a, tensor(0.5))
 
 
