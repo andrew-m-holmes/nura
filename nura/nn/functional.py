@@ -1,7 +1,7 @@
 import nura.functional as f
 import nura.nn.functions as fn
 from nura.tensors import Tensor
-from nura.utils import atot
+from nura.utils import atot, where
 from typing import Optional, Tuple
 
 
@@ -61,12 +61,12 @@ def softmax(a: Tensor, dim=-1):
     return out
 
 
-def selfattn(
+def selfattention(
     q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
 ) -> Tuple[Tensor, Tensor]:
     scaled = f.matmul(q, k.T) / f.sqrt(k.dim[-1])
-    # if mask is not None:
-    #     scaled = where(scaled & mask, -1e9, scaled)
+    if mask is not None:
+        scaled = where(mask == True, -1e-9, scaled)
     attn = softmax(scaled, dim=-1)
     context = f.matmul(attn, v)
     return context, attn
