@@ -7,28 +7,28 @@ from typing import Optional
 
 def add(a: Tensor, b: Tensor | Scalar):
     if not isinstance(b, Tensor):
-        b = tensor(b)
+        b = tensor(b, dtype=a.dtype)
     out = fn._Add.apply(a, b)
     return out
 
 
 def sub(a: Tensor, b: Tensor | Scalar):
     if not isinstance(b, Tensor):
-        b = tensor(b)
+        b = tensor(b, dtype=a.dtype)
     out = fn._Sub.apply(a, b)
     return out
 
 
 def mul(a: Tensor, b: Tensor | Scalar):
     if not isinstance(b, Tensor):
-        b = tensor(b)
+        b = tensor(b, dtype=a.dtype)
     out = fn._Mul.apply(a, b)
     return out
 
 
 def div(a: Tensor, b: Tensor | Scalar):
     if not isinstance(b, Tensor):
-        b = tensor(b)
+        b = tensor(b, dtype=a.dtype)
     out = fn._Div.apply(a, b)
     return out
 
@@ -43,7 +43,9 @@ def matmul(a: Tensor, b: Tensor):
     return out
 
 
-def pow(a: Tensor, b: Tensor):
+def pow(a: Tensor, b: Tensor | Scalar):
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
     out = fn._Pow.apply(a, b)
     return out
 
