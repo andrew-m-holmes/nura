@@ -1,16 +1,12 @@
 import nura
 import nura.types as types
-from nura.types import dtype, dim, dimlike
+from nura.types import Tensorlike, dimlike, dim, dtype
 from nura.autograd.graph import Node
 from typing import Optional, Type, Any
 from numpy import ndarray
-from copy import deepcopy
 
 
 class Tensor:
-
-    _dtype: Optional[Type[dtype]] = None
-    _gradtensor: Optional[bool] = None
 
     def __init__(
         self,
@@ -28,17 +24,8 @@ class Tensor:
         self._leaf: bool = leaf
 
     @property
-    def data(self):
+    def data(self) -> ndarray:
         return self._data
-
-    @property
-    def dtype(self):
-        return self._dtype
-
-    @property
-    def gradtensor(self):
-        assert type(self) != Tensor
-        return self._gradtensor
 
     @property
     def dim(self) -> dim:
@@ -53,27 +40,38 @@ class Tensor:
         return self._data.size
 
     @property
-    def usegrad(self):
+    def usegrad(self) -> bool:
         return self._usegrad
 
     @property
-    def grad(self):
+    def grad(self) -> Optional["Tensor"]:
         return self._grad
 
     @property
-    def backfn(self):
+    def backfn(self) -> Optional[Node]:
         return self._backfn
 
     @property
-    def leaf(self):
+    def leaf(self) -> bool:
         return self._leaf
+
+    @property
+    def dtype(self) -> Type[dtype]:
+        return types.dtypeof(self.data)
+
+    @property
+    def gradtensor(self) -> bool:
+        return self.dtype in (types.half, types.float, types.double)
 
     @property
     def T(self):
         return self.transpose()
 
     def item(self):
-        assert self.nelem == 1
+        if self.nelem != 1:
+            raise RuntimeError(
+                f"Cannot retrieve a single element from a Tensor with {self.nelem} elements"
+            )
         return self.data.item()
 
     def to(self, dtype: Type[types.dtype]):
@@ -109,41 +107,50 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None):
         nura.backward(self, grad)
 
+    def cleargrad(self):
+        self._grad = None
+        return self
+
+    def clearedgrad(self):
+        cls = type(self)
+        return cls(self.data, self.usegrad, None, self.backfn, self.leaf)
+
     def zerograd(self):
-        muttensor(self, grad=nura.zeroslike(self))
+        self._grad = nura.zeroslike(self)
         return self
 
     def zeroedgrad(self):
         cls = type(self)
         return cls(self.data, self.usegrad, nura.zeroslike(self), None, True)
 
+    def usesgrad(self):
+        self._usegrad = True
+        return self
+
+    def usedgrad(self):
+        cls = type(self)
+        return cls(self.data, True, self.grad, self.backfn, self.leaf)
+
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = type(self)
-        a = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
-        return muttensor(a, **attrs)
+        t = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
+        for k, v in attrs.items():
+            setattr(t, f"_{k}", v)
+        return t
 
     def mutate(self, **attrs: Any) -> "Tensor":
-        return muttensor(self, **attrs)
-
-    def copy(self) -> "Tensor":
-        cls = type(self)
-        return cls(self.data.copy(), self.usegrad, None, None, True)
-
-    def deepcopy(self) -> "Tensor":
-        grad = self.grad.copy() if self.grad is not None else None
-        backfn = deepcopy(self.backfn) if self.backfn is not None else None
-        cls = type(self)
-        return cls(self.data.copy(), self.usegrad, grad, backfn, self.leaf)
+        for k, v in attrs.items():
+            setattr(self, f"_{k}", v)
+        return self
 
     def detach(self):
-        cls = type(self)
-        return cls(self.data, False, None, None, True)
+        return tensor(self.data, False, self.dtype)
 
     def clone(self):
         return nura.clone(self)
 
-    def contig(self):
-        return nura.tocontig(self)
+    def contiguous(self):
+        return nura.tocontiguous(self)
 
     def sum(self, dim: Optional[dimlike] = None, keepdims=False):
         return nura.sum(self, dim, keepdims)
@@ -157,11 +164,11 @@ class Tensor:
     def squeeze(self, dim: Optional[dimlike] = None):
         return nura.squeeze(self, dim)
 
-    def unsqueeze(self, dim: dimlike):
+    def unsqueeze(self, dim: Optional[dimlike] = None):
         return nura.unsqueeze(self, dim)
 
-    def view(self, dim: types.dim):
-        return nura.view(self, dim)
+    def view(self, newdim: types.dim):
+        return nura.view(self, newdim)
 
     def reshape(self, dim: types.dim):
         return nura.reshape(self, dim)
@@ -169,14 +176,14 @@ class Tensor:
     def transpose(self, dim0=-2, dim1=-1):
         return nura.transpose(self, dim0, dim1)
 
-    def permute(self, dim: Optional[types.dim] = None):
-        return nura.permute(self, dim=dim)
+    def permute(self, dims: types.dim):
+        return nura.permute(self, dims)
 
     def any(self, dim: Optional[dimlike] = None, keepdims=False):
-        return nura.any(self, dim, keepdims)
+        return nura.tensorany(self, dim, keepdims)
 
     def all(self, dim: Optional[dimlike] = None, keepdims=False):
-        return nura.all(self, dim, keepdims)
+        return nura.tensorall(self, dim, keepdims)
 
     def __add__(self, other):
         return nura.add(self, other)
@@ -188,7 +195,7 @@ class Tensor:
         return nura.sub(self, other)
 
     def __rsub__(self, other):
-        return nura.sub(other, self)
+        return nura.sub(tensor(other, dtype=self.dtype), self)
 
     def __mul__(self, other):
         return nura.mul(self, other)
@@ -200,25 +207,22 @@ class Tensor:
         return nura.div(self, other)
 
     def __rtruediv__(self, other):
-        return nura.div(other, self)
+        return nura.div(tensor(other, dtype=self.dtype), self)
 
     def __matmul__(self, other):
         return nura.matmul(self, other)
-
-    def __rmatmul__(self, other):
-        return nura.matmul(other, self)
 
     def __pow__(self, other):
         return nura.pow(self, other)
 
     def __rpow__(self, other):
-        return nura.pow(other, self)
+        return nura.pow(tensor(other, dtype=self.dtype), self)
 
     def __pos__(self):
-        return self
+        return nura.pos(self)
 
     def __neg__(self):
-        return nura.mul(self, -1.0)
+        return nura.neg(self)
 
     def __abs__(self):
         return nura.abs(self)
@@ -254,17 +258,20 @@ class Tensor:
         return nura.tensornot(self)
 
     def __setattr__(self, name, value):
-        validnames = {
+        validattrs = (
             "_data",
             "_usegrad",
             "_grad",
             "_backfn",
             "_leaf",
-            "_dtype",
-            "_mutable",
-        }
-        if name not in validnames:
+        )
+        if name not in validattrs:
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
+        gradtypes = (types.half, types.float, types.double)
+        if name == "_usegrad" and value and self.dtype not in gradtypes:
+            raise ValueError(
+                f"Only floating-point Tensors can use gradient, received {dtype.name()}"
+            )
         self.__dict__[name] = value
 
     def __getitem__(self, slc):
@@ -277,128 +284,21 @@ class Tensor:
         return self.dim[0]
 
     def __repr__(self) -> str:
-        base = repr(self._data).replace("array(", "").replace(",", "")
-        if " dtype" in base:
-            i = base.index(" dtype")
-            base = base[:i]
-        s = "tensor(" + base
+        s = repr(self._data).replace("array(", "").replace(",", "")
+        if " dtype" in s:
+            i = s.index(" dtype")
+            s = s[:i]
+        strs = ["tensor(", s]
         if self.backfn is not None:
-            s += " backfn=" + str(self.backfn)
-        if self.dtype is not None:
-            s += " dtype=" + self.dtype.name()
-        s += ")"
-        return s
+            strs.append(f" backfn={repr(self.backfn)}")
+        strs.append(f" dtype={self.dtype.name()})")
+        return "".join(strs)
 
 
-class ByteTensor(Tensor):
-    _dtype = types.byte
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class CharTensor(Tensor):
-    _dtype = types.char
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class ShortTensor(Tensor):
-    _dtype = types.short
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class IntTensor(Tensor):
-    _dtype = types.int
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class LongTensor(Tensor):
-    _dtype = types.long
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class HalfTensor(Tensor):
-    _dtype = types.half
-    _gradtensor = True
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class FloatTensor(Tensor):
-    _dtype = types.float
-    _gradtensor = True
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class DoubleTensor(Tensor):
-    _dtype = types.double
-    _gradtensor = True
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-class BoolTensor(Tensor):
-    _gradtensor = False
-
-    def __init__(self, data, usegrad, grad, backfn, leaf) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
-
-
-def getcls(dtype) -> Type:
-    dtypemap = {
-        nura.byte: ByteTensor,
-        nura.char: CharTensor,
-        nura.short: ShortTensor,
-        nura.int: IntTensor,
-        nura.long: LongTensor,
-        nura.half: HalfTensor,
-        nura.float: FloatTensor,
-        nura.double: DoubleTensor,
-        nura.bool: BoolTensor,
-    }
-    return dtypemap[dtype]
-
-
-def tensor(data: Any, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
-    if nura.istensor(data):
-        print("warning, creating Tensor using tensor")
-        data = data.data
+def tensor(
+    data: Tensorlike, usegrad=False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
-    cls = getcls(dtype)
-    if usegrad:
-        assert cls.gradtensor, f"{cls.__name__} cannot usegrad"
-    return cls(data, usegrad, None, None, True)
-
-
-def muttensor(tensor: Tensor, **attrs: Any) -> Tensor:
-    validattrs = {
-        "data": "_data",
-        "usegrad": "_usegrad",
-        "grad": "_grad",
-        "backfn": "_backfn",
-        "leaf": "_leaf",
-        "dtype": "_dtype",
-    }
-    for name, val in attrs.items():
-        if name in validattrs:
-            setattr(tensor, validattrs[name], val)
-    return tensor
+    return Tensor(data, usegrad, None, None, True)

@@ -488,6 +488,92 @@ def test_pow_backward_matrix_exp():
     np.testing.assert_allclose(grad_a.data, expected_grad_a, rtol=1e-5, atol=1e-5)
 
 
+def test_square_backward_scalar():
+    a = np.random.rand()
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.square(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.square(a + h) - np.square(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_square_backward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.square(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.square(a + h) - np.square(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_square_backward_matrix():
+    a = np.random.rand(5, 5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.square(a_tensor)
+    ones = np.ones((5, 5))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.square(a + h) - np.square(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_sqrt_backward_scalar():
+    a = np.random.rand()
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.sqrt(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.sqrt(a + h) - np.sqrt(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_sqrt_backward_vector():
+    a = np.random.rand(5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.sqrt(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.sqrt(a + h) - np.sqrt(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_sqrt_backward_matrix():
+    a = np.random.rand(5, 5)
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.sqrt(a_tensor)
+    ones = np.ones((5, 5))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.sqrt(a + h) - np.sqrt(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
 def test_exp_backward_scalar():
     a = np.random.rand()
 
@@ -866,6 +952,135 @@ def test_min_backward_higher_rank_tensor():
 
     grad_a = a_tensor.grad
     assert grad_a.dim == a.shape
+
+
+def test_abs_backward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.abs(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.absolute(a + h) - np.absolute(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_abs_backward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.abs(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.absolute(a + h) - np.absolute(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_abs_backward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.abs(a_tensor)
+    ones = np.ones((3, 3))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.absolute(a + h) - np.absolute(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_pos_backward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.pos(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.positive(a + h) - np.positive(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_pos_backward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.pos(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.positive(a + h) - np.positive(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_pos_backward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.pos(a_tensor)
+    ones = np.ones((3, 3))
+    m = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(m)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.positive(a + h) - np.positive(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_neg_backward_scalar():
+    a = np.random.rand() * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.neg(a_tensor)
+    result_tensor.backward()
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.negative(a + h) - np.negative(a - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_neg_backward_vector():
+    a = np.random.rand(5) * np.random.choice([-1, 1])
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.neg(a_tensor)
+    ones = np.ones(5)
+    v = nura.tensor(ones, dtype=nura.float)
+    result_tensor.backward(v)
+
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.negative(a + h) - np.negative(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
+
+
+def test_neg_backward_matrix():
+    a = np.random.rand(3, 3) * np.random.choice([-1, 1], size=(3, 3))
+
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.neg(a_tensor)
+    ones = np.ones((3, 3))
+    m = nura.tensor(ones, dtype=nura.float)
+
+    result_tensor.backward(m)
+    grad_a = a_tensor.grad
+    h = 1e-8
+    expected_grad_a = (np.negative(a + h) - np.negative(a - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad_a.data, expected_grad_a, decimal=5)
 
 
 def test_squeeze_backward_rank1_v0():
@@ -1370,192 +1585,3 @@ def test_slice_backward_mixed_indices():
     expected_grad = np.zeros_like(a)
     expected_grad[1:5, -3] = 1
     np.testing.assert_array_almost_equal(a_tensor.grad.data, expected_grad, decimal=5)
-
-
-def main():
-
-    with nura.autograd(enabled=True, reverse=True, forward=False):
-
-        # Add Backward Tests
-
-        test_add_backward_scalar()
-        test_add_backward_vector()
-        test_add_backward_matrix()
-
-        # Sub Backward Tests
-
-        test_sub_backward_scalar()
-        test_sub_backward_vector()
-        test_sub_backward_matrix()
-
-        # Mul Backward Tests
-
-        test_mul_backward_scalar()
-        test_mul_backward_vector()
-        test_sub_backward_matrix()
-
-        # Div Backward Tests
-
-        test_div_backward_scalar()
-        test_div_backward_vector()
-        test_div_backward_matrix()
-
-        # Dot Backward Tests
-
-        test_dot_backward_vector_vector()
-        test_dot_backward_matrix_vector()
-        test_dot_backward_vector_matrix()
-        test_dot_backward_matrix_matrix()
-
-        # Matmul Backward Tests
-
-        test_matmul_backward_same_shape()
-        test_matmul_backward_different_shape()
-        test_matmul_backward_rank3_same_shape()
-        test_matmul_backward_rank3_different_shape()
-        test_matmul_backward_different_ranks()
-
-        # Sin Backward Tests
-
-        test_sin_backward_scalar()
-        test_sin_backward_vector()
-        test_sin_backward_matrix()
-
-        # Cos Backward Tests
-
-        test_cos_backward_scalar()
-        test_cos_backward_vector()
-        test_cos_backward_matrix()
-
-        # Pow Backward Tests
-
-        test_pow_backward_scalar()
-        test_pow_backward_vector()
-        test_pow_backward_matrix()
-
-        # Pow Backward (exponent is not a scalar)
-
-        test_pow_backward_vector_exp()
-        test_pow_backward_matrix_exp()
-
-        # Exp Backward Tests
-
-        test_exp_backward_scalar()
-        test_exp_backward_vector()
-        test_exp_backward_matrix()
-
-        # Log Backward Tests
-
-        test_log_backward_scalar()
-        test_log_backward_vector()
-        test_log_backward_matrix()
-
-        # Sum Backward Tests
-
-        test_sum_backward_single_dim()
-        test_sum_backward_multiple_dims()
-        test_sum_backward_higher_rank_tensor()
-
-        test_sum_backward_keepdims_false()
-        test_sum_backward_keepdims_true()
-        test_sum_backward_single_element_tensor()
-
-        # Max Backward Tests
-
-        test_max_backward_single_dim()
-        test_max_backward_multiple_dims()
-        test_max_backward_higher_rank_tensor()
-
-        test_max_backward_keepdims_false()
-        test_max_backward_keepdims_true()
-        test_max_backward_single_element_tensor()
-
-        # Min Backward Tests
-
-        test_min_backward_single_dim()
-        test_min_backward_multiple_dims()
-        test_min_backward_higher_rank_tensor()
-
-        test_min_backward_keepdims_false()
-        test_min_backward_keepdims_true()
-        test_min_backward_single_element_tensor()
-
-        # Squeeze Backward Tests
-
-        test_squeeze_backward_rank1_v0()
-        test_squeeze_backward_rank1_v1()
-        test_squeeze_backward_rank2_v0()
-        test_squeeze_backward_rank2_v1()
-
-        test_squeeze_backward_multi_v0()
-        test_squeeze_backward_multi_v1()
-        test_squeeze_backward_multi_v2()
-
-        # Unsqueeze Backward Tests
-
-        test_unsqueeze_backward_multi_v0()
-        test_unsqueeze_backward_multi_v1()
-        test_unsqueeze_backward_multi_v2()
-
-        test_unsqueeze_backward_multi_v3()
-        test_unsqueeze_backward_multi_v4()
-
-        # Transpose Backward Tests
-
-        test_transpose_backward_rank2_v0()
-        test_transpose_backward_rank2_v1()
-        test_transpose_backward_rank3_v0()
-
-        test_transpose_backward_multi_v0()
-        test_transpose_backward_multi_v1()
-
-        # Permute Backward Tests
-
-        test_permute_backward_rank2_v0()
-        test_permute_backward_rank3_v0()
-        test_permute_backward_rank3_v1()
-        test_permute_backward_rank4_v0()
-        test_permute_backward_rank4_v1()
-
-        # View Backward Tests
-
-        test_view_backward_rank1_to_rank2()
-        test_view_backward_rank2_to_rank3()
-        test_view_backward_rank3_to_rank4()
-
-        test_view_backward_rank2_to_rank1()
-        test_view_backward_rank3_to_rank2()
-        test_view_backward_rank4_to_rank2()
-        test_view_backward_with_negative_dim()
-
-        # Reshape Backward Tests
-
-        test_reshape_backward_rank1_to_rank2()
-        test_reshape_backward_rank2_to_rank3()
-        test_reshape_backward_rank3_to_rank4()
-
-        test_reshape_backward_rank2_to_rank1()
-        test_reshape_backward_rank3_to_rank2()
-        test_reshape_backward_rank4_to_rank2()
-        test_reshape_backward_with_negative_dim()
-
-        # Clone Backward Tests
-
-        test_clone_backward_scalar()
-        test_clone_backward_vector()
-        test_clone_backward_matrix()
-        test_clone_backward_higher_rank_tensor()
-
-        # Slice Backward Tests
-
-        test_slice_backward_single_index()
-        test_slice_backward_range()
-        test_slice_backward_step()
-        test_slice_backward_negative_indices()
-        test_slice_backward_mixed_indices()
-
-        print("All tests passed")
-
-
-if __name__ == "__main__":
-    main()

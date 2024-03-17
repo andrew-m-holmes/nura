@@ -43,7 +43,7 @@ class Node:
     def __repr__(self):
         if self.tensor.leaf:
             return "accumgrad"
-        return f"{self.function.__name__.lower()}"
+        return f"{self.function.__name__}"
 
 
 def getnode(tensor):
@@ -67,8 +67,5 @@ def genout(out, function, context):
 
 def getgrads(context):
     return tuple(
-        t.grad if t.grad is not None else nura.zeroslike(t)
-        for t in context.tensors()
+        t.grad if t.grad is not None else nura.zeroslike(t) for t in context.tensors()
     )
-
-

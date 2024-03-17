@@ -1,5 +1,6 @@
 import numpy as np
-from typing import Type, Any, Tuple, Union
+from numpy import ndarray
+from typing import Type, Any, Tuple, Union, Iterable
 
 
 _py_int = int
@@ -7,6 +8,9 @@ _py_float = float
 _py_bool = bool
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
+_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
+Scalar = Union[float, int]
+Tensorlike = Union[Scalar, bool, _iterables, ndarray]
 
 
 class dtype:
@@ -14,7 +18,7 @@ class dtype:
     _wrapping = None
 
     @classmethod
-    def numpy(cls, data):
+    def numpy(cls, data) -> ndarray:
         if not isinstance(data, np.ndarray):
             data = np.array(data, cls._wrapping)
         if np.dtype(data.dtype) is not np.dtype(cls._wrapping):
@@ -22,7 +26,7 @@ class dtype:
         return data
 
     @classmethod
-    def name(cls):
+    def name(cls) -> str:
         return cls.__name__
 
 
@@ -71,34 +75,37 @@ class bool(dtype):
     _wrapping = np.bool_
 
 
+dtypemap = {
+    np.uint8: byte,
+    np.int8: char,
+    np.int16: short,
+    np.int32: int,
+    _py_int: int,
+    np.int64: long,
+    np.float16: half,
+    np.float32: float,
+    _py_float: float,
+    np.float64: double,
+    np.bool_: bool,
+    _py_bool: bool,
+    np.dtype(np.uint8): byte,
+    np.dtype(np.int8): char,
+    np.dtype(np.int16): short,
+    np.dtype(np.int32): int,
+    np.dtype(np.int64): long,
+    np.dtype(np.float16): half,
+    np.dtype(np.float32): float,
+    np.dtype(np.float64): double,
+    np.dtype(np.bool_): bool,
+}
+
+
 def dtypeof(data: Any) -> Type[dtype]:
-    dtypemap = {
-        np.uint8: byte,
-        np.int8: char,
-        np.int16: short,
-        np.int32: int,
-        _py_int: int,
-        np.int64: long,
-        np.float16: half,
-        np.float32: float,
-        _py_float: float,
-        np.float64: double,
-        np.bool_: bool,
-        _py_bool: bool,
-        np.dtype(np.uint8): byte,
-        np.dtype(np.int8): char,
-        np.dtype(np.int16): short,
-        np.dtype(np.int32): int,
-        np.dtype(np.int64): long,
-        np.dtype(np.float16): half,
-        np.dtype(np.float32): float,
-        np.dtype(np.float64): double,
-        np.dtype(np.bool_): bool,
-    }
     if isinstance(data, np.ndarray):
         return dtypemap[data.dtype]
     if isinstance(data, list):
         return dtypemap[np.array(data).dtype]
     dtype = type(data)
-    assert dtype in dtypemap
+    if dtype not in dtypemap:
+        raise KeyError(f"Couldn't find {dtype} in dtype table")
     return dtypemap[dtype]

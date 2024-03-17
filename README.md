@@ -15,7 +15,11 @@ Nura is an autograd framework in Python that utilizes NumPy for efficient multi-
 
 ## Installation
 
+<<<<<<< HEAD
 To install Nura, clone the repository from [GitHub](https://github.com/andrew-m-holmes/nura) and navigate into the `nura` directory:
+=======
+To install Nura, clone the repository and navigate into the `nura` directory:
+>>>>>>> develop
 
 ```shell
 git clone https://github.com/andrew-m-holmes/nura.git
@@ -41,15 +45,25 @@ pip3 install -r dev.requirements.txt
 
 ## Contributing
 
+<<<<<<< HEAD
 - **Issues**: Keep track of enhancements, bugs, or other topics by opening issues on the [Issues page](https://github.com/Andrew011002/Transformer/issues).
   
 - **Pull Requests**: Implement your code improvements using pull requests. Make sure to link pull requests to related open issues. Review and merge requests will be done on the [Pull request page](https://github.com/Andrew011002/Transformer/pulls).
+=======
+- **Issues**: Keep track of enhancements, bugs, or other topics by opening issues on the [Issues page](https://github.com/andrew-m-holmes/nura/issues).
+  
+- **Pull Requests**: Implement your code improvements using pull requests. Make sure to link pull requests to related open issues. Review and merge requests will be done on the [Pull request page](https://github.com/andrew-m-holmes/nura/pulls).
+>>>>>>> develop
 
 Thank you in advance for any contributions made!
 
 ---
 
+<<<<<<< HEAD
 ## CCntact
+=======
+## Contact
+>>>>>>> develop
 
 - **LinkedIn**: [Andrew Holmes](https://www.linkedin.com/in/andrewmicholmes/)
 - **Email**: andrewholmes01100@gmail.com

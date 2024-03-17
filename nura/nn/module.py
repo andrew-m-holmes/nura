@@ -1,10 +1,8 @@
 import nura.types as types
 from nura.types import dtype
-from nura.nn.parameter import Parameter, param
-from nura.tensors import Tensor
+from nura.nn.parameter import Parameter
 from collections import OrderedDict
 from typing import Type, Iterator, Tuple, Any
-from copy import copy, deepcopy
 
 
 class Module:
@@ -13,15 +11,14 @@ class Module:
         self._mods: OrderedDict[str, "Module"] = OrderedDict()
         self._params: OrderedDict[str, Parameter] = OrderedDict()
         self._training: bool = True
-        self._dtype: Type[dtype] = types.float
 
     @property
     def training(self) -> bool:
         return self._training
 
-    @property
-    def dtype(self) -> Type[dtype]:
-        return self._dtype
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
 
     def forward(self) -> Any:
         raise NotImplemented
@@ -46,19 +43,16 @@ class Module:
         for m in self._mods.values():
             yield from m.namedparams()
 
-    def param(self, a: Tensor) -> Parameter:
-        return param(a, True, self.dtype)
-
-    def to(self, dtype: Type[types.dtype]):
-        mod = self.copy()
-        mod._dtype = dtype
-        mod._params = OrderedDict()
-        mod._mods = OrderedDict()
+    def to(self, dtype: Type[dtype]):
+        params = OrderedDict()
+        mods = OrderedDict()
         for n, p in self._params.items():
-            setattr(mod, n, p.to(dtype))
+            params[n] = p.to(dtype)
         for n, m in self._mods.items():
-            setattr(mod, n, m.to(dtype))
-        return mod
+            mods[n] = m.to(dtype)
+        self._mods = mods
+        self._params = params
+        return self
 
     def half(self):
         return self.to(types.half)
@@ -77,12 +71,6 @@ class Module:
         self._training = False
         return self
 
-    def copy(self):
-        return copy(self)
-
-    def deepcopy(self):
-        return deepcopy(self)
-
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
@@ -94,10 +82,10 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        return self.repr()
+        return self.repr(main=True)
 
-    def repr(self, pad=3) -> str:
-        strs = [self.xrepr()]
+    def repr(self, pad=3, main=False) -> str:
+        strs = [self.name() if main else self.xrepr()]
         if hasmods := len(self._mods):
             strs.append(" (")
         strs.append("\n")
@@ -109,4 +97,4 @@ class Module:
         return "".join(strs)
 
     def xrepr(self) -> str:
-        return self.__class__.__name__
+        return f"{self.__class__.__name__}()"

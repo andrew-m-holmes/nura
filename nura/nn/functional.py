@@ -1,46 +1,69 @@
-import nura.functions as fn
-import nura.nn.functions as nnfn
+import nura.functional as f
+import nura.nn.functions as fn
 from nura.tensors import Tensor
-from nura.utils import atot
-from nura.types import dim, dimlike
-from typing import Optional
+from nura.utils import where
+from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
-    x, w = atot(x, w)
-    out = fn.Matmul.apply(x, w.transpose())
+    out = f.matmul(x, w.T)
     if b is not None:
-        b = atot(b)[0]
         out = out + b
     return out
 
 
-def sigmoid(z: Tensor, eps=1e-6):
-    z = atot(z)[0]
-    nz = fn.Neg.apply(z)
-    out = 1.0 / (1.0 + fn.Exp.apply(nz) + eps)
+def sigmoid(z: Tensor):
+    out = 1.0 / (1.0 + f.exp(-z))
     return out
 
 
-def tanh(z: Tensor, eps=1e-6):
-    z = atot(z)[0]
-    nz = fn.Neg.apply(z)
-    e = fn.Exp.apply(z)
-    ne = fn.Exp.apply(nz)
-    out = (e - ne) / (e + ne + eps)
+def tanh(z: Tensor):
+    e = f.exp(z)
+    ne = f.exp(-z)
+    out = (e - ne) / (e + ne)
     return out
 
 
 def relu(z: Tensor):
-    z = atot(z)[0]
-    out = nnfn.ReLU.apply(z)
+    out = fn._ReLU.apply(z)
     return out
 
 
-def softmax(a: Tensor, dim: Optional[dimlike] = None, eps=1e-6):
-    if dim is None:
-        dim = tuple(range(a.ndim))
-    a = atot(a)[0]
-    e = fn.Exp.apply(a)
-    out = e / (fn.Sum.apply(e, dim, keepdims=False) + eps)
+def relu6(z: Tensor):
+    out = fn._ReLU6.apply(z)
     return out
+
+
+def leakyrelu(z: Tensor, slope=0.01):
+    out = fn._LeakyReLU.apply(z, slope)
+    return out
+
+
+def elu(z: Tensor, alpha=1.0):
+    out = fn._ELU.apply(z, alpha)
+    return out
+
+
+def gelu(z: Tensor):
+    piconst = 0.79788456
+    const = 0.044715
+    inner = piconst * (z + const * f.pow(z, 3.0))
+    out = 0.5 * z * (1 + tanh(inner))
+    return out
+
+
+def softmax(a: Tensor, dim=-1):
+    e = f.exp(a)
+    out = e / (e.sum(dim, keepdims=False))
+    return out
+
+
+def selfattention(
+    q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
+) -> Tuple[Tensor, Tensor]:
+    scaled = f.matmul(q, k.T) / k.dim[-1] ** 0.5
+    if mask is not None:
+        scaled = where(mask == True, -1e-9, scaled)
+    attn = softmax(scaled, dim=-1)
+    context = f.matmul(attn, v)
+    return context, attn
