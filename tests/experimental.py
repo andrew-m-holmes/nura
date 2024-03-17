@@ -1,6 +1,8 @@
 import nura
 import nura.nn as nn
 import torch
+import torch.nn.functional as f
+import numpy as np
 
 
 def main():
@@ -14,12 +16,13 @@ def main():
         def forward(self, x):
             return self.linear(x)
 
-    model = Model()
-    x = nura.randn().usesgrad()
-    a = nn.relu(x).backward()
-    b = nn.relu6(x).backward()
-    c = nn.leakyrelu(x).backward()
-    d = nn.gelu(x).backward()
+    a = nura.tensor([-2.0, 3.0, 0.0]).usedgrad()
+    b = nura.tensor(2.0).usedgrad()
+    c = a**b
+    print(c)
+    c.backward(nura.oneslike(c))
+    print(a.grad)
+    print(b.grad)
 
 
 if __name__ == "__main__":
