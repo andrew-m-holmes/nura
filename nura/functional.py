@@ -2,155 +2,162 @@ import numpy as np
 import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
-from nura.types import dim, dimlike, tensorlike
-from typing import Union, Optional
+from nura.types import Tensorlike, dimlike, dim
+from typing import Optional
 
 
-def add(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def add(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Add.apply(a, b)
     return out
 
 
-def sub(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def sub(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Sub.apply(a, b)
     return out
 
 
-def mul(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def mul(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Mul.apply(a, b)
     return out
 
 
-def div(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def div(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Div.apply(a, b)
     return out
 
 
-def dot(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def dot(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Dot.apply(a, b)
     return out
 
 
-def matmul(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def matmul(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Matmul.apply(a, b)
     return out
 
 
-def pow(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]):
+def pow(a: Tensor | Tensorlike, b: Tensor | Tensorlike):
     a, b = utils.atot(a, b)
     out = fn._Pow.apply(a, b)
     return out
 
 
-def square(a: Union[Tensor, tensorlike]):
+def square(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     return fn._Pow.apply(a, tensor(2.0))
 
 
-def sqrt(a: Union[Tensor, tensorlike]):
+def sqrt(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     return fn._Pow.apply(a, tensor(0.5))
 
 
-def exp(a: Union[Tensor, tensorlike]):
+def exp(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     out = fn._Exp.apply(a)
     return out
 
 
-def log(a: Union[Union[Tensor, tensorlike], tensorlike]):
+def log(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     out = fn._Log.apply(a)
     return out
 
 
-def sin(a: Union[Tensor, tensorlike]):
+def sin(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     out = fn._Sin.apply(a)
     return out
 
 
-def cos(a: Union[Tensor, tensorlike]):
+def cos(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     out = fn._Cos.apply(a)
     return out
 
 
-def sum(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+def sum(a: Tensor | Tensorlike, dim: Optional[dimlike] = None, keepdims=False):
+    a = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
     out = fn._Sum.apply(a, dim, keepdims)
     return out
 
 
-def max(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
-    b = utils.atot(a)[0]
+def max(a: Tensor | Tensorlike, dim: Optional[dimlike] = None, keepdims=False):
+    a = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
-    out = fn._Max.apply(b, dim, keepdims)
+    out = fn._Max.apply(a, dim, keepdims)
     return out
 
 
-def min(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+def min(a: Tensor | Tensorlike, dim: Optional[dimlike] = None, keepdims=False):
+    a = utils.atot(a)[0]
     if dim is None:
         dim = tuple(range(a.ndim))
-    a = utils.atot(a)[0]
     out = fn._Min.apply(a, dim, keepdims)
     return out
 
 
-def transpose(a: Tensor, dim0=-2, dim1=-1):
+def transpose(a: Tensor | Tensorlike, dim0=-2, dim1=-1):
+    a = utils.atot(a)[0]
     out = fn._Transpose.apply(a, dim0, dim1)
     return out
 
 
-def permute(a: Tensor, dims: dim):
+def permute(a: Tensor | Tensorlike, dims: dim):
+    a = utils.atot(a)[0]
     out = fn._Permute.apply(a, dims)
     return out
 
 
-def squeeze(a: Tensor, dim: Optional[dimlike] = None):
+def squeeze(a: Tensor | Tensorlike, dim: Optional[dimlike] = None):
+    a = utils.atot(a)[0]
     if dim is None:
         dim = tuple(np.where(np.array(a.dim) == 1)[0])
     out = fn._Squeeze.apply(a, dim=dim)
     return out
 
 
-def unsqueeze(a: Tensor, dim: Optional[dimlike] = None):
+def unsqueeze(a: Tensor | Tensorlike, dim: Optional[dimlike] = None):
+    a = utils.atot(a)[0]
     if dim is None:
         dim = 0
     out = fn._Unsqueeze.apply(a, dim)
     return out
 
 
-def view(a: Tensor, newdim: dim):
+def view(a: Tensor | Tensorlike, newdim: dim):
+    a = utils.atot(a)[0]
     out = fn._View.apply(a, newdim)
     return out
 
 
-def reshape(a: Tensor, newdim: dim):
+def reshape(a: Tensor | Tensorlike, newdim: dim):
+    a = utils.atot(a)[0]
     a = tocontiguous(a)
     out = fn._Reshape.apply(a, newdim)
     return out
 
 
-def abs(a: Union[Tensor, tensorlike]):
+def abs(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     return fn._Abs.apply(a)
 
 
-def pos(a: Union[Tensor, tensorlike]):
+def pos(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     return fn._Pos.apply(a)
 
 
-def neg(a: Union[Tensor, tensorlike]):
+def neg(a: Tensor | Tensorlike):
     a = utils.atot(a)[0]
     return fn._Neg.apply(a)
 

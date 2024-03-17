@@ -1,14 +1,14 @@
 import numpy as np
 from numpy import ndarray
-from typing import Type, Any, Tuple, Union, List
+from typing import Type, Any, Tuple, Union, Iterable
 
 
 _py_int = int
 _py_float = float
 _py_bool = bool
-_lists = Union[List[int], List[float], List[bool]]
+_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
 _scalars = Union[int, float, bool]
-tensorlike = Union[ndarray, _lists, _scalars]
+Tensorlike = Union[ndarray, _iterables, _scalars]
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
 

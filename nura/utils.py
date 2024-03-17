@@ -1,6 +1,6 @@
 import numpy as np
 import nura.types as types
-from nura.types import dtype, dim, dimlike, tensorlike
+from nura.types import Tensorlike, dimlike, dim, dtype
 from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
@@ -196,47 +196,47 @@ def hashtensor(a: Tensor) -> int:
     return hash(id(a))
 
 
-def equal(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def equal(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.equal(a.data, b.data))
 
 
-def less(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def less(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.less(a.data, b.data))
 
 
-def lesseq(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def lesseq(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.less_equal(a.data, b.data))
 
 
-def greater(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def greater(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.greater(a.data, b.data))
 
 
-def greatereq(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def greatereq(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.greater_equal(a.data, b.data))
 
 
-def notequal(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def notequal(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(np.not_equal(a.data, b.data))
 
 
-def tensorand(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def tensorand(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(a.data and b.data)
 
 
-def tensoror(a: Union[Tensor, tensorlike], b: Union[Tensor, tensorlike]) -> Tensor:
+def tensoror(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
     a, b = atot(a, b)
     return tensor(a.data or b.data)
 
 
-def tensornot(a: Union[Tensor, tensorlike]) -> Tensor:
+def tensornot(a: Tensor | Tensorlike) -> Tensor:
     b = atot(a)[0]
     return tensor(not b.data)
 
