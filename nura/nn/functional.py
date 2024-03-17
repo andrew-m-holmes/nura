@@ -50,9 +50,8 @@ def elu(z: Tensor, alpha=1.0):
 
 def gelu(z: Tensor):
     z = atot(z)[0]
-    pi = 3.14159
-    inner = f.sqrt(2.0 / pi) * (z + 0.044715 * f.pow(z, 3.0))
-    out = 0.5 * z * (1.0 + tanh(inner))
+    piconst = 0.79788456
+    out = 0.5 * z * (1.0 + tanh(piconst * (z + 0.044715 * f.pow(z, 3.0))))
     return out
 
 
