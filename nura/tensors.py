@@ -195,7 +195,7 @@ class Tensor:
         return nura.sub(self, other)
 
     def __rsub__(self, other):
-        return nura.sub(other, self)
+        return nura.sub(tensor(other, dtype=self.dtype), self)
 
     def __mul__(self, other):
         return nura.mul(self, other)
@@ -207,19 +207,16 @@ class Tensor:
         return nura.div(self, other)
 
     def __rtruediv__(self, other):
-        return nura.div(other, self)
+        return nura.div(tensor(other, dtype=self.dtype), self)
 
     def __matmul__(self, other):
         return nura.matmul(self, other)
-
-    def __rmatmul__(self, other):
-        return nura.matmul(other, self)
 
     def __pow__(self, other):
         return nura.pow(self, other)
 
     def __rpow__(self, other):
-        return nura.pow(other, self)
+        return nura.pow(tensor(other, dtype=self.dtype), self)
 
     def __pos__(self):
         return nura.pos(self)
