@@ -1,6 +1,6 @@
 import numpy as np
 import nura.types as types
-from nura.types import Tensorlike, dimlike, dim, dtype
+from nura.types import Scalar, dimlike, dim, dtype
 from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
@@ -196,53 +196,56 @@ def hashtensor(a: Tensor) -> int:
     return hash(id(a))
 
 
-def equal(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(np.equal(a.data, b.data))
+def equal(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.equal(a.data, b.data))
+    return tensor(np.equal(a.data, b))
 
 
-def less(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(np.less(a.data, b.data))
+def less(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.less(a.data, b.data))
+    return tensor(np.less(a.data, b))
 
 
-def lesseq(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(np.less_equal(a.data, b.data))
+def lesseq(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.less_equal(a.data, b.data))
+    return tensor(np.less_equal(a.data, b))
 
 
-def greater(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(np.greater(a.data, b.data))
+def greater(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.greater(a.data, b.data))
+    return tensor(np.greater(a.data, b))
 
 
-def greatereq(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(np.greater_equal(a.data, b.data))
+def greatereq(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.greater_equal(a.data, b.data))
+    return tensor(np.greater_equal(a.data, b))
 
 
-def notequal(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(np.not_equal(a.data, b.data))
+def notequal(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.not_equal(a.data, b.data))
+    return tensor(np.not_equal(a.data, b))
 
 
-def tensorand(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(a.data and b.data)
+def tensorand(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(a.data and b.data)
+    return tensor(a.data and b)
 
 
-def tensoror(a: Tensor | Tensorlike, b: Tensor | Tensorlike) -> Tensor:
-    a, b = atot(a, b)
-    return tensor(a.data or b.data)
+def tensoror(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(a.data or b.data)
+    return tensor(a.data or b)
 
 
-def tensornot(a: Tensor | Tensorlike) -> Tensor:
-    b = atot(a)[0]
-    return tensor(not b.data)
-
-
-def atot(*args: Any) -> Union[Tuple[Tensor, ...], Tensor]:
-    return tuple(a if istensor(a) else tensor(a) for a in args)
+def tensornot(a: Tensor) -> Tensor:
+    return tensor(not a.data)
 
 
 def typesmatch(*tensors: Tensor) -> bool:
@@ -258,6 +261,12 @@ def to(a: Tensor, dtype: Type[dtype]):
         )
     data = dtype.numpy(a.data)
     return tensor(data, a.usegrad, dtype)
+
+
+def tocontiguous(a: Tensor):
+    c = a.clone()
+    data = np.ascontiguousarray(c.data)
+    return c.mutated(data=data)
 
 
 def todim(dim: Any) -> dim:
