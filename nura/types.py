@@ -6,11 +6,11 @@ from typing import Type, Any, Tuple, Union, Iterable
 _py_int = int
 _py_float = float
 _py_bool = bool
-_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
-_scalars = Union[int, float, bool]
-Tensorlike = Union[ndarray, _iterables, _scalars]
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
+_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
+Scalar = Union[float, int]
+Tensorlike = Union[Scalar, bool, _iterables, ndarray]
 
 
 class dtype:
