@@ -109,7 +109,6 @@ class Tensor:
 
     def cleargrad(self):
         self._grad = None
-        return self
 
     def clearedgrad(self):
         cls = type(self)
@@ -117,7 +116,6 @@ class Tensor:
 
     def zerograd(self):
         self._grad = nura.zeroslike(self)
-        return self
 
     def zeroedgrad(self):
         cls = type(self)
@@ -125,23 +123,21 @@ class Tensor:
 
     def usesgrad(self):
         self._usegrad = True
-        return self
 
     def usedgrad(self):
         cls = type(self)
         return cls(self.data, True, self.grad, self.backfn, self.leaf)
 
-    def mutated(self, **attrs: Any) -> "Tensor":
+    def mutate(self, **attrs: Any):
+        for k, v in attrs.items():
+            setattr(self, f"_{k}", v)
+
+    def mutated(self, **attrs: Any):
         cls = type(self)
         t = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
         for k, v in attrs.items():
             setattr(t, f"_{k}", v)
         return t
-
-    def mutate(self, **attrs: Any) -> "Tensor":
-        for k, v in attrs.items():
-            setattr(self, f"_{k}", v)
-        return self
 
     def detach(self):
         return tensor(self.data, False, self.dtype)
@@ -170,8 +166,8 @@ class Tensor:
     def view(self, newdim: types.dim):
         return nura.view(self, newdim)
 
-    def reshape(self, dim: types.dim):
-        return nura.reshape(self, dim)
+    def reshape(self, newdim: types.dim):
+        return nura.reshape(self, newdim)
 
     def transpose(self, dim0=-2, dim1=-1):
         return nura.transpose(self, dim0, dim1)
