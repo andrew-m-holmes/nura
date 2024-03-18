@@ -6,9 +6,9 @@ from typing import Type, Any, Tuple, Union, Iterable
 _py_int = int
 _py_float = float
 _py_bool = bool
+_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
-_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
 Scalar = Union[float, int]
 Tensorlike = Union[Scalar, bool, _iterables, ndarray]
 
@@ -75,7 +75,7 @@ class bool(dtype):
     _wrapping = np.bool_
 
 
-dtypemap = {
+_dtypemap = {
     np.uint8: byte,
     np.int8: char,
     np.int16: short,
@@ -102,10 +102,10 @@ dtypemap = {
 
 def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
-        return dtypemap[data.dtype]
+        return _dtypemap[data.dtype]
     if isinstance(data, list):
-        return dtypemap[np.array(data).dtype]
+        return _dtypemap[np.array(data).dtype]
     dtype = type(data)
-    if dtype not in dtypemap:
+    if dtype not in _dtypemap:
         raise KeyError(f"Couldn't find {dtype} in dtype table")
-    return dtypemap[dtype]
+    return _dtypemap[dtype]
