@@ -87,8 +87,13 @@ class Tanh(Module):
 
 class SelfAttention(Module):
 
-    def __init__(self) -> None:
+    def __init__(self, dim=-1) -> None:
         super().__init__()
+        self._dim = dim
+
+    @property
+    def dim(self):
+        return self._dim
 
     def forward(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
-        return nnfn.selfattn(q, k, v, mask)
+        return nnfn.selfattention(q, k, v, self.dim, mask)
