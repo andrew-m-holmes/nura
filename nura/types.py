@@ -7,6 +7,7 @@ _py_int = int
 _py_float = float
 _py_bool = bool
 _iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
+inf = np.inf
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
 Scalar = Union[float, int]
