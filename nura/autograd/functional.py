@@ -1,7 +1,7 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from typing import Dict, Generator, Tuple, Union, Optional, Callable, Any
+from typing import Dict, Generator, Tuple, Optional, Callable, Any
 from collections import deque
 
 
@@ -22,9 +22,12 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
+            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
-                tensor.grad if nura.istensor(tensor.grad) else nura.zeroslike(tensor)
+                tensor.grad
+                if isinstance(tensor.grad, Tensor)
+                else nura.zeroslike(tensor)
             )
             newgrad = oldgrad + accumgrad
             tensor.mutate(grad=newgrad.to(tensor.dtype))
@@ -35,7 +38,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
 def _backwarderr(
     out: Tensor, grad: Optional[Tensor] = None
-) -> Optional[Union[RuntimeError, ValueError]]:
+) -> Optional[RuntimeError | ValueError]:
     if out.backfn is None:
         return RuntimeError(
             "Cannot backpropagate gradients for Tensor with no backward function"
@@ -52,7 +55,7 @@ def _backwarderr(
 
 
 def grad(
-    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
+    inpt: Tensor | Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
     if err := _graderr(inpt, out, grad):
@@ -88,7 +91,7 @@ def _grad(
 
 def _graderr(
     inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
-) -> Optional[Union[RuntimeError, ValueError]]:
+) -> Optional[RuntimeError | ValueError]:
     if not all(t.gradtensor for t in inpt):
         return ValueError(
             "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
@@ -129,13 +132,13 @@ def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:
 
 
 def tupify(inpt) -> Tuple[Tensor, ...]:
-    if nura.istensor(inpt):
+    if isinstance(inpt, Tensor):
         return (inpt,)
     return inpt
 
 
 def vjp(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inpt: Tuple[Tensor, ...] | Tensor,
     vec: Tensor,
     f: Callable[..., Tensor],
     *args,
@@ -179,8 +182,8 @@ def _vjperr(inpt: Tuple[Tensor, ...], vec: Tensor) -> Optional[ValueError]:
 
 
 def jvp(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
-    vec: Union[Tuple[Tensor, ...], Tensor],
+    inpt: Tuple[Tensor, ...] | Tensor,
+    vec: Tuple[Tensor, ...] | Tensor,
     f: Callable[..., Tensor],
     *args,
     **kwargs,
@@ -221,7 +224,7 @@ def _jvperr(inpt: Tuple[Tensor, ...], vec: Tuple[Tensor, ...]) -> Optional[Value
 
 
 def jacrev(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inpt: Tuple[Tensor, ...] | Tensor,
     f: Callable[..., Tensor],
     pos=0,
     *args,
@@ -247,7 +250,7 @@ def jacrev(
 
 
 def jacfwd(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inpt: Tuple[Tensor, ...] | Tensor,
     f: Callable[..., Tensor],
     pos=0,
     *args,

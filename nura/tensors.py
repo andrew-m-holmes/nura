@@ -274,7 +274,10 @@ class Tensor:
         return nura.slice(self, slc)
 
     def __setitem__(self, slc, item):
-        self.data[slc] = item.data if nura.istensor(item) else item
+        if isinstance(item, Tensor):
+            self._data[slc] = item.data
+        else:
+            self.data[slc] = item
 
     def __len__(self):
         return self.dim[0]
