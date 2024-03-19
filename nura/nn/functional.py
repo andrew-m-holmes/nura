@@ -54,16 +54,16 @@ def gelu(z: Tensor):
 
 def softmax(a: Tensor, dim=-1):
     e = f.exp(a)
-    out = e / (e.sum(dim, keepdims=False))
+    out = e / (e.sum(dim, keepdims=True))
     return out
 
 
 def selfattention(
     q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
 ) -> Tuple[Tensor, Tensor]:
-    scaled = f.matmul(q, k.T) / k.dim[-1] ** 0.5
+    simscore = f.matmul(q, k.T) / k.dim[-1] ** 0.5
     if mask is not None:
-        scaled = where(mask == True, -1e-9, scaled)
-    attn = softmax(scaled, dim=-1)
+        simscore = where(mask == True, -1e-9, simscore)
+    attn = softmax(simscore, dim=-1)
     context = f.matmul(attn, v)
     return context, attn

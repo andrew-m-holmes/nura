@@ -16,8 +16,21 @@ def main():
         def forward(self, x):
             return self.linear(x)
 
-    tensor = nura.rand(1, 2, 3).usedgrad()
-    print(tensor)
+    bsize, seqlen, dm = 2, 5, 3
+
+    wq = nura.randn(dm, dm)
+    wk = nura.randn(dm, dm)
+    wv = nura.randn(dm, dm)
+
+    q = nura.randn(bsize, seqlen, dm)
+
+    q = nn.linear(q, wq)
+    k = nn.linear(q, wk)
+    v = nn.linear(q, wv)
+
+    mask = nura.tri(seqlen, seqlen).bool()
+    ctx, attn = nn.selfattention(q, k, v, mask)
+    print(ctx, attn, sep="\n" + "-" * 50 + "\n")
 
 
 if __name__ == "__main__":
