@@ -567,9 +567,8 @@ class _Slice(Function):
     def forward(context: Context, a: Tensor, slc: slice):
         context.save(a)
         context["slc"] = slc
-        context["dim"] = a.dim
         arr = a.data[slc]
-        return arr
+        return arr.copy()
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
@@ -577,11 +576,10 @@ class _Slice(Function):
         slc = context["slc"]
         mask = np.zeros_like(a.data)
         mask[slc] = grad.data
-        arr = mask
-        return arr
+        return mask
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         slc = context["slc"]
         arr = agrad.data[slc]
-        return arr
+        return arr.copy()
