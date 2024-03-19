@@ -103,7 +103,7 @@ _dtypemap = {
 def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
         return _dtypemap[data.dtype]
-    if isinstance(data, list):
+    if isinstance(data, list) or isinstance(data, tuple):
         return dtypeof(data[0])
     dtype = type(data)
     if dtype not in _dtypemap:
