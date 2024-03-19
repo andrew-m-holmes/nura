@@ -272,8 +272,8 @@ class _Sum(Function):
         graddata = grad.data
         if not keepdims and a.dim != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-        arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        return arr
+            graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return graddata
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
@@ -306,8 +306,8 @@ class _Max(Function):
         mask = a.data == arr
         if not keepdims and a.dim != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-        arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        return mask * arr
+            graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return mask * graddata
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
@@ -343,8 +343,8 @@ class _Min(Function):
         mask = a.data == arr
         if not keepdims and a.dim != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-        arr = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        return mask * arr
+            graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
+        return mask * graddata
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
