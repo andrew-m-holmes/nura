@@ -122,11 +122,32 @@ def randintlike(
     return tensor(data, dtype=dtype)
 
 
-def identity(n: int, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def identity(n: int, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     data = np.identity(n)
-    return tensor(data, usegrad, dtype)
+    return tensor(data, dtype=dtype)
+
+
+def tri(m: int, n: int, k=0, dtype: Optional[Type[dtype]] = None):
+    if dtype is None:
+        dtype = types.float
+    data = np.tri(m, n, k)
+    return tensor(data, dtype=dtype)
+
+
+def triu(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None):
+    if dtype is None:
+        dtype = a.dtype
+    data = np.triu(a.data, k)
+    return tensor(data, dtype=dtype)
+
+
+def tril(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None):
+    if dtype is None:
+        dtype = a.dtype
+    data = np.tril(a.data, k)
+    return tensor(data, dtype=dtype)
 
 
 def full(
@@ -256,7 +277,7 @@ def typesmatch(*tensors: Tensor) -> bool:
 def to(a: Tensor, dtype: Type[dtype]):
     if not isinstance(a, Tensor):
         raise ValueError(f"Expected Tensor, received {a.__class__.__name__}")
-    if a.usesgrad and dtype not in (types.half, types.float, types.double):
+    if a.usegrad and dtype not in (types.half, types.float, types.double):
         raise RuntimeError(
             f"Can't cast Tensor using gradient to type that doesn't, try Tensor.detach()"
         )
