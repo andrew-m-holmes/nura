@@ -16,21 +16,38 @@ def main():
         def forward(self, x):
             return self.linear(x)
 
-    bsize, seqlen, dm = 2, 5, 3
-
-    wq = nura.randn(dm, dm)
-    wk = nura.randn(dm, dm)
-    wv = nura.randn(dm, dm)
+    bsize, seqlen, dm = 2, 4, 3
 
     q = nura.randn(bsize, seqlen, dm)
+    k = q.clone()
+    v = q.clone()
 
-    q = nn.linear(q, wq)
-    k = nn.linear(q, wk)
-    v = nn.linear(q, wv)
-
+    s = nura.matmul(q, k.transpose(-1, -2)) / dm**0.5
     mask = nura.tri(seqlen, seqlen).bool()
-    ctx, attn = nn.selfattention(q, k, v, mask)
-    print(ctx, attn, sep="\n" + "-" * 50 + "\n")
+    print(f"nura s:\n{s}")
+    s = nura.where(mask, s, -nura.inf)
+    print(f"nura after mask:\n{s}")
+    attn = nn.softmax(s, dim=-1)
+    print(f"nura attn:\n{attn}")
+    ctx = nura.matmul(attn, v)
+    print(f"nura ctx:\n{ctx}")
+
+    print("-" * 50)
+
+    q = torch.from_numpy(q.data)
+    k = q.clone()
+    v = q.clone()
+
+    s = torch.matmul(q, k.transpose(-1, -2)) / dm**0.5
+    print(f"torch s:\n{s}")
+    ones = torch.ones((seqlen, seqlen)).bool()
+    mask = torch.tril(ones)
+    s = s.masked_fill(mask == False, -1e9)
+    print(f"torch after mask:\n{s}")
+    attn = f.softmax(s, dim=-1)
+    print(f"torch attn:\n{attn}")
+    ctx = torch.matmul(attn, v)
+    print(f"torch ctx:\n{ctx}")
 
 
 if __name__ == "__main__":
