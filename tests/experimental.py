@@ -16,13 +16,8 @@ def main():
         def forward(self, x):
             return self.linear(x)
 
-    a = nura.tensor([-2.0, 3.0, 0.0]).usedgrad()
-    b = nura.tensor(2.0).usedgrad()
-    c = a**b
-    print(c)
-    c.backward(nura.oneslike(c))
-    print(a.grad)
-    print(b.grad)
+    tensor = nura.rand(1, 2, 3).usedgrad()
+    print(tensor)
 
 
 if __name__ == "__main__":

@@ -79,6 +79,7 @@ def _grad(
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
+            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
