@@ -104,7 +104,7 @@ def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
         return _dtypemap[data.dtype]
     if isinstance(data, list):
-        return _dtypemap[np.array(data).dtype]
+        return dtypeof(data[0])
     dtype = type(data)
     if dtype not in _dtypemap:
         raise KeyError(f"Couldn't find {dtype} in dtype table")
