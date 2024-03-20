@@ -73,7 +73,7 @@ class Softmax(Module):
 
     def xrepr(self) -> str:
         dim = self.dim
-        return f"{super().xrepr()}({dim=})"
+        return f"{self.name()}({dim=})"
 
 
 class Tanh(Module):
@@ -87,13 +87,23 @@ class Tanh(Module):
 
 class SelfAttention(Module):
 
-    def __init__(self, dim=-1) -> None:
+    def __init__(self, dim=-1, maskfill=-1e-9) -> None:
         super().__init__()
         self._dim = dim
+        self._maskfill = maskfill
 
     @property
     def dim(self):
         return self._dim
 
+    @property
+    def maskfill(self):
+        return self._maskfill
+
     def forward(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
-        return nnfn.selfattention(q, k, v, self.dim, mask)
+        return nnfn.selfattention(q, k, v, self.dim, mask, self.maskfill)
+
+    def xrepr(self) -> str:
+        dim = self.dim
+        maskfill = self.maskfill
+        return f"{self.name()}({dim=} {maskfill=})"

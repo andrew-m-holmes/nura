@@ -59,11 +59,17 @@ def softmax(a: Tensor, dim=-1):
 
 
 def selfattention(
-    q: Tensor, k: Tensor, v: Tensor, dim=-1, mask: Optional[Tensor] = None
+    q: Tensor,
+    k: Tensor,
+    v: Tensor,
+    dim=-1,
+    mask: Optional[Tensor] = None,
+    maskfill=-1e9,
 ) -> Tuple[Tensor, Tensor]:
-    simscore = f.matmul(q, k.T) / k.dim[-1] ** 0.5
+    dk = k.dim[dim]
+    simscore = f.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
     if mask is not None:
-        simscore = where(mask == True, -1e-9, simscore)
+        simscore = where(mask == True, simscore, maskfill)
     attn = softmax(simscore, dim)
     context = f.matmul(attn, v)
     return context, attn
