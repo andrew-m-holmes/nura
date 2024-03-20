@@ -2,7 +2,7 @@ import numpy as np
 import nura.types as types
 from nura.types import Scalar, dimlike, dim, dtype
 from nura.tensors import Tensor, tensor
-from typing import Optional, Type, Any, Tuple
+from typing import Optional, Type, Any, Tuple, Union
 
 
 def empty(*dim: dimlike, dtype: Optional[Type[dtype]] = None):
@@ -176,9 +176,9 @@ def eye(
 
 
 def where(
-    logical: Tensor | bool,
-    x: Tensor | Scalar | bool,
-    y: Tensor | Scalar | bool,
+    logical: Union[Tensor, bool],
+    x: Union[Tensor, Scalar, bool],
+    y: Union[Tensor, Scalar, bool],
 ) -> Tensor:
     data = logical.data if isinstance(logical, Tensor) else logical
     xdata = x.data if isinstance(x, Tensor) else x
@@ -186,7 +186,7 @@ def where(
     return tensor(np.where(data, xdata, ydata))
 
 
-def poswhere(logical: Tensor | bool) -> Tensor:
+def poswhere(logical: Union[Tensor, bool]) -> Tensor:
     data = logical.data if isinstance(logical, Tensor) else logical
     return tensor(np.where(data)[0])
 
@@ -218,49 +218,49 @@ def hashtensor(a: Tensor) -> int:
     return hash(id(a))
 
 
-def equal(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def equal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.equal(a.data, b.data))
     return tensor(np.equal(a.data, b))
 
 
-def less(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def less(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.less(a.data, b.data))
     return tensor(np.less(a.data, b))
 
 
-def lesseq(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def lesseq(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.less_equal(a.data, b.data))
     return tensor(np.less_equal(a.data, b))
 
 
-def greater(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def greater(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.greater(a.data, b.data))
     return tensor(np.greater(a.data, b))
 
 
-def greatereq(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def greatereq(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.greater_equal(a.data, b.data))
     return tensor(np.greater_equal(a.data, b))
 
 
-def notequal(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def notequal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.not_equal(a.data, b.data))
     return tensor(np.not_equal(a.data, b))
 
 
-def tensorand(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def tensorand(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(a.data and b.data)
     return tensor(a.data and b)
 
 
-def tensoror(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def tensoror(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(a.data or b.data)
     return tensor(a.data or b)
