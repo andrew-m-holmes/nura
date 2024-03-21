@@ -15,13 +15,6 @@ def main():
             return self.linear(x)
 
     model = Model()
-    modelhf = model.half()
-    modelfl = model.float()
-    modeldf = model.double()
-    print(model, modelhf, modelfl, modeldf, sep="\n\n")
-    print(modelhf is modelfl)
-    print(modelhf is modeldf)
-    print(modelhf is model)
 
 
 if __name__ == "__main__":

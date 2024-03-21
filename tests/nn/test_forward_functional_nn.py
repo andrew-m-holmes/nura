@@ -154,3 +154,63 @@ def test_gelu_forward_matrix():
         0.5 * z * (1 + np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * np.power(z, 3))))
     )
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_sigmoid_forward_scalar():
+    z = np.random.randn()
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.sigmoid(z_tensor)
+    result = result_tensor.data
+    expected = 1 / (1 + np.exp(-z))
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_sigmoid_forward_vector():
+    z = np.random.randn(5)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.sigmoid(z_tensor)
+    result = result_tensor.data
+    expected = 1 / (1 + np.exp(-z))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_sigmoid_forward_matrix():
+    z = np.random.randn(3, 3)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.sigmoid(z_tensor)
+    result = result_tensor.data
+    expected = 1 / (1 + np.exp(-z))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_tanh_forward_scalar():
+    z = np.random.randn()
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.tanh(z_tensor)
+    result = result_tensor.data
+    expected = np.tanh(z)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_tanh_forward_vector():
+    z = np.random.randn(5)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.tanh(z_tensor)
+    result = result_tensor.data
+    expected = np.tanh(z)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_tanh_forward_matrix():
+    z = np.random.randn(3, 3)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.tanh(z_tensor)
+    result = result_tensor.data
+    expected = np.tanh(z)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
