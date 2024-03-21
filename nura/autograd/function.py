@@ -1,7 +1,7 @@
 import nura
 from nura.tensors import Tensor
 from nura.autograd.graph import genout
-from typing import Tuple, Any, Optional, Dict
+from typing import Tuple, Any, Optional, Dict, Union
 from numpy import ndarray
 
 
@@ -44,7 +44,7 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def backward(context: Context, grad: Tensor) -> Tuple[ndarray, ...] | ndarray:
+    def backward(context: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
