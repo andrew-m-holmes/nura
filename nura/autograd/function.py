@@ -40,7 +40,7 @@ class Context:
 class Function:
 
     @staticmethod
-    def forward(context: Context, *args: Tensor | Any, **kwargs: Any) -> ndarray:
+    def forward(context: Context, *args: Any, **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
@@ -52,7 +52,7 @@ class Function:
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args: Tensor | Any, **kwargs: Any) -> Tensor:
+    def apply(cls, *args: Any, **kwargs: Any) -> Tensor:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
         irout = nura.tensor(rawout)
