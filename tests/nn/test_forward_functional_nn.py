@@ -214,3 +214,157 @@ def test_tanh_forward_matrix():
     result = result_tensor.data
     expected = np.tanh(z)
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_softmax_forward_scalar():
+    z = np.random.randn()
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z))
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_softmax_forward_vector():
+    z = np.random.randn(5)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_softmax_forward_matrix():
+    z = np.random.randn(3, 3)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor, dim=-1)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z), axis=-1, keepdims=True)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_softmax_forward_tensor_rank3():
+    z = np.random.randn(3, 3, 3)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor, dim=1)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_softmax_forward_tensor_rank4():
+    z = np.random.randn(4, 4, 4, 4)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor, dim=2)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z), axis=2, keepdims=True)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_vector():
+    x = np.random.randn(5)
+    w = np.random.randn(5, 5)
+    b = np.random.randn(5)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+    result = result_tensor.data
+    expected = x @ w.T + b
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_matrix():
+    x = np.random.randn(3, 3)
+    w = np.random.randn(3, 3)
+    b = np.random.randn(3)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+    result = result_tensor.data
+    expected = x @ w.T + b
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_matrix_batch():
+    x = np.random.randn(10, 3, 3)
+    w = np.random.randn(3, 3)
+    b = np.random.randn(3)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+    result = result_tensor.data
+    expected = x @ w.T + b
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_matrix_batch2():
+    x = np.random.randn(10, 5, 3, 3)
+    w = np.random.randn(3, 3)
+    b = np.random.randn(3)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+    result = result_tensor.data
+    expected = x @ w.T + b
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_vector_no_bias():
+    x = np.random.randn(5)
+    w = np.random.randn(5, 5)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = x @ w.T
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_matrix_no_bias():
+    x = np.random.randn(3, 3)
+    w = np.random.randn(3, 3)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = x @ w.T
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_matrix_batch_no_bias():
+    x = np.random.randn(10, 3, 3)
+    w = np.random.randn(3, 3)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = x @ w.T
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_linear_forward_matrix_batch2_no_bias():
+    x = np.random.randn(10, 5, 3, 3)
+    w = np.random.randn(3, 3)
+
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = x @ w.T
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)

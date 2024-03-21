@@ -65,7 +65,7 @@ class Tensor:
 
     @property
     def T(self):
-        revdims = tuple(reversed(self.dim))
+        revdims = tuple(range(self.ndim - 1, -1, -1))
         return self.permute(revdims)
 
     def item(self):
