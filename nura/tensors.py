@@ -65,8 +65,8 @@ class Tensor:
 
     @property
     def T(self):
-        dims = tuple(reversed(self.dim))
-        return self.permute(dims)
+        revdims = tuple(reversed(self.dim))
+        return self.permute(revdims)
 
     def item(self):
         if self.nelem != 1:

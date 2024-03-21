@@ -58,3 +58,7 @@ class Function:
         irout = nura.tensor(rawout)
         out = genout(irout, cls, context)
         return out
+
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__

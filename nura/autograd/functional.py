@@ -1,7 +1,7 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from typing import Dict, Generator, Tuple, Optional, Callable, Any
+from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union
 from collections import deque
 
 
@@ -32,13 +32,13 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             newgrad = oldgrad + accumgrad
             tensor.mutate(grad=newgrad.to(tensor.dtype))
         elif nodes:
-            items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
+            items = [(n, g) for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
 
 
 def _backwarderr(
     out: Tensor, grad: Optional[Tensor] = None
-) -> Optional[RuntimeError | ValueError]:
+) -> Optional[Union[RuntimeError, ValueError]]:
     if out.backfn is None:
         return RuntimeError(
             "Cannot backpropagate gradients for Tensor with no backward function"
@@ -55,7 +55,7 @@ def _backwarderr(
 
 
 def grad(
-    inpt: Tensor | Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
+    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
 ) -> Tuple[Tensor, ...]:
     inpt = tupify(inpt)
     if err := _graderr(inpt, out, grad):
@@ -92,7 +92,7 @@ def _grad(
 
 def _graderr(
     inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
-) -> Optional[RuntimeError | ValueError]:
+) -> Optional[Union[ValueError, RuntimeError]]:
     if not all(t.gradtensor for t in inpt):
         return ValueError(
             "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
@@ -139,7 +139,7 @@ def tupify(inpt) -> Tuple[Tensor, ...]:
 
 
 def vjp(
-    inpt: Tuple[Tensor, ...] | Tensor,
+    inpt: Union[Tuple[Tensor, ...], Tensor],
     vec: Tensor,
     f: Callable[..., Tensor],
     *args,
@@ -183,8 +183,8 @@ def _vjperr(inpt: Tuple[Tensor, ...], vec: Tensor) -> Optional[ValueError]:
 
 
 def jvp(
-    inpt: Tuple[Tensor, ...] | Tensor,
-    vec: Tuple[Tensor, ...] | Tensor,
+    inpt: Union[Tuple[Tensor, ...], Tensor],
+    vec: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     *args,
     **kwargs,
@@ -225,7 +225,7 @@ def _jvperr(inpt: Tuple[Tensor, ...], vec: Tuple[Tensor, ...]) -> Optional[Value
 
 
 def jacrev(
-    inpt: Tuple[Tensor, ...] | Tensor,
+    inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     pos=0,
     *args,
@@ -251,7 +251,7 @@ def jacrev(
 
 
 def jacfwd(
-    inpt: Tuple[Tensor, ...] | Tensor,
+    inpt: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     pos=0,
     *args,
