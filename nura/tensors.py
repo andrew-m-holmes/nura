@@ -149,6 +149,9 @@ class Tensor:
     def contiguous(self):
         return nura.tocontiguous(self)
 
+    def exp(self):
+        return nura.exp(self)
+
     def sum(self, dim: Optional[dimlike] = None, keepdims=False):
         return nura.sum(self, dim, keepdims)
 

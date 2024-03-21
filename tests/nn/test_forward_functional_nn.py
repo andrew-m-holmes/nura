@@ -368,3 +368,61 @@ def test_linear_forward_matrix_batch2_no_bias():
     result = result_tensor.data
     expected = x @ w.T
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_selfattention_basic():
+    q = np.random.rand(2, 4, 5)
+    k = q.copy()
+    v = np.random.rand(2, 4, 6)
+
+    context, attn = f.selfattention(nura.tensor(q), nura.tensor(k), nura.tensor(v))
+
+    dk = q.shape[-1]
+    simscore = np.matmul(q, k.transpose(0, 2, 1)) / (dk**0.5)
+    attn_expected = np.exp(simscore) / np.sum(np.exp(simscore), axis=-1, keepdims=True)
+    context_expected = np.matmul(attn_expected, v)
+
+    np.testing.assert_array_almost_equal(attn.data, attn_expected, decimal=5)
+    np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
+
+
+def test_selfattention_with_mask():
+    q = np.random.rand(2, 4, 5)
+    k = q.copy()
+    v = np.random.rand(2, 4, 6)
+    mask = np.tril(np.ones((1, 4, 4)), k=0).astype(bool)
+
+    context, attn = f.selfattention(
+        nura.tensor(q), nura.tensor(k), nura.tensor(v), mask=nura.tensor(mask)
+    )
+
+    dk = q.shape[-1]
+    simscore = np.matmul(q, k.transpose(0, 2, 1)) / (dk**0.5)
+    maskfill = -1e9
+    simscore = np.where(mask == True, simscore, maskfill)
+    attn_expected = np.exp(simscore) / np.sum(np.exp(simscore), axis=-1, keepdims=True)
+    context_expected = np.matmul(attn_expected, v)
+
+    np.testing.assert_array_almost_equal(attn.data, attn_expected, decimal=5)
+    np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
+
+
+def test_selfattention_with_mask_batch():
+    q = np.random.rand(2, 4, 5, 3)
+    k = q.copy()
+    v = np.random.rand(2, 4, 5, 4)
+    mask = np.tril(np.ones((1, 5, 5)), k=0).astype(bool)
+
+    context, attn = f.selfattention(
+        nura.tensor(q), nura.tensor(k), nura.tensor(v), mask=nura.tensor(mask)
+    )
+
+    dk = q.shape[-1]
+    simscore = np.matmul(q, k.transpose(0, 1, 3, 2)) / (dk**0.5)
+    maskfill = -1e9
+    simscore = np.where(mask == True, simscore, maskfill)
+    attn_expected = np.exp(simscore) / np.sum(np.exp(simscore), axis=-1, keepdims=True)
+    context_expected = np.matmul(attn_expected, v)
+
+    np.testing.assert_array_almost_equal(attn.data, attn_expected, decimal=5)
+    np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
