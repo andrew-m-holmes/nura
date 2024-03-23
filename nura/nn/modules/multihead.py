@@ -37,16 +37,17 @@ class MultiHeadAttention(Module):
         self._attn = ScaledDotProductAttention(dim=dim, maskfill=maskfill)
 
         # (m, l, h, e) -> (m, h, l, e)
-        # (m, h, l, e) @ (m, h, e, l) -> (m, h, l, l)
-        # (m, h, l, l) @ (m, h, l, v) -> (m, h, l, v)
+        # (m, h, l, e) @ (m, h, e, l') -> (m, h, l, l')
+        # (m, h, l, l') @ (m, h, l', v) -> (m, h, l, v)
 
     def forward(self, q, k, v, mask=None) -> Tuple[Tensor, Tensor]:
-        seqlen = k.dim[1]
-        q = self._wq(q).reshape(-1, seqlen, self._heads, self._dk).transpose(1, 2)
-        k = self._wk(k).reshape(-1, seqlen, self._heads, self._dk).transpose(1, 2)
-        v = self._wv(v).reshape(-1, seqlen, self._heads, self._dv).transpose(1, 2)
+        qlen = q.dim[1]
+        klen = k.dim[1]
+        q = self._wq(q).reshape((-1, qlen, self._heads, self._dk)).transpose(1, 2)
+        k = self._wk(k).reshape((-1, klen, self._heads, self._dk)).transpose(1, 2)
+        v = self._wv(v).reshape((-1, klen, self._heads, self._dv)).transpose(1, 2)
 
         ctx, attn = self._attn(q, k, v, mask=mask)
-        ctx = ctx.reshape(-1, seqlen, self._heads * self._dv)
+        ctx = ctx.reshape((-1, qlen, self._heads * self._dv))
         out = self._wo(ctx)
         return out, attn

@@ -54,7 +54,7 @@ def gelu(z: Tensor):
 
 def softmax(a: Tensor, dim=-1):
     e = f.exp(a)
-    out = e / (e.sum(dim, keepdims=True) + 1e-9)
+    out = e / (e.sum(dim, keepdims=True))
     return out
 
 
