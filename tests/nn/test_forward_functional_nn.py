@@ -370,12 +370,12 @@ def test_linear_forward_matrix_batch2_no_bias():
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
-def test_selfattention_basic():
+def test_attention_basic():
     q = np.random.rand(2, 4, 5)
     k = q.copy()
     v = np.random.rand(2, 4, 6)
 
-    context, attn = f.selfattention(nura.tensor(q), nura.tensor(k), nura.tensor(v))
+    context, attn = f.attention(nura.tensor(q), nura.tensor(k), nura.tensor(v))
 
     dk = q.shape[-1]
     simscore = np.matmul(q, k.transpose(0, 2, 1)) / (dk**0.5)
@@ -386,13 +386,13 @@ def test_selfattention_basic():
     np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
 
 
-def test_selfattention_with_mask():
+def test_attention_with_mask():
     q = np.random.rand(2, 4, 5)
     k = q.copy()
     v = np.random.rand(2, 4, 6)
     mask = np.tril(np.ones((1, 4, 4)), k=0).astype(bool)
 
-    context, attn = f.selfattention(
+    context, attn = f.attention(
         nura.tensor(q), nura.tensor(k), nura.tensor(v), mask=nura.tensor(mask)
     )
 
@@ -407,13 +407,13 @@ def test_selfattention_with_mask():
     np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
 
 
-def test_selfattention_with_mask_batch():
+def test_attention_with_mask_batch():
     q = np.random.rand(2, 4, 5, 3)
     k = q.copy()
     v = np.random.rand(2, 4, 5, 4)
     mask = np.tril(np.ones((1, 5, 5)), k=0).astype(bool)
 
-    context, attn = f.selfattention(
+    context, attn = f.attention(
         nura.tensor(q), nura.tensor(k), nura.tensor(v), mask=nura.tensor(mask)
     )
 

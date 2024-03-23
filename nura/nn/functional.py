@@ -58,7 +58,7 @@ def softmax(a: Tensor, dim=-1):
     return out
 
 
-def selfattention(
+def attention(
     q: Tensor,
     k: Tensor,
     v: Tensor,

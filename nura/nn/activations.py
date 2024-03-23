@@ -1,4 +1,4 @@
-import nura.nn.functional as nnfn
+import nura.nn.functional as f
 from nura.nn.module import Module
 from nura.tensors import Tensor
 from typing import Optional
@@ -10,7 +10,7 @@ class ReLU(Module):
         super().__init__()
 
     def forward(self, x: Tensor):
-        return nnfn.relu(x)
+        return f.relu(x)
 
 
 class ReLU6(Module):
@@ -19,7 +19,7 @@ class ReLU6(Module):
         super().__init__()
 
     def forward(self, x: Tensor):
-        return nnfn.relu6(x)
+        return f.relu6(x)
 
 
 class LeakyReLU(Module):
@@ -28,7 +28,7 @@ class LeakyReLU(Module):
         super().__init__()
 
     def forward(self, x: Tensor):
-        return nnfn.leakyrelu(x)
+        return f.leakyrelu(x)
 
 
 class ELU(Module):
@@ -37,7 +37,7 @@ class ELU(Module):
         super().__init__()
 
     def forward(self, x: Tensor):
-        return nnfn.elu(x)
+        return f.elu(x)
 
 
 class GELU(Module):
@@ -46,7 +46,7 @@ class GELU(Module):
         super().__init__()
 
     def forward(self, x: Tensor):
-        return nnfn.gelu(x)
+        return f.gelu(x)
 
 
 class Sigmoid(Module):
@@ -55,7 +55,7 @@ class Sigmoid(Module):
         super().__init__()
 
     def forward(self, z: Tensor):
-        return nnfn.sigmoid(z)
+        return f.sigmoid(z)
 
 
 class Softmax(Module):
@@ -69,7 +69,7 @@ class Softmax(Module):
         return self._dim
 
     def forward(self, a: Tensor):
-        return nnfn.softmax(a, self.dim)
+        return f.softmax(a, self.dim)
 
     def xrepr(self) -> str:
         dim = self.dim
@@ -82,10 +82,10 @@ class Tanh(Module):
         super().__init__()
 
     def forward(self, z: Tensor):
-        return nnfn.tanh(z)
+        return f.tanh(z)
 
 
-class SelfAttention(Module):
+class ScaledDotProductAttention(Module):
 
     def __init__(self, dim=-1, maskfill=-1e-9) -> None:
         super().__init__()
@@ -101,7 +101,7 @@ class SelfAttention(Module):
         return self._maskfill
 
     def forward(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
-        return nnfn.selfattention(q, k, v, self.dim, mask, self.maskfill)
+        return f.attention(q, k, v, self.dim, mask, self.maskfill)
 
     def xrepr(self) -> str:
         dim = self.dim
