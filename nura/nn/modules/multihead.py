@@ -36,9 +36,21 @@ class MultiHeadAttention(Module):
         self._wo = Linear(heads * dv, dm, bias=bias, dtype=dtype)
         self._attn = ScaledDotProductAttention(dim=dim, maskfill=maskfill)
 
-        # (m, l, h, e) -> (m, h, l, e)
-        # (m, h, l, e) @ (m, h, e, l') -> (m, h, l, l')
-        # (m, h, l, l') @ (m, h, l', v) -> (m, h, l, v)
+    @property
+    def dm(self):
+        return self._dm
+
+    @property
+    def dk(self):
+        return self._dk
+
+    @property
+    def dv(self):
+        return self._dv
+
+    @property
+    def heads(self):
+        return self._heads
 
     def forward(self, q, k, v, mask=None) -> Tuple[Tensor, Tensor]:
         qlen = q.dim[1]
@@ -51,3 +63,8 @@ class MultiHeadAttention(Module):
         ctx = ctx.reshape((-1, qlen, self._heads * self._dv))
         out = self._wo(ctx)
         return out, attn
+
+    def xrepr(self):
+        dm, dk, dv = self.dm, self.dk, self.dv
+        heads = self._heads
+        return f"{self.name()}({dm=} {dk=} {dv=} {heads=})"

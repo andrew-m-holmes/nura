@@ -15,7 +15,7 @@ def main():
     mask = nura.tri(seqlen - 1, seqlen).unsqueeze(0)
 
     ctx, attn = mha(q, k, v, mask=mask)
-    print(ctx.dim, attn.dim)
+    print(mha)
 
 
 if __name__ == "__main__":

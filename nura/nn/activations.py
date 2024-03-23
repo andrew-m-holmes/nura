@@ -106,4 +106,4 @@ class ScaledDotProductAttention(Module):
     def xrepr(self) -> str:
         dim = self.dim
         maskfill = self.maskfill
-        return f"{self.name()}({dim=} {maskfill=})"
+        return f"{self.name()}({dim=} {maskfill=:.1e})"
