@@ -75,6 +75,9 @@ class Tensor:
             )
         return self.data.item()
 
+    def list(self):
+        return self.data.tolist()
+
     def to(self, dtype: Type[types.dtype]):
         return nura.to(self, dtype)
 
@@ -278,6 +281,8 @@ class Tensor:
         return nura.slice(self, slc)
 
     def __setitem__(self, slc, item):
+        if isinstance(slc, Tensor):
+            slc = slc.data
         if isinstance(item, Tensor):
             self._data[slc] = item.data
         else:

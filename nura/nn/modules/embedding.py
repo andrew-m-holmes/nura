@@ -3,7 +3,8 @@ from nura.nn.module import Module
 from nura.types import dtype
 from nura.tensors import Tensor
 from nura.nn import parameter
-from nura.utils import randn
+from nura.utils import randn, onehot
+from nura.functional import matmul
 from typing import Optional, Type
 
 
@@ -38,3 +39,7 @@ class Embedding(Module):
         m = super().to(dtype)
         m._dtype = dtype
         return m
+
+    def forward(self, x: Tensor) -> Tensor:
+        x = onehot(x, self.size, dtype=self.dtype)
+        return matmul(x, self.embed.T)

@@ -299,6 +299,18 @@ def todim(dim: Tuple[Any, ...]) -> dim:
     return dim
 
 
+def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    if indices.ndim < 1 or indices.ndim > 2:
+        raise ValueError(
+            f"Expected indices with 1 or 2 dimensions, received {indices.ndim}"
+        )
+    if indices.ndim == 1:
+        indices = indices.unsqueeze(0)
+    onehot = zeros(len(indices), indices.dim[-1], n, dtype=dtype)
+    onehot[:, list(range(indices.dim[-1])), indices.list()] = 1
+    return onehot
+
+
 def iscontiguous(a: Tensor) -> bool:
     return a.data.flags["C_CONTIGUOUS"]
 
