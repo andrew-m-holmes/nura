@@ -186,9 +186,9 @@ def where(
     return tensor(np.where(data, xdata, ydata))
 
 
-def poswhere(logical: Union[Tensor, bool]) -> Tensor:
+def indexwhere(logical: Union[Tensor, bool]) -> Tuple[Tensor, ...]:
     data = logical.data if isinstance(logical, Tensor) else logical
-    return tensor(np.where(data)[0])
+    return tuple(tensor(i) for i in np.where(data))
 
 
 def nonzero(a: Tensor) -> Tuple[Tensor, ...]:
