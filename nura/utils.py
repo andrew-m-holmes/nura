@@ -293,7 +293,7 @@ def tocontiguous(a: Tensor):
 
 def todim(dim: Tuple[Any, ...]) -> dim:
     if not dim:
-        return ()
+        return tuple()
     if isinstance(dim[0], tuple):
         return dim[0]
     return dim
@@ -308,7 +308,7 @@ def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tens
         dtype = indices.dtype
     if indices.ndim == 1:
         indices = indices.unsqueeze(0)
-    return eye(n)[indices].to(dtype)
+    return eye(n, dtype=dtype)[indices]
 
 
 def iscontiguous(a: Tensor) -> bool:
