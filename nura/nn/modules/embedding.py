@@ -42,7 +42,7 @@ class Embedding(Module):
 
     def forward(self, x: Tensor) -> Tensor:
         x = onehot(x, self.vocab, dtype=self.dtype)
-        return matmul(x, self.embed.T)
+        return matmul(x, self.embed.transpose(-1, -2))
 
     def xrepr(self) -> str:
         emdim, vocab = self.emdim, self.vocab

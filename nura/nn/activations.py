@@ -1,7 +1,7 @@
 import nura.nn.functional as f
 from nura.nn.module import Module
 from nura.tensors import Tensor
-from typing import Optional
+from typing import Optional, Tuple
 
 
 class ReLU(Module):
@@ -100,7 +100,9 @@ class ScaledDotProductAttention(Module):
     def maskfill(self):
         return self._maskfill
 
-    def forward(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
+    def forward(
+        self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
+    ) -> Tuple[Tensor, Tensor]:
         return f.attention(q, k, v, self.dim, mask, self.maskfill)
 
     def xrepr(self) -> str:
