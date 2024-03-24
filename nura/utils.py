@@ -304,11 +304,11 @@ def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tens
         raise ValueError(
             f"Expected indices with 1 or 2 dimensions, received {indices.ndim}"
         )
+    if dtype is None:
+        dtype = indices.dtype
     if indices.ndim == 1:
         indices = indices.unsqueeze(0)
-    onehot = zeros(len(indices), indices.dim[-1], n, dtype=dtype)
-    onehot[:, list(range(indices.dim[-1])), indices.list()] = 1
-    return onehot
+    return eye(n)[indices].to(dtype)
 
 
 def iscontiguous(a: Tensor) -> bool:

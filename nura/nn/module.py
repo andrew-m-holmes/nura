@@ -78,10 +78,10 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        return self.repr(root=True)
+        return self.repr()
 
-    def repr(self, pad=3, root=False) -> str:
-        strs = [self.name() if root else self.xrepr()]
+    def repr(self, pad=3) -> str:
+        strs = [self.xrepr()]
         if hasmods := len(self._mods):
             strs.append(": (")
         strs.append("\n")

@@ -11,21 +11,21 @@ from typing import Optional, Type
 class Embedding(Module):
 
     def __init__(
-        self, emdim: int, size: int, dtype: Optional[Type[dtype]] = None
+        self, emdim: int, vocab: int, dtype: Optional[Type[dtype]] = None
     ) -> None:
         super().__init__()
         self._emdim = emdim
-        self._size = size
+        self._vocab = vocab
         self._dtype = types.float if dtype is None else dtype
-        self._embed = parameter(randn(emdim, size), dtype=dtype)
+        self._embed = parameter(randn(emdim, vocab), dtype=dtype)
 
     @property
     def emdim(self):
         return self._emdim
 
     @property
-    def size(self):
-        return self._size
+    def vocab(self):
+        return self._vocab
 
     @property
     def dtype(self) -> Type[dtype]:
@@ -41,5 +41,10 @@ class Embedding(Module):
         return m
 
     def forward(self, x: Tensor) -> Tensor:
-        x = onehot(x, self.size, dtype=self.dtype)
+        x = onehot(x, self.vocab, dtype=self.dtype)
         return matmul(x, self.embed.T)
+
+    def xrepr(self) -> str:
+        emdim, vocab = self.emdim, self.vocab
+        dtype = self.dtype.name()
+        return f"{self.name()}({emdim=} {vocab=} {dtype=})"

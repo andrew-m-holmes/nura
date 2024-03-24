@@ -2,7 +2,7 @@ import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
 from nura.types import Scalar, dimlike, dim
-from typing import Optional, Union, List
+from typing import Optional, Union, Any
 
 
 def add(a: Tensor, b: Union[Tensor, Scalar]):
@@ -151,8 +151,10 @@ def clone(a: Tensor):
     return out
 
 
-def slice(a: Tensor, slc: Union[Tensor, List[int], slice]):
+def slice(a: Tensor, slc: Any):
+    if isinstance(slc, tuple):
+        slc = (i.int().data if isinstance(i, Tensor) else i for i in slc)
     if isinstance(slc, Tensor):
-        slc = slc.data.tolist()
+        slc = slc.int().data
     out = fn._Slice.apply(a, slc)
     return out
