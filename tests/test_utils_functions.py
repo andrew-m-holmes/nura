@@ -496,3 +496,30 @@ def test_where_condition_tensor_tensor_not_equal():
     expected = np.where(a.data != b.data, x.data, y.data)
     assert np.array_equal(result, expected)
 
+def test_where_condition_tensor_tensor_greater_equal():
+    a = nura.tensor([3, 4, 5], dtype=nura.int)
+    b = nura.tensor([2, 4, 6], dtype=nura.int)
+    condition = a >= b
+    x = nura.tensor([10, 20, 30], dtype=nura.int)
+    y = nura.tensor([40, 50, 60], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(a.data >= b.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_condition_tensor_tensor_less_equal():
+    a = nura.tensor([1, 2, 3], dtype=nura.int)
+    b = nura.tensor([3, 2, 1], dtype=nura.int)
+    condition = a <= b
+    x = nura.tensor([10, 20, 30], dtype=nura.int)
+    y = nura.tensor([40, 50, 60], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(a.data <= b.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_condition_not():
+    condition = not nura.tensor([True, False, True], dtype=nura.bool)
+    x = nura.tensor([1, 2, 3], dtype=nura.int)
+    y = nura.tensor([4, 5, 6], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(not np.array([True, False, True]), x.data, y.data)
+    assert np.array_equal(result, expected)
