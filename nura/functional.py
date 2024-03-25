@@ -1,4 +1,4 @@
-import nura.utils as utils
+import nura.utils as u
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
 from nura.types import Scalar, dimlike, dim
@@ -129,7 +129,7 @@ def view(a: Tensor, newdim: dim):
 
 
 def reshape(a: Tensor, newdim: dim):
-    a = utils.tocontiguous(a)
+    a = u.tocontiguous(a)
     out = fn._Reshape.apply(a, newdim)
     return out
 
@@ -153,7 +153,7 @@ def clone(a: Tensor):
 
 def slice(a: Tensor, slc: Any):
     if isinstance(slc, tuple):
-        slc = tuple(i.int().data if isinstance(i, Tensor) else i for i in slc)
+        slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
     if isinstance(slc, Tensor):
         slc = slc.int().data
     out = fn._Slice.apply(a, slc)
