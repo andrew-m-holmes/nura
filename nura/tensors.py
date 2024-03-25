@@ -230,6 +230,9 @@ class Tensor:
     def __abs__(self):
         return nura.abs(self)
 
+    def __invert__(self):
+        return nura.tensornot(self)
+
     def __eq__(self, other):
         return nura.equal(self, other)
 
@@ -251,14 +254,22 @@ class Tensor:
     def __hash__(self):
         return nura.hashtensor(self)
 
+    def __len__(self):
+        return len(self.data)
+
+    def __bool__(self):
+        raise ValueError(
+            "Truth of Tensor is undefined for more than one element, use .any() or .all()"
+        )
+
     def __and__(self, other):
         return nura.tensorand(self, other)
 
     def __or__(self, other):
         return nura.tensoror(self, other)
 
-    def __not__(self):
-        return nura.tensornot(self)
+    def __xor__(self, other):
+        return nura.tensorxor(self, other)
 
     def __setattr__(self, name, value):
         validattrs = (
@@ -289,18 +300,16 @@ class Tensor:
             item = item.data
         self.data[slc] = item
 
-    def __len__(self):
-        return self.dim[0]
-
     def __repr__(self) -> str:
-        s = repr(self._data).replace("array(", "").replace(",", "")
+        s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
         if " dtype" in s:
             i = s.index(" dtype")
             s = s[:i]
         strs = ["Tensor(", s]
         if self.backfn is not None:
-            strs.append(f" backfn={repr(self.backfn)}")
-        strs.append(f" dtype={self.dtype.name()})")
+            strs.append(f" backfn={self.backfn}")
+            strs.append(f" dtype={self.dtype.name()}")
+        strs.append(")")
         return "".join(strs)
 
 

@@ -206,14 +206,6 @@ def argmin(a: Tensor, pos: Optional[int] = None, keepdims=False):
     return tensor(data)
 
 
-def tensorany(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
-    return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
-
-
-def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
-    return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
-
-
 def hashtensor(a: Tensor) -> int:
     return hash(id(a))
 
@@ -254,20 +246,38 @@ def notequal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     return tensor(np.not_equal(a.data, b))
 
 
+def tensorany(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+    return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
+
+
+def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+    return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
+
+
 def tensorand(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
-        return tensor(a.data and b.data)
-    return tensor(a.data and b)
+        return tensor(np.logical_and(a.data, b.data))
+    return tensor(np.logical_and(a.data, b))
 
 
 def tensoror(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
-        return tensor(a.data or b.data)
-    return tensor(a.data or b)
+        return tensor(np.logical_or(a.data, b.data))
+    return tensor(np.logical_or(a.data, b))
+
+
+def tensorxor(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.logical_xor(a.data, b.data))
+    return tensor(np.logical_xor(a.data, b))
 
 
 def tensornot(a: Tensor) -> Tensor:
-    return tensor(not a.data)
+    return tensor(np.logical_not(a.data))
+
+
+def tensorinvert(a: Tensor) -> Tensor:
+    return tensor(np.invert(a.data))
 
 
 def typesmatch(*tensors: Tensor) -> bool:
