@@ -50,7 +50,7 @@ class Embedding(Module):
         return mod
 
     def forward(self, x: Tensor) -> Tensor:
-        return f.embedding(x, self.embed)
+        return f.embedding(x, self.embed, self.padid)
 
     def xrepr(self) -> str:
         emdim, vocab = self.emdim, self.vocab
