@@ -1,27 +1,31 @@
 import numpy as np
 import nura
 import nura.nn as nn
-from nura.nn.modules.multihead import MultiHeadAttention
-from nura.nn.modules.embedding import Embedding
+import nura.nn.functional as f
+import torch
+import torch.nn.functional as tf
 
 
 def main():
+    w = nura.randn(4, 5, usegrad=True)
+    x = nura.randint(2, 3, low=0, high=4).long()
+    e = f.embedding(x, w, 0)
+    print(e)
+    l = e.sum()
+    l.backward()
+    print(w.grad)
 
-    batch_size = 1
-    seq_len = 5
-    d_model = 64
-    d_k = 16
-    d_v = 16
-    heads = 4
-    vocab_size = 10
-    x = nura.randint(batch_size, seq_len, low=0, high=vocab_size).float()
-    embedding = Embedding(d_model, vocab_size)
-    multihead = MultiHeadAttention(d_model, d_k, d_v, heads)
+    wdata, xdata = w.data, x.data
+    w = torch.from_numpy(wdata).requires_grad_()
+    x = torch.from_numpy(xdata)
 
-    x = embedding(x) * 0.25
-    ctx, attn = multihead(x, x, x)
-    print(ctx.dim, attn.dim)
-    ctx.backward(nura.oneslike(ctx))
+    print()
+
+    e = tf.embedding(x, w, 0)
+    print(e)
+    l = e.sum()
+    l.backward()
+    print(w.grad)
 
 
 if __name__ == "__main__":

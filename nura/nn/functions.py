@@ -94,16 +94,20 @@ class _Embedding(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, w: Tensor, padid: Optional[int]):
-        context.save(x, w)
+        context.save(w)
+        context["xdata"] = x.data
         context["padid"] = padid
         return w.data[x.data]
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        x, w = context.tensors()[0]
+        w = context.tensors()[0]
+        xdata = context["xdata"]
         padid = context["padid"]
-        mask = np.zeros_like(w.data)
-        mask[x.data] = 1
-        if padid is not None:
-            mask[padid] = 0
-        return mask * grad.data
+
+        mask = xdata != padid
+        indices = xdata[mask]
+        grads = grad.data[mask]
+        arr = np.zeros_like(w.data)
+        np.add.at(arr, indices, grads)
+        return arr
