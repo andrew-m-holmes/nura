@@ -6,11 +6,12 @@ from typing import Type, Any, Tuple, Union, Iterable
 _py_int = int
 _py_float = float
 _py_bool = bool
+
+inf = np.inf
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
-_iterables = Union[Iterable[int], Iterable[float], Iterable[bool]]
 Scalar = Union[float, int]
-Tensorlike = Union[Scalar, bool, _iterables, ndarray]
+Tensorlike = Union[Iterable[Any], Scalar, bool]
 
 
 class dtype:
@@ -20,7 +21,7 @@ class dtype:
     @classmethod
     def numpy(cls, data) -> ndarray:
         if not isinstance(data, np.ndarray):
-            data = np.array(data, cls._wrapping)
+            data = np.array(data, dtype=cls._wrapping)
         if np.dtype(data.dtype) is not np.dtype(cls._wrapping):
             data = data.astype(cls._wrapping)
         return data
@@ -75,7 +76,7 @@ class bool(dtype):
     _wrapping = np.bool_
 
 
-dtypemap = {
+_dtypemap = {
     np.uint8: byte,
     np.int8: char,
     np.int16: short,
@@ -102,10 +103,10 @@ dtypemap = {
 
 def dtypeof(data: Any) -> Type[dtype]:
     if isinstance(data, np.ndarray):
-        return dtypemap[data.dtype]
-    if isinstance(data, list):
-        return dtypemap[np.array(data).dtype]
+        return _dtypemap[data.dtype]
+    if isinstance(data, list) or isinstance(data, tuple):
+        return dtypeof(data[0])
     dtype = type(data)
-    if dtype not in dtypemap:
+    if dtype not in _dtypemap:
         raise KeyError(f"Couldn't find {dtype} in dtype table")
-    return dtypemap[dtype]
+    return _dtypemap[dtype]

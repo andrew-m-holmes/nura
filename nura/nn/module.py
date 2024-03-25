@@ -3,6 +3,7 @@ from nura.types import dtype
 from nura.nn.parameter import Parameter
 from collections import OrderedDict
 from typing import Type, Iterator, Tuple, Any
+from copy import copy
 
 
 class Module:
@@ -43,16 +44,13 @@ class Module:
         for m in self._mods.values():
             yield from m.namedparams()
 
-    def to(self, dtype: Type[dtype]):
-        params = OrderedDict()
-        mods = OrderedDict()
-        for n, p in self._params.items():
-            params[n] = p.to(dtype)
-        for n, m in self._mods.items():
-            mods[n] = m.to(dtype)
-        self._mods = mods
-        self._params = params
-        return self
+    def to(self, dtype: Type[dtype]) -> "Module":
+        params = OrderedDict((n, p.to(dtype)) for n, p in self._params.items())
+        mods = OrderedDict((n, m.to(dtype)) for n, m in self._mods.items())
+        mod = copy(self)
+        mod._params = params
+        mod._mods = mods
+        return mod
 
     def half(self):
         return self.to(types.half)
@@ -65,11 +63,9 @@ class Module:
 
     def train(self):
         self._training = True
-        return self
 
     def eval(self):
         self._training = False
-        return self
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -82,12 +78,12 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        return self.repr(main=True)
+        return self.repr()[:-1]
 
-    def repr(self, pad=3, main=False) -> str:
-        strs = [self.name() if main else self.xrepr()]
+    def repr(self, pad=3) -> str:
+        strs = [self.xrepr()]
         if hasmods := len(self._mods):
-            strs.append(" (")
+            strs.append(": (")
         strs.append("\n")
         for n, m in self._mods.items():
             strs.append(f"{' ' * pad}({n}): ")

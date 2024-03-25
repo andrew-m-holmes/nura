@@ -1,7 +1,7 @@
 import nura
 from nura.tensors import Tensor
 from nura.autograd.graph import genout
-from typing import Tuple, Union, Any, Optional, Dict
+from typing import Tuple, Any, Optional, Dict, Union
 from numpy import ndarray
 
 
@@ -40,7 +40,7 @@ class Context:
 class Function:
 
     @staticmethod
-    def forward(context: Context, *args: Union[Tensor, Any], **kwargs: Any) -> ndarray:
+    def forward(context: Context, *args: Any, **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
@@ -52,9 +52,13 @@ class Function:
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args: Union[Tensor, Any], **kwargs: Any) -> Tensor:
+    def apply(cls, *args: Any, **kwargs: Any) -> Tensor:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
         irout = nura.tensor(rawout)
         out = genout(irout, cls, context)
         return out
+
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__

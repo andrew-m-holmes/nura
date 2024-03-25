@@ -5,63 +5,64 @@ from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
-def empty(dim: dimlike, dtype: Optional[Type[dtype]] = None):
+def empty(*dim: dimlike, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
         dtype = types.float
-    empty_arr = np.empty(dim)
-    return tensor(empty_arr, dtype=dtype)
+    dim = todim(dim)
+    data = np.empty(dim, dtype=np.int8)
+    return tensor(data, dtype=dtype)
 
 
 def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
         dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
-    empty_arr = np.empty_like(data)
-    return tensor(empty_arr, dtype=dtype)
+    data = np.empty_like(data)
+    return tensor(data, dtype=dtype)
 
 
-def zeros(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def zeros(*dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
-    zero_arr = np.zeros(dim)
-    return tensor(zero_arr, usegrad, dtype)
+    data = np.zeros(dim)
+    return tensor(data, usegrad, dtype)
 
 
 def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
-    zero_arr = np.zeros_like(data)
-    return tensor(zero_arr, usegrad, dtype)
+    data = np.zeros_like(data)
+    return tensor(data, usegrad, dtype)
 
 
-def ones(dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def ones(*dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
-    ones_arr = np.ones(dim)
-    return tensor(ones_arr, usegrad, dtype)
+    data = np.ones(dim)
+    return tensor(data, usegrad, dtype)
 
 
 def oneslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
-    ones_arr = np.ones_like(data)
-    return tensor(ones_arr, usegrad, dtype)
+    data = np.ones_like(data)
+    return tensor(data, usegrad, dtype)
 
 
 def randn(
-    dim: Optional[dimlike] = None,
+    *dim: dimlike,
     usegrad=False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
-    randn_arr = np.random.randn(*dim)
-    return tensor(randn_arr, usegrad, dtype)
+    data = np.random.randn(*dim)
+    return tensor(data, usegrad, dtype)
 
 
 def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
@@ -71,20 +72,20 @@ def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
             if a.dtype not in (types.half, types.float, types.double)
             else a.dtype
         )
-    dim = a.dim
-    return randn(dim, usegrad, dtype)
+    data = np.random.randn(*a.dim)
+    return tensor(data, usegrad, dtype)
 
 
 def rand(
-    dim: Optional[dimlike] = None,
+    *dim: dimlike,
     usegrad=False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
-    rand_arr = np.random.rand(*dim)
-    return tensor(rand_arr, usegrad, dtype)
+    data = np.random.rand(*dim)
+    return tensor(data, usegrad, dtype)
 
 
 def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
@@ -95,17 +96,17 @@ def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
             else a.dtype
         )
     dim = a.dim
-    return rand(dim, usegrad, dtype)
+    return rand(dim, usegrad=usegrad, dtype=dtype)
 
 
 def randint(
-    low: int, high: int, dim: dimlike, dtype: Optional[Type[dtype]] = None
+    *dim: dimlike, low: int, high: int, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
     if dtype is None:
         dtype = types.int
     dim = todim(dim)
-    randint_arr = np.random.randint(low, high, dim)
-    return tensor(randint_arr, dtype=dtype)
+    data = np.random.randint(low, high, dim)
+    return tensor(data, dtype=dtype)
 
 
 def randintlike(
@@ -117,19 +118,40 @@ def randintlike(
             if dtype in (types.half, types.float, types.double, types.bool)
             else a.dtype
         )
-    dim = a.dim
-    return randint(low, high, dim, dtype)
+    data = np.random.randint(low, high, a.dim)
+    return tensor(data, dtype=dtype)
 
 
-def identity(n: int, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def identity(n: int, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     data = np.identity(n)
-    return tensor(data, usegrad, dtype)
+    return tensor(data, dtype=dtype)
+
+
+def tri(m: int, n: int, k=0, dtype: Optional[Type[dtype]] = None):
+    if dtype is None:
+        dtype = types.float
+    data = np.tri(m, n, k)
+    return tensor(data, dtype=dtype)
+
+
+def triu(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None):
+    if dtype is None:
+        dtype = a.dtype
+    data = np.triu(a.data, k)
+    return tensor(data, dtype=dtype)
+
+
+def tril(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None):
+    if dtype is None:
+        dtype = a.dtype
+    data = np.tril(a.data, k)
+    return tensor(data, dtype=dtype)
 
 
 def full(
-    dim: dimlike,
+    *dim: dimlike,
     num: float,
     usegrad=False,
     dtype: Optional[Type[dtype]] = None,
@@ -155,8 +177,8 @@ def eye(
 
 def where(
     logical: Union[Tensor, bool],
-    x: Union[Tensor, float, int, bool],
-    y: Union[Tensor, float, int, bool],
+    x: Union[Tensor, Scalar, bool],
+    y: Union[Tensor, Scalar, bool],
 ) -> Tensor:
     data = logical.data if isinstance(logical, Tensor) else logical
     xdata = x.data if isinstance(x, Tensor) else x
@@ -164,9 +186,9 @@ def where(
     return tensor(np.where(data, xdata, ydata))
 
 
-def poswhere(logical: Union[Tensor, bool]) -> Tensor:
+def indexwhere(logical: Union[Tensor, bool]) -> Tuple[Tensor, ...]:
     data = logical.data if isinstance(logical, Tensor) else logical
-    return tensor(np.where(data)[0])
+    return tuple(map(tensor, np.where(data)))
 
 
 def nonzero(a: Tensor) -> Tuple[Tensor, ...]:
@@ -184,6 +206,46 @@ def argmin(a: Tensor, pos: Optional[int] = None, keepdims=False):
     return tensor(data)
 
 
+def hashtensor(a: Tensor) -> int:
+    return hash(id(a))
+
+
+def equal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.equal(a.data, b.data))
+    return tensor(np.equal(a.data, b))
+
+
+def less(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.less(a.data, b.data))
+    return tensor(np.less(a.data, b))
+
+
+def lesseq(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.less_equal(a.data, b.data))
+    return tensor(np.less_equal(a.data, b))
+
+
+def greater(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.greater(a.data, b.data))
+    return tensor(np.greater(a.data, b))
+
+
+def greatereq(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.greater_equal(a.data, b.data))
+    return tensor(np.greater_equal(a.data, b))
+
+
+def notequal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+    if isinstance(b, Tensor):
+        return tensor(np.not_equal(a.data, b.data))
+    return tensor(np.not_equal(a.data, b))
+
+
 def tensorany(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
 
@@ -192,60 +254,30 @@ def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
     return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
 
 
-def hashtensor(a: Tensor) -> int:
-    return hash(id(a))
-
-
-def equal(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def tensorand(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
-        return tensor(np.equal(a.data, b.data))
-    return tensor(np.equal(a.data, b))
+        return tensor(np.logical_and(a.data, b.data))
+    return tensor(np.logical_and(a.data, b))
 
 
-def less(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def tensoror(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
-        return tensor(np.less(a.data, b.data))
-    return tensor(np.less(a.data, b))
+        return tensor(np.logical_or(a.data, b.data))
+    return tensor(np.logical_or(a.data, b))
 
 
-def lesseq(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
+def tensorxor(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     if isinstance(b, Tensor):
-        return tensor(np.less_equal(a.data, b.data))
-    return tensor(np.less_equal(a.data, b))
-
-
-def greater(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
-    if isinstance(b, Tensor):
-        return tensor(np.greater(a.data, b.data))
-    return tensor(np.greater(a.data, b))
-
-
-def greatereq(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
-    if isinstance(b, Tensor):
-        return tensor(np.greater_equal(a.data, b.data))
-    return tensor(np.greater_equal(a.data, b))
-
-
-def notequal(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
-    if isinstance(b, Tensor):
-        return tensor(np.not_equal(a.data, b.data))
-    return tensor(np.not_equal(a.data, b))
-
-
-def tensorand(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
-    if isinstance(b, Tensor):
-        return tensor(a.data and b.data)
-    return tensor(a.data and b)
-
-
-def tensoror(a: Tensor, b: Tensor | Scalar | bool) -> Tensor:
-    if isinstance(b, Tensor):
-        return tensor(a.data or b.data)
-    return tensor(a.data or b)
+        return tensor(np.logical_xor(a.data, b.data))
+    return tensor(np.logical_xor(a.data, b))
 
 
 def tensornot(a: Tensor) -> Tensor:
-    return tensor(not a.data)
+    return tensor(np.logical_not(a.data))
+
+
+def tensorinvert(a: Tensor) -> Tensor:
+    return tensor(np.invert(a.data))
 
 
 def typesmatch(*tensors: Tensor) -> bool:
@@ -253,9 +285,9 @@ def typesmatch(*tensors: Tensor) -> bool:
 
 
 def to(a: Tensor, dtype: Type[dtype]):
-    if not istensor(a):
+    if not isinstance(a, Tensor):
         raise ValueError(f"Expected Tensor, received {a.__class__.__name__}")
-    if a.usesgrad and dtype not in (types.half, types.float, types.double):
+    if a.usegrad and dtype not in (types.half, types.float, types.double):
         raise RuntimeError(
             f"Can't cast Tensor using gradient to type that doesn't, try Tensor.detach()"
         )
@@ -269,20 +301,28 @@ def tocontiguous(a: Tensor):
     return c.mutated(data=data)
 
 
-def todim(dim: Any) -> dim:
-    if dim is None:
+def todim(dim: Tuple[Any, ...]) -> dim:
+    if not dim:
         return tuple()
-    if isinstance(dim, int):
-        return (dim,)
+    if isinstance(dim[0], tuple):
+        return dim[0]
     return dim
 
 
-def iscontig(a: Tensor) -> bool:
+def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tensor:
+    if indices.ndim < 1 or indices.ndim > 2:
+        raise ValueError(
+            f"Expected indices with 1 or 2 dimensions, received {indices.ndim}"
+        )
+    if indices.dtype not in (types.int, types.long):
+        raise TypeError(f"Expected int or long, received {indices.dtype.name()}")
+    if dtype is None:
+        dtype = indices.dtype
+    return eye(n, dtype=dtype)[indices]
+
+
+def iscontiguous(a: Tensor) -> bool:
     return a.data.flags["C_CONTIGUOUS"]
-
-
-def istensor(obj: Any) -> bool:
-    return isinstance(obj, Tensor)
 
 
 def typename(a: Tensor) -> str:

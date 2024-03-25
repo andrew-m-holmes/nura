@@ -2,31 +2,31 @@ import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
 from nura.types import Scalar, dimlike, dim
-from typing import Optional
+from typing import Optional, Union, Any
 
 
-def add(a: Tensor, b: Tensor | Scalar):
+def add(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Add.apply(a, b)
     return out
 
 
-def sub(a: Tensor, b: Tensor | Scalar):
+def sub(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Sub.apply(a, b)
     return out
 
 
-def mul(a: Tensor, b: Tensor | Scalar):
+def mul(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Mul.apply(a, b)
     return out
 
 
-def div(a: Tensor, b: Tensor | Scalar):
+def div(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Div.apply(a, b)
@@ -43,7 +43,7 @@ def matmul(a: Tensor, b: Tensor):
     return out
 
 
-def pow(a: Tensor, b: Tensor | Scalar):
+def pow(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Pow.apply(a, b)
@@ -151,6 +151,10 @@ def clone(a: Tensor):
     return out
 
 
-def slice(a: Tensor, slc: slice):
+def slice(a: Tensor, slc: Any):
+    if isinstance(slc, tuple):
+        slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
+    if isinstance(slc, Tensor):
+        slc = slc.int().data
     out = fn._Slice.apply(a, slc)
     return out

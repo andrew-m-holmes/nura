@@ -1,6 +1,7 @@
 import numpy as np
 from nura.autograd.function import Function, Context
 from nura.tensors import Tensor
+from typing import Optional
 
 
 class _ReLU(Function):
@@ -87,3 +88,26 @@ class _ELU(Function):
         alpha = context["alpha"]
         mask = np.where(z.data > 0, 1, alpha * np.exp(z.data))
         return mask * zgrad.data
+
+
+class _Embedding(Function):
+
+    @staticmethod
+    def forward(context: Context, x: Tensor, w: Tensor, padid: Optional[int]):
+        context.save(w)
+        context["xdata"] = x.data
+        context["padid"] = padid
+        return w.data[x.data]
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        w = context.tensors()[0]
+        xdata = context["xdata"]
+        padid = context["padid"]
+
+        mask = xdata != padid
+        indices = xdata[mask]
+        grads = grad.data[mask]
+        arr = np.zeros_like(w.data)
+        np.add.at(arr, indices, grads)
+        return arr

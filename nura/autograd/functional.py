@@ -1,7 +1,7 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from typing import Dict, Generator, Tuple, Union, Optional, Callable, Any
+from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union
 from collections import deque
 
 
@@ -22,14 +22,17 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         nodes = node.children()
         tensor = node.tensor
         if tensor.leaf:
+            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = (
-                tensor.grad if nura.istensor(tensor.grad) else nura.zeroslike(tensor)
+                tensor.grad
+                if isinstance(tensor.grad, Tensor)
+                else nura.zeroslike(tensor)
             )
             newgrad = oldgrad + accumgrad
             tensor.mutate(grad=newgrad.to(tensor.dtype))
         elif nodes:
-            items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
+            items = [(n, g) for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
 
 
@@ -76,6 +79,7 @@ def _grad(
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
+            assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
@@ -88,7 +92,7 @@ def _grad(
 
 def _graderr(
     inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
-) -> Optional[Union[RuntimeError, ValueError]]:
+) -> Optional[Union[ValueError, RuntimeError]]:
     if not all(t.gradtensor for t in inpt):
         return ValueError(
             "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
@@ -129,7 +133,7 @@ def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:
 
 
 def tupify(inpt) -> Tuple[Tensor, ...]:
-    if nura.istensor(inpt):
+    if isinstance(inpt, Tensor):
         return (inpt,)
     return inpt
 

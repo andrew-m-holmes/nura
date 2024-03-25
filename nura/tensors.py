@@ -2,7 +2,7 @@ import nura
 import nura.types as types
 from nura.types import Tensorlike, dimlike, dim, dtype
 from nura.autograd.graph import Node
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Union
 from numpy import ndarray
 
 
@@ -65,7 +65,8 @@ class Tensor:
 
     @property
     def T(self):
-        return self.transpose()
+        revdims = tuple(range(self.ndim - 1, -1, -1))
+        return self.permute(revdims)
 
     def item(self):
         if self.nelem != 1:
@@ -73,6 +74,9 @@ class Tensor:
                 f"Cannot retrieve a single element from a Tensor with {self.nelem} elements"
             )
         return self.data.item()
+
+    def list(self):
+        return self.data.tolist()
 
     def to(self, dtype: Type[types.dtype]):
         return nura.to(self, dtype)
@@ -109,7 +113,6 @@ class Tensor:
 
     def cleargrad(self):
         self._grad = None
-        return self
 
     def clearedgrad(self):
         cls = type(self)
@@ -117,7 +120,6 @@ class Tensor:
 
     def zerograd(self):
         self._grad = nura.zeroslike(self)
-        return self
 
     def zeroedgrad(self):
         cls = type(self)
@@ -125,23 +127,21 @@ class Tensor:
 
     def usesgrad(self):
         self._usegrad = True
-        return self
 
     def usedgrad(self):
         cls = type(self)
         return cls(self.data, True, self.grad, self.backfn, self.leaf)
 
-    def mutated(self, **attrs: Any) -> "Tensor":
+    def mutate(self, **attrs: Any):
+        for k, v in attrs.items():
+            setattr(self, f"_{k}", v)
+
+    def mutated(self, **attrs: Any):
         cls = type(self)
         t = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
         for k, v in attrs.items():
             setattr(t, f"_{k}", v)
         return t
-
-    def mutate(self, **attrs: Any) -> "Tensor":
-        for k, v in attrs.items():
-            setattr(self, f"_{k}", v)
-        return self
 
     def detach(self):
         return tensor(self.data, False, self.dtype)
@@ -151,6 +151,9 @@ class Tensor:
 
     def contiguous(self):
         return nura.tocontiguous(self)
+
+    def exp(self):
+        return nura.exp(self)
 
     def sum(self, dim: Optional[dimlike] = None, keepdims=False):
         return nura.sum(self, dim, keepdims)
@@ -170,8 +173,8 @@ class Tensor:
     def view(self, newdim: types.dim):
         return nura.view(self, newdim)
 
-    def reshape(self, dim: types.dim):
-        return nura.reshape(self, dim)
+    def reshape(self, newdim: types.dim):
+        return nura.reshape(self, newdim)
 
     def transpose(self, dim0=-2, dim1=-1):
         return nura.transpose(self, dim0, dim1)
@@ -227,6 +230,9 @@ class Tensor:
     def __abs__(self):
         return nura.abs(self)
 
+    def __invert__(self):
+        return nura.tensornot(self)
+
     def __eq__(self, other):
         return nura.equal(self, other)
 
@@ -248,14 +254,22 @@ class Tensor:
     def __hash__(self):
         return nura.hashtensor(self)
 
+    def __len__(self):
+        return len(self.data)
+
+    def __bool__(self):
+        raise ValueError(
+            "Truth of Tensor is undefined for more than one element, use .any() or .all()"
+        )
+
     def __and__(self, other):
         return nura.tensorand(self, other)
 
     def __or__(self, other):
         return nura.tensoror(self, other)
 
-    def __not__(self):
-        return nura.tensornot(self)
+    def __xor__(self, other):
+        return nura.tensorxor(self, other)
 
     def __setattr__(self, name, value):
         validattrs = (
@@ -278,26 +292,32 @@ class Tensor:
         return nura.slice(self, slc)
 
     def __setitem__(self, slc, item):
-        self.data[slc] = item.data if nura.istensor(item) else item
-
-    def __len__(self):
-        return self.dim[0]
+        if isinstance(slc, tuple):
+            slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
+        if isinstance(slc, Tensor):
+            slc = slc.data
+        if isinstance(item, Tensor):
+            item = item.data
+        self.data[slc] = item
 
     def __repr__(self) -> str:
-        s = repr(self._data).replace("array(", "").replace(",", "")
+        s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
         if " dtype" in s:
             i = s.index(" dtype")
             s = s[:i]
-        strs = ["tensor(", s]
+        strs = ["Tensor(", s]
         if self.backfn is not None:
-            strs.append(f" backfn={repr(self.backfn)}")
-        strs.append(f" dtype={self.dtype.name()})")
+            strs.append(f" backfn={self.backfn}")
+            strs.append(f" dtype={self.dtype.name()}")
+        strs.append(")")
         return "".join(strs)
 
 
 def tensor(
-    data: Tensorlike, usegrad=False, dtype: Optional[Type[dtype]] = None
+    data: Union[Tensor, Tensorlike], usegrad=False, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
+    if isinstance(data, Tensor):
+        data = data.data
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)

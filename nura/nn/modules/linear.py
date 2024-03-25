@@ -56,7 +56,7 @@ class Linear(Module):
         return mod
 
     def xrepr(self) -> str:
-        inout = (self.indim, self.outdim)
+        indim, outdim = self.indim, self.outdim
         bias = True if self.bias is not None else False
         dtype = self.dtype.name()
-        return f"{self.name()}({inout=} {bias=} {dtype=})"
+        return f"{self.name()}({indim=} {outdim=} {bias=} {dtype=})"
