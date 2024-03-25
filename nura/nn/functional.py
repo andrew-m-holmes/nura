@@ -1,3 +1,4 @@
+import nura.types as types
 import nura.functional as f
 import nura.nn.functions as fn
 from nura.tensors import Tensor
@@ -73,3 +74,11 @@ def attention(
     attn = softmax(simscore, dim)
     context = f.matmul(attn, v)
     return context, attn
+
+
+def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
+    if x.dtype not in (types.int, types.long):
+        raise ValueError(
+            f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
+        )
+    return fn._Embedding.apply(x, w, padid)
