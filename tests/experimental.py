@@ -9,8 +9,8 @@ import nura.nn.functional as f
 
 def main():
 
-    embedding = nn.Embedding(64, 100, padid=0)
-    multihead = nn.MultiHeadAttention(64, 16, 16, 4)
+    a = nura.randint(3, 3, low=0, high=2).float().usedgrad()
+    print(a + 1)
 
 
 if __name__ == "__main__":
