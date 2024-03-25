@@ -9,7 +9,7 @@ def empty(*dim: dimlike, dtype: Optional[Type[dtype]] = None):
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
-    data = np.empty(dim)
+    data = np.empty(dim, dtype=np.int8)
     return tensor(data, dtype=dtype)
 
 
