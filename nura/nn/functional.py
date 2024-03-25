@@ -1,4 +1,4 @@
-import nura.types as types
+import nura
 import nura.functional as f
 import nura.nn.functions as fn
 from nura.tensors import Tensor
@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
-    out = f.matmul(x, w.transpose())
+    out = nura.matmul(x, w.transpose())
     if b is not None:
         out = out + b
     return out
@@ -19,8 +19,8 @@ def sigmoid(z: Tensor):
 
 
 def tanh(z: Tensor):
-    e = f.exp(z)
-    ne = f.exp(-z)
+    e = nura.exp(z)
+    ne = nura.exp(-z)
     out = (e - ne) / (e + ne)
     return out
 
@@ -54,7 +54,7 @@ def gelu(z: Tensor):
 
 
 def softmax(a: Tensor, dim=-1):
-    e = f.exp(a)
+    e = nura.exp(a)
     out = e / (e.sum(dim, keepdims=True))
     return out
 
@@ -68,16 +68,16 @@ def attention(
     maskfill=-1e9,
 ) -> Tuple[Tensor, Tensor]:
     dk = k.dim[dim]
-    simscore = f.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
+    simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
     if mask is not None:
         simscore = where(mask == True, simscore, maskfill)
     attn = softmax(simscore, dim)
-    context = f.matmul(attn, v)
+    context = nura.matmul(attn, v)
     return context, attn
 
 
 def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
-    if x.dtype not in (types.int, types.long):
+    if x.dtype not in (nura.int, nura.long):
         raise ValueError(
             f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
         )
