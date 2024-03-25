@@ -188,7 +188,7 @@ def where(
 
 def indexwhere(logical: Union[Tensor, bool]) -> Tuple[Tensor, ...]:
     data = logical.data if isinstance(logical, Tensor) else logical
-    return tuple(tensor(i) for i in np.where(data))
+    return tuple(map(tensor, np.where(data)))
 
 
 def nonzero(a: Tensor) -> Tuple[Tensor, ...]:
@@ -318,8 +318,6 @@ def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tens
         raise TypeError(f"Expected int or long, received {indices.dtype.name()}")
     if dtype is None:
         dtype = indices.dtype
-    if indices.ndim == 1:
-        indices = indices.unsqueeze(0)
     return eye(n, dtype=dtype)[indices]
 
 

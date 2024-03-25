@@ -1,4 +1,4 @@
-import nura.utils as u
+import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
 from nura.types import Scalar, dimlike, dim
@@ -129,7 +129,7 @@ def view(a: Tensor, newdim: dim):
 
 
 def reshape(a: Tensor, newdim: dim):
-    a = u.tocontiguous(a)
+    a = utils.tocontiguous(a)
     out = fn._Reshape.apply(a, newdim)
     return out
 
