@@ -2,7 +2,7 @@ import nura
 import nura.types as types
 from nura.types import Tensorlike, dimlike, dim, dtype
 from nura.autograd.graph import Node
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Union
 from numpy import ndarray
 
 
@@ -281,12 +281,13 @@ class Tensor:
         return nura.slice(self, slc)
 
     def __setitem__(self, slc, item):
+        if isinstance(slc, tuple):
+            slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
         if isinstance(slc, Tensor):
             slc = slc.data
         if isinstance(item, Tensor):
-            self._data[slc] = item.data
-        else:
-            self.data[slc] = item
+            item = item.data
+        self.data[slc] = item
 
     def __len__(self):
         return self.dim[0]
@@ -296,7 +297,7 @@ class Tensor:
         if " dtype" in s:
             i = s.index(" dtype")
             s = s[:i]
-        strs = ["tensor(", s]
+        strs = ["Tensor(", s]
         if self.backfn is not None:
             strs.append(f" backfn={repr(self.backfn)}")
         strs.append(f" dtype={self.dtype.name()})")
@@ -304,8 +305,10 @@ class Tensor:
 
 
 def tensor(
-    data: Tensorlike, usegrad=False, dtype: Optional[Type[dtype]] = None
+    data: Union[Tensor, Tensorlike], usegrad=False, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
+    if isinstance(data, Tensor):
+        data = data.data
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)

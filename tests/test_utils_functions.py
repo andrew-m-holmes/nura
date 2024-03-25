@@ -422,3 +422,77 @@ def test_randint_half():
 def test_randint_bool():
     result = utils.randint(3, 3, low=0, high=2, dtype=nura.bool).data
     assert result.dtype == np.bool_
+
+def test_where_scalar_condition():
+    condition = nura.tensor(True, dtype=nura.bool)
+    x = nura.tensor(1, dtype=nura.int)
+    y = nura.tensor(0, dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(condition.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_vector_condition():
+    condition = nura.tensor([True, False, True], dtype=nura.bool)
+    x = nura.tensor([1, 2, 3], dtype=nura.int)
+    y = nura.tensor([4, 5, 6], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(condition.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_matrix_condition():
+    condition = nura.tensor([[True, False], [False, True]], dtype=nura.bool)
+    x = nura.tensor([[1, 2], [3, 4]], dtype=nura.int)
+    y = nura.tensor([[5, 6], [7, 8]], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(condition.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_tensor_condition():
+    condition = nura.tensor([[[True, False], [False, True]], [[True, True], [False, False]]], dtype=nura.bool)
+    x = nura.tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]], dtype=nura.int)
+    y = nura.tensor([[[9, 10], [11, 12]], [[13, 14], [15, 16]]], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(condition.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+
+def test_where_condition_tensor_tensor_equal():
+    a = nura.tensor([1, 2, 3], dtype=nura.int)
+    b = nura.tensor([3, 2, 1], dtype=nura.int)
+    condition = a == b
+    x = nura.tensor([10, 20, 30], dtype=nura.int)
+    y = nura.tensor([40, 50, 60], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(a.data == b.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_condition_tensor_tensor_greater():
+    a = nura.tensor([3, 2, 1], dtype=nura.int)
+    b = nura.tensor([1, 2, 3], dtype=nura.int)
+    condition = a > b
+    x = nura.tensor([10, 20, 30], dtype=nura.int)
+    y = nura.tensor([40, 50, 60], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(a.data > b.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_condition_tensor_scalar_less():
+    a = nura.tensor([1, 2, 3], dtype=nura.int)
+    b = 2
+    condition = a < b
+    x = nura.tensor([10, 20, 30], dtype=nura.int)
+    y = nura.tensor([40, 50, 60], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(a.data < b, x.data, y.data)
+    assert np.array_equal(result, expected)
+
+def test_where_condition_tensor_tensor_not_equal():
+    a = nura.tensor([[1, 2], [3, 4]], dtype=nura.int)
+    b = nura.tensor([[4, 3], [2, 1]], dtype=nura.int)
+    condition = a != b
+    x = nura.tensor([[10, 20], [30, 40]], dtype=nura.int)
+    y = nura.tensor([[50, 60], [70, 80]], dtype=nura.int)
+    result = nura.where(condition, x, y).data
+    expected = np.where(a.data != b.data, x.data, y.data)
+    assert np.array_equal(result, expected)
+

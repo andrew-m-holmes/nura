@@ -78,7 +78,7 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        return self.repr()
+        return self.repr()[:-1]
 
     def repr(self, pad=3) -> str:
         strs = [self.xrepr()]

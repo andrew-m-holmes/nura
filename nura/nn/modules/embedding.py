@@ -22,7 +22,7 @@ class Embedding(Module):
         self._vocab = vocab
         self._padid = padid
         self._dtype = types.float if dtype is None else dtype
-        self._embed = parameter(randn(vocab, emdim), dtype=dtype)
+        self._weight = parameter(randn(vocab, emdim), dtype=dtype)
 
     @property
     def emdim(self):
@@ -41,8 +41,8 @@ class Embedding(Module):
         return self._dtype
 
     @property
-    def embed(self) -> Tensor:
-        return self._embed
+    def weight(self) -> Tensor:
+        return self._weight
 
     def to(self, dtype: Type[types.dtype]):
         mod = super().to(dtype)
@@ -50,7 +50,7 @@ class Embedding(Module):
         return mod
 
     def forward(self, x: Tensor) -> Tensor:
-        return f.embedding(x, self.embed, self.padid)
+        return f.embedding(x, self.weight, self.padid)
 
     def xrepr(self) -> str:
         emdim, vocab = self.emdim, self.vocab
