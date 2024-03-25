@@ -304,6 +304,8 @@ def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tens
         raise ValueError(
             f"Expected indices with 1 or 2 dimensions, received {indices.ndim}"
         )
+    if indices.dtype not in (types.int, types.long):
+        raise TypeError(f"Expected int or long, received {indices.dtype.name()}")
     if dtype is None:
         dtype = indices.dtype
     if indices.ndim == 1:
