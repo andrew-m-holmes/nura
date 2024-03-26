@@ -90,6 +90,24 @@ class _ELU(Function):
         return mask * zgrad.data
 
 
+class _CELU(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor, alpha: float):
+        context.save(z)
+        context["alpha"] = alpha
+        arr0 = np.maximum(z.data, 0)
+        arr1 = np.minimum(0, alpha * (np.exp(z.data / alpha) - 1))
+        return arr0 + arr1
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        z = context.tensors()[0]
+        alpha = context["alpha"]
+        mask = np.where(z.data >= 0, 1, np.exp(z.data / alpha))
+        return mask * grad.data
+
+
 class _Embedding(Function):
 
     @staticmethod

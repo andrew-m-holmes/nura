@@ -53,6 +53,11 @@ def gelu(z: Tensor):
     return out
 
 
+def celu(z: Tensor, alpha=1.0):
+    out = fn._CELU.apply(z, alpha)
+    return out
+
+
 def softmax(a: Tensor, dim=-1):
     e = nura.exp(a)
     out = e / (e.sum(dim, keepdims=True))

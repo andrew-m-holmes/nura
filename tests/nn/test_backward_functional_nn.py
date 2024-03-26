@@ -281,3 +281,12 @@ def test_gelu_backward_matrix():
     h = 1e-8
     expected_grad = (gelu(z + h) - gelu(z - h)) / (2 * h)
     np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+# TODO Tests CELU
+
+# TODO Test Sigmoid
+
+# TODO Test Tanh
+
+# TODO Test Softmax

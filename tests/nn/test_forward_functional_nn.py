@@ -156,6 +156,9 @@ def test_gelu_forward_matrix():
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
+# TODO Tests ELU
+
+
 def test_sigmoid_forward_scalar():
     z = np.random.randn()
 
