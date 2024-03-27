@@ -4,6 +4,69 @@ from nura.tensors import Tensor
 from typing import Optional
 
 
+class _Sigmoid(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor):
+        context.save(z)
+        arr = 1 / (1 + np.exp(-z.data))
+        context["arr"] = arr
+        return arr
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        arr = context["arr"]
+        return arr * (1 - arr) * grad.data
+
+    @staticmethod
+    def tangent(context: Context, zgrad: Tensor):
+        arr = context["arr"]
+        return arr * (1 - arr) * zgrad.data
+
+
+class _Tanh(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor):
+        context.save(z)
+        arr = np.tanh(z.data)
+        context["arr"] = arr
+        return arr
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        arr = context["arr"]
+        return (1 - arr**2) * grad.data
+
+    @staticmethod
+    def tangent(context: Context, zgrad: Tensor):
+        arr = context["arr"]
+        return (1 - arr**2) * zgrad.data
+
+
+class _Softmax(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor, dim: int):
+        context.save(z)
+        e = np.exp(z.data)
+        arr = e / e.sum(axis=dim, keepdims=True)
+        context["arr"] = arr
+        return arr
+
+    # TODO FIX
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        arr = context["arr"]
+        jacobian = np.diag(arr.flatten()) - np.outer(arr, arr)
+        return np.reshape(jacobian, arr.shape + arr.shape[-1:])
+
+    @staticmethod
+    def tangent(context: Context, zgrad: Tensor):
+        arr = context["arr"]
+        return (np.diagflat(arr) - np.outer(arr, arr)) * zgrad.data
+
+
 class _ReLU(Function):
 
     @staticmethod

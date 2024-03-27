@@ -14,14 +14,12 @@ def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
 
 
 def sigmoid(z: Tensor):
-    out = 1.0 / (1.0 + f.exp(-z))
+    out = fn._Sigmoid.apply(z)
     return out
 
 
 def tanh(z: Tensor):
-    e = nura.exp(z)
-    ne = nura.exp(-z)
-    out = (e - ne) / (e + ne)
+    out = fn._Tanh.apply(z)
     return out
 
 
@@ -59,8 +57,7 @@ def celu(z: Tensor, alpha=1.0):
 
 
 def softmax(a: Tensor, dim=-1):
-    e = nura.exp(a)
-    out = e / (e.sum(dim, keepdims=True))
+    out = fn._Softmax.apply(a, dim)
     return out
 
 

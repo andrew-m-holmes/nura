@@ -9,14 +9,19 @@ import torch.nn.functional as tf
 
 def main():
 
-    a = np.random.randn(5)
+    a = np.random.randn(5, 4)
     b = nura.tensor(a, usegrad=True).float()
     c = f.softmax(b)
     print(c)
+    c.backward(nura.oneslike(c))
+    print(b.grad)
 
     b = torch.from_numpy(b.data)
-    c = tf.softmax(b)
+    b.requires_grad_()
+    c = tf.softmax(b, dim=-1)
     print(c)
+    c.backward(torch.ones_like(c))
+    print(b.grad)
 
 
 if __name__ == "__main__":
