@@ -153,6 +153,36 @@ class _ELU(Function):
         return mask * zgrad.data
 
 
+class _GELU(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor):
+        context.save(z)
+        PICONST = 0.79788456
+        CONST = 0.044715
+        context["PICONST"] = PICONST
+        context["CONST"] = CONST
+
+        tanh = np.tanh(PICONST * (z.data + CONST * np.power(z.data, 3)))
+        inner = tanh + 1.0
+        context["tanh"] = tanh
+        context["inner"] = inner
+        return 0.5 * z.data * inner
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        z = context.tensors()[0]
+        PICONST = context["PICONST"]
+        CONST = context["CONST"]
+        tanh = context["tanh"]
+        inner = context["inner"]
+        dtanh = 1 - tanh**2
+        dgelu = 0.5 * (
+            inner + z.data * PICONST * dtanh * (1 + 3 * CONST * np.power(z.data, 2))
+        )
+        return dgelu * grad.data
+
+
 class _CELU(Function):
 
     @staticmethod
