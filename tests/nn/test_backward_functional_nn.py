@@ -283,10 +283,169 @@ def test_gelu_backward_matrix():
     np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
 
 
-# TODO Tests CELU
+def test_celu_backward_scalar():
+    def celu(z, alpha=1.0):
+        return np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
 
-# TODO Test Sigmoid
+    z = np.random.randn()
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.celu(z_tensor)
+    result_tensor.backward()
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (celu(z + h) - celu(z - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad.data, expected_grad, decimal=5)
 
-# TODO Test Tanh
 
-# TODO Test Softmax
+def test_celu_backward_vector():
+    def celu(z, alpha=1.0):
+        return np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.celu(z_tensor)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (celu(z + h) - celu(z - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_celu_backward_matrix():
+    def celu(z, alpha=1.0):
+        return np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.celu(z_tensor)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (celu(z + h) - celu(z - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_celu_backward_scalar_alpha_2():
+    def celu(z, alpha=2.0):
+        return np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+
+    z = np.random.randn()
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.celu(z_tensor, alpha=2.0)
+    result_tensor.backward()
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (celu(z + h, alpha=2.0) - celu(z - h, alpha=2.0)) / (2 * h)
+    np.testing.assert_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_celu_backward_vector_alpha_0_5():
+    def celu(z, alpha=0.5):
+        return np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.celu(z_tensor, alpha=0.5)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (celu(z + h, alpha=0.5) - celu(z - h, alpha=0.5)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_celu_backward_matrix_alpha_0_1():
+    def celu(z, alpha=0.1):
+        return np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.celu(z_tensor, alpha=0.1)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (celu(z + h, alpha=0.1) - celu(z - h, alpha=0.1)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_sigmoid_backward_scalar():
+    def sigmoid(z):
+        return 1 / (1 + np.exp(-z))
+
+    z = np.random.randn()
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.sigmoid(z_tensor)
+    result_tensor.backward()
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (sigmoid(z + h) - sigmoid(z - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_sigmoid_backward_vector():
+    def sigmoid(z):
+        return 1 / (1 + np.exp(-z))
+
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.sigmoid(z_tensor)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (sigmoid(z + h) - sigmoid(z - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_sigmoid_backward_matrix():
+    def sigmoid(z):
+        return 1 / (1 + np.exp(-z))
+
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.sigmoid(z_tensor)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (sigmoid(z + h) - sigmoid(z - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_tanh_backward_scalar():
+    def tanh(z):
+        return np.tanh(z)
+
+    z = np.random.randn()
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.tanh(z_tensor)
+    result_tensor.backward()
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (tanh(z + h) - tanh(z - h)) / (2 * h)
+    np.testing.assert_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_tanh_backward_vector():
+    def tanh(z):
+        return np.tanh(z)
+
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.tanh(z_tensor)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (tanh(z + h) - tanh(z - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_tanh_backward_matrix():
+    def tanh(z):
+        return np.tanh(z)
+
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    result_tensor = f.tanh(z_tensor)
+    result_tensor.backward(nura.tensor(np.ones_like(z)))
+    grad = z_tensor.grad
+    h = 1e-8
+    expected_grad = (tanh(z + h) - tanh(z - h)) / (2 * h)
+    np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
