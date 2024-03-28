@@ -54,17 +54,23 @@ class _Softmax(Function):
         context["arr"] = arr
         return arr
 
-    # TODO FIX
     @staticmethod
     def backward(context: Context, grad: Tensor):
         arr = context["arr"]
-        jacobian = np.diag(arr.flatten()) - np.outer(arr, arr)
-        return np.reshape(jacobian, arr.shape + arr.shape[-1:])
+        diag = np.diagflat(arr)
+        outprod = np.outer(arr, arr)
+        jac = diag - outprod
+        agg = jac.sum(axis=-1).reshape(arr.shape)
+        return agg * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         arr = context["arr"]
-        return (np.diagflat(arr) - np.outer(arr, arr)) * zgrad.data
+        diag = np.diagflat(arr)
+        outprod = np.outer(arr, arr)
+        jac = diag - outprod
+        agg = jac.sum(axis=-1).reshape(arr.shape)
+        return agg * zgrad.data
 
 
 class _ReLU(Function):
