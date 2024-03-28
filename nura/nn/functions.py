@@ -228,3 +228,22 @@ class _Embedding(Function):
         arr = np.zeros_like(w.data)
         np.add.at(arr, indices, grads)
         return arr
+
+
+class _CrossEntropy(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor, y: Tensor, ignoreid: int):
+        context.save(z, y)
+        exp = np.exp(z.data - np.max(z.data, axis=-1, keepdims=True))
+        a = exp / exp.sum(axis=-1, keepdims=True)
+
+        mask = (y.data != ignoreid).astype(a.dtype)
+        context["a"] = a
+        context["mask"] = mask
+        losses = np.log(a) * mask
+        return -losses.mean(axis=-1, keepdims=True)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+
