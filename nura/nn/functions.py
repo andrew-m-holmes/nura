@@ -238,15 +238,28 @@ class _CrossEntropy(Function):
         exp = np.exp(z.data - z.data.max(axis=-1, keepdims=True))
         a = exp / exp.sum(axis=-1, keepdims=True)
 
-        mask = (y.data != ignoreid).flatten()
-        indices, *_ = mask.nonzero()
-        classes = y.data.flatten()[indices]
-        p = a[indices, classes]
-        context["p"] = p
+        context["a"] = a
+        context["ignoreid"] = ignoreid
+        context["labels"] = y.data
 
+        mask = y.data != ignoreid
+        indices, *_ = mask.nonzero()
+        classes = y.data[indices]
+        p = a[indices, classes]
         nll = -np.log(p)
         return nll.mean()
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        pass
+        a = context["a"].copy()
+        ignoreid = context["ignoreid"]
+        labels = context["labels"]
+
+        mask = labels != ignoreid
+        indices, *_ = mask.nonzero()
+        m = indices.shape[0]
+        ignore, *_ = np.invert(mask).nonzero()
+        classes = labels[indices]
+        a[indices, classes] -= 1
+        a[ignore] = 0
+        return (a / m) * grad.data
