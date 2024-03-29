@@ -81,3 +81,7 @@ def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
             f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
         )
     return fn._Embedding.apply(x, w, padid)
+
+
+def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
+    return fn._CrossEntropy.apply(z, y, ignoreid)

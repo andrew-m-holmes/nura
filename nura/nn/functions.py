@@ -49,8 +49,8 @@ class _Softmax(Function):
     @staticmethod
     def forward(context: Context, z: Tensor, dim: int):
         context.save(z)
-        e = np.exp(z.data)
-        arr = e / e.sum(axis=dim, keepdims=True)
+        exp = np.exp(z.data - z.data.max(axis=dim, keepdims=True))
+        arr = exp / exp.sum(axis=dim, keepdims=True)
         context["arr"] = arr
         return arr
 
@@ -234,16 +234,19 @@ class _CrossEntropy(Function):
 
     @staticmethod
     def forward(context: Context, z: Tensor, y: Tensor, ignoreid: int):
-        context.save(z, y)
-        exp = np.exp(z.data - np.max(z.data, axis=-1, keepdims=True))
+        context.save(z)
+        exp = np.exp(z.data - z.data.max(axis=-1, keepdims=True))
         a = exp / exp.sum(axis=-1, keepdims=True)
 
-        mask = (y.data != ignoreid).astype(a.dtype)
-        context["a"] = a
-        context["mask"] = mask
-        losses = np.log(a) * mask
-        return -losses.mean(axis=-1, keepdims=True)
+        mask = (y.data != ignoreid).flatten()
+        indices, *_ = mask.nonzero()
+        classes = y.data.flatten()[indices]
+        p = a[indices, classes]
+        context["p"] = p
+
+        nll = -np.log(p)
+        return nll.mean()
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-
+        pass

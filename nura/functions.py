@@ -3,7 +3,6 @@ from .tensors import Tensor
 from .autograd.function import Context, Function
 from nura.types import dim, dimlike
 from typing import Any
-import warnings
 
 
 class _Add(Function):
@@ -157,7 +156,6 @@ class _Pow(Function):
         a, b = context.tensors()
         arr = context["arr"]
         arr0 = b.data * np.power(a.data, b.data - 1.0) * grad.data
-        warnings.filterwarnings("ignore")
         arr1 = arr * np.log(a.data) * grad.data
         return arr0, arr1
 
@@ -166,7 +164,6 @@ class _Pow(Function):
         a, b = context.tensors()
         arr = context["arr"]
         arr0 = b.data * np.power(a.data, b.data - 1.0) * agrad.data
-        warnings.filterwarnings("ignore")
         arr1 = np.log(a.data) * arr * bgrad.data
         return arr0 + arr1
 
