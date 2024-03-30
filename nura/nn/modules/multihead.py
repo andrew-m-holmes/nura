@@ -14,7 +14,6 @@ class MultiHeadAttention(Module):
         dk: int,
         dv: int,
         heads: int,
-        dim=-1,
         maskfill=-1e9,
         bias=False,
         dtype: Optional[Type[dtype]] = None,
@@ -27,14 +26,13 @@ class MultiHeadAttention(Module):
         self._dk = dk
         self._dv = dv
         self._heads = heads
-        self._dim = dim
         self._maskfill = maskfill
 
         self._wq = Linear(dm, heads * dk, bias=bias, dtype=dtype)
         self._wk = Linear(dm, heads * dk, bias=bias, dtype=dtype)
         self._wv = Linear(dm, heads * dv, bias=bias, dtype=dtype)
         self._wo = Linear(heads * dv, dm, bias=bias, dtype=dtype)
-        self._attn = ScaledDotProductAttention(dim=dim, maskfill=maskfill)
+        self._attn = ScaledDotProductAttention(maskfill=maskfill)
 
     @property
     def dm(self):

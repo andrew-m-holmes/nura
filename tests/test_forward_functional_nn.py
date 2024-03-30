@@ -124,7 +124,7 @@ def test_elu_forward_matrix():
 
 
 def test_gelu_forward_scalar():
-    z = np.random.randn()  # Random scalar
+    z = np.random.randn()
     z_tensor = nura.tensor(z)
     result_tensor = f.gelu(z_tensor)
     result = result_tensor.data
@@ -135,7 +135,7 @@ def test_gelu_forward_scalar():
 
 
 def test_gelu_forward_vector():
-    z = np.random.randn(5)  # Random vector
+    z = np.random.randn(5)
     z_tensor = nura.tensor(z)
     result_tensor = f.gelu(z_tensor)
     result = result_tensor.data
@@ -146,13 +146,63 @@ def test_gelu_forward_vector():
 
 
 def test_gelu_forward_matrix():
-    z = np.random.randn(3, 3)  # Random matrix
+    z = np.random.randn(3, 3)
     z_tensor = nura.tensor(z)
     result_tensor = f.gelu(z_tensor)
     result = result_tensor.data
     expected = (
         0.5 * z * (1 + np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * np.power(z, 3))))
     )
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_scalar():
+    alpha = 1.0
+    z = np.random.randn()
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_vector():
+    alpha = 1.0
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_matrix():
+    alpha = 1.0
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_tensor():
+    alpha = 1.0
+    z = np.random.randn(2, 3, 4)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_alpha():
+    alpha = 0.5
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
@@ -263,6 +313,16 @@ def test_softmax_forward_tensor_rank4():
     result_tensor = f.softmax(z_tensor, dim=2)
     result = result_tensor.data
     expected = np.exp(z) / np.sum(np.exp(z), axis=2, keepdims=True)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_softmax_forward_tensor_rank4_zero_dim():
+    z = np.random.randn(4, 4, 4, 4)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor, dim=0)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z), axis=0, keepdims=True)
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
@@ -426,3 +486,105 @@ def test_attention_with_mask_batch():
 
     np.testing.assert_array_almost_equal(attn.data, attn_expected, decimal=5)
     np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
+
+
+def test_embedding_forward_single_index():
+    vocab_size = 10
+    embedding_dim = 5
+    x = np.random.randint(0, vocab_size)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = w[x]
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_embedding_forward_vector():
+    vocab_size = 10
+    embedding_dim = 5
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=seq_length)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = w[x]
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_embedding_forward_matrix():
+    vocab_size = 10
+    embedding_dim = 5
+    batch_size = 2
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=(batch_size, seq_length))
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = w[x]
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_embedding_forward_with_padding():
+    vocab_size = 10
+    embedding_dim = 5
+    batch_size = 2
+    seq_length = 3
+    padid = 0
+    x = np.random.randint(0, vocab_size, size=(batch_size, seq_length))
+    x[np.random.rand(*x.shape) < 0.2] = padid
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor, padid=padid)
+    result = result_tensor.data
+    expected = w[x]
+    expected[x == padid] = 0
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_crossentropy_forward_matrix():
+    def numpy_crossentropy(z, y, ignoreid=None):
+        exp_z = np.exp(z - np.max(z, axis=-1, keepdims=True))
+        probs = exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+
+        mask = y != ignoreid
+        indices = mask.nonzero()[0]
+        classes = y[indices]
+        return -np.mean(np.log(probs[indices, classes]))
+
+    z = np.random.randn(3, 5).astype(np.float32)
+    y = np.random.randint(0, 5, size=3).astype(np.int32)
+    z_tensor = nura.tensor(z, dtype=nura.float)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(z_tensor, y_tensor)
+    result = result_tensor.data
+    expected = numpy_crossentropy(z, y)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_crossentropy_forward_matrix_ignoreid():
+    def numpy_crossentropy(z, y, ignoreid=None):
+        exp_z = np.exp(z - np.max(z, axis=-1, keepdims=True))
+        probs = exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+
+        mask = y != ignoreid
+        indices = mask.nonzero()[0]
+        classes = y[indices]
+        return -np.mean(np.log(probs[indices, classes]))
+
+    z = np.random.randn(3, 100).astype(np.float32)
+    y = np.random.randint(0, 100, size=3).astype(np.int32)
+    ignoreid = 0
+    y[np.random.randint(0, 3)] = ignoreid
+    z_tensor = nura.tensor(z, dtype=nura.float)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(z_tensor, y_tensor, ignoreid=ignoreid)
+    result = result_tensor.data
+    expected = numpy_crossentropy(z, y, ignoreid=ignoreid)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)

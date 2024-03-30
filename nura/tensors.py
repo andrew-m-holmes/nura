@@ -167,7 +167,7 @@ class Tensor:
     def squeeze(self, dim: Optional[dimlike] = None):
         return nura.squeeze(self, dim)
 
-    def unsqueeze(self, dim: Optional[dimlike] = None):
+    def unsqueeze(self, dim: dimlike):
         return nura.unsqueeze(self, dim)
 
     def view(self, newdim: types.dim):

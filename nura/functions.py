@@ -3,7 +3,6 @@ from .tensors import Tensor
 from .autograd.function import Context, Function
 from nura.types import dim, dimlike
 from typing import Any
-import warnings
 
 
 class _Add(Function):
@@ -157,7 +156,6 @@ class _Pow(Function):
         a, b = context.tensors()
         arr = context["arr"]
         arr0 = b.data * np.power(a.data, b.data - 1.0) * grad.data
-        warnings.filterwarnings("ignore")
         arr1 = arr * np.log(a.data) * grad.data
         return arr0, arr1
 
@@ -166,7 +164,6 @@ class _Pow(Function):
         a, b = context.tensors()
         arr = context["arr"]
         arr0 = b.data * np.power(a.data, b.data - 1.0) * agrad.data
-        warnings.filterwarnings("ignore")
         arr1 = np.log(a.data) * arr * bgrad.data
         return arr0 + arr1
 
@@ -270,10 +267,9 @@ class _Sum(Function):
         dim = context["dim"]
         keepdims = context["keepdims"]
         graddata = grad.data
-        if not keepdims and a.dim != graddata.shape:
+        if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-            graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        return graddata
+        return graddata + np.zeros_like(a.data)
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
@@ -304,10 +300,9 @@ class _Max(Function):
         arr = context["arr"]
         graddata = grad.data
         mask = a.data == arr
-        if not keepdims and a.dim != graddata.shape:
+        if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-            graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        return mask * graddata
+        return mask * (graddata + np.zeros_like(a.data))
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
@@ -341,10 +336,9 @@ class _Min(Function):
         arr = context["arr"]
         graddata = grad.data
         mask = a.data == arr
-        if not keepdims and a.dim != graddata.shape:
+        if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-            graddata = np.ascontiguousarray(np.broadcast_to(graddata, a.dim))
-        return mask * graddata
+        return mask * (graddata + np.zeros_like(a.data))
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
@@ -481,14 +475,16 @@ class _Permute(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
         dims = np.argsort(context["dims"])
-        arr = grad.data.transpose(dims)
+        arr = grad.data.reshape(a.data.shape).transpose(dims)
         return arr
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
+        a = context.tensors()[0]
         dims = context["dims"]
-        arr = agrad.data.transpose(dims)
+        arr = agrad.data.reshape(a.data.shape).transpose(dims)
         return arr
 
 

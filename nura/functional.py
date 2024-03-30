@@ -116,9 +116,7 @@ def squeeze(a: Tensor, dim: Optional[dimlike] = None):
     return out
 
 
-def unsqueeze(a: Tensor, dim: Optional[dimlike] = None):
-    if dim is None:
-        dim = 0
+def unsqueeze(a: Tensor, dim: dimlike):
     out = fn._Unsqueeze.apply(a, dim)
     return out
 
