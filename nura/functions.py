@@ -475,14 +475,16 @@ class _Permute(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
         dims = np.argsort(context["dims"])
-        arr = grad.data.transpose(dims)
+        arr = grad.data.reshape(a.data.shape).transpose(dims)
         return arr
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
+        a = context.tensors()[0]
         dims = context["dims"]
-        arr = agrad.data.transpose(dims)
+        arr = agrad.data.reshape(a.data.shape).transpose(dims)
         return arr
 
 

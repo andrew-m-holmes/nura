@@ -21,6 +21,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         node, grad = queue.popleft()
         nodes = node.children()
         tensor = node.tensor
+
         if tensor.leaf:
             assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
@@ -32,7 +33,11 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             newgrad = oldgrad + accumgrad
             tensor.mutate(grad=newgrad.to(tensor.dtype))
         elif nodes:
-            items = [(n, g) for n, g in zip(nodes, node.apply(grad, backward=True))]
+            items = [
+                (n, g)
+                for n, g in zip(nodes, node.apply(grad, backward=True))
+                if n is not None
+            ]
             queue.extend(items)
 
 

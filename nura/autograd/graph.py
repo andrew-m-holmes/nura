@@ -26,7 +26,8 @@ class Node:
             arr = self.function.backward(self.context, *grad)
             if not isinstance(arr, tuple):
                 arr = (arr,)
-            return tuple(nura.tensor(a) for a in arr)
+            out = tuple(nura.tensor(a) for a in arr)
+            return out
         arr = self.function.tangent(self.context, *grad)
         return nura.tensor(arr)
 
@@ -36,13 +37,12 @@ class Node:
         nodes = []
         for t in self.context.tensors():
             node = getnode(t)
-            if isinstance(node, Node):
-                nodes.append(node)
+            nodes.append(node)
         return nodes
 
     def __repr__(self):
         if self.tensor.leaf:
-            return "accumgrad"
+            return "_AccumulateGrad"
         return f"{self.function.__name__}"
 
 

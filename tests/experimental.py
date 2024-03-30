@@ -10,22 +10,19 @@ import torch.nn.functional as torchf
 
 def main():
 
-    w = np.arange(start=1, stop=5).reshape(2, 2).astype(np.float32)
-    x = np.array([0, 1, 1])[None]
-    e = w[x]
-    g = np.array([1.0, 2.0, 3.0]).reshape(1, 3, 1) + np.zeros_like(e)
+    batch_size = 1
+    seq_length = 5
+    d_model = 10
 
-    w = nura.tensor(w, usegrad=True)
-    x = nura.tensor(x)
-    e = f.embedding(x, w, padid=1)
-    g = nura.tensor(g)
-    e.backward(g)
+    w0 = nura.randn(10, 10, usegrad=True)
+    w1 = nura.randn(10, 10, usegrad=True)
 
-    print(f"w:\n{w}\n")
-    print(f"x:\n{x}\n")
-    print(f"e:\n{e}\n")
-    print(f"g:\n{g}\n")
-    print(f"w.grad:\n{w.grad}")
+    a = nura.randn(batch_size, 1, seq_length, d_model)
+    b = nura.matmul(a, w0.T)  # batch_size, 1, seq_length, d_model
+    c = b.reshape((-1, seq_length, d_model))  # (batch_size, seq_length, d_model)
+    d = nura.matmul(c, w1.T)
+    e = d.sum()  # scalar
+    e.backward()
 
 
 if __name__ == "__main__":
