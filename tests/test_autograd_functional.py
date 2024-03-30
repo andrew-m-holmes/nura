@@ -606,7 +606,6 @@ def test_grad_cos_scalar():
 
     partial_derivatives, *_ = grad(a_tensor, result_tensor)
     result_tensor.backward()
-    print(partial_derivatives)
 
     assert np.allclose(
         a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5
@@ -622,7 +621,6 @@ def test_grad_sin_vector():
         a_tensor, result_tensor, nura.oneslike(result_tensor)
     )
     result_tensor.backward(nura.oneslike(result_tensor))
-    print(partial_derivatives)
 
     assert np.allclose(
         a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5
@@ -656,7 +654,6 @@ def test_grad_permute_complex_tensor():
         a_tensor, result_tensor, nura.oneslike(result_tensor)
     )
     result_tensor.backward(nura.oneslike(result_tensor))
-    print(partial_derivatives)
 
     assert np.allclose(
         a_tensor.grad.data, partial_derivatives.data, rtol=1e-5, atol=1e-5
