@@ -10,18 +10,22 @@ import torch.nn.functional as torchf
 
 def main():
 
-    x = np.random.randn(3)
-    y = np.random.choice(3, size=1)
+    w = np.arange(start=1, stop=5).reshape(2, 2).astype(np.float32)
+    x = np.array([0, 1, 1])[None]
+    e = w[x]
+    g = np.array([1.0, 2.0, 3.0]).reshape(1, 3, 1) + np.zeros_like(e)
 
-    xn = nura.tensor(x).float()
-    yn = nura.tensor(y).long()
-    loss = f.crossentropy(xn, yn)
-    print(loss)
+    w = nura.tensor(w, usegrad=True)
+    x = nura.tensor(x)
+    e = f.embedding(x, w, padid=1)
+    g = nura.tensor(g)
+    e.backward(g)
 
-    torch_x = torch.tensor(x).float()
-    torch_y = torch.tensor(y).long()
-    loss_torch = torchf.cross_entropy(torch_x, torch_y)
-    print(loss_torch)
+    print(f"w:\n{w}\n")
+    print(f"x:\n{x}\n")
+    print(f"e:\n{e}\n")
+    print(f"g:\n{g}\n")
+    print(f"w.grad:\n{w.grad}")
 
 
 if __name__ == "__main__":

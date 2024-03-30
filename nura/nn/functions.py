@@ -224,11 +224,10 @@ class _Embedding(Function):
         xdata = context["xdata"]
         padid = context["padid"]
 
+        arr = np.zeros_like(w.data)
         mask = xdata != padid
         indices = xdata[mask]
-        grads = grad.data[mask]
-        arr = np.zeros_like(w.data)
-        np.add.at(arr, indices, grads)
+        np.add.at(arr, indices, grad.data[mask])
         return arr
 
 
