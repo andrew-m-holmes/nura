@@ -502,3 +502,103 @@ def test_crossentropy_backward_matrix_ignoreid():
     expected_grad[indices, classes] -= 1
     expected_grad /= m
     np.testing.assert_array_almost_equal(grad, expected_grad, decimal=5)
+
+
+def test_embedding_backward_vector():
+    def numpy_embedding(x, w, grad):
+        np.add.at(w, x, grad)
+        return w
+
+    vocab_size = 10
+    embedding_dim = 5
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=seq_length).astype(np.int32)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w, dtype=nura.float, usegrad=True)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+
+    grad = np.random.randn(*result_tensor.dim).astype(np.float32)
+    result_tensor.backward(nura.tensor(grad))
+
+    expected_grad = numpy_embedding(x, np.zeros_like(w), grad)
+
+    np.testing.assert_array_almost_equal(w_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_embedding_backward_vector_padid():
+    def numpy_embedding(x, w, grad, padid):
+        mask = x != padid
+        indices = x[mask]
+        np.add.at(w, indices, grad[mask])
+        return w
+
+    vocab_size = 10
+    embedding_dim = 5
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=seq_length).astype(np.int32)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    padid = vocab_size - 1
+
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w, dtype=nura.float, usegrad=True)
+    result_tensor = f.embedding(x_tensor, w_tensor, padid=padid)
+
+    grad = np.random.randn(*result_tensor.dim).astype(np.float32)
+    result_tensor.backward(nura.tensor(grad))
+
+    expected_grad = numpy_embedding(x, np.zeros_like(w), grad, padid)
+
+    np.testing.assert_array_almost_equal(w_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_embedding_backward_matrix():
+    def numpy_embedding(x, w, grad):
+        np.add.at(w, x, grad)
+        return w
+
+    vocab_size = 10
+    embedding_dim = 5
+    batch_size = 2
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=(batch_size, seq_length)).astype(np.int32)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w, dtype=nura.float, usegrad=True)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+
+    grad = np.random.randn(*result_tensor.dim).astype(np.float32)
+    result_tensor.backward(nura.tensor(grad))
+
+    expected_grad = numpy_embedding(x, np.zeros_like(w), grad)
+
+    np.testing.assert_array_almost_equal(w_tensor.grad.data, expected_grad, decimal=5)
+
+
+def test_embedding_backward_matrix_padid():
+    def numpy_embedding(x, w, grad, padid):
+        mask = x != padid
+        indices = x[mask]
+        np.add.at(w, indices, grad[mask])
+        return w
+
+    vocab_size = 10
+    embedding_dim = 5
+    batch_size = 2
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=(batch_size, seq_length)).astype(np.int32)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    padid = vocab_size - 1
+
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w, dtype=nura.float, usegrad=True)
+    result_tensor = f.embedding(x_tensor, w_tensor, padid=padid)
+
+    grad = np.random.randn(*result_tensor.dim).astype(np.float32)
+    result_tensor.backward(nura.tensor(grad))
+
+    expected_grad = numpy_embedding(x, np.zeros_like(w), grad, padid)
+
+    np.testing.assert_array_almost_equal(w_tensor.grad.data, expected_grad, decimal=5)
