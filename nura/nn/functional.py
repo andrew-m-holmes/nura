@@ -75,7 +75,7 @@ def attention(
 
 def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
     if x.dtype not in (nura.int, nura.long):
-        raise ValueError(
+        raise RuntimeError(
             f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
         )
     return fn._Embedding.apply(x, w, padid)
@@ -83,11 +83,11 @@ def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
 
 def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
     if z.ndim != 2:
-        raise ValueError(f"Expected 'z' to be 2D but got '{z.ndim}'D")
+        raise RuntimeError(f"Expected 'z' to be 2D but got '{z.ndim}'D")
     if y.ndim != 1:
-        raise ValueError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
+        raise RuntimeError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
     if y.dtype not in (nura.int, nura.long):
-        raise ValueError(
+        raise RuntimeError(
             f"Expected 'y' to be of type 'int' or 'long' but got '{y.dtype.name()}'"
         )
     return fn._CrossEntropy.apply(z, y, ignoreid)

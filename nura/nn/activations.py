@@ -24,20 +24,38 @@ class ReLU6(Module):
 
 class LeakyReLU(Module):
 
-    def __init__(self) -> None:
+    def __init__(self, slope: float = 0.1) -> None:
         super().__init__()
+        self._slope = slope
+
+    @property
+    def slope(self):
+        return self._slope
 
     def forward(self, x: Tensor):
-        return f.leakyrelu(x)
+        return f.leakyrelu(x, self.slope)
+
+    def xrepr(self) -> str:
+        slope = self.slope
+        return f"{self.name()}({slope=})"
 
 
 class ELU(Module):
 
-    def __init__(self) -> None:
+    def __init__(self, alpha: float = 1.0) -> None:
         super().__init__()
+        self._alpha = alpha
+
+    @property
+    def alpha(self):
+        return self._alpha
 
     def forward(self, x: Tensor):
-        return f.elu(x)
+        return f.elu(x, self.alpha)
+
+    def xrepr(self) -> str:
+        alpha = self.alpha
+        return f"{self.name()}({alpha=})"
 
 
 class GELU(Module):
@@ -47,6 +65,24 @@ class GELU(Module):
 
     def forward(self, x: Tensor):
         return f.gelu(x)
+
+
+class CELU(Module):
+
+    def __init__(self, alpha: float = 1.0) -> None:
+        super().__init__()
+        self._alpha = alpha
+
+    @property
+    def alpha(self):
+        return self._alpha
+
+    def forward(self, x: Tensor):
+        return f.celu(x, self.alpha)
+
+    def xrepr(self) -> str:
+        alpha = self.alpha
+        return f"{self.name()}({alpha=})"
 
 
 class Sigmoid(Module):
