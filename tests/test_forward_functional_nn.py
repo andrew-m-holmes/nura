@@ -124,7 +124,7 @@ def test_elu_forward_matrix():
 
 
 def test_gelu_forward_scalar():
-    z = np.random.randn()  # Random scalar
+    z = np.random.randn()
     z_tensor = nura.tensor(z)
     result_tensor = f.gelu(z_tensor)
     result = result_tensor.data
@@ -135,7 +135,7 @@ def test_gelu_forward_scalar():
 
 
 def test_gelu_forward_vector():
-    z = np.random.randn(5)  # Random vector
+    z = np.random.randn(5)
     z_tensor = nura.tensor(z)
     result_tensor = f.gelu(z_tensor)
     result = result_tensor.data
@@ -146,7 +146,7 @@ def test_gelu_forward_vector():
 
 
 def test_gelu_forward_matrix():
-    z = np.random.randn(3, 3)  # Random matrix
+    z = np.random.randn(3, 3)
     z_tensor = nura.tensor(z)
     result_tensor = f.gelu(z_tensor)
     result = result_tensor.data
@@ -156,7 +156,54 @@ def test_gelu_forward_matrix():
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
-# TODO Tests ELU
+def test_celu_forward_scalar():
+    alpha = 1.0
+    z = np.random.randn()
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_vector():
+    alpha = 1.0
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_matrix():
+    alpha = 1.0
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_tensor():
+    alpha = 1.0
+    z = np.random.randn(2, 3, 4)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_celu_forward_alpha():
+    alpha = 0.5
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z)
+    result_tensor = f.celu(z_tensor, alpha=alpha)
+    result = result_tensor.data
+    expected = np.maximum(0, z) + np.minimum(0, alpha * (np.exp(z / alpha) - 1))
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
 def test_sigmoid_forward_scalar():
@@ -480,12 +527,12 @@ def test_embedding_forward_with_padding():
     seq_length = 3
     padid = 0
     x = np.random.randint(0, vocab_size, size=(batch_size, seq_length))
-    x[np.random.rand(*x.shape) < 0.2] = padid  # Add padding randomly
+    x[np.random.rand(*x.shape) < 0.2] = padid
     w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
     x_tensor = nura.tensor(x, dtype=nura.int)
     w_tensor = nura.tensor(w)
     result_tensor = f.embedding(x_tensor, w_tensor, padid=padid)
     result = result_tensor.data
     expected = w[x]
-    expected[x == padid] = 0  # Set padded embeddings to zero
+    expected[x == padid] = 0
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
