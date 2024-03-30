@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
-    out = nura.matmul(x, w.transpose())
+    out = nura.matmul(x, w.T)
     if b is not None:
         out = out + b
     return out

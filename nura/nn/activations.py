@@ -87,14 +87,9 @@ class Tanh(Module):
 
 class ScaledDotProductAttention(Module):
 
-    def __init__(self, dim=-1, maskfill=-1e-9) -> None:
+    def __init__(self, maskfill=-1e-9) -> None:
         super().__init__()
-        self._dim = dim
         self._maskfill = maskfill
-
-    @property
-    def dim(self):
-        return self._dim
 
     @property
     def maskfill(self):
@@ -103,9 +98,8 @@ class ScaledDotProductAttention(Module):
     def forward(
         self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
     ) -> Tuple[Tensor, Tensor]:
-        return f.attention(q, k, v, self.dim, mask, self.maskfill)
+        return f.attention(q, k, v, mask, self.maskfill)
 
     def xrepr(self) -> str:
-        dim = self.dim
         maskfill = self.maskfill
-        return f"{self.name()}({dim=} {maskfill=:.1e})"
+        return f"{self.name()}({maskfill=:.1e})"
