@@ -10,21 +10,18 @@ import torch.nn.functional as torchf
 
 def main():
 
-    padid = 0
-    vocab_size = 3
-    embeddingd_dim = 7
-    batch_size = 1
-    seq_len = 3
+    x = np.random.randn(3)
+    y = np.random.choice(3, size=1)
 
-    x = nura.randint(batch_size, seq_len, low=0, high=vocab_size).long()
-    embedding = nn.Embedding(vocab_size, embeddingd_dim, padid=padid)
-    out = embedding(x)
-    print(out)
+    xn = nura.tensor(x).float()
+    yn = nura.tensor(y).long()
+    loss = f.crossentropy(xn, yn)
+    print(loss)
 
-    x = torch.randint(0, vocab_size, (batch_size, seq_len))
-    embedding = torchnn.Embedding(vocab_size, embeddingd_dim, padding_idx=padid)
-    out = embedding(x)
-    print(out)
+    torch_x = torch.tensor(x).float()
+    torch_y = torch.tensor(y).long()
+    loss_torch = torchf.cross_entropy(torch_x, torch_y)
+    print(loss_torch)
 
 
 if __name__ == "__main__":

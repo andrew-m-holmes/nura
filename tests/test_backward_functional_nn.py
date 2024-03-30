@@ -449,3 +449,56 @@ def test_tanh_backward_matrix():
     h = 1e-8
     expected_grad = (tanh(z + h) - tanh(z - h)) / (2 * h)
     np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
+
+
+def test_crossentropy_backward_matrix():
+    def numpy_crossentropy(z, y):
+        exp_z = np.exp(z - np.max(z, axis=-1, keepdims=True))
+        probs = exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+        m = len(y)
+        indices = np.arange(m)
+        classes = y
+        return probs, indices, classes, m
+
+    z = np.random.randn(10, 5).astype(np.float32)
+    y = np.random.randint(0, 5, size=10).astype(np.int32)
+    z_tensor = nura.tensor(z, dtype=nura.float, usegrad=True)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(z_tensor, y_tensor)
+    result_tensor.backward()
+    grad = z_tensor.grad.data
+
+    probs, indices, classes, m = numpy_crossentropy(z, y)
+    expected_grad = probs.copy()
+    expected_grad[indices, classes] -= 1
+    expected_grad /= m
+    np.testing.assert_array_almost_equal(grad, expected_grad, decimal=5)
+
+
+def test_crossentropy_backward_matrix_ignoreid():
+    def numpy_crossentropy(z, y, ignoreid):
+        exp_z = np.exp(z - np.max(z, axis=-1, keepdims=True))
+        probs = exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+        mask = y != ignoreid
+        indices = mask.nonzero()[0]
+        classes = y[indices]
+        probs = probs[indices]
+        m = len(indices)
+        return probs, indices, classes, m
+
+    z = np.random.randn(10, 50).astype(np.float32)
+    y = np.random.randint(0, 50, size=10).astype(np.int32)
+    ignoreid = 0
+    y[np.random.randint(0, 10)] = ignoreid
+    z_tensor = nura.tensor(z, dtype=nura.float, usegrad=True)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(z_tensor, y_tensor, ignoreid=ignoreid)
+    result_tensor.backward()
+    grad = z_tensor.grad.data
+
+    probs, indices, classes, m = numpy_crossentropy(z, y, ignoreid)
+    expected_grad = np.zeros_like(z)
+    expected_grad[indices] = probs.copy()
+    expected_grad[indices, classes] -= 1
+    expected_grad /= m
+    np.testing.assert_array_almost_equal(grad, expected_grad, decimal=5)

@@ -316,6 +316,16 @@ def test_softmax_forward_tensor_rank4():
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
+def test_softmax_forward_tensor_rank4_zero_dim():
+    z = np.random.randn(4, 4, 4, 4)
+
+    z_tensor = nura.tensor(z)
+    result_tensor = f.softmax(z_tensor, dim=0)
+    result = result_tensor.data
+    expected = np.exp(z) / np.sum(np.exp(z), axis=0, keepdims=True)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
 def test_linear_forward_vector():
     x = np.random.randn(5)
     w = np.random.randn(5, 5)
@@ -535,4 +545,46 @@ def test_embedding_forward_with_padding():
     result = result_tensor.data
     expected = w[x]
     expected[x == padid] = 0
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_crossentropy_forward_matrix():
+    def numpy_crossentropy(z, y, ignoreid=None):
+        exp_z = np.exp(z - np.max(z, axis=-1, keepdims=True))
+        probs = exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+
+        mask = y != ignoreid
+        indices = mask.nonzero()[0]
+        classes = y[indices]
+        return -np.mean(np.log(probs[indices, classes]))
+
+    z = np.random.randn(3, 5).astype(np.float32)
+    y = np.random.randint(0, 5, size=3).astype(np.int32)
+    z_tensor = nura.tensor(z, dtype=nura.float)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(z_tensor, y_tensor)
+    result = result_tensor.data
+    expected = numpy_crossentropy(z, y)
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_crossentropy_forward_matrix_ignoreid():
+    def numpy_crossentropy(z, y, ignoreid=None):
+        exp_z = np.exp(z - np.max(z, axis=-1, keepdims=True))
+        probs = exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+
+        mask = y != ignoreid
+        indices = mask.nonzero()[0]
+        classes = y[indices]
+        return -np.mean(np.log(probs[indices, classes]))
+
+    z = np.random.randn(3, 100).astype(np.float32)
+    y = np.random.randint(0, 100, size=3).astype(np.int32)
+    ignoreid = 0
+    y[np.random.randint(0, 3)] = ignoreid
+    z_tensor = nura.tensor(z, dtype=nura.float)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(z_tensor, y_tensor, ignoreid=ignoreid)
+    result = result_tensor.data
+    expected = numpy_crossentropy(z, y, ignoreid=ignoreid)
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
