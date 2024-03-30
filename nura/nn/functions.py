@@ -214,7 +214,9 @@ class _Embedding(Function):
         context.save(w)
         context["xdata"] = x.data
         context["padid"] = padid
-        return w.data[x.data]
+        mask = x.data != padid
+        mask = np.expand_dims(mask, -1)
+        return w.data[x.data] * mask
 
     @staticmethod
     def backward(context: Context, grad: Tensor):

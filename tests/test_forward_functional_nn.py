@@ -429,3 +429,63 @@ def test_attention_with_mask_batch():
 
     np.testing.assert_array_almost_equal(attn.data, attn_expected, decimal=5)
     np.testing.assert_array_almost_equal(context.data, context_expected, decimal=5)
+
+
+def test_embedding_forward_single_index():
+    vocab_size = 10
+    embedding_dim = 5
+    x = np.random.randint(0, vocab_size)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = w[x]
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_embedding_forward_vector():
+    vocab_size = 10
+    embedding_dim = 5
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=seq_length)
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = w[x]
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_embedding_forward_matrix():
+    vocab_size = 10
+    embedding_dim = 5
+    batch_size = 2
+    seq_length = 3
+    x = np.random.randint(0, vocab_size, size=(batch_size, seq_length))
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+    result = result_tensor.data
+    expected = w[x]
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+def test_embedding_forward_with_padding():
+    vocab_size = 10
+    embedding_dim = 5
+    batch_size = 2
+    seq_length = 3
+    padid = 0
+    x = np.random.randint(0, vocab_size, size=(batch_size, seq_length))
+    x[np.random.rand(*x.shape) < 0.2] = padid  # Add padding randomly
+    w = np.random.randn(vocab_size, embedding_dim).astype(np.float32)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor, padid=padid)
+    result = result_tensor.data
+    expected = w[x]
+    expected[x == padid] = 0  # Set padded embeddings to zero
+    np.testing.assert_array_almost_equal(result, expected, decimal=5)

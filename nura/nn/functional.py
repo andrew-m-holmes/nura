@@ -1,5 +1,4 @@
 import nura
-import nura.functional as f
 import nura.nn.functions as fn
 from nura.tensors import Tensor
 from nura.utils import where
@@ -62,15 +61,14 @@ def attention(
     q: Tensor,
     k: Tensor,
     v: Tensor,
-    dim=-1,
     mask: Optional[Tensor] = None,
     maskfill=-1e9,
 ) -> Tuple[Tensor, Tensor]:
-    dk = k.dim[dim]
+    dk = k.dim[-1]
     simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
     if mask is not None:
         simscore = where(mask == True, simscore, maskfill)
-    attn = softmax(simscore, dim)
+    attn = softmax(simscore, -1)
     context = nura.matmul(attn, v)
     return context, attn
 
