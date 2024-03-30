@@ -10,19 +10,13 @@ import torch.nn.functional as torchf
 
 def main():
 
-    batch_size = 1
-    seq_length = 5
-    d_model = 10
-
-    w0 = nura.randn(10, 10, usegrad=True)
-    w1 = nura.randn(10, 10, usegrad=True)
-
-    a = nura.randn(batch_size, 1, seq_length, d_model)
-    b = nura.matmul(a, w0.T)  # batch_size, 1, seq_length, d_model
-    c = b.reshape((-1, seq_length, d_model))  # (batch_size, seq_length, d_model)
-    d = nura.matmul(c, w1.T)
-    e = d.sum()  # scalar
-    e.backward()
+    x = nura.randn(3, 10).usedgrad()
+    y = nura.randint(3, low=0, high=10)
+    lossfn = nn.CrossEntropy()
+    loss = lossfn(x, y)
+    print(loss)
+    loss.backward()
+    print(x.grad)
 
 
 if __name__ == "__main__":
