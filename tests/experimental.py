@@ -10,12 +10,16 @@ import torch.nn.functional as torchf
 
 def main():
 
-    x = nura.randn(3, 10).usedgrad()
-    y = nura.randint(3, low=0, high=10)
-    lossfn = nn.CrossEntropy()
-    loss = lossfn(x, y)
-    print(loss)
+    p = 0.5
+    x = nura.randn(3, 5, usegrad=True)
+    print(x.dtype)
+    dropout = nn.Dropout(p)
+    dropout.train()
+    z = dropout(x)
+    loss = z.sum()
     loss.backward()
+    print(dropout)
+    print(z)
     print(x.grad)
 
 

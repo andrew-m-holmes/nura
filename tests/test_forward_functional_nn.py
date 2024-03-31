@@ -588,3 +588,6 @@ def test_crossentropy_forward_matrix_ignoreid():
     result = result_tensor.data
     expected = numpy_crossentropy(z, y, ignoreid=ignoreid)
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
+
+
+# TODO dropout tests
