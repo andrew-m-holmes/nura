@@ -318,6 +318,7 @@ def tensor(
 ) -> Tensor:
     if isinstance(data, Tensor):
         data = data.data
+        dtype = data.dtype
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
