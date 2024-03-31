@@ -264,3 +264,23 @@ class _CrossEntropy(Function):
         a[indices, classes] -= 1
         a[ignore] = 0
         return (a / m) * grad.data
+
+
+class _Dropout(Function):
+
+    @staticmethod
+    def forward(context: Context, z: Tensor, p: float):
+        context.save(z)
+        mask = np.random.binomial(1, 1 - p, size=z.data.shape)
+        context["p"] = p
+        context["mask"] = mask
+        scale = 1 / (1 - p)
+        return (z.data * mask * scale).astype(z.data.dtype)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        z = context.tensors()[0]
+        p = context["p"]
+        mask = context["mask"]
+        scale = 1 / (1 - p)
+        return (grad.data * mask * scale).astype(z.data.dtype)

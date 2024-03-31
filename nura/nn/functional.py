@@ -1,7 +1,7 @@
 import nura
 import nura.nn.functions as fn
+import nura.utils as utils
 from nura.tensors import Tensor
-from nura.utils import where
 from typing import Optional, Tuple
 
 
@@ -67,7 +67,7 @@ def attention(
     dk = k.dim[-1]
     simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
     if mask is not None:
-        simscore = where(mask == True, simscore, maskfill)
+        simscore = utils.where(mask == True, simscore, maskfill)
     attn = softmax(simscore, -1)
     context = nura.matmul(attn, v)
     return context, attn
@@ -91,3 +91,7 @@ def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
             f"Expected 'y' to be of type 'int' or 'long' but got '{y.dtype.name()}'"
         )
     return fn._CrossEntropy.apply(z, y, ignoreid)
+
+
+def dropout(x: Tensor, p: float = 0.5):
+    return fn._Dropout.apply(x, p)

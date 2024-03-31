@@ -1,10 +1,10 @@
 import nura.types as types
+import nura.nn.functional as f
 from nura.nn import parameter
 from nura.utils import randn
 from nura.nn.module import Module
 from nura.tensors import Tensor
 from nura.types import dtype
-from nura.nn.functional import linear
 from typing import Type, Optional
 
 
@@ -48,7 +48,7 @@ class Linear(Module):
         return self._dtype
 
     def forward(self, x: Tensor) -> Tensor:
-        return linear(x, self.weight, self.bias)
+        return f.linear(x, self.weight, self.bias)
 
     def to(self, dtype: Type[types.dtype]):
         mod = super().to(dtype)
