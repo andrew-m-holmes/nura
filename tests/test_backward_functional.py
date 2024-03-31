@@ -27,7 +27,7 @@ def test_add_backward_vector():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.add(a_tensor, b_tensor)
 
-    v = nura.ones((4,), dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -45,7 +45,7 @@ def test_add_backward_matrix():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.add(a_tensor, b_tensor)
 
-    m = nura.ones((5, 5), dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -81,7 +81,7 @@ def test_sub_backward_vector():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.sub(a_tensor, b_tensor)
 
-    v = nura.ones((4,), dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -100,7 +100,7 @@ def test_sub_backward_matrix():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.sub(a_tensor, b_tensor)
 
-    m = nura.ones((5, 5), dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -410,14 +410,13 @@ def test_pow_backward_scalar():
 
 def test_pow_backward_vector():
     a = np.random.rand(5)
-    b = 3.0
+    b = np.array(3.0)
 
     a_tensor = nura.tensor(a, usegrad=True)
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.pow(a_tensor, b_tensor)
 
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -432,14 +431,13 @@ def test_pow_backward_vector():
 
 def test_pow_backward_matrix():
     a = np.random.rand(5, 5)
-    b = 4.0
+    b = np.array(4.0)
 
     a_tensor = nura.tensor(a, usegrad=True)
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.pow(a_tensor, b_tensor)
 
-    ones = np.ones((5, 5))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -1015,8 +1013,7 @@ def test_pos_backward_vector():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.pos(a_tensor)
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
 
     grad_a = a_tensor.grad
@@ -1030,8 +1027,7 @@ def test_pos_backward_matrix():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.pos(a_tensor)
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
 
     grad_a = a_tensor.grad
@@ -1058,8 +1054,7 @@ def test_neg_backward_vector():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.neg(a_tensor)
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
 
     grad_a = a_tensor.grad
@@ -1073,9 +1068,7 @@ def test_neg_backward_matrix():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.neg(a_tensor)
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
-
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a = a_tensor.grad
     h = 1e-8

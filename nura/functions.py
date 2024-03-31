@@ -75,14 +75,14 @@ class _Div(Function):
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
         arr0 = grad.data / b.data
-        arr1 = np.negative(a.data) / b.data**2.0 * grad.data
+        arr1 = np.negative(a.data) / np.square(b.data) * grad.data
         return arr0, arr1
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
         arr0 = agrad.data / b.data
-        arr1 = a.data * (np.negative(bgrad.data) / b.data**2)
+        arr1 = a.data * (np.negative(bgrad.data) / np.square(b.data))
         arr = arr0 + arr1
         return arr
 
@@ -155,7 +155,8 @@ class _Pow(Function):
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
         arr = context["arr"]
-        arr0 = b.data * np.power(a.data, b.data - 1.0) * grad.data
+        one = np.array(1, dtype=arr.dtype)
+        arr0 = b.data * np.power(a.data, b.data - one) * grad.data
         arr1 = arr * np.log(a.data) * grad.data
         return arr0, arr1
 
@@ -163,7 +164,8 @@ class _Pow(Function):
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
         arr = context["arr"]
-        arr0 = b.data * np.power(a.data, b.data - 1.0) * agrad.data
+        one = np.array(1, dtype=arr.dtype)
+        arr0 = b.data * np.power(a.data, b.data - one) * agrad.data
         arr1 = np.log(a.data) * arr * bgrad.data
         return arr0 + arr1
 
@@ -199,13 +201,15 @@ class _Log(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = 1.0 / a.data * grad.data
+        one = np.array(1, dtype=a.data.dtype)
+        arr = one / a.data * grad.data
         return arr
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
-        arr = 1.0 / a.data * agrad.data
+        one = np.array(1, dtype=a.data.dtype)
+        arr = one / a.data * agrad.data
         return arr
 
 
@@ -533,11 +537,13 @@ class _Neg(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        return grad.data * -1.0
+        a = context.tensors()[0]
+        return grad.data * np.array(-1, dtype=a.data.dtype)
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
-        return agrad.data * -1.0
+        a = context.tensors()[0]
+        return agrad.data * np.array(-1, dtype=a.data.dtype)
 
 
 class _Clone(Function):

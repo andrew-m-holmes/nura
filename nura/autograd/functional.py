@@ -25,11 +25,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         if tensor.leaf:
             assert isinstance(grad, Tensor)
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = (
-                tensor.grad
-                if isinstance(tensor.grad, Tensor)
-                else nura.zeroslike(tensor)
-            )
+            oldgrad = tensor.grad if tensor.grad is not None else nura.zeroslike(tensor)
             newgrad = oldgrad + accumgrad
             tensor.mutate(grad=newgrad)
         elif nodes:
