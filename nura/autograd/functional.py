@@ -31,7 +31,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
                 else nura.zeroslike(tensor)
             )
             newgrad = oldgrad + accumgrad
-            tensor.mutate(grad=newgrad.to(tensor.dtype))
+            tensor.mutate(grad=newgrad)
         elif nodes:
             items = [
                 (n, g)
@@ -88,7 +88,7 @@ def _grad(
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
-            inptmap[tensor] = newgrad.to(tensor.dtype)
+            inptmap[tensor] = newgrad
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
