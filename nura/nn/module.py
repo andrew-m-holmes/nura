@@ -63,9 +63,13 @@ class Module:
 
     def train(self):
         self._training = True
+        for m in self._mods.values():
+            m.train()
 
     def eval(self):
         self._training = False
+        for m in self._mods.values():
+            m.eval()
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
