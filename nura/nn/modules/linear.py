@@ -1,8 +1,8 @@
 import nura.types as types
 import nura.nn.functional as f
-from nura.nn import parameter
-from nura.utils import randn
-from nura.nn.module import Module
+import nura.utils as utils
+from nura.nn import Module
+from nura.nn.parameter import Parameter, parameter
 from nura.tensors import Tensor
 from nura.types import dtype
 from typing import Type, Optional
@@ -24,33 +24,33 @@ class Linear(Module):
         self._indim = indim
         self._outdim = outdim
         self._dtype = dtype
-        self._weight = parameter(randn((outdim, indim)), True, dtype)
-        self._bias = parameter(randn(outdim), True, dtype) if bias else None
+        self._weight = parameter(utils.randn((outdim, indim)), dtype=dtype)
+        self._bias = parameter(utils.randn(outdim), dtype=dtype) if bias else None
 
     @property
-    def weight(self):
+    def weight(self) -> Parameter:
         return self._weight
 
     @property
-    def bias(self):
+    def bias(self) -> Optional[Parameter]:
         return self._bias
 
     @property
-    def indim(self):
+    def indim(self) -> int:
         return self._indim
 
     @property
-    def outdim(self):
+    def outdim(self) -> int:
         return self._outdim
 
     @property
-    def dtype(self):
+    def dtype(self) -> Type[dtype]:
         return self._dtype
 
     def forward(self, x: Tensor) -> Tensor:
         return f.linear(x, self.weight, self.bias)
 
-    def to(self, dtype: Type[types.dtype]):
+    def to(self, dtype: Type[types.dtype]) -> Module:
         mod = super().to(dtype)
         mod._dtype = dtype
         return mod

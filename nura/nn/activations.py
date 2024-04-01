@@ -9,7 +9,7 @@ class ReLU(Module):
     def __init__(self) -> None:
         super().__init__()
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         return f.relu(x)
 
 
@@ -29,10 +29,10 @@ class LeakyReLU(Module):
         self._slope = slope
 
     @property
-    def slope(self):
+    def slope(self) -> float:
         return self._slope
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         return f.leakyrelu(x, self.slope)
 
     def xrepr(self) -> str:
@@ -63,7 +63,7 @@ class GELU(Module):
     def __init__(self) -> None:
         super().__init__()
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         return f.gelu(x)
 
 
@@ -74,10 +74,10 @@ class CELU(Module):
         self._alpha = alpha
 
     @property
-    def alpha(self):
+    def alpha(self) -> float:
         return self._alpha
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         return f.celu(x, self.alpha)
 
     def xrepr(self) -> str:
@@ -90,7 +90,7 @@ class Sigmoid(Module):
     def __init__(self) -> None:
         super().__init__()
 
-    def forward(self, z: Tensor):
+    def forward(self, z: Tensor) -> Tensor:
         return f.sigmoid(z)
 
 
@@ -101,10 +101,10 @@ class Softmax(Module):
         self._dim = dim
 
     @property
-    def dim(self):
+    def dim(self) -> int:
         return self._dim
 
-    def forward(self, a: Tensor):
+    def forward(self, a: Tensor) -> Tensor:
         return f.softmax(a, self.dim)
 
     def xrepr(self) -> str:
@@ -117,7 +117,7 @@ class Tanh(Module):
     def __init__(self) -> None:
         super().__init__()
 
-    def forward(self, z: Tensor):
+    def forward(self, z: Tensor) -> Tensor:
         return f.tanh(z)
 
 
@@ -128,7 +128,7 @@ class ScaledDotProductAttention(Module):
         self._maskfill = maskfill
 
     @property
-    def maskfill(self):
+    def maskfill(self) -> float:
         return self._maskfill
 
     def forward(

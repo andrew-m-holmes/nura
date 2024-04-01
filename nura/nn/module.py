@@ -52,13 +52,13 @@ class Module:
         mod._mods = mods
         return mod
 
-    def half(self):
+    def half(self) -> "Module":
         return self.to(types.half)
 
-    def float(self):
+    def float(self) -> "Module":
         return self.to(types.float)
 
-    def double(self):
+    def double(self) -> "Module":
         return self.to(types.double)
 
     def train(self):
@@ -71,7 +71,7 @@ class Module:
         for m in self._mods.values():
             m.eval()
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> Any:
         return self.forward(*args, **kwargs)
 
     def __setattr__(self, name, value):
