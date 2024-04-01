@@ -4,6 +4,9 @@ from nura.tensors import Tensor
 from typing import Optional
 
 
+np._set_promotion_state("weak_and_warn")
+
+
 class _Sigmoid(Function):
 
     @staticmethod
@@ -36,12 +39,12 @@ class _Tanh(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         arr = context["arr"]
-        return (1 - arr**2) * grad.data
+        return (1 - np.square(arr)) * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         arr = context["arr"]
-        return (1 - arr**2) * zgrad.data
+        return (1 - np.square(arr)) * zgrad.data
 
 
 class _Softmax(Function):
@@ -83,13 +86,13 @@ class _ReLU(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
-        mask = np.where(z.data > 0, 1, 0)
+        mask = np.where(z.data > 0, 0, 1)
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         z = context.tensors()[0]
-        mask = np.where(z.data > 0, 1, 0)
+        mask = np.where(z.data > 0, 0, 1)
         return mask * zgrad.data
 
 

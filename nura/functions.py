@@ -4,6 +4,8 @@ from .autograd.function import Context, Function
 from nura.types import dim, dimlike
 from typing import Any
 
+np._set_promotion_state("weak_and_warn")
+
 
 class _Add(Function):
 
@@ -155,8 +157,7 @@ class _Pow(Function):
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
         arr = context["arr"]
-        one = np.array(1, dtype=arr.dtype)
-        arr0 = b.data * np.power(a.data, b.data - one) * grad.data
+        arr0 = b.data * np.power(a.data, b.data - 1) * grad.data
         arr1 = arr * np.log(a.data) * grad.data
         return arr0, arr1
 
@@ -164,8 +165,7 @@ class _Pow(Function):
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
         arr = context["arr"]
-        one = np.array(1, dtype=arr.dtype)
-        arr0 = b.data * np.power(a.data, b.data - one) * agrad.data
+        arr0 = b.data * np.power(a.data, b.data - 1) * agrad.data
         arr1 = np.log(a.data) * arr * bgrad.data
         return arr0 + arr1
 
@@ -201,15 +201,13 @@ class _Log(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        one = np.array(1, dtype=a.data.dtype)
-        arr = one / a.data * grad.data
+        arr = 1 / a.data * grad.data
         return arr
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
-        one = np.array(1, dtype=a.data.dtype)
-        arr = one / a.data * agrad.data
+        arr = 1 / a.data * agrad.data
         return arr
 
 
@@ -538,12 +536,12 @@ class _Neg(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        return grad.data * np.array(-1, dtype=a.data.dtype)
+        return np.negative(grad.data)
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor):
         a = context.tensors()[0]
-        return agrad.data * np.array(-1, dtype=a.data.dtype)
+        return np.negative(agrad.data)
 
 
 class _Clone(Function):
