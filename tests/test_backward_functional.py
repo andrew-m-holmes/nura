@@ -137,7 +137,7 @@ def test_mul_backward_vector():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.mul(a_tensor, b_tensor)
 
-    v = nura.ones((4,), dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -156,7 +156,7 @@ def test_mul_backward_matrix():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.mul(a_tensor, b_tensor)
 
-    m = nura.ones((5, 5), dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -193,7 +193,7 @@ def test_div_backward_vector():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.div(a_tensor, b_tensor)
 
-    v = nura.ones((4,), dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -212,7 +212,7 @@ def test_div_backward_matrix():
     b_tensor = nura.tensor(b, usegrad=True)
     result_tensor = f.div(a_tensor, b_tensor)
 
-    m = nura.ones((3, 3), dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -303,7 +303,7 @@ def test_matmul_backward_same_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     ones = np.ones((2, 2))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -322,7 +322,7 @@ def test_matmul_backward_different_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     ones = np.ones((3, 4))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -341,7 +341,7 @@ def test_matmul_backward_rank3_same_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     ones = np.ones((5, 5, 5))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -360,7 +360,7 @@ def test_matmul_backward_rank3_different_shape():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     ones = np.ones((3, 4, 2))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -379,7 +379,7 @@ def test_matmul_backward_different_ranks():
     result_tensor = f.matmul(a_tensor, b_tensor)
 
     ones = np.ones((6, 2, 9, 4, 4))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a, grad_b = a_tensor.grad, b_tensor.grad
 
@@ -458,8 +458,7 @@ def test_pow_backward_vector_exp():
     b_tensor = nura.tensor(b)
     result_tensor = f.pow(a_tensor, b_tensor)
 
-    ones = np.ones(4)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a = a_tensor.grad
 
@@ -476,8 +475,7 @@ def test_pow_backward_matrix_exp():
     b_tensor = nura.tensor(b)
     result_tensor = f.pow(a_tensor, b_tensor)
 
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a = a_tensor.grad
 
@@ -504,8 +502,7 @@ def test_square_backward_vector():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.square(a_tensor)
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
 
     grad_a = a_tensor.grad
@@ -519,8 +516,7 @@ def test_square_backward_matrix():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.square(a_tensor)
-    ones = np.ones((5, 5))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
 
     grad_a = a_tensor.grad
@@ -547,8 +543,7 @@ def test_sqrt_backward_vector():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sqrt(a_tensor)
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
 
     grad_a = a_tensor.grad
@@ -562,8 +557,7 @@ def test_sqrt_backward_matrix():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sqrt(a_tensor)
-    ones = np.ones((5, 5))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
 
     grad_a = a_tensor.grad
@@ -591,8 +585,7 @@ def test_exp_backward_vector():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.exp(a_tensor)
 
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a = a_tensor.grad
 
@@ -607,8 +600,7 @@ def test_exp_backward_matrix():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.exp(a_tensor)
 
-    ones = np.ones((5, 4))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a = a_tensor.grad
 
@@ -636,8 +628,7 @@ def test_log_backward_vector():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.log(a_tensor)
 
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a = a_tensor.grad
 
@@ -652,8 +643,7 @@ def test_log_backward_matrix():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.log(a_tensor)
 
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a = a_tensor.grad
 
@@ -682,8 +672,7 @@ def test_sin_backward_vector():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sin(a_tensor)
 
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a = a_tensor.grad
 
@@ -698,8 +687,7 @@ def test_sin_backward_matrix():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sin(a_tensor)
 
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a = a_tensor.grad
 
@@ -728,8 +716,7 @@ def test_cos_backward_vector():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.cos(a_tensor)
 
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
     grad_a = a_tensor.grad
 
@@ -744,8 +731,7 @@ def test_cos_backward_matrix():
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.cos(a_tensor)
 
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
     grad_a = a_tensor.grad
 
@@ -970,8 +956,7 @@ def test_abs_backward_vector():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.abs(a_tensor)
-    ones = np.ones(5)
-    v = nura.tensor(ones, dtype=nura.float)
+    v = nura.oneslike(result_tensor)
     result_tensor.backward(v)
 
     grad_a = a_tensor.grad
@@ -985,8 +970,7 @@ def test_abs_backward_matrix():
 
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.abs(a_tensor)
-    ones = np.ones((3, 3))
-    m = nura.tensor(ones, dtype=nura.float)
+    m = nura.oneslike(result_tensor)
     result_tensor.backward(m)
 
     grad_a = a_tensor.grad
