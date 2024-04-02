@@ -23,7 +23,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         tensor = node.tensor
 
         if tensor.leaf:
-            assert isinstance(grad, Tensor)
+            assert isinstance(grad, Tensor), "Received non-Tensor grad"
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = tensor.grad if tensor.grad is not None else nura.zeroslike(tensor)
             newgrad = oldgrad + accumgrad
@@ -51,6 +51,10 @@ def _backwarderr(
     elif grad is not None and not grad.gradtensor:
         return ValueError(
             f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
+        )
+    elif grad is not None and grad.dtype != out.dtype:
+        return RuntimeError(
+            f"Expected grad argument of type {out.dtype.name()}, received {grad.dtype.name()}"
         )
     return None
 
@@ -80,7 +84,7 @@ def _grad(
         nodes = node.children()
         tensor = node.tensor
         if tensor in inptmap:
-            assert isinstance(grad, Tensor)
+            assert isinstance(grad, Tensor), "Received non-Tensor grad"
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             oldgrad = inptmap[tensor]
             newgrad = oldgrad + accumgrad
@@ -109,6 +113,10 @@ def _graderr(
     elif grad is not None and not grad.gradtensor:
         return ValueError(
             f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
+        )
+    elif grad is not None and grad.dtype != out.dtype:
+        return RuntimeError(
+            f"Expected grad argument of type {out.dtype.name()}, received {grad.dtype.name()}"
         )
     return None
 
@@ -209,7 +217,7 @@ def _jvp(
 ) -> Tuple[Tensor, Tensor]:
     with nura.autograd(enabled=True, reverse=False, forward=True):
         out = f(*inpt, *args, **kwargs)
-    assert out.grad is not None
+    assert out.grad is not None, "out grad is None"
     return out, out.grad
 
 
