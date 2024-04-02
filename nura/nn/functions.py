@@ -86,13 +86,15 @@ class _ReLU(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
-        mask = np.where(z.data > 0, 0, 1)
+        dtype = z.data.dtype
+        mask = np.where(z.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         z = context.tensors()[0]
-        mask = np.where(z.data > 0, 0, 1)
+        dtype = z.data.dtype
+        mask = np.where(z.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
         return mask * zgrad.data
 
 
@@ -106,13 +108,23 @@ class _ReLU6(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
-        mask = np.where((z.data > 0) & (z.data < 6), 1, 0)
+        dtype = z.data.dtype
+        mask = np.where(
+            (z.data > 0) & (z.data < 6),
+            np.array(1, dtype=dtype),
+            np.array(0, dtype=dtype),
+        )
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         z = context.tensors()[0]
-        mask = np.where((z.data > 0) & (z.data < 6), 1, 0)
+        dtype = z.data.dtype
+        mask = np.where(
+            (z.data > 0) & (z.data < 6),
+            np.array(1, dtype=dtype),
+            np.array(0, dtype=dtype),
+        )
         return mask * zgrad.data
 
 
@@ -128,14 +140,20 @@ class _LeakyReLU(Function):
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
         slope = context["slope"]
-        mask = np.where(z.data >= 0, 1, slope)
+        dtype = z.data.dtype
+        mask = np.where(
+            z.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
+        )
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         z = context.tensors()[0]
         slope = context["slope"]
-        mask = np.where(z.data >= 0, 1, slope)
+        dtype = z.data.dtype
+        mask = np.where(
+            z.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
+        )
         return mask * zgrad.data
 
 
@@ -151,14 +169,16 @@ class _ELU(Function):
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
         alpha = context["alpha"]
-        mask = np.where(z.data > 0, 1, alpha * np.exp(z.data))
+        dtype = z.data.dtype
+        mask = np.where(z.data > 0, np.array(1, dtype=dtype), alpha * np.exp(z.data))
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         z = context.tensors()[0]
         alpha = context["alpha"]
-        mask = np.where(z.data > 0, 1, alpha * np.exp(z.data))
+        dtype = z.data.dtype
+        mask = np.where(z.data > 0, np.array(1, dtype=dtype), alpha * np.exp(z.data))
         return mask * zgrad.data
 
 
@@ -206,7 +226,8 @@ class _CELU(Function):
     def backward(context: Context, grad: Tensor):
         z = context.tensors()[0]
         alpha = context["alpha"]
-        mask = np.where(z.data >= 0, 1, np.exp(z.data / alpha))
+        dtype = z.data.dtype
+        mask = np.where(z.data >= 0, np.array(1, dtype=dtype), np.exp(z.data / alpha))
         return mask * grad.data
 
 
