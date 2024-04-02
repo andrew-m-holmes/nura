@@ -13,7 +13,7 @@ def test_vjp_basic_v0():
     b_tensor = nura.tensor(b, usegrad=True)
     c_tensor = nura.tensor(c, usegrad=True)
     primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = nura.ones((6, 10))
+    cotangent = nura.ones((6, 10)).double()
 
     def func(a, b, c):
         return f.add(f.matmul(a, b), c)
@@ -37,7 +37,7 @@ def test_vjp_basic_v1():
     b_tensor = nura.tensor(b, usegrad=True)
     c_tensor = nura.tensor(c, usegrad=True)
     primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = nura.ones((5, 7))
+    cotangent = nura.ones((5, 7)).double()
 
     def func(a, b, c):
         return f.add(f.matmul(a, b), c)
@@ -63,7 +63,7 @@ def test_vjp_add_sub():
     b_tensor = nura.tensor(b, usegrad=True)
     c_tensor = nura.tensor(c, usegrad=True)
     primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = nura.ones((4, 4))
+    cotangent = nura.ones((4, 4)).double()
 
     def func(a, b, c):
         return f.sub(f.add(a, b), c)
@@ -89,7 +89,7 @@ def test_vjp_mul_div():
     b_tensor = nura.tensor(b, usegrad=True)
     c_tensor = nura.tensor(c, usegrad=True)
     primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = nura.ones((5, 5))
+    cotangent = nura.ones((5, 5)).double()
 
     def func(a, b, c):
         return f.div(f.mul(a, b), c)
@@ -113,7 +113,7 @@ def test_vjp_matmul_sum():
     a_tensor = nura.tensor(a, usegrad=True)
     b_tensor = nura.tensor(b, usegrad=True)
     primals = (a_tensor, b_tensor)
-    cotangent = nura.ones((3,))
+    cotangent = nura.ones((3,)).double()
 
     def func(a, b):
         return f.sum(f.matmul(a, b), dim=0)
@@ -139,7 +139,7 @@ def test_vjp_add_mul_broadcast():
     a_tensor = nura.tensor(a, usegrad=True)
     b_tensor = nura.tensor(b, usegrad=True)
     primals = (a_tensor, b_tensor)
-    cotangent = nura.ones((3, 4))
+    cotangent = nura.ones((3, 4)).double()
 
     def func(a, b):
         return f.mul(f.add(a, b), b)
@@ -165,7 +165,7 @@ def test_vjp_nested_operations_broadcast():
     a_tensor = nura.tensor(a, usegrad=True)
     b_tensor = nura.tensor(b, usegrad=True)
     primals = (a_tensor, b_tensor)
-    cotangent = nura.ones((5, 6))
+    cotangent = nura.ones((5, 6)).double()
 
     def func(a, b):
         return f.cos(f.div(f.add(a, b), f.sin(b)))
@@ -193,7 +193,7 @@ def test_vjp_matmul_add_broadcast():
     b_tensor = nura.tensor(b, usegrad=True)
     c_tensor = nura.tensor(c, usegrad=True)
     primals = (a_tensor, b_tensor, c_tensor)
-    cotangent = nura.ones((4, 5))
+    cotangent = nura.ones((4, 5)).double()
 
     def func(a, b, c):
         return f.add(f.matmul(a, b), c)

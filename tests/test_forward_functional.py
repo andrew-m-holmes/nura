@@ -233,37 +233,31 @@ def test_matmul_forward_rank3_different_shape():
 
 def test_pow_forward_scalar():
     a = np.random.rand()
-    b = 2
 
     a_tensor = nura.tensor(a)
-    b_tensor = nura.tensor(b)
-    result_tensor = f.pow(a_tensor, b_tensor)
+    result_tensor = f.pow(a_tensor, 2)
 
-    expected = np.power(a, b)
+    expected = np.power(a, 2)
     np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_vector():
     a = np.random.rand(5)
-    b = 3
 
     a_tensor = nura.tensor(a)
-    b_tensor = nura.tensor(b)
-    result_tensor = f.pow(a_tensor, b_tensor)
+    result_tensor = f.pow(a_tensor, 3)
 
-    expected = np.power(a, b)
+    expected = np.power(a, 3)
     np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 
 def test_pow_forward_matrix():
     a = np.random.rand(5, 5)
-    b = 4
 
     a_tensor = nura.tensor(a)
-    b_tensor = nura.tensor(b)
-    result_tensor = f.pow(a_tensor, b_tensor)
+    result_tensor = f.pow(a_tensor, 0.1)
 
-    expected = np.power(a, b)
+    expected = np.power(a, 0.1)
     np.testing.assert_array_almost_equal(result_tensor.data, expected, decimal=5)
 
 

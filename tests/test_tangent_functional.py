@@ -39,12 +39,8 @@ def test_add_tangent_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.add(a_tensor, b_tensor)
 
@@ -91,12 +87,8 @@ def test_sub_tangent_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.sub(a_tensor, b_tensor)
 
@@ -143,12 +135,8 @@ def test_mul_tangent_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.mul(a_tensor, b_tensor)
 
@@ -195,12 +183,8 @@ def test_div_tangent_matrix():
     a = np.random.rand(3, 3)
     b = np.random.rand(3, 3)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.div(a_tensor, b_tensor)
 
@@ -230,9 +214,7 @@ def test_dot_tangent_matrix_vector():
     a = np.random.rand(4, 3)
     b = np.random.rand(3)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
     b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones(3)))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.dot(a_tensor, b_tensor)
@@ -248,9 +230,7 @@ def test_dot_tangent_vector_matrix():
     b = np.random.rand(3, 5)
 
     a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones(3)))
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 5)))
-    )
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 5))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.dot(a_tensor, b_tensor)
 
@@ -264,12 +244,8 @@ def test_dot_tangent_matrix_matrix():
     a = np.random.rand(4, 3)
     b = np.random.rand(3, 5)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 5)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 5))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.dot(a_tensor, b_tensor)
 
@@ -283,12 +259,8 @@ def test_matmul_tangent_square_matrices():
     a = np.random.rand(5, 5)
     b = np.random.rand(5, 5)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((5, 5)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((5, 5)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((5, 5))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((5, 5))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.matmul(a_tensor, b_tensor)
 
@@ -302,12 +274,8 @@ def test_matmul_tangent_different_shapes():
     a = np.random.rand(4, 3)
     b = np.random.rand(3, 5)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 5)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 5))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.matmul(a_tensor, b_tensor)
 
@@ -366,9 +334,7 @@ def test_matmul_tangent_different_ranks():
     a_tensor = nura.tensor(a, usegrad=True).mutated(
         grad=nura.tensor(np.ones((2, 4, 3)))
     )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 2)))
-    )
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 2))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.matmul(a_tensor, b_tensor)
 
@@ -398,7 +364,7 @@ def test_pow_tangent_scalar():
 
 def test_pow_tangent_vector():
     a = np.random.rand(4)
-    b = 3.0
+    b = np.array(3, dtype=a.dtype)
 
     a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones(4)))
     b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(1.0))
@@ -416,11 +382,9 @@ def test_pow_tangent_vector():
 
 def test_pow_tangent_matrix():
     a = np.random.rand(3, 3)
-    b = 4.0
+    b = np.array(4, dtype=a.dtype)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(1.0))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.pow(a_tensor, b_tensor)
@@ -456,12 +420,8 @@ def test_pow_tangent_matrix_exp():
     a = np.random.rand(3, 3)
     b = np.full_like(a, 3)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
-    b_tensor = nura.tensor(b, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
+    b_tensor = nura.tensor(b, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.pow(a_tensor, b_tensor)
 
@@ -505,9 +465,7 @@ def test_exp_tangent_vector():
 def test_exp_tangent_matrix():
     a = np.random.rand(3, 4)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.exp(a_tensor)
 
@@ -549,9 +507,7 @@ def test_log_tangent_vector():
 def test_log_tangent_matrix():
     a = np.random.rand(3, 4)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.log(a_tensor)
 
@@ -588,9 +544,7 @@ def test_sin_tangent_vector():
 
 def test_sin_tangent_matrix():
     a = np.random.rand(3, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.sin(a_tensor)
     h = 1e-8
@@ -626,9 +580,7 @@ def test_cos_tangent_vector():
 
 def test_cos_tangent_matrix():
     a = np.random.rand(4, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.cos(a_tensor)
     h = 1e-8
@@ -640,9 +592,7 @@ def test_cos_tangent_matrix():
 
 def test_sum_tangent_single_dim():
     a = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.sum(a_tensor, dim=1)
     expected_tangent = np.sum(np.ones((3, 4)), axis=1)
@@ -666,9 +616,7 @@ def test_sum_tangent_multiple_dim():
 
 def test_sum_tangent_keepdims():
     a = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.sum(a_tensor, dim=1, keepdims=True)
     expected_tangent = np.sum(np.ones((3, 4)), axis=1, keepdims=True)
@@ -703,9 +651,7 @@ def test_sum_tangent_single_element_rank1():
 
 def test_max_tangent_single_dim():
     a = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.max(a_tensor, dim=1)
 
@@ -737,9 +683,7 @@ def test_max_tangent_multiple_dim():
 
 def test_max_tangent_keepdims():
     a = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.max(a_tensor, dim=1, keepdims=True)
 
@@ -786,9 +730,7 @@ def test_max_tangent_single_element_rank1():
 
 def test_min_tangent_single_dim():
     a = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.min(a_tensor, dim=1)
 
@@ -820,9 +762,7 @@ def test_min_tangent_multiple_dim():
 
 def test_min_tangent_keepdims():
     a = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = f.min(a_tensor, dim=1, keepdims=True)
 
@@ -892,9 +832,7 @@ def test_squeeze_tangent_rank1_v1():
 def test_squeeze_tangent_rank2_v0():
     a = np.random.rand(5, 5)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((5, 5)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((5, 5))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.squeeze(a_tensor)
 
@@ -905,9 +843,7 @@ def test_squeeze_tangent_rank2_v0():
 def test_squeeze_tangent_rank2_v1():
     a = np.random.rand(3, 1)
 
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((3, 1)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((3, 1))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.squeeze(a_tensor)
 
@@ -968,9 +904,7 @@ def test_unsqueeze_tangent_multi_v0():
 
 def test_unsqueeze_tangent_multi_v1():
     a = np.random.rand(2, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((2, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((2, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.unsqueeze(a_tensor, (1, 3, 4))
 
@@ -992,9 +926,7 @@ def test_unsqueeze_tangent_multi_v2():
 
 def test_unsqueeze_tangent_multi_v3():
     a = np.random.rand(4, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.unsqueeze(a_tensor, (1,))
 
@@ -1028,9 +960,7 @@ def test_transpose_tangent_multi_v0():
 
 def test_transpose_tangent_multi_v1():
     a = np.random.rand(2, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((2, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((2, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.transpose(a_tensor, 0, 1)
 
@@ -1052,9 +982,7 @@ def test_transpose_tangent_multi_v2():
 
 def test_transpose_tangent_multi_v3():
     a = np.random.rand(4, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.transpose(a_tensor, -1, -2)
 
@@ -1076,9 +1004,7 @@ def test_transpose_tangent_multi_v4():
 
 def test_permute_tangent_rank2_v0():
     a = np.random.rand(8, 15)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((8, 15)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((8, 15))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.permute(a_tensor, (1, 0))
 
@@ -1146,9 +1072,7 @@ def test_view_tangent_rank1_to_rank2():
 
 def test_view_tangent_rank2_to_rank3():
     a = np.random.rand(6, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((6, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((6, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.view(a_tensor, (2, 3, 4))
 
@@ -1170,9 +1094,7 @@ def test_view_tangent_rank3_to_rank4():
 
 def test_view_tangent_rank2_to_rank1():
     a = np.random.rand(4, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.view(a_tensor, (12,))
 
@@ -1228,9 +1150,7 @@ def test_reshape_tangent_rank1_to_rank2():
 
 def test_reshape_tangent_rank2_to_rank3():
     a = np.random.rand(8, 6)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((8, 6)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((8, 6))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.reshape(a_tensor, (2, 4, 6))
 
@@ -1252,9 +1172,7 @@ def test_reshape_tangent_rank3_to_rank4():
 
 def test_reshape_tangent_rank2_to_rank1():
     a = np.random.rand(5, 4)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((5, 4)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((5, 4))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.reshape(a_tensor, (20,))
 
@@ -1320,9 +1238,7 @@ def test_clone_tangent_vector():
 
 def test_clone_tangent_matrix():
     a = np.random.rand(4, 3)
-    a_tensor = nura.tensor(a, usegrad=True).mutated(
-        grad=nura.tensor(np.ones((4, 3)))
-    )
+    a_tensor = nura.tensor(a, usegrad=True).mutated(grad=nura.tensor(np.ones((4, 3))))
     with nura.autograd(enabled=True, reverse=False, forward=True):
         result_tensor = nura.clone(a_tensor)
 
@@ -1390,5 +1306,3 @@ def test_slice_tangent_mixed_indices():
 
     expected_tangent = np.ones(10)[1:-2]
     np.testing.assert_allclose(result_tensor.grad.data, expected_tangent)
-
-
