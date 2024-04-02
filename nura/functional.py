@@ -8,7 +8,9 @@ from typing import Optional, Union, Any
 def add(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    assert utils.typesmatch(a, b)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Add.apply(a, b)
     return out
 
@@ -16,7 +18,9 @@ def add(a: Tensor, b: Union[Tensor, Scalar]):
 def sub(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    assert utils.typesmatch(a, b)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Sub.apply(a, b)
     return out
 
@@ -24,7 +28,9 @@ def sub(a: Tensor, b: Union[Tensor, Scalar]):
 def mul(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    assert utils.typesmatch(a, b)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Mul.apply(a, b)
     return out
 
@@ -32,19 +38,25 @@ def mul(a: Tensor, b: Union[Tensor, Scalar]):
 def div(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    assert utils.typesmatch(a, b)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Div.apply(a, b)
     return out
 
 
 def dot(a: Tensor, b: Tensor):
-    assert utils.typesmatch(a, b)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Dot.apply(a, b)
     return out
 
 
 def matmul(a: Tensor, b: Tensor):
-    assert utils.typesmatch(a, b)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Matmul.apply(a, b)
     return out
 
@@ -52,7 +64,9 @@ def matmul(a: Tensor, b: Tensor):
 def pow(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    # assert utils.typesmatch(a, b) TODO Enforce this
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Pow.apply(a, b)
     return out
 
