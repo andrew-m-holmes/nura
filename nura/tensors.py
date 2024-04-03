@@ -194,11 +194,17 @@ class Tensor:
     def __radd__(self, other):
         return nura.add(self, other)
 
+    def __iadd__(self, other):
+        return nura.iadd(self, other)
+
     def __sub__(self, other):
         return nura.sub(self, other)
 
     def __rsub__(self, other):
         return nura.sub(tensor(other, dtype=self.dtype), self)
+
+    def __isub__(self, other):
+        return nura.isub(self, other)
 
     def __mul__(self, other):
         return nura.mul(self, other)
@@ -206,17 +212,29 @@ class Tensor:
     def __rmul__(self, other):
         return nura.mul(self, other)
 
+    def __imul__(self, other):
+        return nura.imul(self, other)
+
     def __truediv__(self, other):
         return nura.div(self, other)
 
     def __rtruediv__(self, other):
         return nura.div(tensor(other, dtype=self.dtype), self)
 
+    def __itruediv__(self, other):
+        return nura.idiv(self, other)
+
     def __matmul__(self, other):
         return nura.matmul(self, other)
 
+    def __imatmul__(self, other):
+        return nura.imatmul(self, other)
+
     def __pow__(self, other):
         return nura.pow(self, other)
+
+    def __ipow__(self, other):
+        return nura.ipow(self, other)
 
     def __rpow__(self, other):
         return nura.pow(tensor(other, dtype=self.dtype), self)

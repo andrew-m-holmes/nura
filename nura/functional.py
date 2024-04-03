@@ -10,9 +10,20 @@ def add(a: Tensor, b: Union[Tensor, Scalar]):
         b = tensor(b, dtype=a.dtype)
     assert utils.typesmatch(
         a, b
-    ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
+    ), f"Types don't match for add(): {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Add.apply(a, b)
     return out
+
+
+def iadd(a: Tensor, b: Union[Tensor, Scalar]):
+    assert not a.usegrad, f"Cannot use inplace add() with grad enabled"
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match iadd(): {a.dtype.name()} != {b.dtype.name()}"
+    a._data += b.data
+    return a
 
 
 def sub(a: Tensor, b: Union[Tensor, Scalar]):
@@ -25,6 +36,17 @@ def sub(a: Tensor, b: Union[Tensor, Scalar]):
     return out
 
 
+def isub(a: Tensor, b: Union[Tensor, Scalar]):
+    assert not a.usegrad, f"Cannot use inplace sub() with grad enabled"
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match isub(): {a.dtype.name()} != {b.dtype.name()}"
+    a._data -= b.data
+    return a
+
+
 def mul(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
@@ -35,6 +57,17 @@ def mul(a: Tensor, b: Union[Tensor, Scalar]):
     return out
 
 
+def imul(a: Tensor, b: Union[Tensor, Scalar]):
+    assert not a.usegrad, f"Cannot use inplace mul() with grad enabled"
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match imul(): {a.dtype.name()} != {b.dtype.name()}"
+    a._data *= b.data
+    return a
+
+
 def div(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
@@ -43,6 +76,17 @@ def div(a: Tensor, b: Union[Tensor, Scalar]):
     ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Div.apply(a, b)
     return out
+
+
+def idiv(a: Tensor, b: Union[Tensor, Scalar]):
+    assert not a.usegrad, f"Cannot use inplace div() with grad enabled"
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match idiv(): {a.dtype.name()} != {b.dtype.name()}"
+    a._data /= b.data
+    return a
 
 
 def dot(a: Tensor, b: Tensor):
@@ -61,6 +105,17 @@ def matmul(a: Tensor, b: Tensor):
     return out
 
 
+def imatmul(a: Tensor, b: Tensor):
+    assert not a.usegrad, f"Cannot use inplace matmul() with grad enabled"
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match imatmul(): {a.dtype.name()} != {b.dtype.name()}"
+    a._data @= b.data
+    return a
+
+
 def pow(a: Tensor, b: Union[Tensor, Scalar]):
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
@@ -69,6 +124,17 @@ def pow(a: Tensor, b: Union[Tensor, Scalar]):
     ), f"Types don't match: {a.dtype.name()} != {b.dtype.name()}"
     out = fn._Pow.apply(a, b)
     return out
+
+
+def ipow(a: Tensor, b: Union[Tensor, Scalar]):
+    assert not a.usegrad, f"Cannot use inplace pow() with grad enabled"
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    assert utils.typesmatch(
+        a, b
+    ), f"Types don't match ipow(): {a.dtype.name()} != {b.dtype.name()}"
+    a._data **= b.data
+    return a
 
 
 def square(a: Tensor):
