@@ -1,43 +1,30 @@
-import numpy as np
-import nura
-import nura.nn as nn
-import nura.nn.functional as f
-
 import torch
-import torch.nn as torchnn
-import torch.nn.functional as torchf
-
-np._set_promotion_state("weak_and_warn")
+import torch.nn.functional as f
 
 
 def main():
 
-    # x = torch.arange(4)
-    # x = x.float().requires_grad_()
-    # z = torchf.sigmoid(x)
-    #
-    # def softmax(x, dim=-1):
-    #     exp = torch.exp(x - torch.max(x, dim=dim, keepdim=True).values)
-    #     return exp / torch.sum(exp, dim=dim, keepdim=True)
-    #
-    # def softmax_backward(p, grad):
-    #     p = p.clone().detach()
-    #     p = torch.flatten(p)
-    #     diagonal = torch.diagflat(p)
-    #     off_diagonal = torch.outer(p, p)
-    #     return (diagonal - off_diagonal) * grad
-    #
-    # p = torchf.softmax(z, dim=-1)
-    # p.backward(torch.ones_like(p))
-    # print(f"AD Gradient: {x.grad}\n")
-    #
-    # grad = softmax_backward(p, 1)
+    # trying to represent a batch with 1 sample of 7 features
+    x = torch.arange(20).reshape(5, 4)
+    x = x.float().requires_grad_()
 
-    x = nura.randn(3, 3)
-    y = x.clone()
-    print(x)
-    x @= y
-    print(x)
+    # Jacobian computation
+    def softmax_grad(probs):
+        tensor = probs.clone().detach()
+        flat = torch.flatten(tensor)
+        diagonal = torch.diagflat(flat)
+        off_diagonal = torch.outer(flat, flat)
+        return diagonal - off_diagonal
+
+    probs = f.softmax(x, dim=-1)
+    grad = torch.ones_like(probs)
+    probs.backward(grad)
+    jacobian = softmax_grad(probs)
+    x_grad = torch.sum(jacobian, dim=-1, keepdim=True).reshape(x.size()) * grad
+
+    print(f"What I expected:\n{x_grad}\n")
+
+    print(f"What autograd computed:\n{x.grad}")
 
 
 if __name__ == "__main__":
