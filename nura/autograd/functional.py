@@ -19,15 +19,16 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
     while queue:
         node, grad = queue.popleft()
+        assert isinstance(grad, Tensor)
         nodes = node.children()
         tensor = node.tensor
 
         if tensor.leaf:
-            assert isinstance(grad, Tensor), "Received non-Tensor grad"
+            if tensor.grad is None:
+                tensor.zerograd()
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = tensor.grad if tensor.grad is not None else nura.zeroslike(tensor)
-            newgrad = oldgrad + accumgrad
-            tensor.mutate(grad=newgrad)
+            tensor._grad += accumgrad
+
         elif nodes:
             items = [
                 (n, g)
@@ -81,14 +82,14 @@ def _grad(
 
     while queue:
         node, grad = queue.popleft()
+        assert isinstance(grad, Tensor)
         nodes = node.children()
         tensor = node.tensor
+
         if tensor in inptmap:
-            assert isinstance(grad, Tensor), "Received non-Tensor grad"
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            oldgrad = inptmap[tensor]
-            newgrad = oldgrad + accumgrad
-            inptmap[tensor] = newgrad
+            inptmap[tensor] += accumgrad
+
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
@@ -217,7 +218,7 @@ def _jvp(
 ) -> Tuple[Tensor, Tensor]:
     with nura.autograd(enabled=True, reverse=False, forward=True):
         out = f(*inpt, *args, **kwargs)
-    assert out.grad is not None, "out grad is None"
+    assert out.grad is not None
     return out, out.grad
 
 
