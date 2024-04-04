@@ -319,7 +319,7 @@ class _LayerNorm(Function):
         z: Tensor,
         gamma: Tensor,
         beta: Tensor,
-        dim: dimlike,
+        dim: Optional[dimlike],
         bias: bool,
         eps: float,
     ):
@@ -328,8 +328,17 @@ class _LayerNorm(Function):
         mu = x.mean(axis=dim, keepdims=True)
         sigma = np.sqrt(x.var(axis=dim, keepdims=True, ddof=bias) + eps)
         norm = (x - mu) / sigma
+
+        context["dim"] = dim
+        context["mu"] = mu
+        context["sigma"] = sigma
+        context["norm"] = norm
         return gamma.data * norm + beta.data
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        raise NotImplementedError
+        z, gamma, beta = context.tensors()
+        dim = context["dim"]
+        mu = context["mu"]
+        sigma = context["sigma"]
+        norm = context["norm"]
