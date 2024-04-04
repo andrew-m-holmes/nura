@@ -95,3 +95,15 @@ def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
 
 def dropout(x: Tensor, p: float = 0.5):
     return fn._Dropout.apply(x, p)
+
+
+def layernorm(
+    z: Tensor,
+    gamma: Tensor,
+    beta: Tensor,
+    dim: Optional[int] = None,
+    bias=True,
+    eps: float = 1e-5,
+):
+    out = fn._LayerNorm.apply(z, gamma, beta, dim, bias, eps)
+    return out

@@ -1,5 +1,6 @@
 import numpy as np
 from nura.autograd.function import Function, Context
+from nura.types import dimlike
 from nura.tensors import Tensor
 from typing import Optional
 
@@ -308,3 +309,27 @@ class _Dropout(Function):
         mask = context["mask"]
         scale = 1 / (1 - p)
         return (grad.data * mask * scale).astype(z.data.dtype)
+
+
+class _LayerNorm(Function):
+
+    @staticmethod
+    def forward(
+        context: Context,
+        z: Tensor,
+        gamma: Tensor,
+        beta: Tensor,
+        dim: dimlike,
+        bias: bool,
+        eps: float,
+    ):
+        context.save(z, gamma, beta)
+        x = z.data
+        mu = x.mean(axis=dim, keepdims=True)
+        sigma = np.sqrt(x.var(axis=dim, keepdims=True, ddof=bias) + eps)
+        norm = (x - mu) / sigma
+        return gamma.data * norm + beta.data
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        raise NotImplementedError
