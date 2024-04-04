@@ -4,7 +4,7 @@ from nura.tensors import Tensor
 from typing import Optional
 
 
-np._set_promotion_state("weak_and_warn")
+np._set_promotion_state("weak")
 
 
 class _Sigmoid(Function):

@@ -4,7 +4,7 @@ from .autograd.function import Context, Function
 from nura.types import dim, dimlike
 from typing import Any
 
-np._set_promotion_state("weak_and_warn")
+np._set_promotion_state("weak")
 
 
 class _Add(Function):
