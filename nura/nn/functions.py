@@ -326,13 +326,15 @@ class _LayerNorm(Function):
         context.save(z, gamma, beta)
         x = z.data
         mu = x.mean(axis=dim, keepdims=True)
-        sigma = np.sqrt(x.var(axis=dim, keepdims=True, ddof=bias) + eps)
+        var = x.var(axis=dim, keepdims=True, ddof=bias)
+        sigma = np.sqrt(var + eps)
         norm = (x - mu) / sigma
 
         context["dim"] = dim
         context["mu"] = mu
-        context["sigma"] = sigma
+        context["var"] = var
         context["norm"] = norm
+        context["eps"] = eps
         return gamma.data * norm + beta.data
 
     @staticmethod
@@ -340,5 +342,22 @@ class _LayerNorm(Function):
         z, gamma, beta = context.tensors()
         dim = context["dim"]
         mu = context["mu"]
-        sigma = context["sigma"]
+        var = context["var"]
         norm = context["norm"]
+        eps = context["eps"]
+
+        h = z.data.shape[dim]
+        dnorm = grad.data * gamma.data
+        dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (z.data - mu)
+        dmu0 = -1 * dnorm / np.sqrt(var + eps)
+        dmu1 = dvar * (-2 / h) * np.sum(z.data - mu, axis=dim, keepdims=True)
+        dmu = dmu0 + dmu1
+
+        dz0 = dnorm / np.sqrt(var + eps)
+        dz1 = dvar * (2 / h) * np.sum(z.data - mu, axis=dim, keepdims=True)
+        dz2 = dmu / h
+        arr0 = dz0 + dz1 + dz2
+
+        arr1 = norm * grad.data
+        arr2 = grad.data.copy()
+        return arr0, arr1, arr2
