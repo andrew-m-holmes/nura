@@ -354,7 +354,7 @@ class _LayerNorm(Function):
         dmu = dmu0 + dmu1
 
         dz0 = dnorm / np.sqrt(var + eps)
-        dz1 = dvar * (2 / h) * np.sum(z.data - mu, axis=dim, keepdims=True)
+        dz1 = dvar * (2 / h) * (z.data - mu)
         dz2 = dmu / h
         arr0 = dz0 + dz1 + dz2
 
