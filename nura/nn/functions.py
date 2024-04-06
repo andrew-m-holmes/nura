@@ -54,27 +54,41 @@ class _Softmax(Function):
     def forward(context: Context, z: Tensor, dim: int):
         context.save(z)
         exp = np.exp(z.data - z.data.max(axis=dim, keepdims=True))
-        arr = exp / exp.sum(axis=dim, keepdims=True)
-        context["arr"] = arr
-        return arr
+        p = exp / exp.sum(axis=dim, keepdims=True)
+        context["p"] = p
+        return p
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        arr = context["arr"]
-        diag = np.diagflat(arr)
-        outprod = np.outer(arr, arr)
-        jac = diag - outprod
-        agg = jac.sum(axis=-1).reshape(arr.shape)
-        return agg * grad.data
+        p = context["p"]
+        jac = 0
+        if p.ndim == 1:
+            jac = np.zeros(p.shape + p.shape)
+            i = np.arange(p.shape[0])
+            jac[i, i] = p
+            jac[i, :] -= np.outer(p, p)
+        else:
+            n = p.shape[-1]
+            diagonal = np.einsum("...ij,jk->...ijk", p, np.eye(n, n))
+            offdiagonal = np.einsum("...ij,...ik->...ijk", p, p)
+            jac = diagonal - offdiagonal
+        return jac.sum(axis=-1) * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
-        arr = context["arr"]
-        diag = np.diagflat(arr)
-        outprod = np.outer(arr, arr)
-        jac = diag - outprod
-        agg = jac.sum(axis=-1).reshape(arr.shape)
-        return agg * zgrad.data
+        p = context["p"]
+        jac = 0
+        if p.ndim == 1:
+            jac = np.zeros(p.shape + p.shape)
+            i = np.arange(p.shape[0])
+            jac[i, i] = p
+            jac[i, :] -= np.outer(p, p)
+        else:
+            n = p.shape[-1]
+            diagonal = np.einsum("...ij,jk->...ijk", p, np.eye(n, n))
+            offdiagonal = np.einsum("...ij,...ik->...ijk", p, p)
+            jac = diagonal - offdiagonal
+        return jac * zgrad.data
 
 
 class _ReLU(Function):
