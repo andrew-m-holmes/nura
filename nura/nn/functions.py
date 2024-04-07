@@ -349,6 +349,7 @@ class _LayerNorm(Function):
         context["var"] = var
         context["norm"] = norm
         context["eps"] = eps
+        context["bias"] = bias
         return gamma.data * norm + beta.data
 
     @staticmethod
@@ -359,19 +360,20 @@ class _LayerNorm(Function):
         var = context["var"]
         norm = context["norm"]
         eps = context["eps"]
+        bias = context["bias"]
 
-        h = z.data.shape[dim]
+        h = sum(z.data.shape[d] for d in dim) if isinstance(dim, tuple) else z.data.shape[dim]
         dnorm = grad.data * gamma.data
         dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (z.data - mu)
         dmu0 = -1 * dnorm / np.sqrt(var + eps)
-        dmu1 = dvar * (-2 / h) * np.sum(z.data - mu, axis=dim, keepdims=True)
+        dmu1 = dvar * (-2 / (h - bias)) * np.sum(z.data - mu, axis=dim, keepdims=True)
         dmu = dmu0 + dmu1
 
         dz0 = dnorm / np.sqrt(var + eps)
-        dz1 = dvar * (2 / h) * (z.data - mu)
+        dz1 = dvar * (2 / (h - bias)) * (z.data - mu)
         dz2 = dmu / h
-        arr0 = dz0 + dz1 + dz2
 
+        arr0 = dz0 + dz1 + dz2
         arr1 = norm * grad.data
         arr2 = grad.data.copy()
         return arr0, arr1, arr2

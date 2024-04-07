@@ -5,11 +5,11 @@ import numpy as np
 
 def main():
     
-    x = nura.rand(5, 3, 2, 4, usegrad=True)
-    p = f.softmax(x, dim=-1)
-    loss = p.sum()
-    loss.backward()
-    print(x.grad)
+    x = nura.randn(2, 7, 3, usegrad=True)
+    gamma = nura.randn(7, 3, usegrad=True)
+    beta = nura.randn(7, 3, usegrad=True)
+    z = f.layernorm(x, gamma, beta, bias=True, dim=(-2, -1))
+    z.backward(nura.oneslike(z))
 
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@ import nura
 import nura.nn.functions as fn
 import nura.utils as utils
 from nura.tensors import Tensor
+from nura.types import dimlike
 from typing import Optional, Tuple
 
 
@@ -101,7 +102,7 @@ def layernorm(
     z: Tensor,
     gamma: Tensor,
     beta: Tensor,
-    dim: Optional[int] = None,
+    dim: dimlike = -1,
     bias=True,
     eps: float = 1e-5,
 ):
