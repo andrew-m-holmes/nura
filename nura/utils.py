@@ -302,7 +302,7 @@ def tocontiguous(a: Tensor):
 
 
 def todim(dim: Tuple[Any, ...]) -> dim:
-    if not dim:
+    if dim is None:
         return tuple()
     if isinstance(dim[0], tuple):
         return dim[0]

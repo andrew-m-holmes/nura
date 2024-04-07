@@ -106,5 +106,15 @@ def layernorm(
     bias=True,
     eps: float = 1e-5,
 ):
-    out = fn._LayerNorm.apply(z, gamma, beta, dim, bias, eps)
-    return out
+    expecteddim = (
+        (z.dim[dim],) if isinstance(dim, int) else tuple(z.dim[d] for d in dim)
+    )
+    if gamma.dim != expecteddim:
+        raise ValueError(
+            f"Expected 'gamma' to be of dimensions {expecteddim} but got {gamma.dim}"
+        )
+    if beta.dim != expecteddim:
+        raise ValueError(
+            f"Expected 'beta' to be of dimensions {expecteddim} but got {beta.dim}"
+        )
+    return fn._LayerNorm.apply(z, gamma, beta, dim, bias, eps)
