@@ -2,7 +2,7 @@ import numpy as np
 from nura.autograd.function import Function, Context
 from nura.types import dimlike
 from nura.tensors import Tensor
-from typing import Optional
+from typing import Optional, Union
 
 
 np._set_promotion_state("weak")
@@ -334,13 +334,13 @@ class _LayerNorm(Function):
         gamma: Tensor,
         beta: Tensor,
         dim: Optional[dimlike],
-        bias: bool,
+        unbiased: Union[bool, int],
         eps: float,
     ):
         context.save(z, gamma, beta)
         x = z.data
         mu = x.mean(axis=dim, keepdims=True)
-        var = x.var(axis=dim, keepdims=True, ddof=bias)
+        var = x.var(axis=dim, keepdims=True, ddof=unbiased)
         sigma = np.sqrt(var + eps)
         norm = (x - mu) / sigma
 
@@ -349,7 +349,7 @@ class _LayerNorm(Function):
         context["var"] = var
         context["norm"] = norm
         context["eps"] = eps
-        context["bias"] = bias
+        context["unbiased"] = unbiased
         return gamma.data * norm + beta.data
 
     @staticmethod
@@ -360,17 +360,23 @@ class _LayerNorm(Function):
         var = context["var"]
         norm = context["norm"]
         eps = context["eps"]
-        bias = context["bias"]
+        unbiased = context["unbiased"]
 
-        h = sum(z.data.shape[d] for d in dim) if isinstance(dim, tuple) else z.data.shape[dim]
+        h = (
+            sum(z.data.shape[d] for d in dim)
+            if isinstance(dim, tuple)
+            else z.data.shape[dim]
+        )
         dnorm = grad.data * gamma.data
         dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (z.data - mu)
         dmu0 = -1 * dnorm / np.sqrt(var + eps)
-        dmu1 = dvar * (-2 / (h - bias)) * np.sum(z.data - mu, axis=dim, keepdims=True)
+        dmu1 = (
+            dvar * (-2 / (h - unbiased)) * np.sum(z.data - mu, axis=dim, keepdims=True)
+        )
         dmu = dmu0 + dmu1
 
         dz0 = dnorm / np.sqrt(var + eps)
-        dz1 = dvar * (2 / (h - bias)) * (z.data - mu)
+        dz1 = dvar * (2 / (h - unbiased)) * (z.data - mu)
         dz2 = dmu / h
 
         arr0 = dz0 + dz1 + dz2

@@ -3,7 +3,7 @@ import nura.nn.functions as fn
 import nura.utils as utils
 from nura.tensors import Tensor
 from nura.types import dimlike
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
@@ -103,7 +103,7 @@ def layernorm(
     gamma: Tensor,
     beta: Tensor,
     dim: dimlike = -1,
-    bias=True,
+    unbiased: Union[bool, int] = True,
     eps: float = 1e-5,
 ):
     expecteddim = (
@@ -117,4 +117,4 @@ def layernorm(
         raise ValueError(
             f"Expected 'beta' to be of dimensions {expecteddim} but got {beta.dim}"
         )
-    return fn._LayerNorm.apply(z, gamma, beta, dim, bias, eps)
+    return fn._LayerNorm.apply(z, gamma, beta, dim, unbiased, eps)
