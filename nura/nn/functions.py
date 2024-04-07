@@ -56,39 +56,36 @@ class _Softmax(Function):
         exp = np.exp(z.data - z.data.max(axis=dim, keepdims=True))
         p = exp / exp.sum(axis=dim, keepdims=True)
         context["p"] = p
+        context["dim"] = dim
         return p
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         p = context["p"]
-        jac = 0
+        dim = context["dim"]
         if p.ndim == 1:
-            jac = np.zeros(p.shape + p.shape)
-            i = np.arange(p.shape[0])
-            jac[i, i] = p
-            jac[i, :] -= np.outer(p, p)
+            diagonal = np.diagflat(p)
+            offdiagonal = np.outer(p, p)
         else:
-            n = p.shape[-1]
-            diagonal = np.einsum("...ij,jk->...ijk", p, np.eye(n, n))
-            offdiagonal = np.einsum("...ij,...ik->...ijk", p, p)
-            jac = diagonal - offdiagonal
+            p = p.reshape(-1, p.shape[dim])
+            diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
+            offdiagonal = np.einsum("ij,ik->ijk", p, p)
+        jac = diagonal - offdiagonal
         return jac.sum(axis=-1) * grad.data
 
     @staticmethod
     def tangent(context: Context, zgrad: Tensor):
         p = context["p"]
-        jac = 0
         if p.ndim == 1:
-            jac = np.zeros(p.shape + p.shape)
-            i = np.arange(p.shape[0])
-            jac[i, i] = p
-            jac[i, :] -= np.outer(p, p)
+            diagonal = np.diagflat(p)
+            offdiagonal = np.outer(p, p)
         else:
-            n = p.shape[-1]
-            diagonal = np.einsum("...ij,jk->...ijk", p, np.eye(n, n))
-            offdiagonal = np.einsum("...ij,...ik->...ijk", p, p)
-            jac = diagonal - offdiagonal
-        return jac * zgrad.data
+            p = p.reshape(-1, p)
+            dim = context["dim"]
+            diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
+            offdiagonal = np.einsum("ij,ik->ijk", p, p)
+        jac = diagonal - offdiagonal
+        return jac.sum(axis=-1) * zgrad.data
 
 
 class _ReLU(Function):
