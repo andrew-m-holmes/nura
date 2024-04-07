@@ -26,3 +26,6 @@ class BinaryCrossEntropy(Module):
 
     def __init__(self):
         super().__init__()
+
+    def forward(self, a: Tensor, y: Tensor) -> Tensor:
+        return f.binarycrossentropy(a, y)

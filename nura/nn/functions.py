@@ -305,6 +305,21 @@ class _CrossEntropy(Function):
         return (a / m) * grad.data
 
 
+class _BinaryCrossEntropy(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, y: Tensor):
+        context.save(a, y)
+        nll = np.negative(y.data * np.log(a.data) + (1 - y.data) * np.log(1 - a.data))
+        return nll.mean()
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a, y = context.tensors()
+        arr = np.negative(y.data / a.data) + (1 - y.data) / (1 - a.data)
+        return (1 / y.data.size) * arr * grad.data
+
+
 class _Dropout(Function):
 
     @staticmethod

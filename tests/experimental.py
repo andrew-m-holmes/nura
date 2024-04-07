@@ -6,11 +6,14 @@ import numpy as np
 
 def main():
 
-    x = nura.randn(2, 7, 3, usegrad=True)
-    gamma = nura.ones((7, 3), usegrad=True)
-    beta = nura.zeros((7, 3), usegrad=True)
-    z = f.layernorm(x, gamma, beta, bias=True, dim=(-2, -1))
-    z.backward(nura.oneslike(z))
+    z = (nura.randn(4, 1) - 0.5).usedgrad()
+    a = f.sigmoid(z)
+    y = nura.tensor([1, 0, 1, 0]).float()
+    lossfn = nn.BinaryCrossEntropy()
+    loss = lossfn(a, y)
+    loss.backward()
+    print(lossfn)
+    print(z.grad)
 
 
 if __name__ == "__main__":

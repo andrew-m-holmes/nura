@@ -65,6 +65,7 @@ def attention(
     mask: Optional[Tensor] = None,
     maskfill=-1e9,
 ) -> Tuple[Tensor, Tensor]:
+
     dk = k.dim[-1]
     simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
     if mask is not None:
@@ -80,6 +81,22 @@ def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
             f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
         )
     return fn._Embedding.apply(x, w, padid)
+
+
+def binarycrossentropy(a: Tensor, y: Tensor):
+    if a.ndim != 2:
+        raise RuntimeError(f"Expected 'a' to be 2D but got '{a.ndim}'D")
+    if y.ndim != 1:
+        raise RuntimeError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
+    if a.dtype not in (nura.half, nura.float, nura.double):
+        raise ValueError(
+            f"Expected 'a' to be of type 'half', 'float', or 'double' but got '{a.dtype.name()}'"
+        )
+    if y.dtype not in (nura.half, nura.float, nura.double):
+        raise ValueError(
+            f"Expected 'y' to be of type 'half', 'float', or 'double' but got '{y.dtype.name()}'"
+        )
+    return fn._BinaryCrossEntropy.apply(a, y)
 
 
 def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
