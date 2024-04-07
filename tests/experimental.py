@@ -5,7 +5,7 @@ import numpy as np
 
 
 def main():
-    x = np.arange(12).reshape(4, 3)
+    x = np.random.randn(10)
     z = nura.tensor(x, usegrad=True, dtype=nura.float)
     a = f.softmax(z)
     a.backward(nura.oneslike(a))
