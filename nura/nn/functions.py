@@ -23,9 +23,9 @@ class _Sigmoid(Function):
         return arr * (1 - arr) * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         arr = context["arr"]
-        return arr * (1 - arr) * zgrad.data
+        return arr * (1 - arr) * grad.data
 
 
 class _Tanh(Function):
@@ -43,9 +43,9 @@ class _Tanh(Function):
         return (1 - np.square(arr)) * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         arr = context["arr"]
-        return (1 - np.square(arr)) * zgrad.data
+        return (1 - np.square(arr)) * grad.data
 
 
 class _Softmax(Function):
@@ -75,7 +75,7 @@ class _Softmax(Function):
         return jac.sum(axis=-1).reshape(outshape) * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         p = context["p"]
         outshape = p.shape
         if p.ndim == 1:
@@ -87,7 +87,7 @@ class _Softmax(Function):
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
         jac = diagonal - offdiagonal
-        return jac.sum(axis=-1).reshape(outshape) * zgrad.data
+        return jac.sum(axis=-1).reshape(outshape) * grad.data
 
 
 class _ReLU(Function):
@@ -105,11 +105,11 @@ class _ReLU(Function):
         return mask * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         z = context.tensors()[0]
         dtype = z.data.dtype
         mask = np.where(z.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
-        return mask * zgrad.data
+        return mask * grad.data
 
 
 class _ReLU6(Function):
@@ -131,7 +131,7 @@ class _ReLU6(Function):
         return mask * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         z = context.tensors()[0]
         dtype = z.data.dtype
         mask = np.where(
@@ -139,7 +139,7 @@ class _ReLU6(Function):
             np.array(1, dtype=dtype),
             np.array(0, dtype=dtype),
         )
-        return mask * zgrad.data
+        return mask * grad.data
 
 
 class _LeakyReLU(Function):
@@ -161,14 +161,14 @@ class _LeakyReLU(Function):
         return mask * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         z = context.tensors()[0]
         slope = context["slope"]
         dtype = z.data.dtype
         mask = np.where(
             z.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
         )
-        return mask * zgrad.data
+        return mask * grad.data
 
 
 class _ELU(Function):
@@ -188,12 +188,12 @@ class _ELU(Function):
         return mask * grad.data
 
     @staticmethod
-    def tangent(context: Context, zgrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         z = context.tensors()[0]
         alpha = context["alpha"]
         dtype = z.data.dtype
         mask = np.where(z.data > 0, np.array(1, dtype=dtype), alpha * np.exp(z.data))
-        return mask * zgrad.data
+        return mask * grad.data
 
 
 class _GELU(Function):

@@ -5,7 +5,7 @@ from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
 
-def empty(*dim: dimlike, dtype: Optional[Type[dtype]] = None):
+def empty(*dim: dimlike, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
@@ -13,7 +13,7 @@ def empty(*dim: dimlike, dtype: Optional[Type[dtype]] = None):
     return tensor(data, dtype=dtype)
 
 
-def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None):
+def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
