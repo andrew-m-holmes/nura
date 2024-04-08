@@ -129,21 +129,21 @@ def identity(n: int, dtype: Optional[Type[dtype]] = None) -> Tensor:
     return tensor(data, dtype=dtype)
 
 
-def tri(m: int, n: int, k=0, dtype: Optional[Type[dtype]] = None):
+def tri(m: int, n: int, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     data = np.tri(m, n, k)
     return tensor(data, dtype=dtype)
 
 
-def triu(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None):
+def triu(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = a.dtype
     data = np.triu(a.data, k)
     return tensor(data, dtype=dtype)
 
 
-def tril(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None):
+def tril(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = a.dtype
     data = np.tril(a.data, k)
@@ -196,12 +196,12 @@ def nonzero(a: Tensor) -> Tuple[Tensor, ...]:
     return tuple(map(tensor, arrs))
 
 
-def argmax(a: Tensor, pos: Optional[int] = None, keepdims=False):
+def argmax(a: Tensor, pos: Optional[int] = None, keepdims=False) -> Tensor:
     data = np.argmax(a.data, axis=pos, keepdims=keepdims)
     return tensor(data)
 
 
-def argmin(a: Tensor, pos: Optional[int] = None, keepdims=False):
+def argmin(a: Tensor, pos: Optional[int] = None, keepdims=False) -> Tensor:
     data = np.argmin(a.data, axis=pos, keepdims=keepdims)
     return tensor(data)
 
@@ -246,11 +246,11 @@ def notequal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
     return tensor(np.not_equal(a.data, b))
 
 
-def tensorany(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+def tensorany(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tensor:
     return tensor(np.any(a.data, axis=dim, keepdims=keepdims))
 
 
-def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False):
+def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tensor:
     return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
 
 
@@ -284,7 +284,7 @@ def typesmatch(*tensors: Tensor) -> bool:
     return len(set(t.dtype for t in tensors)) == 1
 
 
-def to(a: Tensor, dtype: Type[dtype]):
+def to(a: Tensor, dtype: Type[dtype]) -> Tensor:
     if not isinstance(a, Tensor):
         raise ValueError(f"Expected Tensor, received {a.__class__.__name__}")
     if a.usegrad and dtype not in (types.half, types.float, types.double):
@@ -295,14 +295,14 @@ def to(a: Tensor, dtype: Type[dtype]):
     return tensor(data, a.usegrad, dtype)
 
 
-def tocontiguous(a: Tensor):
+def tocontiguous(a: Tensor) -> Tensor:
     c = a.clone()
     data = np.ascontiguousarray(c.data)
     return c.mutated(data=data)
 
 
 def todim(dim: Tuple[Any, ...]) -> dim:
-    if dim is None:
+    if not dim:
         return tuple()
     if isinstance(dim[0], tuple):
         return dim[0]
