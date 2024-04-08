@@ -11,9 +11,9 @@ np._set_promotion_state("weak")
 class _Sigmoid(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor):
-        context.save(z)
-        arr = 1 / (1 + np.exp(-z.data))
+    def forward(context: Context, x: Tensor):
+        context.save(x)
+        arr = 1 / (1 + np.exp(-x.data))
         context["arr"] = arr
         return arr
 
@@ -31,9 +31,9 @@ class _Sigmoid(Function):
 class _Tanh(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor):
-        context.save(z)
-        arr = np.tanh(z.data)
+    def forward(context: Context, x: Tensor):
+        context.save(x)
+        arr = np.tanh(x.data)
         context["arr"] = arr
         return arr
 
@@ -51,9 +51,9 @@ class _Tanh(Function):
 class _Softmax(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor, dim: int):
-        context.save(z)
-        exp = np.exp(z.data - z.data.max(axis=dim, keepdims=True))
+    def forward(context: Context, x: Tensor, dim: int):
+        context.save(x)
+        exp = np.exp(x.data - x.data.max(axis=dim, keepdims=True))
         p = exp / exp.sum(axis=dim, keepdims=True)
         context["p"] = p
         context["dim"] = dim
@@ -93,38 +93,38 @@ class _Softmax(Function):
 class _ReLU(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor):
-        context.save(z)
-        return np.maximum(z.data, 0)
+    def forward(context: Context, x: Tensor):
+        context.save(x)
+        return np.maximum(x.data, 0)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
-        dtype = z.data.dtype
-        mask = np.where(z.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
+        x = context.tensors()[0]
+        dtype = x.data.dtype
+        mask = np.where(x.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        z = context.tensors()[0]
-        dtype = z.data.dtype
-        mask = np.where(z.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
+        x = context.tensors()[0]
+        dtype = x.data.dtype
+        mask = np.where(x.data > 0, np.array(1, dtype=dtype), np.array(0, dtype=dtype))
         return mask * grad.data
 
 
 class _ReLU6(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor):
-        context.save(z)
-        return np.clip(z.data, 0, 6)
+    def forward(context: Context, x: Tensor):
+        context.save(x)
+        return np.clip(x.data, 0, 6)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
-        dtype = z.data.dtype
+        x = context.tensors()[0]
+        dtype = x.data.dtype
         mask = np.where(
-            (z.data > 0) & (z.data < 6),
+            (x.data > 0) & (x.data < 6),
             np.array(1, dtype=dtype),
             np.array(0, dtype=dtype),
         )
@@ -132,10 +132,10 @@ class _ReLU6(Function):
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        z = context.tensors()[0]
-        dtype = z.data.dtype
+        x = context.tensors()[0]
+        dtype = x.data.dtype
         mask = np.where(
-            (z.data > 0) & (z.data < 6),
+            (x.data > 0) & (x.data < 6),
             np.array(1, dtype=dtype),
             np.array(0, dtype=dtype),
         )
@@ -145,28 +145,28 @@ class _ReLU6(Function):
 class _LeakyReLU(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor, slope: float):
-        context.save(z)
+    def forward(context: Context, x: Tensor, slope: float):
+        context.save(x)
         context["slope"] = slope
-        return np.maximum(z.data * slope, z.data)
+        return np.maximum(x.data * slope, x.data)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         slope = context["slope"]
-        dtype = z.data.dtype
+        dtype = x.data.dtype
         mask = np.where(
-            z.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
+            x.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
         )
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         slope = context["slope"]
-        dtype = z.data.dtype
+        dtype = x.data.dtype
         mask = np.where(
-            z.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
+            x.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
         )
         return mask * grad.data
 
@@ -174,54 +174,54 @@ class _LeakyReLU(Function):
 class _ELU(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor, alpha: float):
-        context.save(z)
+    def forward(context: Context, x: Tensor, alpha: float):
+        context.save(x)
         context["alpha"] = alpha
-        return np.where(z.data > 0, z.data, alpha * (np.exp(z.data) - 1))
+        return np.where(x.data > 0, x.data, alpha * (np.exp(x.data) - 1))
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         alpha = context["alpha"]
-        dtype = z.data.dtype
-        mask = np.where(z.data > 0, np.array(1, dtype=dtype), alpha * np.exp(z.data))
+        dtype = x.data.dtype
+        mask = np.where(x.data > 0, np.array(1, dtype=dtype), alpha * np.exp(x.data))
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         alpha = context["alpha"]
-        dtype = z.data.dtype
-        mask = np.where(z.data > 0, np.array(1, dtype=dtype), alpha * np.exp(z.data))
+        dtype = x.data.dtype
+        mask = np.where(x.data > 0, np.array(1, dtype=dtype), alpha * np.exp(x.data))
         return mask * grad.data
 
 
 class _GELU(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor):
-        context.save(z)
+    def forward(context: Context, x: Tensor):
+        context.save(x)
         PICONST = 0.79788456
         CONST = 0.044715
         context["PICONST"] = PICONST
         context["CONST"] = CONST
 
-        tanh = np.tanh(PICONST * (z.data + CONST * np.power(z.data, 3)))
+        tanh = np.tanh(PICONST * (x.data + CONST * np.power(x.data, 3)))
         inner = tanh + 1.0
         context["tanh"] = tanh
         context["inner"] = inner
-        return 0.5 * z.data * inner
+        return 0.5 * x.data * inner
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         PICONST = context["PICONST"]
         CONST = context["CONST"]
         tanh = context["tanh"]
         inner = context["inner"]
         dtanh = 1 - tanh**2
         dgelu = 0.5 * (
-            inner + z.data * PICONST * dtanh * (1 + 3 * CONST * np.power(z.data, 2))
+            inner + x.data * PICONST * dtanh * (1 + 3 * CONST * np.power(x.data, 2))
         )
         return dgelu * grad.data
 
@@ -229,19 +229,19 @@ class _GELU(Function):
 class _CELU(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor, alpha: float):
-        context.save(z)
+    def forward(context: Context, x: Tensor, alpha: float):
+        context.save(x)
         context["alpha"] = alpha
-        arr0 = np.maximum(z.data, 0)
-        arr1 = np.minimum(0, alpha * (np.exp(z.data / alpha) - 1))
+        arr0 = np.maximum(x.data, 0)
+        arr1 = np.minimum(0, alpha * (np.exp(x.data / alpha) - 1))
         return arr0 + arr1
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         alpha = context["alpha"]
-        dtype = z.data.dtype
-        mask = np.where(z.data >= 0, np.array(1, dtype=dtype), np.exp(z.data / alpha))
+        dtype = x.data.dtype
+        mask = np.where(x.data >= 0, np.array(1, dtype=dtype), np.exp(x.data / alpha))
         return mask * grad.data
 
 
@@ -272,9 +272,9 @@ class _Embedding(Function):
 class _CrossEntropy(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor, y: Tensor, ignoreid: int):
-        context.save(z)
-        exp = np.exp(z.data - z.data.max(axis=-1, keepdims=True))
+    def forward(context: Context, x: Tensor, y: Tensor, ignoreid: int):
+        context.save(x)
+        exp = np.exp(x.data - x.data.max(axis=-1, keepdims=True))
         a = exp / exp.sum(axis=-1, keepdims=True)
 
         context["a"] = a
@@ -322,21 +322,21 @@ class _BinaryCrossEntropy(Function):
 class _Dropout(Function):
 
     @staticmethod
-    def forward(context: Context, z: Tensor, p: float):
-        context.save(z)
-        mask = np.random.binomial(1, 1 - p, size=z.data.shape)
+    def forward(context: Context, x: Tensor, p: float):
+        context.save(x)
+        mask = np.random.binomial(1, 1 - p, size=x.data.shape)
         context["p"] = p
         context["mask"] = mask
         scale = 1 / (1 - p)
-        return (z.data * mask * scale).astype(z.data.dtype)
+        return (x.data * mask * scale).astype(x.data.dtype)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z = context.tensors()[0]
+        x = context.tensors()[0]
         p = context["p"]
         mask = context["mask"]
         scale = 1 / (1 - p)
-        return (grad.data * mask * scale).astype(z.data.dtype)
+        return (grad.data * mask * scale).astype(x.data.dtype)
 
 
 class _LayerNorm(Function):
@@ -344,19 +344,18 @@ class _LayerNorm(Function):
     @staticmethod
     def forward(
         context: Context,
-        z: Tensor,
+        x: Tensor,
         gamma: Tensor,
         beta: Tensor,
         dim: Optional[dimlike],
         unbiased: Union[bool, int],
         eps: float,
     ):
-        context.save(z, gamma, beta)
-        x = z.data
-        mu = x.mean(axis=dim, keepdims=True)
-        var = x.var(axis=dim, keepdims=True, ddof=unbiased)
+        context.save(x, gamma, beta)
+        mu = x.data.mean(axis=dim, keepdims=True)
+        var = x.data.var(axis=dim, keepdims=True, ddof=unbiased)
         sigma = np.sqrt(var + eps)
-        norm = (x - mu) / sigma
+        norm = (x.data - mu) / sigma
 
         context["dim"] = dim
         context["mu"] = mu
@@ -368,7 +367,7 @@ class _LayerNorm(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        z, gamma, beta = context.tensors()
+        x, gamma, beta = context.tensors()
         dim = context["dim"]
         mu = context["mu"]
         var = context["var"]
@@ -377,23 +376,23 @@ class _LayerNorm(Function):
         unbiased = context["unbiased"]
 
         h = (
-            sum(z.data.shape[d] for d in dim)
+            sum(x.data.shape[d] for d in dim)
             if isinstance(dim, tuple)
-            else z.data.shape[dim]
+            else x.data.shape[dim]
         )
         dnorm = grad.data * gamma.data
-        dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (z.data - mu)
+        dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (x.data - mu)
         dmu0 = -1 * dnorm / np.sqrt(var + eps)
         dmu1 = (
-            dvar * (-2 / (h - unbiased)) * np.sum(z.data - mu, axis=dim, keepdims=True)
+            dvar * (-2 / (h - unbiased)) * np.sum(x.data - mu, axis=dim, keepdims=True)
         )
         dmu = dmu0 + dmu1
 
-        dz0 = dnorm / np.sqrt(var + eps)
-        dz1 = dvar * (2 / (h - unbiased)) * (z.data - mu)
-        dz2 = dmu / h
+        dx0 = dnorm / np.sqrt(var + eps)
+        dx1 = dvar * (2 / (h - unbiased)) * (x.data - mu)
+        dx2 = dmu / h
 
-        arr0 = dz0 + dz1 + dz2
+        arr0 = dx0 + dx1 + dx2
         arr1 = norm * grad.data
         arr2 = grad.data.copy()
         return arr0, arr1, arr2

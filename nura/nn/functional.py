@@ -13,48 +13,48 @@ def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
     return out
 
 
-def sigmoid(z: Tensor):
-    out = fn._Sigmoid.apply(z)
+def sigmoid(x: Tensor):
+    out = fn._Sigmoid.apply(x)
     return out
 
 
-def tanh(z: Tensor):
-    out = fn._Tanh.apply(z)
+def tanh(x: Tensor):
+    out = fn._Tanh.apply(x)
     return out
 
 
-def relu(z: Tensor):
-    out = fn._ReLU.apply(z)
+def relu(x: Tensor):
+    out = fn._ReLU.apply(x)
     return out
 
 
-def relu6(z: Tensor):
-    out = fn._ReLU6.apply(z)
+def relu6(x: Tensor):
+    out = fn._ReLU6.apply(x)
     return out
 
 
-def leakyrelu(z: Tensor, slope=0.01):
-    out = fn._LeakyReLU.apply(z, slope)
+def leakyrelu(x: Tensor, slope=0.01):
+    out = fn._LeakyReLU.apply(x, slope)
     return out
 
 
-def elu(z: Tensor, alpha=1.0):
-    out = fn._ELU.apply(z, alpha)
+def elu(x: Tensor, alpha=1.0):
+    out = fn._ELU.apply(x, alpha)
     return out
 
 
-def gelu(z: Tensor):
-    out = fn._GELU.apply(z)
+def gelu(x: Tensor):
+    out = fn._GELU.apply(x)
     return out
 
 
-def celu(z: Tensor, alpha=1.0):
-    out = fn._CELU.apply(z, alpha)
+def celu(x: Tensor, alpha=1.0):
+    out = fn._CELU.apply(x, alpha)
     return out
 
 
-def softmax(a: Tensor, dim=-1):
-    out = fn._Softmax.apply(a, dim)
+def softmax(x: Tensor, dim=-1):
+    out = fn._Softmax.apply(x, dim)
     return out
 
 
@@ -83,32 +83,32 @@ def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
     return fn._Embedding.apply(x, w, padid)
 
 
-def binarycrossentropy(a: Tensor, y: Tensor):
-    if a.ndim != 2:
-        raise RuntimeError(f"Expected 'a' to be 2D but got '{a.ndim}'D")
+def binarycrossentropy(x: Tensor, y: Tensor):
+    if x.ndim != 2:
+        raise RuntimeError(f"Expected 'a' to be 2D but got '{x.ndim}'D")
     if y.ndim != 1:
         raise RuntimeError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
-    if a.dtype not in (nura.half, nura.float, nura.double):
+    if x.dtype not in (nura.half, nura.float, nura.double):
         raise ValueError(
-            f"Expected 'a' to be of type 'half', 'float', or 'double' but got '{a.dtype.name()}'"
+            f"Expected 'a' to be of type 'half', 'float', or 'double' but got '{x.dtype.name()}'"
         )
     if y.dtype not in (nura.half, nura.float, nura.double):
         raise ValueError(
             f"Expected 'y' to be of type 'half', 'float', or 'double' but got '{y.dtype.name()}'"
         )
-    return fn._BinaryCrossEntropy.apply(a, y)
+    return fn._BinaryCrossEntropy.apply(x, y)
 
 
-def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
-    if z.ndim != 2:
-        raise RuntimeError(f"Expected 'z' to be 2D but got '{z.ndim}'D")
+def crossentropy(x: Tensor, y: Tensor, ignoreid: Optional[int] = None):
+    if x.ndim != 2:
+        raise RuntimeError(f"Expected 'x' to be 2D but got '{x.ndim}'D")
     if y.ndim != 1:
         raise RuntimeError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
     if y.dtype not in (nura.int, nura.long):
         raise RuntimeError(
             f"Expected 'y' to be of type 'int' or 'long' but got '{y.dtype.name()}'"
         )
-    return fn._CrossEntropy.apply(z, y, ignoreid)
+    return fn._CrossEntropy.apply(x, y, ignoreid)
 
 
 def dropout(x: Tensor, p: float = 0.5):
@@ -116,7 +116,7 @@ def dropout(x: Tensor, p: float = 0.5):
 
 
 def layernorm(
-    z: Tensor,
+    x: Tensor,
     gamma: Tensor,
     beta: Tensor,
     dim: dimlike = -1,
@@ -124,7 +124,7 @@ def layernorm(
     eps: float = 1e-5,
 ):
     expecteddim = (
-        (z.dim[dim],) if isinstance(dim, int) else tuple(z.dim[d] for d in dim)
+        (x.dim[dim],) if isinstance(dim, int) else tuple(x.dim[d] for d in dim)
     )
     if gamma.dim != expecteddim:
         raise ValueError(
@@ -134,4 +134,4 @@ def layernorm(
         raise ValueError(
             f"Expected 'beta' to be of dimensions {expecteddim} but got {beta.dim}"
         )
-    return fn._LayerNorm.apply(z, gamma, beta, dim, unbiased, eps)
+    return fn._LayerNorm.apply(x, gamma, beta, dim, unbiased, eps)
