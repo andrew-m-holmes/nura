@@ -348,12 +348,12 @@ class _LayerNorm(Function):
         gamma: Tensor,
         beta: Tensor,
         dim: Optional[dimlike],
-        unbiased: Union[bool, int],
+        correction: Union[bool, int],
         eps: float,
     ):
         context.save(x, gamma, beta)
         mu = x.data.mean(axis=dim, keepdims=True)
-        var = x.data.var(axis=dim, keepdims=True, ddof=unbiased)
+        var = x.data.var(axis=dim, keepdims=True, ddof=correction)
         sigma = np.sqrt(var + eps)
         norm = (x.data - mu) / sigma
 
@@ -362,7 +362,7 @@ class _LayerNorm(Function):
         context["var"] = var
         context["norm"] = norm
         context["eps"] = eps
-        context["unbiased"] = unbiased
+        context["correction"] = correction
         return gamma.data * norm + beta.data
 
     @staticmethod
@@ -373,7 +373,7 @@ class _LayerNorm(Function):
         var = context["var"]
         norm = context["norm"]
         eps = context["eps"]
-        unbiased = context["unbiased"]
+        correction = context["correction"]
 
         h = (
             sum(x.data.shape[d] for d in dim)
@@ -384,12 +384,14 @@ class _LayerNorm(Function):
         dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (x.data - mu)
         dmu0 = -1 * dnorm / np.sqrt(var + eps)
         dmu1 = (
-            dvar * (-2 / (h - unbiased)) * np.sum(x.data - mu, axis=dim, keepdims=True)
+            dvar
+            * (-2 / (h - correction))
+            * np.sum(x.data - mu, axis=dim, keepdims=True)
         )
         dmu = dmu0 + dmu1
 
         dx0 = dnorm / np.sqrt(var + eps)
-        dx1 = dvar * (2 / (h - unbiased)) * (x.data - mu)
+        dx1 = dvar * (2 / (h - correction)) * (x.data - mu)
         dx2 = dmu / h
 
         arr0 = dx0 + dx1 + dx2

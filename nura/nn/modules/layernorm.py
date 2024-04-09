@@ -12,7 +12,7 @@ class LayerNorm(Module):
     def __init__(
         self,
         normdim: dimlike,
-        unbiased: Union[bool, int] = True,
+        correction: int = True,
         eps: float = 1e-5,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
@@ -21,7 +21,7 @@ class LayerNorm(Module):
         if dtype is None:
             dtype = nura.float
         self._normdim = normdim
-        self._unbiased = unbiased
+        self._correction = correction
         self._eps = eps
         self._dtype = dtype
         self._gamma = parameter(nura.randn(normdim), dtype=dtype)
@@ -33,8 +33,8 @@ class LayerNorm(Module):
         return self._normdim
 
     @property
-    def unbiased(self) -> Union[bool, int]:
-        return self._unbiased
+    def correction(self) -> int:
+        return self._correction
 
     @property
     def eps(self) -> float:
@@ -53,9 +53,11 @@ class LayerNorm(Module):
         return self._beta
 
     def forward(self, x: Tensor) -> Tensor:
-        return f.layernorm(x, self.gamma, self.beta, self._dim, self.unbiased, self.eps)
+        return f.layernorm(
+            x, self.gamma, self.beta, self._dim, self.correction, self.eps
+        )
 
     def xrepr(self) -> str:
-        normdim, unbiased = self.normdim, self.unbiased
+        normdim, correction = self.normdim, self.correction
         eps, dtype = self.eps, self.dtype.name()
-        return f"{self.name()}({normdim=} {unbiased=} {eps=:.1e} {dtype=})"
+        return f"{self.name()}({normdim=} {correction=} {eps=:.1e} {dtype=})"
