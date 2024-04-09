@@ -76,38 +76,14 @@ def attention(
 
 
 def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
-    if x.dtype not in (nura.int, nura.long):
-        raise RuntimeError(
-            f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
-        )
     return fn._Embedding.apply(x, w, padid)
 
 
 def binarycrossentropy(x: Tensor, y: Tensor):
-    if x.ndim != 2:
-        raise RuntimeError(f"Expected 'a' to be 2D but got '{x.ndim}'D")
-    if y.ndim != 1:
-        raise RuntimeError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
-    if x.dtype not in (nura.half, nura.float, nura.double):
-        raise ValueError(
-            f"Expected 'a' to be of type 'half', 'float', or 'double' but got '{x.dtype.name()}'"
-        )
-    if y.dtype not in (nura.half, nura.float, nura.double):
-        raise ValueError(
-            f"Expected 'y' to be of type 'half', 'float', or 'double' but got '{y.dtype.name()}'"
-        )
     return fn._BinaryCrossEntropy.apply(x, y)
 
 
 def crossentropy(x: Tensor, y: Tensor, ignoreid: Optional[int] = None):
-    if x.ndim != 2:
-        raise RuntimeError(f"Expected 'x' to be 2D but got '{x.ndim}'D")
-    if y.ndim != 1:
-        raise RuntimeError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
-    if y.dtype not in (nura.int, nura.long):
-        raise RuntimeError(
-            f"Expected 'y' to be of type 'int' or 'long' but got '{y.dtype.name()}'"
-        )
     return fn._CrossEntropy.apply(x, y, ignoreid)
 
 
@@ -123,15 +99,4 @@ def layernorm(
     unbiased: Union[bool, int] = True,
     eps: float = 1e-5,
 ):
-    expecteddim = (
-        (x.dim[dim],) if isinstance(dim, int) else tuple(x.dim[d] for d in dim)
-    )
-    if gamma.dim != expecteddim:
-        raise ValueError(
-            f"Expected 'gamma' to be of dimensions {expecteddim} but got {gamma.dim}"
-        )
-    if beta.dim != expecteddim:
-        raise ValueError(
-            f"Expected 'beta' to be of dimensions {expecteddim} but got {beta.dim}"
-        )
     return fn._LayerNorm.apply(x, gamma, beta, dim, unbiased, eps)
