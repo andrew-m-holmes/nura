@@ -590,4 +590,169 @@ def test_crossentropy_forward_matrix_ignoreid():
     np.testing.assert_array_almost_equal(result, expected, decimal=5)
 
 
-# TODO dropout tests
+def test_dropout_forward_scalar():
+    z = np.random.randn()
+    z_tensor = nura.tensor(z)
+    p = 0.5
+    result_tensor = f.dropout(z_tensor, p)
+    result = result_tensor.data
+    assert result.shape == ()
+
+
+def test_dropout_forward_vector():
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z)
+    p = 0.1
+    result_tensor = f.dropout(z_tensor, p)
+    result = result_tensor.data
+    assert result.shape == (5,)
+
+
+def test_dropout_forward_matrix():
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z)
+    p = 0.9
+    result_tensor = f.dropout(z_tensor, p)
+    result = result_tensor.data
+    assert result.shape == (3, 3)
+
+
+def test_dropout_forward_tensor():
+    z = np.random.randn(2, 3, 4)
+    z_tensor = nura.tensor(z)
+    p = 0.3
+    result_tensor = f.dropout(z_tensor, p)
+    result = result_tensor.data
+    assert result.shape == (2, 3, 4)
+
+
+def numpy_binarycrossentropy(x, y):
+    epsilon = 1e-7
+    x = np.clip(x, epsilon, 1 - epsilon)
+    return -np.mean(y * np.log(x) + (1 - y) * np.log(1 - x))
+
+
+def test_binarycrossentropy_scalar():
+    x = np.random.rand()
+    y = np.random.randint(0, 2)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result = f.binarycrossentropy(x_tensor, y_tensor).data
+    expected = numpy_binarycrossentropy(x, y)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_binarycrossentropy_vector():
+    x = np.random.rand(5)
+    y = np.random.randint(0, 2, size=5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result = f.binarycrossentropy(x_tensor, y_tensor).data
+    expected = numpy_binarycrossentropy(x, y)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_binarycrossentropy_matrix():
+    x = np.random.rand(3, 4)
+    y = np.random.randint(0, 2, size=(3, 4))
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result = f.binarycrossentropy(x_tensor, y_tensor).data
+    expected = numpy_binarycrossentropy(x, y)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_binarycrossentropy_tensor():
+    x = np.random.rand(2, 3, 4)
+    y = np.random.randint(0, 2, size=(2, 3, 4))
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result = f.binarycrossentropy(x_tensor, y_tensor).data
+    expected = numpy_binarycrossentropy(x, y)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def numpy_layernorm(x, gamma, beta, dim, correction, eps):
+    mean = np.mean(x, axis=dim, keepdims=True)
+    var = np.var(x, axis=dim, keepdims=True, ddof=correction)
+    std = np.sqrt(var + eps)
+    normalized = (x - mean) / std
+    return gamma * normalized + beta
+
+
+def test_layernorm_vector():
+    x = np.random.randn(5)
+    gamma = np.random.randn(5)
+    beta = np.random.randn(5)
+    x_tensor = nura.tensor(x)
+    gamma_tensor = nura.tensor(gamma)
+    beta_tensor = nura.tensor(beta)
+    result = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=0, eps=1e-5).data
+    expected = numpy_layernorm(x, gamma, beta, dim=0, correction=1, eps=1e-5)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_layernorm_matrix():
+    x = np.random.randn(3, 4)
+    gamma = np.random.randn(4)
+    beta = np.random.randn(4)
+    x_tensor = nura.tensor(x)
+    gamma_tensor = nura.tensor(gamma)
+    beta_tensor = nura.tensor(beta)
+    result = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1, eps=1e-5).data
+    expected = numpy_layernorm(x, gamma, beta, dim=-1, correction=1, eps=1e-5)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_layernorm_tensor():
+    x = np.random.randn(2, 3, 4)
+    gamma = np.random.randn(2, 1, 4)
+    beta = np.random.randn(2, 1, 4)
+    x_tensor = nura.tensor(x)
+    gamma_tensor = nura.tensor(gamma)
+    beta_tensor = nura.tensor(beta)
+    result = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1, eps=1e-5).data
+    expected = numpy_layernorm(x, gamma, beta, dim=-1, correction=1, eps=1e-5)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_layernorm_biased():
+    x = np.random.randn(3, 4)
+    gamma = np.random.randn(4)
+    beta = np.random.randn(4)
+    x_tensor = nura.tensor(x)
+    gamma_tensor = nura.tensor(gamma)
+    beta_tensor = nura.tensor(beta)
+    result = f.layernorm(
+        x_tensor, gamma_tensor, beta_tensor, dim=-1, correction=0, eps=1e-5
+    ).data
+    expected = numpy_layernorm(x, gamma, beta, dim=-1, correction=0, eps=1e-5)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_layernorm_unbiased():
+    x = np.random.randn(3, 4)
+    gamma = np.random.randn(4)
+    beta = np.random.randn(4)
+    x_tensor = nura.tensor(x)
+    gamma_tensor = nura.tensor(gamma)
+    beta_tensor = nura.tensor(beta)
+    result = f.layernorm(
+        x_tensor, gamma_tensor, beta_tensor, dim=-1, correction=1, eps=1e-5
+    ).data
+    expected = numpy_layernorm(x, gamma, beta, dim=-1, correction=1, eps=1e-5)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
+
+
+def test_layernorm_aggressive():
+    x = np.random.randn(3, 4)
+    gamma = np.random.randn(4)
+    beta = np.random.randn(4)
+    x_tensor = nura.tensor(x)
+    gamma_tensor = nura.tensor(gamma)
+    beta_tensor = nura.tensor(beta)
+    result = f.layernorm(
+        x_tensor, gamma_tensor, beta_tensor, dim=-1, correction=2, eps=1e-5
+    ).data
+    expected = numpy_layernorm(x, gamma, beta, dim=-1, correction=2, eps=1e-5)
+    np.testing.assert_almost_equal(result, expected, decimal=5)
