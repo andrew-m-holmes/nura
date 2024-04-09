@@ -156,7 +156,7 @@ class _LeakyReLU(Function):
         alpha = context["alpha"]
         dtype = x.data.dtype
         mask = np.where(
-            x.data >= 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
+            x.data > 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
         )
         return mask * grad.data
 
@@ -166,7 +166,7 @@ class _LeakyReLU(Function):
         alpha = context["alpha"]
         dtype = x.data.dtype
         mask = np.where(
-            x.data >= 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
+            x.data > 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
         )
         return mask * grad.data
 
