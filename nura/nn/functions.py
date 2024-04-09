@@ -63,7 +63,7 @@ class _Softmax(Function):
     def backward(context: Context, grad: Tensor):
         p = context["p"]
         dim = context["dim"]
-        outshape = p.shape 
+        outshape = p.shape
         if p.ndim == 1:
             diagonal = np.diagflat(p)
             offdiagonal = np.outer(p, p)
@@ -145,28 +145,28 @@ class _ReLU6(Function):
 class _LeakyReLU(Function):
 
     @staticmethod
-    def forward(context: Context, x: Tensor, slope: float):
+    def forward(context: Context, x: Tensor, alpha: float):
         context.save(x)
-        context["slope"] = slope
-        return np.maximum(x.data * slope, x.data)
+        context["alpha"] = alpha
+        return np.maximum(x.data * alpha, x.data)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        slope = context["slope"]
+        alpha = context["alpha"]
         dtype = x.data.dtype
         mask = np.where(
-            x.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
+            x.data >= 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
         )
         return mask * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        slope = context["slope"]
+        alpha = context["alpha"]
         dtype = x.data.dtype
         mask = np.where(
-            x.data >= 0, np.array(1, dtype=dtype), np.array(slope, dtype=dtype)
+            x.data >= 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
         )
         return mask * grad.data
 

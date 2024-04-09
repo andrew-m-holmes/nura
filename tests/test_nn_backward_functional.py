@@ -100,8 +100,8 @@ def test_relu6_backward_matrix():
 
 
 def test_leakyrelu_backward_scalar():
-    def leakyrelu(z, slope=0.01):
-        return np.where(z > 0, z, slope * z)
+    def leakyrelu(z, alpha=0.01):
+        return np.where(z > 0, z, alpha * z)
 
     z = np.random.randn()
     z_tensor = nura.tensor(z, usegrad=True)
@@ -116,8 +116,8 @@ def test_leakyrelu_backward_scalar():
 
 
 def test_leakyrelu_backward_vector():
-    def leakyrelu(z, slope=0.01):
-        return np.where(z > 0, z, slope * z)
+    def leakyrelu(z, alpha=0.01):
+        return np.where(z > 0, z, alpha * z)
 
     z = np.random.randn(5)
     z_tensor = nura.tensor(z, usegrad=True)
@@ -132,8 +132,8 @@ def test_leakyrelu_backward_vector():
 
 
 def test_leakyrelu_backward_matrix():
-    def leakyrelu(z, slope=0.01):
-        return np.where(z > 0, z, slope * z)
+    def leakyrelu(z, alpha=0.01):
+        return np.where(z > 0, z, alpha * z)
 
     z = np.random.randn(3, 3)
     z_tensor = nura.tensor(z, usegrad=True)
@@ -147,19 +147,19 @@ def test_leakyrelu_backward_matrix():
     np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)
 
 
-def test_leakyrelu_backward_custom_slope():
-    def leakyrelu(z, slope=0.05):
-        return np.where(z > 0, z, slope * z)
+def test_leakyrelu_backward_custom_alpha():
+    def leakyrelu(z, alpha=0.05):
+        return np.where(z > 0, z, alpha * z)
 
     z = np.random.randn(3, 3)
     z_tensor = nura.tensor(z, usegrad=True)
 
-    result_tensor = f.leakyrelu(z_tensor, slope=0.05)
+    result_tensor = f.leakyrelu(z_tensor, alpha=0.05)
     result_tensor.backward(nura.tensor(np.ones_like(z)))
 
     grad = z_tensor.grad
     h = 1e-8
-    expected_grad = (leakyrelu(z + h, slope=0.05) - leakyrelu(z - h, slope=0.05)) / (
+    expected_grad = (leakyrelu(z + h, alpha=0.05) - leakyrelu(z - h, alpha=0.05)) / (
         2 * h
     )
     np.testing.assert_array_almost_equal(grad.data, expected_grad, decimal=5)

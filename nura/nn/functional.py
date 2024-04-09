@@ -33,8 +33,8 @@ def relu6(x: Tensor) -> Tensor:
     return out
 
 
-def leakyrelu(x: Tensor, slope=0.01):
-    out = fn._LeakyReLU.apply(x, slope)
+def leakyrelu(x: Tensor, alpha=0.01):
+    out = fn._LeakyReLU.apply(x, alpha)
     return out
 
 
