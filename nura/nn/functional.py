@@ -65,7 +65,6 @@ def attention(
     mask: Optional[Tensor] = None,
     maskfill=-1e9,
 ) -> Tuple[Tensor, Tensor]:
-
     dk = k.dim[-1]
     simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
     if mask is not None:
