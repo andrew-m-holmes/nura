@@ -225,6 +225,19 @@ class _GELU(Function):
         )
         return dgelu * grad.data
 
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
+        x = context.tensors()[0]
+        PICONST = context["PICONST"]
+        CONST = context["CONST"]
+        tanh = context["tanh"]
+        inner = context["inner"]
+        dtanh = 1 - tanh**2
+        dgelu = 0.5 * (
+            inner + x.data * PICONST * dtanh * (1 + 3 * CONST * np.power(x.data, 2))
+        )
+        return dgelu * grad.data
+
 
 class _CELU(Function):
 
@@ -238,6 +251,14 @@ class _CELU(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
+        x = context.tensors()[0]
+        alpha = context["alpha"]
+        dtype = x.data.dtype
+        mask = np.where(x.data >= 0, np.array(1, dtype=dtype), np.exp(x.data / alpha))
+        return mask * grad.data
+
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
         x = context.tensors()[0]
         alpha = context["alpha"]
         dtype = x.data.dtype
@@ -324,19 +345,18 @@ class _Dropout(Function):
     @staticmethod
     def forward(context: Context, x: Tensor, p: float):
         context.save(x)
-        mask = np.random.binomial(1, 1 - p, size=x.data.shape)
+        mask = np.random.binomial(1, 1 - p, size=x.data.shape).astype(x.data.dtype)
         context["p"] = p
         context["mask"] = mask
         scale = 1 / (1 - p)
-        return (x.data * mask * scale).astype(x.data.dtype)
+        return x.data * mask * scale
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        x = context.tensors()[0]
         p = context["p"]
         mask = context["mask"]
         scale = 1 / (1 - p)
-        return (grad.data * mask * scale).astype(x.data.dtype)
+        return grad.data * mask * scale
 
 
 class _LayerNorm(Function):
