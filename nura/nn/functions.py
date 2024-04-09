@@ -63,7 +63,7 @@ class _Softmax(Function):
     def backward(context: Context, grad: Tensor):
         p = context["p"]
         dim = context["dim"]
-        outshape = p.shape + (p.shape[dim],)
+        outshape = p.shape 
         if p.ndim == 1:
             diagonal = np.diagflat(p)
             offdiagonal = np.outer(p, p)
@@ -72,13 +72,13 @@ class _Softmax(Function):
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
         jac = diagonal - offdiagonal
-        return jac.reshape(outshape) * grad.data
+        return jac.sum(axis=-1).reshape(outshape) * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         p = context["p"]
         dim = context["dim"]
-        outshape = p.shape + (p.shape[dim],)
+        outshape = p.shape
         if p.ndim == 1:
             diagonal = np.diagflat(p)
             offdiagonal = np.outer(p, p)
@@ -87,7 +87,7 @@ class _Softmax(Function):
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
         jac = diagonal - offdiagonal
-        return jac.reshape(outshape) * grad.data
+        return jac.sum(axis=-1).reshape(outshape) * grad.data
 
 
 class _ReLU(Function):
