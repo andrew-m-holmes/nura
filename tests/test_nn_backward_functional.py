@@ -604,4 +604,12 @@ def test_embedding_backward_matrix_padid():
     np.testing.assert_array_almost_equal(w_tensor.grad.data, expected_grad, decimal=5)
 
 
+# TODO softmax tests
+
 # TODO dropout tests
+
+# TODO crossentropy tests
+
+# TODO binarycrossentropytests
+
+# TODO layernorm tests
