@@ -374,15 +374,15 @@ class _LayerNorm(Function):
         context.save(x, gamma, beta)
         mu = x.data.mean(axis=dim, keepdims=True)
         var = x.data.var(axis=dim, keepdims=True, ddof=correction)
-        sigma = np.sqrt(var + eps)
-        norm = (x.data - mu) / sigma
+        std = np.sqrt(var + eps)
+        norm = (x.data - mu) / std
 
         context["dim"] = dim
         context["mu"] = mu
-        context["var"] = var
+        context["std"] = std
         context["norm"] = norm
-        context["eps"] = eps
         context["correction"] = correction
+        context["eps"] = eps
         return gamma.data * norm + beta.data
 
     @staticmethod
@@ -390,35 +390,32 @@ class _LayerNorm(Function):
         x, gamma, beta = context.tensors()
         dim = context["dim"]
         mu = context["mu"]
-        var = context["var"]
+        std = context["std"]
         norm = context["norm"]
-        eps = context["eps"]
         correction = context["correction"]
 
-        h = (
-            np.prod([x.data.shape[d] for d in dim])
-            if isinstance(dim, tuple)
-            else x.data.shape[dim]
+        n = (
+            x.data.shape[dim]
+            if isinstance(dim, int)
+            else np.prod([x.data[d] for d in dim])
         )
+
+        dgamma = grad.data * norm
+        dbeta = grad.data.copy()
         dnorm = grad.data * gamma.data
+
         dvar = np.sum(
-            dnorm * -0.5 * np.power(var + eps, -1.5) * (x.data - mu),
+            dnorm * (x.data - mu) * -0.5 * np.power(std, -1.5),
             axis=dim,
             keepdims=True,
         )
-        dmu0 = np.sum(-1 * dnorm / np.sqrt(var + eps), axis=dim, keepdims=True)
-        dmu1 = (
-            dvar
-            * (-2 / (h - correction))
-            * np.sum(x.data - mu, axis=dim, keepdims=True)
+
+        dmu = np.sum(-1 * dnorm / std, axis=dim, keepdims=True)
+        dmu += (
+            dvar * -2 / (n - correction) * np.sum(x.data - mu, axis=dim, keepdims=True)
         )
-        dmu = dmu0 + dmu1
 
-        dx0 = dnorm / np.sqrt(var + eps)
-        dx1 = dvar * 2 / (h - correction) * (x.data - mu)
-        dx2 = dmu / h
-
-        arr0 = dx0 + dx1 + dx2
-        arr1 = norm * grad.data
-        arr2 = grad.data.copy()
-        return arr0, arr1, arr2
+        dx = dnorm / std
+        dx += dvar * 2 / (n - correction) * (x.data - mu)
+        dx += dmu / n
+        return dx, dgamma, dbeta
