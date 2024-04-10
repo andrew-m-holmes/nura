@@ -396,13 +396,17 @@ class _LayerNorm(Function):
         correction = context["correction"]
 
         h = (
-            sum(x.data.shape[d] for d in dim)
+            np.prod([x.data.shape[d] for d in dim])
             if isinstance(dim, tuple)
             else x.data.shape[dim]
         )
         dnorm = grad.data * gamma.data
-        dvar = dnorm * -0.5 * np.power(var + eps, -1.5) * (x.data - mu)
-        dmu0 = -1 * dnorm / np.sqrt(var + eps)
+        dvar = np.sum(
+            dnorm * -0.5 * np.power(var + eps, -1.5) * (x.data - mu),
+            axis=dim,
+            keepdims=True,
+        )
+        dmu0 = np.sum(-1 * dnorm / np.sqrt(var + eps), axis=dim, keepdims=True)
         dmu1 = (
             dvar
             * (-2 / (h - correction))
@@ -411,7 +415,7 @@ class _LayerNorm(Function):
         dmu = dmu0 + dmu1
 
         dx0 = dnorm / np.sqrt(var + eps)
-        dx1 = dvar * (2 / (h - correction)) * (x.data - mu)
+        dx1 = dvar * 2 / (h - correction) * (x.data - mu)
         dx2 = dmu / h
 
         arr0 = dx0 + dx1 + dx2

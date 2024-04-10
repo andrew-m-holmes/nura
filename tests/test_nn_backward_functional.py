@@ -504,6 +504,9 @@ def test_crossentropy_backward_matrix_ignoreid():
     np.testing.assert_array_almost_equal(grad, expected_grad, decimal=5)
 
 
+# TODO crossentropy tests
+
+
 def test_embedding_backward_vector():
     def numpy_embedding(x, w, grad):
         np.add.at(w, x, grad)
@@ -606,10 +609,154 @@ def test_embedding_backward_matrix_padid():
 
 # TODO softmax tests
 
-# TODO dropout tests
 
-# TODO crossentropy tests
+def test_dropout_backward_scalar():
+    z = np.random.randn()
+    z_tensor = nura.tensor(z, usegrad=True)
+    p = 0.5
+    result_tensor = f.dropout(z_tensor, p)
+    result_tensor.backward()
+    grad = z_tensor.grad
+    assert grad.data.shape == ()
 
-# TODO binarycrossentropytests
 
-# TODO layernorm tests
+def test_dropout_backward_vector():
+    z = np.random.randn(5)
+    z_tensor = nura.tensor(z, usegrad=True)
+    p = 0.3
+    result_tensor = f.dropout(z_tensor, p)
+    result_tensor.backward(nura.oneslike(result_tensor))
+    grad = z_tensor.grad
+    assert grad.data.shape == (5,)
+
+
+def test_dropout_backward_matrix():
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    p = 0.7
+    result_tensor = f.dropout(z_tensor, p)
+    result_tensor.backward(nura.oneslike(result_tensor))
+    grad = z_tensor.grad
+    assert grad.data.shape == (3, 3)
+
+
+def test_dropout_backward_tensor():
+    z = np.random.randn(2, 3, 4)
+    z_tensor = nura.tensor(z, usegrad=True)
+    p = 0.2
+    result_tensor = f.dropout(z_tensor, p)
+    result_tensor.backward(nura.oneslike(result_tensor))
+    grad = z_tensor.grad
+    assert grad.data.shape == (2, 3, 4)
+
+
+def test_dropout_backward_no_dropout():
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    p = 0.0
+    result_tensor = f.dropout(z_tensor, p)
+    result_tensor.backward(nura.oneslike(result_tensor))
+    grad = z_tensor.grad
+    assert grad.data.shape == (3, 3)
+
+
+def test_dropout_backward_near_all_dropout():
+    z = np.random.randn(3, 3)
+    z_tensor = nura.tensor(z, usegrad=True)
+    p = 0.999
+    result_tensor = f.dropout(z_tensor, p)
+    result_tensor.backward(nura.oneslike(result_tensor))
+    grad = z_tensor.grad
+    assert grad.data.shape == (3, 3)
+
+
+def numpy_layernorm_backward(x, gamma, beta, dim, correction, eps, dout):
+    # Shape information
+    mean = np.mean(x, axis=dim, keepdims=True)
+    var = np.var(x, axis=dim, keepdims=True, ddof=correction)
+    std = np.sqrt(var + eps)
+    normalized = (x - mean) / std
+
+    # Gradient of beta
+    dbeta = np.sum(dout, axis=0, keepdims=False)
+
+    # Gradient of gamma
+    dgamma = np.sum(dout * normalized, axis=0, keepdims=False)
+
+    # Intermediate gradients
+    dnormalized = dout * gamma
+
+    # Gradient of variance
+    n = x.shape[dim] if isinstance(dim, int) else np.prod([x.shape[d] for d in dim])
+    dvar = np.sum(
+        dnormalized * (x - mean) * -0.5 * (var + eps) ** -1.5, axis=dim, keepdims=True
+    )
+
+    # Gradient of mean
+    dmean = np.sum(dnormalized * -1.0 / std, axis=dim, keepdims=True)
+    dmean += (
+        dvar
+        * np.sum(-2.0 * (x - mean), axis=dim, keepdims=True)
+        * (1.0 / (n - correction))
+    )
+
+    # Gradient of x
+    dx = dnormalized / std
+    dx += dvar * 2.0 * (x - mean) * (1.0 / (n - correction))
+    dx += dmean * (1.0 / n)
+
+    return dx, dgamma, dbeta
+
+
+def test_layernorm_backward_vector():
+    x = np.random.randn(5)
+    gamma = np.random.randn(5)
+    beta = np.random.randn(5)
+    x_tensor = nura.tensor(x, usegrad=True)
+    gamma_tensor = nura.tensor(gamma, usegrad=True)
+    beta_tensor = nura.tensor(beta, usegrad=True)
+    result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=0, eps=1e-5)
+    dout = np.random.randn(5)
+    result_tensor.backward(nura.tensor(dout))
+    dx_expected, dgamma_expected, dbeta_expected = numpy_layernorm_backward(
+        x, gamma, beta, dim=0, correction=1, eps=1e-5, dout=dout
+    )
+    np.testing.assert_allclose(x_tensor.grad.data, dx_expected, atol=1e-5)
+    np.testing.assert_allclose(gamma_tensor.grad.data, dgamma_expected, atol=1e-5)
+    np.testing.assert_allclose(beta_tensor.grad.data, dbeta_expected, atol=1e-5)
+
+
+def test_layernorm_backward_matrix():
+    x = np.random.randn(3, 4)
+    gamma = np.random.randn(4)
+    beta = np.random.randn(4)
+    x_tensor = nura.tensor(x, usegrad=True)
+    gamma_tensor = nura.tensor(gamma, usegrad=True)
+    beta_tensor = nura.tensor(beta, usegrad=True)
+    result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1, eps=1e-5)
+    dout = np.random.randn(3, 4)
+    result_tensor.backward(nura.tensor(dout))
+    dx_expected, dgamma_expected, dbeta_expected = numpy_layernorm_backward(
+        x, gamma, beta, dim=-1, correction=1, eps=1e-5, dout=dout
+    )
+    np.testing.assert_allclose(x_tensor.grad.data, dx_expected, atol=1e-5)
+    np.testing.assert_allclose(gamma_tensor.grad.data, dgamma_expected, atol=1e-5)
+    np.testing.assert_allclose(beta_tensor.grad.data, dbeta_expected, atol=1e-5)
+
+
+def test_layernorm_backward_tensor():
+    x = np.random.randn(2, 3, 4)
+    gamma = np.random.randn(3, 4)
+    beta = np.random.randn(3, 4)
+    x_tensor = nura.tensor(x, usegrad=True)
+    gamma_tensor = nura.tensor(gamma, usegrad=True)
+    beta_tensor = nura.tensor(beta, usegrad=True)
+    result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1, eps=1e-5)
+    dout = np.random.randn(2, 3, 4)
+    result_tensor.backward(nura.tensor(dout))
+    dx_expected, dgamma_expected, dbeta_expected = numpy_layernorm_backward(
+        x, gamma, beta, dim=(-2, -1), correction=1, eps=1e-5, dout=dout
+    )
+    np.testing.assert_allclose(x_tensor.grad.data, dx_expected, atol=1e-5)
+    np.testing.assert_allclose(gamma_tensor.grad.data, dgamma_expected, atol=1e-5)
+    np.testing.assert_allclose(beta_tensor.grad.data, dbeta_expected, atol=1e-5)
