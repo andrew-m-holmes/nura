@@ -318,14 +318,6 @@ class Tensor:
             item = item.data
         self.data[slc] = item
 
-    def __str__(self) -> str:
-        s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
-        if " dtype" in s:
-            i = s.index(" dtype")
-            s = s[:i]
-        strs = ["Tensor(", s, ")"]
-        return "".join(strs)
-
     def __repr__(self) -> str:
         s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
         if " dtype" in s:
