@@ -82,16 +82,16 @@ class Module:
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
-        return self.repr()[:-1]
+        return self.reprhelp()[:-1]
 
-    def repr(self, pad=3) -> str:
+    def reprhelp(self, pad=3) -> str:
         strs = [self.xrepr()]
         if hasmods := len(self._mods):
             strs.append(": (")
         strs.append("\n")
         for n, m in self._mods.items():
             strs.append(f"{' ' * pad}({n}): ")
-            strs.extend(m.repr(pad + 3))
+            strs.extend(m.reprhelp(pad + 3))
         if hasmods:
             strs.append(f"{' ' * (pad - 3)})\n")
         return "".join(strs)
