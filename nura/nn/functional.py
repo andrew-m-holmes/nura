@@ -3,7 +3,7 @@ import nura.nn.functions as fn
 import nura.utils as utils
 from nura.tensors import Tensor
 from nura.types import dimlike
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None) -> Tensor:
@@ -33,12 +33,12 @@ def relu6(x: Tensor) -> Tensor:
     return out
 
 
-def leakyrelu(x: Tensor, alpha=0.01):
+def leakyrelu(x: Tensor, alpha: float = 0.01) -> Tensor:
     out = fn._LeakyReLU.apply(x, alpha)
     return out
 
 
-def elu(x: Tensor, alpha=1.0):
+def elu(x: Tensor, alpha: float = 1.0) -> Tensor:
     out = fn._ELU.apply(x, alpha)
     return out
 
@@ -48,12 +48,12 @@ def gelu(x: Tensor) -> Tensor:
     return out
 
 
-def celu(x: Tensor, alpha=1.0) -> Tensor:
+def celu(x: Tensor, alpha: float = 1.0) -> Tensor:
     out = fn._CELU.apply(x, alpha)
     return out
 
 
-def softmax(x: Tensor, dim=-1) -> Tensor:
+def softmax(x: Tensor, dim: int = -1) -> Tensor:
     out = fn._Softmax.apply(x, dim)
     return out
 
@@ -63,13 +63,16 @@ def attention(
     k: Tensor,
     v: Tensor,
     mask: Optional[Tensor] = None,
-    maskfill=-1e9,
+    maskfill: float = -1e9,
+    drop: Optional[float] = None,
 ) -> Tuple[Tensor, Tensor]:
-    dk = k.dim[-1]
-    simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
+    norm = 1 / (k.dim[-1] ** 0.5)
+    simscore = nura.matmul(q, k.transpose(-1, -2)) * norm
     if mask is not None:
         simscore = utils.where(mask == True, simscore, maskfill)
     attn = softmax(simscore, -1)
+    if drop is not None:
+        attn = dropout(attn, drop)
     context = nura.matmul(attn, v)
     return context, attn
 

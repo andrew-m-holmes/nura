@@ -24,20 +24,20 @@ class ReLU6(Module):
 
 class LeakyReLU(Module):
 
-    def __init__(self, slope: float = 0.1) -> None:
+    def __init__(self, alpha: float = 0.1) -> None:
         super().__init__()
-        self._slope = slope
+        self._alpha = alpha
 
     @property
-    def slope(self) -> float:
-        return self._slope
+    def alpha(self) -> float:
+        return self._alpha
 
     def forward(self, x: Tensor) -> Tensor:
-        return f.leakyrelu(x, self.slope)
+        return f.leakyrelu(x, self.alpha)
 
     def xrepr(self) -> str:
-        slope = self.slope
-        return f"{self.name()}({slope=})"
+        alpha = self.alpha
+        return f"{self.name()}({alpha=})"
 
 
 class ELU(Module):
@@ -96,7 +96,7 @@ class Sigmoid(Module):
 
 class Softmax(Module):
 
-    def __init__(self, dim=-1) -> None:
+    def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self._dim = dim
 
@@ -123,19 +123,26 @@ class Tanh(Module):
 
 class ScaledDotProductAttention(Module):
 
-    def __init__(self, maskfill=-1e-9) -> None:
+    def __init__(
+        self, maskfill: float = -1e-9, dropout: Optional[float] = None
+    ) -> None:
         super().__init__()
         self._maskfill = maskfill
+        self._dropout = dropout
 
     @property
     def maskfill(self) -> float:
         return self._maskfill
 
+    @property
+    def dropout(self) -> Optional[float]:
+        return self._dropout
+
     def forward(
         self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
     ) -> Tuple[Tensor, Tensor]:
-        return f.attention(q, k, v, mask, self.maskfill)
+        return f.attention(q, k, v, mask, self.maskfill, self.dropout)
 
     def xrepr(self) -> str:
-        maskfill = self.maskfill
-        return f"{self.name()}({maskfill=:.1e})"
+        maskfill, dropout = self.maskfill, self.dropout
+        return f"{self.name()}({maskfill=:.1e} {dropout=})"
