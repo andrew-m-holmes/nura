@@ -1,16 +1,26 @@
 from nura.nn.parameter import Parameter
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 
 
 class Optimizer:
 
-    def __init__(self, params: Iterable[Parameter], learnrate: float) -> None:
+    def __init__(
+        self,
+        params: Iterable[Parameter],
+        learnrate: float,
+        decay: Optional[float] = None,
+    ) -> None:
         self._params = params
         self._learnrate = learnrate
+        self._decay = decay
 
     @property
     def learnrate(self) -> float:
         return self._learnrate
+
+    @property
+    def decay(self) -> Optional[float]:
+        return self._decay
 
     @classmethod
     def name(cls) -> str:
@@ -24,15 +34,20 @@ class Optimizer:
         raise NotImplementedError
 
     def __repr__(self) -> str:
-        return f"{self.name()}()"
+        learnrate, decay = self.learnrate, self.decay
+        return f"{self.name()}({learnrate=} {decay=})"
 
 
 class SGD(Optimizer):
 
     def __init__(
-        self, params: Iterable[Parameter], learnrate: float, momentum: float = 0.9
+        self,
+        params: Iterable[Parameter],
+        learnrate: float,
+        momentum: float = 0.9,
+        decay: Optional[float] = None,
     ) -> None:
-        super().__init__(params, learnrate)
+        super().__init__(params, learnrate, decay)
         self._momentum = momentum
 
     @property
@@ -52,8 +67,9 @@ class RMSProp(Optimizer):
         learnrate: float,
         alpha: float = 0.99,
         eps: float = 1e-8,
+        decay: Optional[float] = None,
     ) -> None:
-        super().__init__(params, learnrate)
+        super().__init__(params, learnrate, decay)
         self._alpha = alpha
         self._eps = eps
 
@@ -78,8 +94,9 @@ class Adam(Optimizer):
         learnrate: float,
         betas: Tuple[float, float] = (0.9, 0.990),
         eps: float = 1e-8,
+        decay: Optional[float] = None,
     ) -> None:
-        super().__init__(params, learnrate)
+        super().__init__(params, learnrate, decay)
         self._betas = betas
         self._eps = eps
 
