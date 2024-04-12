@@ -52,6 +52,16 @@ def test_add_broadcast():
     np.testing.assert_array_equal(result_tensor.data, expected)
 
 
+def test_add_operator():
+    a = np.random.rand(8, 3)
+    b = np.random.rand(2, 8, 3)
+    a_tensor = nura.tensor(a)
+    b_tensor = nura.tensor(b)
+    result_tensor = a_tensor + b_tensor
+    expected = a + b
+    np.testing.assert_array_equal(result_tensor.data, expected)
+
+
 def test_sub_scalar():
     a, b = -1.0, 5.0
     a_tensor = nura.tensor(a)
@@ -98,4 +108,14 @@ def test_sub_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.sub(a_tensor, b_tensor)
     expected = a - b
+    np.testing.assert_array_equal(result_tensor.data, expected)
+
+
+def test_sub_operator():
+    a = np.random.rand(3)
+    b = np.random.rand(2, 4, 3)
+    a_tensor = nura.tensor(a)
+    b_tensor = nura.tensor(b)
+    result_tensor = a_tensor + b_tensor
+    expected = a + b
     np.testing.assert_array_equal(result_tensor.data, expected)
