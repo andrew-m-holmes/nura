@@ -1,9 +1,10 @@
 import nura
 import nura.nn.functions as fn
 import nura.utils as utils
+from nura.nn.parameter import Parameter
 from nura.tensors import Tensor
 from nura.types import dimlike
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Iterator, List
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None) -> Tensor:
@@ -102,3 +103,13 @@ def layernorm(
     eps: float = 1e-5,
 ) -> Tensor:
     return fn._LayerNorm.apply(x, gamma, beta, dim, correction, eps)
+
+
+def sgd(
+    params: Iterator[Parameter],
+    moments: Iterator[Tensor],
+    learnrate: float,
+    momentum: float,
+) -> None:
+    for p, m in zip(params, moments):
+        pass

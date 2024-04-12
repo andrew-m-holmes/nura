@@ -1,5 +1,6 @@
-from nura.nn.parameter import Parameter
+import nura.nn.functional as f
 from typing import Iterable, Tuple, Optional
+from nura.nn.parameter import Parameter
 
 
 class Optimizer:
@@ -55,8 +56,8 @@ class SGD(Optimizer):
         return self._momentum
 
     def __repr__(self) -> str:
-        learnrate, momentum = self.learnrate, self.momentum
-        return f"{self.name()}({learnrate=} {momentum=})"
+        learnrate, momentum, decay = self.learnrate, self.momentum, self.decay
+        return f"{self.name()}({learnrate=} {momentum=} {decay=})"
 
 
 class RMSProp(Optimizer):
@@ -82,8 +83,8 @@ class RMSProp(Optimizer):
         return self._eps
 
     def __repr__(self) -> str:
-        learnrate, alpha, eps = self.learnrate, self.alpha, self.eps
-        return f"{self.name()}({learnrate=} {alpha=} {eps=:.3e})"
+        learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
+        return f"{self.name()}({learnrate=} {alpha=} {eps=:.3e} {decay=})"
 
 
 class Adam(Optimizer):
@@ -109,5 +110,5 @@ class Adam(Optimizer):
         return self._eps
 
     def __repr__(self) -> str:
-        learnrate, betas, eps = self.learnrate, self.betas, self.eps
-        return f"{self.name()}({learnrate=} {betas=} {eps=})"
+        learnrate, betas, eps, decay = self.learnrate, self.betas, self.eps, self.decay
+        return f"{self.name()}({learnrate=} {betas=} {eps=} {decay=})"
