@@ -1,6 +1,6 @@
 import numpy as np
-from nura.autograd.function import Function, Context
 from nura.types import dimlike
+from nura.autograd.function import Function, Context
 from nura.tensors import Tensor
 from typing import Optional, Union
 

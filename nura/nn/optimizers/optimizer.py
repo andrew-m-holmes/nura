@@ -1,13 +1,12 @@
-import nura.nn.functional as f
-from typing import Iterable, Tuple, Optional
-from nura.nn.parameter import Parameter
+from typing import Iterator, Optional
+from nura.nn import Parameter
 
 
 class Optimizer:
 
     def __init__(
         self,
-        params: Iterable[Parameter],
+        params: Iterator[Parameter],
         learnrate: float,
         decay: Optional[float] = None,
     ) -> None:
@@ -37,78 +36,3 @@ class Optimizer:
     def __repr__(self) -> str:
         learnrate, decay = self.learnrate, self.decay
         return f"{self.name()}({learnrate=} {decay=})"
-
-
-class SGD(Optimizer):
-
-    def __init__(
-        self,
-        params: Iterable[Parameter],
-        learnrate: float,
-        momentum: float = 0.9,
-        decay: Optional[float] = None,
-    ) -> None:
-        super().__init__(params, learnrate, decay)
-        self._momentum = momentum
-
-    @property
-    def momentum(self) -> float:
-        return self._momentum
-
-    def __repr__(self) -> str:
-        learnrate, momentum, decay = self.learnrate, self.momentum, self.decay
-        return f"{self.name()}({learnrate=} {momentum=} {decay=})"
-
-
-class RMSProp(Optimizer):
-
-    def __init__(
-        self,
-        params: Iterable[Parameter],
-        learnrate: float,
-        alpha: float = 0.99,
-        eps: float = 1e-8,
-        decay: Optional[float] = None,
-    ) -> None:
-        super().__init__(params, learnrate, decay)
-        self._alpha = alpha
-        self._eps = eps
-
-    @property
-    def alpha(self) -> float:
-        return self._alpha
-
-    @property
-    def eps(self) -> float:
-        return self._eps
-
-    def __repr__(self) -> str:
-        learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
-        return f"{self.name()}({learnrate=} {alpha=} {eps=:.3e} {decay=})"
-
-
-class Adam(Optimizer):
-
-    def __init__(
-        self,
-        params: Iterable[Parameter],
-        learnrate: float,
-        betas: Tuple[float, float] = (0.9, 0.990),
-        eps: float = 1e-8,
-        decay: Optional[float] = None,
-    ) -> None:
-        super().__init__(params, learnrate, decay)
-        self._betas = betas
-        self._eps = eps
-
-    @property
-    def betas(self) -> Tuple[float, float]:
-        return self._betas
-
-    @property
-    def eps(self) -> float:
-        return self._eps
-
-    def __repr__(self) -> str:
-        learnrate, betas, eps, decay = self.learnrate, self.betas, self.eps, self.decay
-        return f"{self.name()}({learnrate=} {betas=} {eps=} {decay=})"

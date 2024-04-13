@@ -1,9 +1,9 @@
-import nura
+import nura.utils as utils
+import nura.types as types
 import nura.nn.functional as f
 from nura.types import dtype, dimlike
 from nura.tensors import Tensor
 from nura.nn import Module, Parameter, parameter
-from nura.nn.parameter import Parameter, parameter
 from typing import Optional, Type, Union
 
 
@@ -19,13 +19,13 @@ class LayerNorm(Module):
 
         super().__init__()
         if dtype is None:
-            dtype = nura.float
+            dtype = types.float
         self._normdim = normdim
         self._correction = correction
         self._eps = eps
         self._dtype = dtype
-        self._gamma = parameter(nura.randn(normdim), dtype=dtype)
-        self._beta = parameter(nura.randn(normdim), dtype=dtype)
+        self._gamma = parameter(utils.randn(normdim), dtype=dtype)
+        self._beta = parameter(utils.randn(normdim), dtype=dtype)
         self._dim = tuple(-i for i in range(self.gamma.ndim, 0, -1))
 
     @property

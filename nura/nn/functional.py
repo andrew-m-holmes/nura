@@ -1,8 +1,8 @@
 import nura
 import nura.nn.functions as fn
 import nura.utils as utils
-from nura.tensors import Tensor
 from nura.types import dimlike
+from nura.tensors import Tensor
 from typing import Optional, Tuple
 
 

@@ -1,4 +1,4 @@
-import nura
+import nura.types as types
 from nura.types import dtype
 from nura.tensors import Tensor
 from nura.autograd.graph import Node
@@ -26,7 +26,7 @@ class Parameter(Tensor):
 
 
 def parameter(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
-    validtypes = (nura.half, nura.float, nura.double)
+    validtypes = (types.half, types.float, types.double)
     if dtype is None:
         dtype = a.dtype
     if dtype not in validtypes:
