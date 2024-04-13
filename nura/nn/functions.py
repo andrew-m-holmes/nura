@@ -373,14 +373,14 @@ class _Dropout(Function):
         mask = np.random.binomial(1, 1 - p, size=x.data.shape).astype(x.data.dtype)
         context["p"] = p
         context["mask"] = mask
-        scale = 1 / (1 - p)
+        scale = 1 / (1 - p) if p < 1 else -np.inf
         return x.data * mask * scale
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         p = context["p"]
         mask = context["mask"]
-        scale = 1 / (1 - p)
+        scale = 1 / (1 - p) if p < 1 else -np.inf
         return grad.data * mask * scale
 
 

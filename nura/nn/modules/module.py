@@ -1,6 +1,6 @@
 import nura.types as types
 from nura.types import dtype
-from nura.nn import Parameter
+from nura.nn.parameter import Parameter
 from collections import OrderedDict
 from typing import Type, Iterator, Tuple, Any
 from copy import copy

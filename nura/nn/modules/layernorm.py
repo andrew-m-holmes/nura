@@ -3,7 +3,8 @@ import nura.types as types
 import nura.nn.functional as f
 from nura.types import dtype, dimlike
 from nura.tensors import Tensor
-from nura.nn import Module, Parameter, parameter
+from nura.nn.modules.module import Module
+from nura.nn.parameter import Parameter, parameter
 from typing import Optional, Type, Union
 
 

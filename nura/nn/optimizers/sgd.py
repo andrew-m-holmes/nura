@@ -19,6 +19,9 @@ class SGD(Optimizer):
     def momentum(self) -> float:
         return self._momentum
 
+    def step(self) -> None:
+        pass
+
     def __repr__(self) -> str:
         learnrate, momentum, decay = self.learnrate, self.momentum, self.decay
         return f"{self.name()}({learnrate=} {momentum=} {decay=})"

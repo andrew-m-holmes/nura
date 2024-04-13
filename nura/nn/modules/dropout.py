@@ -1,6 +1,6 @@
 import nura.nn.functional as f
 from nura.tensors import Tensor
-from nura.nn import Module
+from nura.nn.modules.module import Module
 
 
 class Dropout(Module):

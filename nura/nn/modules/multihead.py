@@ -1,5 +1,7 @@
 from nura.tensors import Tensor
-from nura.nn import Module, Linear, ScaledDotProductAttention
+from nura.nn.modules.module import Module
+from nura.nn.modules.linear import Linear
+from nura.nn.modules.activations import ScaledDotProductAttention
 from nura.types import dtype
 from typing import Optional, Tuple, Type
 

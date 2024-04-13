@@ -75,6 +75,8 @@ def dot(a: Tensor, b: Tensor) -> Tensor:
 
 
 def matmul(a: Tensor, b: Tensor) -> Tensor:
+    if a.ndim < 2 or b.ndim < 2:
+        raise ValueError("Cannot compute matmul() with tensors that aren't at least 2D")
     out = fn._Matmul.apply(a, b)
     return out
 
@@ -153,7 +155,7 @@ def min(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tensor:
     return out
 
 
-def transpose(a: Tensor, dim0=-2, dim1=-1) -> Tensor:
+def transpose(a: Tensor, dim0: int = -2, dim1: int = -1) -> Tensor:
     out = fn._Transpose.apply(a, dim0, dim1)
     return out
 

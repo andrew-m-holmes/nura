@@ -84,6 +84,10 @@ def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None) -> Tensor:
 def binarycrossentropy(
     x: Tensor, y: Tensor, reduction: Optional[str] = "mean"
 ) -> Tensor:
+    if y.ndim > 2:
+        raise ValueError("'y' cannot be more than 2D")
+    if x.ndim != y.ndim:
+        raise ValueError("'x' must have the same rank as 'y'")
     return fn._BinaryCrossEntropy.apply(x, y, reduction)
 
 
@@ -93,10 +97,16 @@ def crossentropy(
     ignoreid: Optional[int] = None,
     reduction: Optional[str] = "mean",
 ) -> Tensor:
+    if x.ndim != 2:
+        raise ValueError("'x' must be 2D")
+    if y.ndim != 1:
+        raise ValueError("'y' must be 1D")
     return fn._CrossEntropy.apply(x, y, ignoreid, reduction)
 
 
 def dropout(x: Tensor, p: float = 0.5) -> Tensor:
+    if p < 0:
+        raise ValueError("'p' cannot be less than zero")
     return fn._Dropout.apply(x, p)
 
 

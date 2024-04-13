@@ -2,7 +2,8 @@ import nura.nn.functional as f
 import nura.utils as utils
 import nura.types as types
 from nura.types import dtype
-from nura.nn import Module, Parameter, parameter
+from nura.nn.modules.module import Module
+from nura.nn.parameter import Parameter, parameter
 from nura.tensors import Tensor
 from typing import Optional, Type
 
