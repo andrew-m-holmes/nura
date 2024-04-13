@@ -84,8 +84,6 @@ def matmul(a: Tensor, b: Tensor) -> Tensor:
 def imatmul(a: Tensor, b: Tensor) -> Tensor:
     if a.usegrad:
         raise RuntimeError("Cannot use inplace matmul() with grad enabled")
-    if not isinstance(b, Tensor):
-        b = tensor(b, dtype=a.dtype)
     a._data @= b.data
     return a
 

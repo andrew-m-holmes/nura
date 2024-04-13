@@ -34,10 +34,7 @@ class Node:
     def children(self) -> Optional[List["Node"]]:
         if self.context is None:
             return None
-        nodes = []
-        for t in self.context.tensors():
-            node = getnode(t)
-            nodes.append(node)
+        nodes = [getnode(t) for t in self.context.tensors()]
         return nodes
 
     def __repr__(self):

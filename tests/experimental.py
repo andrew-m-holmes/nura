@@ -7,11 +7,10 @@ import torch
 
 def main():
 
-    x = nura.randn(3, 5, usegrad=True)
-    o = f.sigmoid(x)
-    y = nura.randint(3, low=0, high=5, dtype=nura.int)
-    loss = f.crossentropy(o, y, ignoreid=0, reduction="sum")
-    loss.backward()
+    a = nura.rand(4, 3, 2, usegrad=True)
+    b = nura.rand(2, usegrad=True)
+    c = nura.dot(a, b)
+    c.backward(nura.oneslike(c))
 
 
 if __name__ == "__main__":
