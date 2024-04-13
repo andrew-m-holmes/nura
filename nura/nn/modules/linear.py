@@ -17,7 +17,6 @@ class Linear(Module):
         bias=True,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
-
         super().__init__()
         if dtype is None:
             dtype = types.float

@@ -1,10 +1,9 @@
 import nura
 import nura.nn.functions as fn
 import nura.utils as utils
-from nura.nn.parameter import Parameter
 from nura.tensors import Tensor
 from nura.types import dimlike
-from typing import Optional, Tuple, Iterator, List
+from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None) -> Tensor:
@@ -82,12 +81,19 @@ def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None) -> Tensor:
     return fn._Embedding.apply(x, w, padid)
 
 
-def binarycrossentropy(x: Tensor, y: Tensor) -> Tensor:
-    return fn._BinaryCrossEntropy.apply(x, y)
+def binarycrossentropy(
+    x: Tensor, y: Tensor, reduction: Optional[str] = "mean"
+) -> Tensor:
+    return fn._BinaryCrossEntropy.apply(x, y, reduction)
 
 
-def crossentropy(x: Tensor, y: Tensor, ignoreid: Optional[int] = None) -> Tensor:
-    return fn._CrossEntropy.apply(x, y, ignoreid)
+def crossentropy(
+    x: Tensor,
+    y: Tensor,
+    ignoreid: Optional[int] = None,
+    reduction: Optional[str] = "mean",
+) -> Tensor:
+    return fn._CrossEntropy.apply(x, y, ignoreid, reduction)
 
 
 def dropout(x: Tensor, p: float = 0.5) -> Tensor:
@@ -103,13 +109,3 @@ def layernorm(
     eps: float = 1e-5,
 ) -> Tensor:
     return fn._LayerNorm.apply(x, gamma, beta, dim, correction, eps)
-
-
-def sgd(
-    params: Iterator[Parameter],
-    moments: Iterator[Tensor],
-    learnrate: float,
-    momentum: float,
-) -> None:
-    for p, m in zip(params, moments):
-        pass

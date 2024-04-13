@@ -1,7 +1,5 @@
-from nura.nn import Module
 from nura.tensors import Tensor
-from nura.nn.modules.linear import Linear
-from nura.nn.activations import ScaledDotProductAttention
+from nura.nn import Module, Linear, ScaledDotProductAttention
 from nura.types import dtype
 from typing import Optional, Tuple, Type
 
@@ -16,6 +14,7 @@ class MultiHeadAttention(Module):
         heads: int,
         maskfill=-1e9,
         bias=False,
+        dropout: Optional[float] = None,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
 
@@ -32,7 +31,7 @@ class MultiHeadAttention(Module):
         self._kweight = Linear(dm, heads * dk, bias=bias, dtype=dtype)
         self._vweight = Linear(dm, heads * dv, bias=bias, dtype=dtype)
         self._oweight = Linear(heads * dv, dm, bias=bias, dtype=dtype)
-        self._attn = ScaledDotProductAttention(maskfill=maskfill)
+        self._attn = ScaledDotProductAttention(maskfill=maskfill, dropout=dropout)
 
     @property
     def dm(self) -> int:

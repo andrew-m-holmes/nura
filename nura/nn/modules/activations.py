@@ -1,5 +1,5 @@
 import nura.nn.functional as f
-from nura.nn.module import Module
+from nura.nn import Module
 from nura.tensors import Tensor
 from typing import Optional, Tuple
 

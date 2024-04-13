@@ -293,7 +293,9 @@ class _Embedding(Function):
 class _CrossEntropy(Function):
 
     @staticmethod
-    def forward(context: Context, x: Tensor, y: Tensor, ignoreid: int):
+    def forward(
+        context: Context, x: Tensor, y: Tensor, ignoreid: int, reduction: Optional[str]
+    ):
         context.save(x)
         exp = np.exp(x.data - x.data.max(axis=-1, keepdims=True))
         a = exp / exp.sum(axis=-1, keepdims=True)
@@ -301,43 +303,66 @@ class _CrossEntropy(Function):
         context["a"] = a
         context["ignoreid"] = ignoreid
         context["labels"] = y.data
+        context["reduction"] = reduction
 
         mask = y.data != ignoreid
         indices, *_ = mask.nonzero()
         classes = y.data[indices]
         p = a[indices, classes]
         nll = -np.log(p)
-        return nll.mean()
+
+        if reduction == "mean":
+            return nll.mean()
+        if reduction == "sum":
+            return nll.sum()
+        if reduction is None:
+            return nll
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context["a"].copy()
         ignoreid = context["ignoreid"]
         labels = context["labels"]
+        reduction = context["reduction"]
 
         mask = labels != ignoreid
         indices, *_ = mask.nonzero()
-        m = indices.shape[0]
         ignore, *_ = np.invert(mask).nonzero()
         classes = labels[indices]
         a[indices, classes] -= 1
         a[ignore] = 0
-        return (a / m) * grad.data
+
+        if reduction == "mean":
+            return (1 / labels.size) * a * grad.data
+        if reduction == "sum" or reduction is None:
+            return a * grad.data
 
 
 class _BinaryCrossEntropy(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, y: Tensor):
+    def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
         context.save(a, y)
         nll = np.negative(y.data * np.log(a.data) + (1 - y.data) * np.log(1 - a.data))
-        return nll.mean()
+        context["reduction"] = reduction
+
+        if reduction == "mean":
+            return nll.mean()
+        if reduction == "sum":
+            return nll.sum()
+        if reduction is None:
+            return nll
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, y = context.tensors()
         arr = np.negative(y.data / a.data) + (1 - y.data) / (1 - a.data)
-        return (1 / y.data.size) * arr * grad.data
+        reduction = context["reduction"]
+
+        if reduction == "mean":
+            return (1 / y.data.size) * arr * grad.data
+        if reduction == "sum" or reduction is None:
+            return arr * grad.data
 
 
 class _Dropout(Function):

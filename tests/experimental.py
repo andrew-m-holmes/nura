@@ -7,19 +7,10 @@ import torch
 
 def main():
 
-    x = torch.arange(30).reshape(3, 10).float().requires_grad_()
-    w = torch.nn.Parameter(torch.rand(10))
-    optim = torch.optim.SGD(iter([w]), lr=1.0)
-
-    w_ = w.clone().detach()
-    y = x * w
-    loss = y.sum()
-    loss.backward()
-    grad = w.grad
-    optim.step()
-
-    print(grad / 3)
-    print(w_ - w)
+    x = nura.randn(3, 5, usegrad=True)
+    w = nura.randn(5, 1)
+    o = nura.dot(x, w)
+    print(o)
 
 
 if __name__ == "__main__":

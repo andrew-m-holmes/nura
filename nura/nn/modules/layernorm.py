@@ -1,8 +1,8 @@
 import nura
 import nura.nn.functional as f
-from nura.tensors import Tensor
-from nura.nn.module import Module
 from nura.types import dtype, dimlike
+from nura.tensors import Tensor
+from nura.nn import Module, Parameter, parameter
 from nura.nn.parameter import Parameter, parameter
 from typing import Optional, Type, Union
 
@@ -12,7 +12,7 @@ class LayerNorm(Module):
     def __init__(
         self,
         normdim: dimlike,
-        correction: int = True,
+        correction: Union[bool, int] = True,
         eps: float = 1e-5,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
@@ -33,7 +33,7 @@ class LayerNorm(Module):
         return self._normdim
 
     @property
-    def correction(self) -> int:
+    def correction(self) -> Union[bool, int]:
         return self._correction
 
     @property
