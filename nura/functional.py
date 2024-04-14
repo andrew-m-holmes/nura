@@ -1,6 +1,5 @@
 import nura.utils as utils
 import nura.functions as fn
-import nura.types as types
 from nura.tensors import Tensor, tensor
 from nura.types import Scalar, dimlike, dim
 from typing import Optional, Union, Any
