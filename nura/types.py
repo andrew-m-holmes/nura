@@ -2,16 +2,14 @@ import numpy as np
 from numpy import ndarray
 from typing import Type, Any, Tuple, Union, Iterable
 
-
-_py_int = int
-_py_float = float
-_py_bool = bool
-
+pyint = int
+pyfloat = float
+pybool = bool
 inf = np.inf
 dim = Tuple[int, ...]
 dimlike = Union[Tuple[int, ...], int]
-Scalar = Union[float, int]
-Tensorlike = Union[Iterable[Any], Scalar, bool]
+Scalar = Union[float, int, bool]
+Tensorlike = Union[Iterable[Any], Scalar]
 
 
 class dtype:
@@ -81,14 +79,14 @@ _dtypemap = {
     np.int8: char,
     np.int16: short,
     np.int32: int,
-    _py_int: int,
+    pyint: int,
     np.int64: long,
     np.float16: half,
     np.float32: float,
-    _py_float: float,
+    pyfloat: float,
     np.float64: double,
     np.bool_: bool,
-    _py_bool: bool,
+    pybool: bool,
     np.dtype(np.uint8): byte,
     np.dtype(np.int8): char,
     np.dtype(np.int16): short,

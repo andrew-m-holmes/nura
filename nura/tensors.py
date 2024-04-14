@@ -151,8 +151,14 @@ class Tensor:
     def contiguous(self) -> "Tensor":
         return nura.tocontiguous(self)
 
+    def dot(self, other: Union["Tensor", Scalar]) -> "Tensor":
+        return nura.dot(self, other)
+
     def exp(self) -> "Tensor":
         return nura.exp(self)
+
+    def log(self) -> "Tensor":
+        return nura.log(self)
 
     def sum(self, dim: Optional[dimlike] = None, keepdims=False) -> "Tensor":
         return nura.sum(self, dim, keepdims)
@@ -232,6 +238,15 @@ class Tensor:
     def __ifloordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.ifloordiv(self, other)
 
+    def __mod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
+        return nura.modulo(self, other)
+
+    def __rmod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
+        return nura.modulo(tensor(other, dtype=self.dtype), self)
+
+    def __imod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
+        return nura.imodulo(self, other)
+
     def __matmul__(self, other: "Tensor") -> "Tensor":
         return nura.matmul(self, other)
 
@@ -259,19 +274,19 @@ class Tensor:
     def __invert__(self) -> "Tensor":
         return nura.tensornot(self)
 
-    def __eq__(self, other) -> "Tensor":
+    def __eq__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.equal(self, other)
 
-    def __lt__(self, other) -> "Tensor":
+    def __lt__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.less(self, other)
 
-    def __le__(self, other) -> "Tensor":
+    def __le__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.lesseq(self, other)
 
-    def __gt__(self, other) -> "Tensor":
+    def __gt__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.greater(self, other)
 
-    def __ge__(self, other) -> "Tensor":
+    def __ge__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.greatereq(self, other)
 
     def __ne__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -339,7 +354,9 @@ class Tensor:
 
 
 def tensor(
-    data: Union[Tensor, Tensorlike], usegrad=False, dtype: Optional[Type[dtype]] = None
+    data: Union[Tensor, Tensorlike],
+    usegrad: bool = False,
+    dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if isinstance(data, Tensor):
         data = data.data
