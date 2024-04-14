@@ -1,5 +1,6 @@
-from typing import Iterator, Optional
-from nura.nn import Parameter
+from nura.tensors import Tensor
+from nura.nn.parameter import Parameter
+from typing import Iterator, Optional, Tuple
 
 
 class Optimizer:
@@ -10,6 +11,7 @@ class Optimizer:
         learnrate: float,
         decay: Optional[float] = None,
     ) -> None:
+        self._stepnum = 1
         self._params = params
         self._learnrate = learnrate
         self._decay = decay
@@ -25,6 +27,16 @@ class Optimizer:
     @classmethod
     def name(cls) -> str:
         return cls.__name__
+
+    def update(self, a: Tensor, grad: Tensor) -> None:
+        a.mutate(usegrad=False)
+        a -= self.learnrate * grad
+        a.mutate(usegrad=True)
+
+    def autodecay(self, param: Parameter, grad: Tensor) -> Tensor:
+        if self.decay is not None:
+            return grad + self.decay * param.clone().detach()
+        return grad.clone().detach()
 
     def zerograd(self) -> None:
         for p in self._params:
@@ -45,17 +57,36 @@ class SGD(Optimizer):
         params: Iterator[Parameter],
         learnrate: float,
         momentum: float = 0.9,
+        nesterov: bool = False,
         decay: Optional[float] = None,
     ) -> None:
         super().__init__(params, learnrate, decay)
         self._momentum = momentum
+        self._nesterov = nesterov
+        self._moments = {}
 
     @property
     def momentum(self) -> float:
         return self._momentum
 
+    @property
+    def nesterov(self) -> bool:
+        return self._nesterov
+
+    @property
+    def moments(self) -> Iterator[Tuple[Parameter, Tensor]]:
+        yield from self._moments.items()
+
     def step(self) -> None:
-        pass
+        for p in self._params:
+            if p.grad is None or not p.usegrad:
+                continue
+            grad = self.autodecay(p, p.grad)
+            vprev = self._moments.get(p, p.clone().detach())
+            v = self.momentum * vprev + (1 - self.momentum) * grad
+            gradstep = grad + self.momentum * v if self.nesterov else v
+            self._moments[p] = gradstep
+            self.update(p, gradstep)
 
     def __repr__(self) -> str:
         learnrate, momentum, decay = self.learnrate, self.momentum, self.decay
