@@ -1,4 +1,3 @@
-from .loss import *
 from .activations import *
 from .module import Module
 from .linear import Linear
