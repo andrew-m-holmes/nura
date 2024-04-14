@@ -77,13 +77,16 @@ class SGD(Optimizer):
         for p in self._params:
             if not p.usegrad or p.grad is None:
                 continue
-
-            grad = p.grad.mutated(usegrad=False)
+            grad = p.grad.clone().detach()
+            ptensor = p.clone().detach()
             if self.decay is not None:
-                grad *= self.decay
-            velprev = self._moments.get(p, p.clone().detach())
+                grad += self.decay * ptensor
+            velprev = self._moments.get(p, ptensor)
             vel = self.momentum * velprev + (1 - self.momentum) * grad
-            updategrad = grad + self.momentum * vel if self.nesterov else vel
+            if self.nesterov:
+                vel = self.momentum * vel + grad
+            self._moments[p] = vel
+            updategrad = self.learnrate * vel
             self.update(p, updategrad)
 
     def __repr__(self) -> str:
