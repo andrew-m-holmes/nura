@@ -89,6 +89,22 @@ class _Div(Function):
         return arr
 
 
+class _Floordiv(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor):
+        arr = a.data // b.data
+        return arr
+
+
+class _Modulo(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor):
+        arr = a.data % b.data
+        return arr
+
+
 class _Dot(Function):
 
     @staticmethod

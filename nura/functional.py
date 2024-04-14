@@ -1,5 +1,6 @@
 import nura.utils as utils
 import nura.functions as fn
+import nura.types as types
 from nura.tensors import Tensor, tensor
 from nura.types import Scalar, dimlike, dim
 from typing import Optional, Union, Any
@@ -69,7 +70,41 @@ def idiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     return a
 
 
-def dot(a: Tensor, b: Tensor) -> Tensor:
+def floordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    out = fn._Floordiv.apply(a, b)
+    return out
+
+
+def ifloordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+    if a.usegrad:
+        raise RuntimeError("Cannot use inplace mul() with grad enabled")
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data //= b.data
+    return a
+
+
+def modulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    out = fn._Modulo.apply(a, b)
+    return out
+
+
+def imodulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+    if a.usegrad:
+        raise RuntimeError("Cannot use inplace mul() with grad enabled")
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data %= b.data
+    return a
+
+
+def dot(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
     out = fn._Dot.apply(a, b)
     return out
 
