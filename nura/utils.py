@@ -301,6 +301,10 @@ def tocontiguous(a: Tensor) -> Tensor:
     return c.mutated(data=data)
 
 
+def detach(a: Tensor) -> Tensor:
+    return tensor(a.data, False, a.dtype)
+
+
 def todim(dim: Tuple[Any, ...]) -> dim:
     if not dim:
         return tuple()

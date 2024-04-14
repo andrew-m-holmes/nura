@@ -143,8 +143,11 @@ class Tensor:
             setattr(t, f"_{k}", v)
         return t
 
+    def nograd(self):
+        self._usegrad = False
+
     def detach(self):
-        return tensor(self.data, False, self.dtype)
+        return nura.detach(self)
 
     def clone(self):
         return nura.clone(self)
