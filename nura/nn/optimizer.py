@@ -11,7 +11,7 @@ class Optimizer:
         learnrate: float,
         decay: Optional[float] = None,
     ) -> None:
-        self._stepnum = 1
+        self._stepnum = 0
         self._params = params
         self._learnrate = learnrate
         self._decay = decay
@@ -28,22 +28,17 @@ class Optimizer:
     def name(cls) -> str:
         return cls.__name__
 
-    def update(self, a: Tensor, grad: Tensor) -> None:
+    def update(self, a: Tensor, gradstep: Tensor) -> None:
         a.mutate(usegrad=False)
-        a -= self.learnrate * grad
+        a -= gradstep
         a.mutate(usegrad=True)
-
-    def autodecay(self, param: Parameter, grad: Tensor) -> Tensor:
-        if self.decay is not None:
-            return grad + self.decay * param.clone().detach()
-        return grad.clone().detach()
 
     def zerograd(self) -> None:
         for p in self._params:
             p.zerograd()
 
     def step(self) -> None:
-        raise NotImplementedError
+        self._stepnum += 1
 
     def __repr__(self) -> str:
         learnrate, decay = self.learnrate, self.decay
@@ -78,15 +73,18 @@ class SGD(Optimizer):
         yield from self._moments.items()
 
     def step(self) -> None:
+        super().step()
         for p in self._params:
-            if p.grad is None or not p.usegrad:
+            if not p.usegrad or p.grad is None:
                 continue
-            grad = self.autodecay(p, p.grad)
-            vprev = self._moments.get(p, p.clone().detach())
-            v = self.momentum * vprev + (1 - self.momentum) * grad
-            gradstep = grad + self.momentum * v if self.nesterov else v
-            self._moments[p] = gradstep
-            self.update(p, gradstep)
+
+            grad = p.grad.mutated(usegrad=False)
+            if self.decay is not None:
+                grad *= self.decay
+            velprev = self._moments.get(p, p.clone().detach())
+            vel = self.momentum * velprev + (1 - self.momentum) * grad
+            updategrad = grad + self.momentum * vel if self.nesterov else vel
+            self.update(p, updategrad)
 
     def __repr__(self) -> str:
         learnrate, momentum, decay = self.learnrate, self.momentum, self.decay
