@@ -356,14 +356,60 @@ class _BinaryCrossEntropy(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, y = context.tensors()
-        arr = np.negative(y.data / a.data) + (1 - y.data) / (1 - a.data)
         reduction = context["reduction"]
+        arr = np.negative(y.data / a.data) + (1 - y.data) / (1 - a.data)
 
         if reduction == "mean":
             return (1 / y.data.size) * arr * grad.data
         if reduction == "sum" or reduction is None:
             return arr * grad.data
 
+class _MSE(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
+        context.save(a, y)
+        context["reduction"] = reduction
+        mse = 0.5 * np.square(a.data - y.data)
+        if reduction == "mean":
+            return mse.mean()
+        if reduction == "sum":
+            return mse.sum()
+        if reduction is None:
+            return mse
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a, y = context.tensors()
+        reduction = context["reduction"]
+        if reduction == "mean":
+            return (1 / y.data.size) * (a.data - y.data) * grad.data
+        if reduction == "sum" or reduction is None:
+            return (a.data - y.data) * grad.data
+
+class _RMSE(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
+        context.save(a, y)
+        context["reduction"] = reduction
+        mse =  np.sqrt(np.square(a.data - y.data))
+        if reduction == "mean":
+            return mse.sum() * np.sqrt(1 / y.data.size)
+        if reduction == "sum":
+            return mse.sum()
+        if reduction is None:
+            return mse
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a, y = context.tensors()
+        reduction = context["reduction"]
+        error = a.data - y.data
+        if reduction == "mean":
+            return np.sqrt(1 / y.data.size) * np.sqrt(error) * grad.data
+        if reduction == "sum" or reduction is None:
+            return np.sqrt(error) * grad.data
 
 class _Dropout(Function):
 
