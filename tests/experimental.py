@@ -6,10 +6,15 @@ import numpy as np
 
 def main():
 
-    a = nura.rand(5)
-    b = nura.rand(5)
-    c = a % b
-    print(c)
+    p = nn.parameter(nura.rand(4))
+    parameters = iter([p])
+    sgd = nn.SGD(parameters, 1e-2)
+    y = p / 3.0
+    loss = y.sum()
+    loss.backward()
+    print(p)
+    sgd.step()
+    print(p)
 
 
 if __name__ == "__main__":
