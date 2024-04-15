@@ -110,12 +110,6 @@ def mse(a: Tensor, y: Tensor, reduction: Optional[str] = "mean") -> Tensor:
     return fn._MSE.apply(a, y, reduction)
 
 
-def rmse(a: Tensor, y: Tensor, reduction: Optional[str] = "mean") -> Tensor:
-    if a.ndim != y.ndim:
-        raise ValueError("'x' must have the same dimensions as 'y'")
-    return fn._RMSE.apply(a, y, reduction)
-
-
 def dropout(x: Tensor, p: float = 0.5) -> Tensor:
     if p < 0:
         raise ValueError("'p' cannot be less than zero")

@@ -6,15 +6,17 @@ import numpy as np
 
 def main():
 
-    p = nn.parameter(nura.rand(4))
-    parameters = iter([p])
-    sgd = nn.SGD(parameters, 1e-2)
-    y = p / 3.0
-    loss = y.sum()
-    loss.backward()
-    print(p)
-    sgd.step()
-    print(p)
+    def rmse(a, y):
+        return np.sqrt(np.mean(np.square(a - y)))
+
+    a, y = np.random.rand(4), np.random.randint(0, 2, size=4).astype(float)
+    error = rmse(a, y)
+    print(error)
+
+    a = nura.tensor(a)
+    y = nura.tensor(y)
+    error = f.rmse(a, y)
+    print(error)
 
 
 if __name__ == "__main__":
