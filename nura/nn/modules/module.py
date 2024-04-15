@@ -9,8 +9,8 @@ from copy import copy
 class Module:
 
     def __init__(self) -> None:
-        self._mods: OrderedDict[str, "Module"] = OrderedDict()
-        self._params: OrderedDict[str, Parameter] = OrderedDict()
+        self._modules: OrderedDict[str, "Module"] = OrderedDict()
+        self._parameters: OrderedDict[str, Parameter] = OrderedDict()
         self._training: bool = True
 
     @property
@@ -24,32 +24,32 @@ class Module:
     def forward(self) -> Any:
         raise NotImplemented
 
-    def mods(self) -> Iterator["Module"]:
-        yield from self._mods.values()
-        for m in self._mods.values():
-            yield from m.mods()
+    def modules(self) -> Iterator["Module"]:
+        yield from self._modules.values()
+        for m in self._modules.values():
+            yield from m.modules()
 
-    def namedmods(self) -> Iterator[Tuple[str, "Module"]]:
-        yield from self._mods.items()
-        for m in self._mods.values():
-            yield from m.namedmods()
+    def namedmodules(self) -> Iterator[Tuple[str, "Module"]]:
+        yield from self._modules.items()
+        for m in self._modules.values():
+            yield from m.namedmodules()
 
-    def params(self) -> Iterator[Parameter]:
-        yield from self._params.values()
-        for m in self._mods.values():
-            yield from m.params()
+    def parameters(self) -> Iterator[Parameter]:
+        yield from self._parameters.values()
+        for m in self._modules.values():
+            yield from m.parameters()
 
-    def namedparams(self) -> Iterator[Tuple[str, Parameter]]:
-        yield from self._params.items()
-        for m in self._mods.values():
-            yield from m.namedparams()
+    def namedparameters(self) -> Iterator[Tuple[str, Parameter]]:
+        yield from self._parameters.items()
+        for m in self._modules.values():
+            yield from m.namedparameters()
 
     def to(self, dtype: Type[dtype]) -> "Module":
-        params = OrderedDict((n, p.to(dtype)) for n, p in self._params.items())
-        mods = OrderedDict((n, m.to(dtype)) for n, m in self._mods.items())
+        parameters = OrderedDict((n, p.to(dtype)) for n, p in self._parameters.items())
+        modules = OrderedDict((n, m.to(dtype)) for n, m in self._modules.items())
         mod = copy(self)
-        mod._params = params
-        mod._mods = mods
+        mod._parameters = parameters
+        mod._modules = modules
         return mod
 
     def half(self) -> "Module":
@@ -63,12 +63,12 @@ class Module:
 
     def train(self):
         self._training = True
-        for m in self._mods.values():
+        for m in self._modules.values():
             m.train()
 
     def eval(self):
         self._training = False
-        for m in self._mods.values():
+        for m in self._modules.values():
             m.eval()
 
     def __call__(self, *args, **kwargs) -> Any:
@@ -76,9 +76,9 @@ class Module:
 
     def __setattr__(self, name, value):
         if isinstance(value, Module):
-            self._mods[name] = value
+            self._modules[name] = value
         if isinstance(value, Parameter):
-            self._params[name] = value
+            self._parameters[name] = value
         self.__dict__[name] = value
 
     def __repr__(self) -> str:
@@ -86,13 +86,13 @@ class Module:
 
     def reprhelp(self, pad=3) -> str:
         strs = [self.xrepr()]
-        if hasmods := len(self._mods):
+        if hasmodules := len(self._modules):
             strs.append(": (")
         strs.append("\n")
-        for n, m in self._mods.items():
+        for n, m in self._modules.items():
             strs.append(f"{' ' * pad}({n}): ")
             strs.extend(m.reprhelp(pad + 3))
-        if hasmods:
+        if hasmodules:
             strs.append(f"{' ' * (pad - 3)})\n")
         return "".join(strs)
 
