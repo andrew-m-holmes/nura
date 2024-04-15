@@ -78,7 +78,7 @@ def floordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 
 def ifloordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if a.usegrad:
-        raise RuntimeError("Cannot use inplace mul() with grad enabled")
+        raise RuntimeError("Cannot use inplace floordiv() with grad enabled")
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     a._data //= b.data
@@ -94,7 +94,7 @@ def modulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 
 def imodulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if a.usegrad:
-        raise RuntimeError("Cannot use inplace mul() with grad enabled")
+        raise RuntimeError("Cannot use inplace modulo() with grad enabled")
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     a._data %= b.data
@@ -116,6 +116,8 @@ def matmul(a: Tensor, b: Tensor) -> Tensor:
 
 
 def imatmul(a: Tensor, b: Tensor) -> Tensor:
+    if a.ndim < 2 or b.ndim < 2:
+        raise ValueError("Cannot compute matmul() with tensors that aren't at least 2D")
     if a.usegrad:
         raise RuntimeError("Cannot use inplace matmul() with grad enabled")
     a._data @= b.data
