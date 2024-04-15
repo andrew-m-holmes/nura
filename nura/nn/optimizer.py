@@ -7,12 +7,12 @@ class Optimizer:
 
     def __init__(
         self,
-        params: Iterator[Parameter],
+        parameters: Iterator[Parameter],
         learnrate: float,
         decay: Optional[float] = None,
     ) -> None:
         self._stepnum = 0
-        self._params = params
+        self._parameters = parameters
         self._learnrate = learnrate
         self._decay = decay
 
@@ -28,13 +28,13 @@ class Optimizer:
     def name(cls) -> str:
         return cls.__name__
 
-    def update(self, a: Tensor, gradstep: Tensor) -> None:
-        a.mutate(usegrad=False)
-        a -= gradstep
-        a.mutate(usegrad=True)
+    def update(self, parameter: Tensor, gradstep: Tensor) -> None:
+        parameter.mutate(usegrad=False)
+        parameter -= gradstep
+        parameter.mutate(usegrad=True)
 
     def zerograd(self) -> None:
-        for p in self._params:
+        for p in self._parameters:
             p.zerograd()
 
     def step(self) -> None:
@@ -42,20 +42,20 @@ class Optimizer:
 
     def __repr__(self) -> str:
         learnrate, decay = self.learnrate, self.decay
-        return f"{self.name()}({learnrate=} {decay=})"
+        return f"{self.name()}({learnrate=:.2e} {decay=})"
 
 
 class SGD(Optimizer):
 
     def __init__(
         self,
-        params: Iterator[Parameter],
+        parameters: Iterator[Parameter],
         learnrate: float,
         momentum: float = 0.9,
         nesterov: bool = False,
         decay: Optional[float] = None,
     ) -> None:
-        super().__init__(params, learnrate, decay)
+        super().__init__(parameters, learnrate, decay)
         self._momentum = momentum
         self._nesterov = nesterov
         self._moments = {}
@@ -74,37 +74,56 @@ class SGD(Optimizer):
 
     def step(self) -> None:
         super().step()
-        for p in self._params:
-            if not p.usegrad or p.grad is None:
+        for p in self._parameters:
+            if p.grad is None or not p.usegrad:
                 continue
-            grad = p.grad.clone().detach()
-            ptensor = p.clone().detach()
-            if self.decay is not None:
-                grad += self.decay * ptensor
-            velprev = self._moments.get(p, ptensor)
-            vel = self.momentum * velprev + (1 - self.momentum) * grad
-            if self.nesterov:
-                vel = self.momentum * vel + grad
-            self._moments[p] = vel
-            updategrad = self.learnrate * vel
-            self.update(p, updategrad)
+            vel = self._moments.get(p)
+            update, nextvel = sgd(
+                p, self.learnrate, self.momentum, vel, self.nesterov, self.decay
+            )
+            self._moments[p] = nextvel
+            self.update(p, update)
 
     def __repr__(self) -> str:
-        learnrate, momentum, decay = self.learnrate, self.momentum, self.decay
-        return f"{self.name()}({learnrate=} {momentum=} {decay=})"
+        learnrate, momentum = self.learnrate, self.momentum
+        nesterov, decay = self.nesterov, self.decay
+        return f"{self.name()}({learnrate=:.2e} {momentum=} {nesterov=} {decay=})"
+
+
+def sgd(
+    parameter: Parameter,
+    learnrate: float,
+    momentum: float,
+    velocity: Optional[Tensor] = None,
+    nesterov: bool = False,
+    decay: Optional[float] = None,
+) -> Tuple[Tensor, Tensor]:
+    if parameter.grad is None:
+        raise ValueError(
+            "Cannot compute update gradient or next velocity, 'parameter.grad' is None"
+        )
+    if velocity is None:
+        velocity = parameter.detach()
+    grad = (
+        parameter.grad if decay is None else parameter.grad + parameter.detach() * decay
+    )
+    nextvel = momentum * velocity + (1 - momentum) * grad
+    # TODO figure out update with nesterov
+    update = learnrate * nextvel
+    return update, nextvel
 
 
 class RMSProp(Optimizer):
 
     def __init__(
         self,
-        params: Iterator[Parameter],
+        parameters: Iterator[Parameter],
         learnrate: float,
         alpha: float = 0.99,
         eps: float = 1e-8,
         decay: Optional[float] = None,
     ) -> None:
-        super().__init__(params, learnrate, decay)
+        super().__init__(parameters, learnrate, decay)
         self._alpha = alpha
         self._eps = eps
 
@@ -118,20 +137,20 @@ class RMSProp(Optimizer):
 
     def __repr__(self) -> str:
         learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
-        return f"{self.name()}({learnrate=} {alpha=} {eps=:.3e} {decay=})"
+        return f"{self.name()}({learnrate=:.2e} {alpha=} {eps=:.3e} {decay=})"
 
 
 class Adam(Optimizer):
 
     def __init__(
         self,
-        params: Iterator[Parameter],
+        parameters: Iterator[Parameter],
         learnrate: float,
         betas: Tuple[float, float] = (0.9, 0.990),
         eps: float = 1e-8,
         decay: Optional[float] = None,
     ) -> None:
-        super().__init__(params, learnrate, decay)
+        super().__init__(parameters, learnrate, decay)
         self._betas = betas
         self._eps = eps
 
@@ -145,4 +164,4 @@ class Adam(Optimizer):
 
     def __repr__(self) -> str:
         learnrate, betas, eps, decay = self.learnrate, self.betas, self.eps, self.decay
-        return f"{self.name()}({learnrate=} {betas=} {eps=} {decay=})"
+        return f"{self.name()}({learnrate=:.2e} {betas=} {eps=} {decay=})"
