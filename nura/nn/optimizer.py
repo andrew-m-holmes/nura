@@ -1,3 +1,4 @@
+import nura.utils as utils
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
 from typing import Iterator, Optional, Tuple
@@ -77,12 +78,9 @@ class SGD(Optimizer):
         for p in self._parameters:
             if p.grad is None or not p.usegrad:
                 continue
-            vel = self._moments.get(p)
-            update, nextvel = sgd(
-                p, self.learnrate, self.momentum, vel, self.nesterov, self.decay
-            )
-            self._moments[p] = nextvel
-            self.update(p, update)
+            v = self._moments.get(p, utils.zeroslike(p))
+            g = sgd(p, v, self.learnrate, self.momentum, self.nesterov, self.decay)
+            self.update(p, g)
 
     def __repr__(self) -> str:
         learnrate, momentum = self.learnrate, self.momentum
@@ -92,25 +90,21 @@ class SGD(Optimizer):
 
 def sgd(
     parameter: Parameter,
+    velocity: Tensor,
     learnrate: float,
     momentum: float,
-    velocity: Optional[Tensor] = None,
     nesterov: bool = False,
     decay: Optional[float] = None,
-) -> Tuple[Tensor, Tensor]:
+) -> Tensor:
     if parameter.grad is None:
-        raise ValueError(
-            "Cannot compute update gradient or next velocity, 'parameter.grad' is None"
-        )
-    if velocity is None:
-        velocity = parameter.detach()
-    grad = (
-        parameter.grad if decay is None else parameter.grad + parameter.detach() * decay
-    )
-    nextvel = momentum * velocity + (1 - momentum) * grad
-    # TODO figure out update with nesterov
-    update = learnrate * nextvel
-    return update, nextvel
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+    grad = parameter.clone().detach()
+    if decay is not None:
+        grad += decay * parameter.detach()
+    if nesterov:
+        grad += momentum * velocity
+    update = momentum * velocity + learnrate * grad
+    return update
 
 
 class RMSProp(Optimizer):
