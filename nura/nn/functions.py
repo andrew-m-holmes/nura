@@ -89,6 +89,15 @@ class _Softmax(Function):
         jac = diagonal - offdiagonal
         return jac.sum(axis=-1).reshape(outshape) * grad.data
 
+class _LogSoftmax(Function):
+
+    @staticmethod
+    def forward(context: Context, x: Tensor, dim: int):
+        context.save(x)
+        logsum = np.log(np.exp(x.data).sum(axis=dim, keepdims=True))
+        nll = np.negative(x.data - logsum)
+        return nll
+
 
 class _ReLU(Function):
 
@@ -288,6 +297,7 @@ class _Embedding(Function):
         indices = xdata[mask]
         np.add.at(arr, indices, grad.data[mask])
         return arr
+
 
 
 class _CrossEntropy(Function):
