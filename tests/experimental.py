@@ -6,18 +6,13 @@ import numpy as np
 
 def main():
 
-    x = np.random.randn(7)
-    exp = np.exp(x - x.max(keepdims=True))
-    a = np.log(exp * (1 / exp.sum(keepdims=True)))
-    print(a)
-    print(np.exp(a).sum())
-
-    xmax = x.max(keepdims=True)
-    a_ = x - xmax - np.log(np.exp(x - xmax).sum(keepdims=True))
-    print(a_)
-    print(np.exp(a_).sum())
-
-    np.testing.assert_allclose(a_, a, rtol=1e-7, atol=1e-7)
+    x = nura.randn(3, 7)
+    x.usesgrad()
+    y = nura.randint(0, 7, 3)
+    ignoreid = int(nura.randint(0, 7).item())
+    loss = f.crossentropy(x, y, ignoreid)
+    loss.backward()
+    print(x.grad)
 
 
 if __name__ == "__main__":
