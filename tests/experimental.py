@@ -6,19 +6,18 @@ import numpy as np
 
 def main():
 
-    def mse(a, y):
-        return np.mean(0.5 * np.square(a - y))
+    x = np.random.randn(7)
+    exp = np.exp(x - x.max(keepdims=True))
+    a = np.log(exp * (1 / exp.sum(keepdims=True)))
+    print(a)
+    print(np.exp(a).sum())
 
-    a, y = np.random.rand(4), np.random.randint(0, 2, size=4).astype(float)
-    error = mse(a, y)
-    print(error)
+    xmax = x.max(keepdims=True)
+    a_ = x - xmax - np.log(np.exp(x - xmax).sum(keepdims=True))
+    print(a_)
+    print(np.exp(a_).sum())
 
-    a = nura.tensor(a)
-    y = nura.tensor(y)
-    error = f.mse(a, y)
-    print(error)
-
-    print(nura.sum(nura.square(a - y)) / a.nelem)
+    np.testing.assert_allclose(a_, a, rtol=1e-7, atol=1e-7)
 
 
 if __name__ == "__main__":

@@ -70,21 +70,21 @@ class _Div(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         context.save(a, b)
-        arr = a.data / b.data
+        arr = a.data * (1 / b.data)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr0 = grad.data / b.data
-        arr1 = np.negative(a.data) / np.square(b.data) * grad.data
+        arr0 = grad.data * (1 / b.data)
+        arr1 = a.data * np.negative(1 / np.square(b.data)) * grad.data
         return arr0, arr1
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
-        arr0 = agrad.data / b.data
-        arr1 = a.data * (np.negative(bgrad.data) / np.square(b.data))
+        arr0 = agrad.data * (1 / b.data)
+        arr1 = a.data * np.negative(1 / np.square(b.data)) * bgrad.data
         arr = arr0 + arr1
         return arr
 
@@ -217,13 +217,13 @@ class _Log(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = 1 / a.data * grad.data
+        arr = (1 / a.data) * grad.data
         return arr
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = 1 / a.data * grad.data
+        arr = (1 / a.data) * grad.data
         return arr
 
 
