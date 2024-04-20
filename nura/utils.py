@@ -303,7 +303,7 @@ def tocontiguous(a: Tensor) -> Tensor:
     return c.mutated(data=data)
 
 
-def detach(a: Tensor) -> Tensor:
+def detached(a: Tensor) -> Tensor:
     return tensor(a.data, False, a.dtype)
 
 

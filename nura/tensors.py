@@ -1,6 +1,6 @@
 import nura
 import nura.types as types
-from nura.types import Tensorlike, Scalar, dtype, dim, dimlike, pyint
+from nura.types import Tensorlike, Scalar, dtype, dim, dimlike
 from nura.autograd.graph import Node
 from typing import Optional, Type, Any, Union, List
 from numpy import ndarray
@@ -77,36 +77,6 @@ class Tensor:
     def list(self) -> List[Any]:
         return self.data.tolist()
 
-    def to(self, dtype: Type[types.dtype]):
-        return nura.to(self, dtype)
-
-    def byte(self) -> "Tensor":
-        return self.to(types.byte)
-
-    def char(self) -> "Tensor":
-        return self.to(types.char)
-
-    def short(self) -> "Tensor":
-        return self.to(types.short)
-
-    def int(self) -> "Tensor":
-        return self.to(types.int)
-
-    def long(self) -> "Tensor":
-        return self.to(types.long)
-
-    def half(self) -> "Tensor":
-        return self.to(types.half)
-
-    def float(self) -> "Tensor":
-        return self.to(types.float)
-
-    def double(self) -> "Tensor":
-        return self.to(types.double)
-
-    def bool(self) -> "Tensor":
-        return self.to(types.bool)
-
     def backward(self, grad: Optional["Tensor"] = None) -> None:
         nura.backward(self, grad)
 
@@ -142,8 +112,11 @@ class Tensor:
             setattr(t, f"_{k}", v)
         return t
 
-    def detach(self) -> "Tensor":
-        return nura.detach(self)
+    def detach(self) -> None:
+        self._usegrad = False
+
+    def detached(self) -> "Tensor":
+        return nura.detached(self)
 
     def clone(self) -> "Tensor":
         return nura.clone(self)
@@ -160,13 +133,13 @@ class Tensor:
     def log(self) -> "Tensor":
         return nura.log(self)
 
-    def sum(self, dim: Optional[dimlike] = None, keepdims=False) -> "Tensor":
+    def sum(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.sum(self, dim, keepdims)
 
-    def max(self, dim: Optional[dimlike] = None, keepdims=False) -> "Tensor":
+    def max(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.max(self, dim, keepdims)
 
-    def min(self, dim: Optional[dimlike] = None, keepdims=False) -> "Tensor":
+    def min(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.min(self, dim, keepdims)
 
     def squeeze(self, dim: Optional[dimlike] = None) -> "Tensor":
@@ -181,16 +154,16 @@ class Tensor:
     def reshape(self, newdim: types.dim) -> "Tensor":
         return nura.reshape(self, newdim)
 
-    def transpose(self, dim0: pyint = -2, dim1: pyint = -1) -> "Tensor":
+    def transpose(self, dim0: int = -2, dim1: int = -1) -> "Tensor":
         return nura.transpose(self, dim0, dim1)
 
     def permute(self, dims: types.dim) -> "Tensor":
         return nura.permute(self, dims)
 
-    def any(self, dim: Optional[dimlike] = None, keepdims=False) -> "Tensor":
+    def any(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.tensorany(self, dim, keepdims)
 
-    def all(self, dim: Optional[dimlike] = None, keepdims=False) -> "Tensor":
+    def all(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.tensorall(self, dim, keepdims)
 
     def __add__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -292,10 +265,10 @@ class Tensor:
     def __ne__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.notequal(self, other)
 
-    def __hash__(self) -> pyint:
+    def __hash__(self) -> int:
         return nura.hashtensor(self)
 
-    def __len__(self) -> pyint:
+    def __len__(self) -> int:
         return len(self.data)
 
     def __bool__(self) -> None:
@@ -351,6 +324,36 @@ class Tensor:
             reprs.append(f" backfn={self.backfn}")
         reprs.append(f" dtype={self.dtype.name()})")
         return "".join(reprs)
+
+    def to(self, dtype: Type[types.dtype]):
+        return nura.to(self, dtype)
+
+    def byte(self) -> "Tensor":
+        return self.to(types.byte)
+
+    def char(self) -> "Tensor":
+        return self.to(types.char)
+
+    def short(self) -> "Tensor":
+        return self.to(types.short)
+
+    def int(self) -> "Tensor":
+        return self.to(types.int)
+
+    def long(self) -> "Tensor":
+        return self.to(types.long)
+
+    def half(self) -> "Tensor":
+        return self.to(types.half)
+
+    def float(self) -> "Tensor":
+        return self.to(types.float)
+
+    def double(self) -> "Tensor":
+        return self.to(types.double)
+
+    def bool(self) -> "Tensor":
+        return self.to(types.bool)
 
 
 def tensor(

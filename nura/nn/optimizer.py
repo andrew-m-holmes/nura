@@ -13,7 +13,7 @@ class Optimizer:
         decay: Optional[float] = None,
     ) -> None:
         self._stepnum = 0
-        self._parameters = parameters
+        self._parameters = list(parameters)
         self._learnrate = learnrate
         self._decay = decay
 
@@ -30,9 +30,9 @@ class Optimizer:
         return cls.__name__
 
     def update(self, parameter: Tensor, gradstep: Tensor) -> None:
-        parameter.mutate(usegrad=False)
+        parameter.detach()
         parameter -= gradstep
-        parameter.mutate(usegrad=True)
+        parameter.usesgrad()
 
     def zerograd(self) -> None:
         for p in self._parameters:
@@ -80,6 +80,7 @@ class SGD(Optimizer):
                 continue
             v = self._moments.get(p, utils.zeroslike(p))
             g = sgd(p, v, self.learnrate, self.momentum, self.nesterov, self.decay)
+            self._moments[p] = g
             self.update(p, g)
 
     def __repr__(self) -> str:
@@ -98,9 +99,9 @@ def sgd(
 ) -> Tensor:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    grad = parameter.clone().detach()
+    grad = parameter.clone().detached()
     if decay is not None:
-        grad += decay * parameter.detach()
+        grad += decay * parameter.detached()
     if nesterov:
         grad += momentum * velocity
     update = momentum * velocity + learnrate * grad

@@ -6,13 +6,17 @@ import numpy as np
 
 def main():
 
-    x = nura.randn(3, 7)
-    x.usesgrad()
-    y = nura.randint(0, 7, 3)
-    ignoreid = int(nura.randint(0, 7).item())
-    loss = f.crossentropy(x, y, ignoreid)
+    w = nn.parameter(nura.randn(4, 5))
+    b = nn.parameter(nura.randn(4))
+    x = nura.randn(2, 5)
+    y = nura.randint(0, 4, 2)
+    sgd = nn.SGD(iter([w, b]), 1e-2, momentum=0.9, nesterov=True, decay=0)
+    o = f.linear(x, w, b)
+    loss = f.crossentropy(o, y)
+    print(loss)
     loss.backward()
-    print(x.grad)
+    sgd.step()
+    sgd.zerograd()
 
 
 if __name__ == "__main__":

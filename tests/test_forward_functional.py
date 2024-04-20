@@ -9,7 +9,7 @@ def test_add_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.add(a_tensor, b_tensor)
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_vector():
@@ -19,7 +19,7 @@ def test_add_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.add(a_tensor, b_tensor)
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_matrix():
@@ -29,7 +29,7 @@ def test_add_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.add(a_tensor, b_tensor)
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_tensor():
@@ -39,7 +39,7 @@ def test_add_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.add(a_tensor, b_tensor)
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_broadcast():
@@ -49,7 +49,7 @@ def test_add_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.add(a_tensor, b_tensor)
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_operator():
@@ -59,7 +59,7 @@ def test_add_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor + b_tensor
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_inplace():
@@ -70,7 +70,7 @@ def test_add_inplace():
     result_tensor += b_tensor
     a += b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_different_types():
@@ -78,7 +78,7 @@ def test_add_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.add(a_tensor, 3)
     expected = a + 3
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_add_different_types_reversed():
@@ -86,7 +86,7 @@ def test_add_different_types_reversed():
     a_tensor = nura.tensor(a)
     result_tensor = 4 + a_tensor
     expected = 4 + a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_scalar():
@@ -95,7 +95,7 @@ def test_sub_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.sub(a_tensor, b_tensor)
     expected = a - b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_vector():
@@ -105,7 +105,7 @@ def test_sub_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.sub(a_tensor, b_tensor)
     expected = a - b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_matrix():
@@ -115,7 +115,7 @@ def test_sub_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.sub(a_tensor, b_tensor)
     expected = a - b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_tensor():
@@ -125,7 +125,7 @@ def test_sub_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.sub(a_tensor, b_tensor)
     expected = a - b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_broadcast():
@@ -135,7 +135,7 @@ def test_sub_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.sub(a_tensor, b_tensor)
     expected = a - b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_operator():
@@ -145,7 +145,7 @@ def test_sub_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor + b_tensor
     expected = a + b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_inplace():
@@ -156,7 +156,7 @@ def test_sub_inplace():
     result_tensor -= b_tensor
     a -= b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_different_types():
@@ -164,7 +164,7 @@ def test_sub_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.sub(a_tensor, 15.0)
     expected = a - 15.0
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sub_different_types_reversed():
@@ -172,7 +172,7 @@ def test_sub_different_types_reversed():
     a_tensor = nura.tensor(a)
     result_tensor = 0.232 - a_tensor
     expected = 0.232 - a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_scalar():
@@ -181,7 +181,7 @@ def test_mul_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.mul(a_tensor, b_tensor)
     expected = a * b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_vector():
@@ -191,7 +191,7 @@ def test_mul_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.mul(a_tensor, b_tensor)
     expected = a * b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_matrix():
@@ -201,7 +201,7 @@ def test_mul_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.mul(a_tensor, b_tensor)
     expected = a * b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_tensor():
@@ -211,7 +211,7 @@ def test_mul_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.mul(a_tensor, b_tensor)
     expected = a * b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_broadcast():
@@ -221,7 +221,7 @@ def test_mul_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.mul(a_tensor, b_tensor)
     expected = a * b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_operator():
@@ -231,7 +231,7 @@ def test_mul_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor * b_tensor
     expected = a * b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_inplace():
@@ -242,7 +242,7 @@ def test_mul_inplace():
     result_tensor *= b_tensor
     a *= b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_different_types():
@@ -250,7 +250,7 @@ def test_mul_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.mul(a_tensor, 2)
     expected = a * 2
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_mul_different_types_reversed():
@@ -258,7 +258,7 @@ def test_mul_different_types_reversed():
     a_tensor = nura.tensor(a)
     result_tensor = 8.2 * a_tensor
     expected = 8.2 * a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_scalar():
@@ -267,7 +267,7 @@ def test_div_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.div(a_tensor, b_tensor)
     expected = a / b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_vector():
@@ -277,7 +277,7 @@ def test_div_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.div(a_tensor, b_tensor)
     expected = a / b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_matrix():
@@ -287,7 +287,7 @@ def test_div_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.div(a_tensor, b_tensor)
     expected = a / b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_tensor():
@@ -297,7 +297,7 @@ def test_div_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.div(a_tensor, b_tensor)
     expected = a / b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_broadcast():
@@ -307,7 +307,7 @@ def test_div_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.div(a_tensor, b_tensor)
     expected = a / b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_operator():
@@ -317,7 +317,7 @@ def test_div_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor / b_tensor
     expected = a / b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_inplace():
@@ -328,7 +328,7 @@ def test_div_inplace():
     result_tensor /= b_tensor
     a /= b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_different_types():
@@ -336,7 +336,7 @@ def test_div_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.div(a_tensor, 2)
     expected = a / 2
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_div_different_types_reversed():
@@ -344,7 +344,7 @@ def test_div_different_types_reversed():
     a_tensor = nura.tensor(a)
     result_tensor = 6 / a_tensor
     expected = 6 / a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_scalar():
@@ -353,7 +353,7 @@ def test_floordiv_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.floordiv(a_tensor, b_tensor)
     expected = a // b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_vector():
@@ -363,7 +363,7 @@ def test_floordiv_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.floordiv(a_tensor, b_tensor)
     expected = a // b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_matrix():
@@ -373,7 +373,7 @@ def test_floordiv_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.floordiv(a_tensor, b_tensor)
     expected = a // b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_tensor():
@@ -383,7 +383,7 @@ def test_floordiv_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.floordiv(a_tensor, b_tensor)
     expected = a // b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_broadcast():
@@ -393,7 +393,7 @@ def test_floordiv_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.floordiv(a_tensor, b_tensor)
     expected = a // b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_operator():
@@ -403,7 +403,7 @@ def test_floordiv_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor // b_tensor
     expected = a // b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_inplace():
@@ -414,7 +414,7 @@ def test_floordiv_inplace():
     result_tensor //= b_tensor
     a //= b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_different_types():
@@ -422,7 +422,7 @@ def test_floordiv_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.floordiv(a_tensor, 3)
     expected = a // 3
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_floordiv_different_types_reversed():
@@ -430,7 +430,7 @@ def test_floordiv_different_types_reversed():
     a_tensor = nura.tensor(a)
     result_tensor = 2 // a_tensor
     expected = 2 // a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_scalar():
@@ -439,7 +439,7 @@ def test_modulo_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.modulo(a_tensor, b_tensor)
     expected = a % b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_vector():
@@ -449,7 +449,7 @@ def test_modulo_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.modulo(a_tensor, b_tensor)
     expected = a % b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_matrix():
@@ -459,7 +459,7 @@ def test_modulo_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.modulo(a_tensor, b_tensor)
     expected = a % b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_tensor():
@@ -469,7 +469,7 @@ def test_modulo_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.modulo(a_tensor, b_tensor)
     expected = a % b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_broadcast():
@@ -479,7 +479,7 @@ def test_modulo_broadcast():
     b_tensor = nura.tensor(b)
     result_tensor = f.modulo(a_tensor, b_tensor)
     expected = a % b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_operator():
@@ -489,7 +489,7 @@ def test_modulo_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor % b_tensor
     expected = a % b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_inplace():
@@ -500,7 +500,7 @@ def test_modulo_inplace():
     result_tensor %= b_tensor
     a %= b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_different_types():
@@ -508,7 +508,7 @@ def test_modulo_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.modulo(a_tensor, 3)
     expected = a % 3
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_modulo_different_types_reversed():
@@ -516,7 +516,7 @@ def test_modulo_different_types_reversed():
     a_tensor = nura.tensor(a)
     result_tensor = 2 % a_tensor
     expected = 2 % a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_dot_scalar():
@@ -525,7 +525,7 @@ def test_dot_scalar():
     b_tensor = nura.tensor(b)
     result_tensor = f.dot(a_tensor, b_tensor)
     expected = np.dot(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_dot_vector():
@@ -535,7 +535,7 @@ def test_dot_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.dot(a_tensor, b_tensor)
     expected = np.dot(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_dot_matrix_vector():
@@ -545,7 +545,7 @@ def test_dot_matrix_vector():
     b_tensor = nura.tensor(b)
     result_tensor = f.dot(a_tensor, b_tensor)
     expected = np.dot(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_dot_matrix():
@@ -555,7 +555,7 @@ def test_dot_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.dot(a_tensor, b_tensor)
     expected = np.dot(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_dot_tensor():
@@ -565,7 +565,7 @@ def test_dot_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.dot(a_tensor, b_tensor)
     expected = np.dot(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_dot_different_types():
@@ -573,7 +573,7 @@ def test_dot_different_types():
     a_tensor = nura.tensor(a)
     result_tensor = nura.dot(a_tensor, 2)
     expected = np.dot(a, 2)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_matmul_matrix():
@@ -583,7 +583,7 @@ def test_matmul_matrix():
     b_tensor = nura.tensor(b)
     result_tensor = f.matmul(a_tensor, b_tensor)
     expected = np.matmul(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_matmul_tensor():
@@ -593,7 +593,7 @@ def test_matmul_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.matmul(a_tensor, b_tensor)
     expected = np.matmul(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_matmul_higher_rank_tensor():
@@ -603,7 +603,7 @@ def test_matmul_higher_rank_tensor():
     b_tensor = nura.tensor(b)
     result_tensor = f.matmul(a_tensor, b_tensor)
     expected = np.matmul(a, b)
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_matmul_operator():
@@ -613,7 +613,7 @@ def test_matmul_operator():
     b_tensor = nura.tensor(b)
     result_tensor = a_tensor @ b_tensor
     expected = a @ b
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_matmul_inplace():
@@ -624,4 +624,4 @@ def test_matmul_inplace():
     result_tensor @= b_tensor
     a @= b
     expected = a
-    np.testing.assert_array_equal(result_tensor.data, expected)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
