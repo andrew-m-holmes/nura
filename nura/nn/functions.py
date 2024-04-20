@@ -318,7 +318,6 @@ class _CrossEntropy(Function):
         context["ignoreid"] = ignoreid
         context["labels"] = y.data
         context["reduction"] = reduction
-
         mask = y.data != ignoreid
         classes = y.data[mask]
         nll = np.negative(log[mask, classes])

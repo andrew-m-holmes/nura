@@ -100,11 +100,13 @@ def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
 
 
 def randint(
-    *dim: dimlike, low: int, high: int, dtype: Optional[Type[dtype]] = None
+    low: int,
+    high: int,
+    dim: Optional[dimlike] = None,
+    dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
         dtype = types.int
-    dim = todim(dim)
     data = np.random.randint(low, high, dim)
     return tensor(data, dtype=dtype)
 
