@@ -94,12 +94,18 @@ class Tensor:
         cls = type(self)
         return cls(self.data, self.usegrad, nura.zeroslike(self), None, True)
 
-    def usesgrad(self) -> None:
+    def attach(self) -> None:
         self._usegrad = True
 
-    def usedgrad(self) -> "Tensor":
+    def attached(self) -> "Tensor":
         cls = type(self)
         return cls(self.data, True, self.grad, self.backfn, self.leaf)
+
+    def detach(self) -> None:
+        self._usegrad = False
+
+    def detached(self) -> "Tensor":
+        return nura.detached(self)
 
     def mutate(self, **attrs: Any) -> None:
         for k, v in attrs.items():
@@ -112,12 +118,6 @@ class Tensor:
             setattr(t, f"_{k}", v)
         return t
 
-    def detach(self) -> None:
-        self._usegrad = False
-
-    def detached(self) -> "Tensor":
-        return nura.detached(self)
-
     def clone(self) -> "Tensor":
         return nura.clone(self)
 
@@ -126,6 +126,12 @@ class Tensor:
 
     def dot(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.dot(self, other)
+
+    def square(self) -> "Tensor":
+        return nura.square(self)
+
+    def sqrt(self) -> "Tensor":
+        return nura.sqrt(self)
 
     def exp(self) -> "Tensor":
         return nura.exp(self)
@@ -172,17 +178,11 @@ class Tensor:
     def __radd__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.add(self, other)
 
-    def __iadd__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.iadd(self, other)
-
     def __sub__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.sub(self, other)
 
     def __rsub__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.sub(tensor(other, dtype=self.dtype), self)
-
-    def __isub__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.isub(self, other)
 
     def __mul__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.mul(self, other)
@@ -190,17 +190,11 @@ class Tensor:
     def __rmul__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.mul(self, other)
 
-    def __imul__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.imul(self, other)
-
     def __truediv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.div(self, other)
 
     def __rtruediv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.div(tensor(other, dtype=self.dtype), self)
-
-    def __itruediv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.idiv(self, other)
 
     def __floordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.floordiv(self, other)
@@ -208,29 +202,17 @@ class Tensor:
     def __rfloordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.floordiv(tensor(other, dtype=self.dtype), self)
 
-    def __ifloordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.ifloordiv(self, other)
-
     def __mod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.modulo(self, other)
 
     def __rmod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.modulo(tensor(other, dtype=self.dtype), self)
 
-    def __imod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.imodulo(self, other)
-
     def __matmul__(self, other: "Tensor") -> "Tensor":
         return nura.matmul(self, other)
 
-    def __imatmul__(self, other: "Tensor") -> "Tensor":
-        return nura.imatmul(self, other)
-
     def __pow__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.pow(self, other)
-
-    def __ipow__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.ipow(self, other)
 
     def __rpow__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.pow(tensor(other, dtype=self.dtype), self)
@@ -285,46 +267,6 @@ class Tensor:
     def __xor__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.tensorxor(self, other)
 
-    def __setattr__(self, name: str, value: Any) -> None:
-        validattrs = (
-            "_data",
-            "_usegrad",
-            "_grad",
-            "_backfn",
-            "_leaf",
-        )
-        if name not in validattrs:
-            raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
-        gradtypes = (types.half, types.float, types.double)
-        if name == "_usegrad" and value and self.dtype not in gradtypes:
-            raise ValueError(
-                f"Only floating-point Tensors can use gradient, received {dtype.name()}"
-            )
-        self.__dict__[name] = value
-
-    def __getitem__(self, slc: Any) -> "Tensor":
-        return nura.slice(self, slc)
-
-    def __setitem__(self, slc: Any, item: Any) -> None:
-        if isinstance(slc, tuple):
-            slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
-        if isinstance(slc, Tensor):
-            slc = slc.data
-        if isinstance(item, Tensor):
-            item = item.data
-        self.data[slc] = item
-
-    def __repr__(self) -> str:
-        s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
-        if " dtype" in s:
-            i = s.index(" dtype")
-            s = s[:i]
-        reprs = ["Tensor(", s]
-        if self.backfn is not None:
-            reprs.append(f" backfn={self.backfn}")
-        reprs.append(f" dtype={self.dtype.name()})")
-        return "".join(reprs)
-
     def to(self, dtype: Type[types.dtype]):
         return nura.to(self, dtype)
 
@@ -354,6 +296,46 @@ class Tensor:
 
     def bool(self) -> "Tensor":
         return self.to(types.bool)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        validattrs = (
+            "_data",
+            "_usegrad",
+            "_grad",
+            "_backfn",
+            "_leaf",
+        )
+        if name not in validattrs:
+            raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
+        if name == "_usegrad":
+            if value and self.dtype not in (types.half, types.float, types.double):
+                raise ValueError(
+                    f"Only floating-point Tensors can use gradient, received {dtype.name()}"
+                )
+        self.__dict__[name] = value
+
+    def __getitem__(self, slc: Any) -> "Tensor":
+        return nura.slice(self, slc)
+
+    def __setitem__(self, slc: Any, item: Any) -> None:
+        if isinstance(slc, tuple):
+            slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
+        if isinstance(slc, Tensor):
+            slc = slc.data
+        if isinstance(item, Tensor):
+            item = item.data
+        self.data[slc] = item
+
+    def __repr__(self) -> str:
+        s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
+        if " dtype" in s:
+            i = s.index(" dtype")
+            s = s[:i]
+        reprs = ["Tensor(", s]
+        if self.backfn is not None:
+            reprs.append(f" backfn={self.backfn}")
+        reprs.append(f" dtype={self.dtype.name()})")
+        return "".join(reprs)
 
 
 def tensor(
