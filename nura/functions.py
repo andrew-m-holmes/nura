@@ -302,9 +302,9 @@ class _Max(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
+        arr = np.max(a.data, dim, keepdims=True)
         context["dim"] = dim
         context["keepdims"] = keepdims
-        arr = np.max(a.data, dim, keepdims=True)
         context["arr"] = arr
         if not keepdims:
             arr = np.squeeze(arr)
@@ -338,9 +338,9 @@ class _Min(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
+        arr = np.min(a.data, dim, keepdims=True)
         context["dim"] = dim
         context["keepdims"] = keepdims
-        arr = np.min(a.data, dim, keepdims=True)
         context["arr"] = arr
         if not keepdims:
             arr = np.squeeze(arr)
