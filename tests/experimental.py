@@ -6,20 +6,11 @@ import numpy as np
 
 def main():
 
-    w = nn.parameter(nura.randn(4, 5))
-    b = nn.parameter(nura.randn(4))
-    x = nura.randn(2, 5)
-    y = nura.randint(0, 4, 2)
-    rmsprop = nn.RMSProp(iter([w, b]), learnrate=0.1, alpha=0.9, decay=1)
-    o = f.linear(x, w, b)
-    loss = f.crossentropy(o, y)
-    print(loss)
-    loss.backward()
-    rmsprop.step()
-    rmsprop.zerograd()
-    for m in rmsprop.moments():
-        print(m)
-    print(rmsprop)
+    a = np.random.rand(3)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = 2 - a_tensor
+    result_tensor.backward(nura.oneslike(result_tensor))
+    print(a_tensor.grad)
 
 
 if __name__ == "__main__":
