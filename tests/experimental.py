@@ -10,13 +10,16 @@ def main():
     b = nn.parameter(nura.randn(4))
     x = nura.randn(2, 5)
     y = nura.randint(0, 4, 2)
-    sgd = nn.SGD(iter([w, b]), 1e-2, momentum=0.9, nesterov=True, decay=0)
+    rmsprop = nn.RMSProp(iter([w, b]), learnrate=0.1, alpha=0.9, decay=1)
     o = f.linear(x, w, b)
     loss = f.crossentropy(o, y)
     print(loss)
     loss.backward()
-    sgd.step()
-    sgd.zerograd()
+    rmsprop.step()
+    rmsprop.zerograd()
+    for m in rmsprop.moments():
+        print(m)
+    print(rmsprop)
 
 
 if __name__ == "__main__":

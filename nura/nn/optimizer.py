@@ -1,4 +1,5 @@
 import nura.utils as utils
+import nura.functional as f
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
 from typing import Iterator, Optional, Tuple
@@ -93,7 +94,7 @@ def sgd(
     parameter: Parameter,
     velocity: Tensor,
     learnrate: float,
-    momentum: float,
+    momentum: float = 0.9,
     nesterov: bool = False,
     decay: Optional[float] = None,
 ) -> Tensor:
@@ -114,13 +115,14 @@ class RMSProp(Optimizer):
         self,
         parameters: Iterator[Parameter],
         learnrate: float,
-        alpha: float = 0.99,
-        eps: float = 1e-8,
+        alpha: float = 0.9,
         decay: Optional[float] = None,
+        eps: float = 1e-8,
     ) -> None:
         super().__init__(parameters, learnrate, decay)
         self._alpha = alpha
         self._eps = eps
+        self._moments = {}
 
     @property
     def alpha(self) -> float:
@@ -130,9 +132,40 @@ class RMSProp(Optimizer):
     def eps(self) -> float:
         return self._eps
 
+    def step(self) -> None:
+        super().step()
+        for p in self._parameters:
+            if p.grad is None or not p.usegrad:
+                continue
+            v = self._moments.get(p, utils.zeroslike(p))
+            g, v_ = rmsprop(p, v, self.learnrate, self.alpha, self.decay, self.eps)
+            self._moments[p] = v_
+            self.update(p, g)
+
+    def moments(self) -> Iterator[Tuple[Tensor, Tensor]]:
+        yield from self._moments.items()
+
     def __repr__(self) -> str:
         learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
-        return f"{self.name()}({learnrate=:.2e} {alpha=} {eps=:.3e} {decay=})"
+        return f"{self.name()}({learnrate=:.2e} {alpha=} {decay=} {eps=:.3e})"
+
+
+def rmsprop(
+    parameter: Parameter,
+    velocity: Tensor,
+    learnrate: float,
+    alpha: float = 0.9,
+    decay: Optional[float] = None,
+    eps: float = 1e-8,
+) -> Tuple[Tensor, Tensor]:
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+    grad = parameter.clone().detached()
+    if decay is not None:
+        grad += decay * parameter.detached()
+    nextvel = alpha * velocity + (1 - alpha) * f.square(grad)
+    update = learnrate / f.sqrt(nextvel + eps) * grad
+    return update, nextvel
 
 
 class Adam(Optimizer):
@@ -141,13 +174,15 @@ class Adam(Optimizer):
         self,
         parameters: Iterator[Parameter],
         learnrate: float,
-        betas: Tuple[float, float] = (0.9, 0.990),
-        eps: float = 1e-8,
+        betas: Tuple[float, float] = (0.9, 0.999),
         decay: Optional[float] = None,
+        eps: float = 1e-8,
     ) -> None:
         super().__init__(parameters, learnrate, decay)
         self._betas = betas
         self._eps = eps
+        self._moments0 = {}
+        self._moments1 = {}
 
     @property
     def betas(self) -> Tuple[float, float]:
@@ -159,4 +194,4 @@ class Adam(Optimizer):
 
     def __repr__(self) -> str:
         learnrate, betas, eps, decay = self.learnrate, self.betas, self.eps, self.decay
-        return f"{self.name()}({learnrate=:.2e} {betas=} {eps=} {decay=})"
+        return f"{self.name()}({learnrate=:.2e} {betas=} {decay=} {eps=})"

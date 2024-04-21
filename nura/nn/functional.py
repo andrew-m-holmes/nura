@@ -85,9 +85,9 @@ def binarycrossentropy(
     x: Tensor, y: Tensor, reduction: Optional[str] = "mean"
 ) -> Tensor:
     if y.ndim > 2:
-        raise ValueError("'y' cannot be more than 2D")
+        raise ValueError(f"'y' cannot be more than 2D, received {y.ndim}D")
     if x.ndim != y.ndim:
-        raise ValueError("'x' must have the same rank as 'y'")
+        raise ValueError(f"'x' must have the same rank as 'y', {x.ndim} != {y.ndim}")
     return fn._BinaryCrossEntropy.apply(x, y, reduction)
 
 
@@ -98,21 +98,23 @@ def crossentropy(
     reduction: Optional[str] = "mean",
 ) -> Tensor:
     if x.ndim != 2:
-        raise ValueError("'x' must be 2D")
+        raise ValueError(f"'x' must be 2D, recieved {x.ndim}D")
     if y.ndim != 1:
-        raise ValueError("'y' must be 1D")
+        raise ValueError(f"'y' must be 1D, received {y.ndim}D")
     return fn._CrossEntropy.apply(x, y, ignoreid, reduction)
 
 
-def mse(a: Tensor, y: Tensor, reduction: Optional[str] = "mean") -> Tensor:
-    if a.ndim != y.ndim:
-        raise ValueError("'x' must have the same dimensions as 'y'")
-    return fn._MSE.apply(a, y, reduction)
+def mse(x: Tensor, y: Tensor, reduction: Optional[str] = "mean") -> Tensor:
+    if x.ndim != y.ndim:
+        raise ValueError(
+            f"'x' must have the same dimensions as 'y', {x.ndim} != {y.ndim}"
+        )
+    return fn._MSE.apply(x, y, reduction)
 
 
 def dropout(x: Tensor, p: float = 0.5) -> Tensor:
-    if p < 0:
-        raise ValueError("'p' cannot be less than zero")
+    if p < 0 or p > 1:
+        raise ValueError(f"'p' must in the interval [0, 1], received {p}")
     return fn._Dropout.apply(x, p)
 
 
