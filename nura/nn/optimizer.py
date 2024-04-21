@@ -33,7 +33,7 @@ class Optimizer:
     def update(self, parameter: Tensor, gradstep: Tensor) -> None:
         parameter.detach()
         parameter -= gradstep
-        parameter.usesgrad()
+        parameter.attach()
 
     def zerograd(self) -> None:
         for p in self._parameters:

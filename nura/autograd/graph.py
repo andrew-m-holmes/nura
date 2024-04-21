@@ -43,16 +43,24 @@ class Node:
     def leaf(self) -> bool:
         return self.tensor.leaf
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.function is not None:
             return f"{self.function.__name__}"
-        return "Accumulate"
+        if self.leaf() and self.ongraph():
+            return "Accumulate"
+        return "OffGraph"
 
 
 def getnode(tensor):
     if tensor.leaf and tensor.usegrad:
         return Node(tensor, None, None)
     return tensor.backfn
+
+
+def getgrads(context):
+    return tuple(
+        t.grad if t.grad is not None else nura.zeroslike(t) for t in context.tensors()
+    )
 
 
 def genout(out, function, context):
@@ -66,9 +74,3 @@ def genout(out, function, context):
         grad = node.apply(*grads, backward=False)
         out.mutate(usegrad=True, grad=grad, leaf=False)
     return out
-
-
-def getgrads(context):
-    return tuple(
-        t.grad if t.grad is not None else nura.zeroslike(t) for t in context.tensors()
-    )

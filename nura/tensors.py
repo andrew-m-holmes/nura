@@ -139,6 +139,12 @@ class Tensor:
     def log(self) -> "Tensor":
         return nura.log(self)
 
+    def sin(self) -> "Tensor":
+        return nura.sin(self)
+
+    def cos(self) -> "Tensor":
+        return nura.cos(self)
+
     def sum(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.sum(self, dim, keepdims)
 
