@@ -23,12 +23,11 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         nodes = node.children()
         tensor = node.tensor
 
-        if tensor.leaf and tensor.usegrad:
+        if node.leaf() and node.ongraph():
             if tensor.grad is None:
                 tensor.zerograd()
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             tensor._grad += accumgrad
-
         elif nodes:
             items = [
                 (n, g)

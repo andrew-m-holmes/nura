@@ -26,10 +26,10 @@ class Node:
             arr = self.function.backward(self.context, *grad)
             if not isinstance(arr, tuple):
                 arr = (arr,)
-            out = tuple(nura.tensor(a) for a in arr)
-            return out
-        arr = self.function.tangent(self.context, *grad)
-        return nura.tensor(arr)
+            grads = tuple(nura.tensor(a) for a in arr)
+            return grads
+        grad = self.function.tangent(self.context, *grad)
+        return nura.tensor(grad)
 
     def children(self) -> Optional[List["Node"]]:
         if self.context is None:
@@ -37,10 +37,16 @@ class Node:
         nodes = [getnode(t) for t in self.context.tensors()]
         return nodes
 
+    def ongraph(self):
+        return self.tensor.usegrad
+
+    def leaf(self) -> bool:
+        return self.tensor.leaf
+
     def __repr__(self):
-        if self.tensor.leaf:
-            return "_AccumulateGrad"
-        return f"{self.function.__name__}"
+        if self.function is not None:
+            return f"{self.function.__name__}"
+        return "Accumulate"
 
 
 def getnode(tensor):
