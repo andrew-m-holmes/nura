@@ -1,5 +1,6 @@
 import nura.utils as utils
 import nura.functional as f
+from nura.autograd.mode import autograd
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
 from typing import Iterator, Optional, Tuple
@@ -26,14 +27,17 @@ class Optimizer:
     def decay(self) -> Optional[float]:
         return self._decay
 
+    @property
+    def stepnum(self) -> int:
+        return self._stepnum
+
     @classmethod
     def name(cls) -> str:
         return cls.__name__
 
     def update(self, parameter: Tensor, gradstep: Tensor) -> None:
-        parameter.detach()
-        parameter -= gradstep
-        parameter.attach()
+        with autograd(enabled=False):
+            parameter -= gradstep
 
     def zerograd(self) -> None:
         for p in self._parameters:
@@ -45,6 +49,12 @@ class Optimizer:
     def __repr__(self) -> str:
         learnrate, decay = self.learnrate, self.decay
         return f"{self.name()}({learnrate=:.2e} {decay=})"
+
+
+def computedecay(tensor: Tensor, grad: Tensor, decay: Optional[float]) -> Tensor:
+    if decay is not None:
+        return grad + tensor * decay
+    return grad
 
 
 class SGD(Optimizer):
@@ -100,12 +110,11 @@ def sgd(
 ) -> Tensor:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    grad = parameter.clone().detached()
-    if decay is not None:
-        grad += decay * parameter.detached()
-    if nesterov:
-        grad += momentum * velocity
-    update = momentum * velocity + learnrate * grad
+    with autograd(enabled=False):
+        grad = computedecay(parameter, parameter.grad, decay)
+        if nesterov:
+            grad += momentum * velocity
+        update = momentum * velocity + learnrate * grad
     return update
 
 
@@ -132,6 +141,9 @@ class RMSProp(Optimizer):
     def eps(self) -> float:
         return self._eps
 
+    def moments(self) -> Iterator[Tuple[Tensor, Tensor]]:
+        yield from self._moments.items()
+
     def step(self) -> None:
         super().step()
         for p in self._parameters:
@@ -141,9 +153,6 @@ class RMSProp(Optimizer):
             g, v_ = rmsprop(p, v, self.learnrate, self.alpha, self.decay, self.eps)
             self._moments[p] = v_
             self.update(p, g)
-
-    def moments(self) -> Iterator[Tuple[Tensor, Tensor]]:
-        yield from self._moments.items()
 
     def __repr__(self) -> str:
         learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
@@ -160,11 +169,10 @@ def rmsprop(
 ) -> Tuple[Tensor, Tensor]:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    grad = parameter.clone().detached()
-    if decay is not None:
-        grad += decay * parameter.detached()
-    nextvel = alpha * velocity + (1 - alpha) * f.square(grad)
-    update = learnrate / f.sqrt(nextvel + eps) * grad
+    with autograd(enabled=False):
+        grad = computedecay(parameter, parameter.grad, decay)
+        nextvel = alpha * velocity + (1 - alpha) * f.square(grad)
+        update = learnrate / f.sqrt(nextvel + eps) * grad
     return update, nextvel
 
 
@@ -181,8 +189,7 @@ class Adam(Optimizer):
         super().__init__(parameters, learnrate, decay)
         self._betas = betas
         self._eps = eps
-        self._moments0 = {}
-        self._moments1 = {}
+        self._moments = {}
 
     @property
     def betas(self) -> Tuple[float, float]:
@@ -192,6 +199,43 @@ class Adam(Optimizer):
     def eps(self) -> float:
         return self._eps
 
+    def moments(self) -> Iterator[Tuple[Tensor, Tuple[Tensor, Tensor]]]:
+        yield from self._moments.items()
+
+    def step(self) -> None:
+        super().step()
+        for p in self._parameters:
+            if p.grad is None or not p.usegrad:
+                continue
+            vs = self._moments.get(p, (utils.zeroslike(p), utils.zeroslike(p)))
+            g, vs = adam(
+                p, vs, self.learnrate, self.stepnum, self.betas, self.decay, self.eps
+            )
+            self._moments[p] = vs
+            self.update(p, g)
+
     def __repr__(self) -> str:
         learnrate, betas, eps, decay = self.learnrate, self.betas, self.eps, self.decay
         return f"{self.name()}({learnrate=:.2e} {betas=} {decay=} {eps=})"
+
+
+def adam(
+    parameter: Parameter,
+    velocities: Tuple[Tensor, Tensor],
+    learnrate: float,
+    timestep: int,
+    betas: Tuple[float, float] = (0.9, 0.99),
+    decay: Optional[float] = None,
+    eps: float = 1e-8,
+) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
+
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+    with autograd(enabled=False):
+        grad = computedecay(parameter, parameter.grad, decay)
+        nextvel0 = betas[0] * velocities[0] + (1 - betas[0]) * grad
+        nextvel1 = betas[1] * velocities[1] + (1 - betas[1]) * f.square(grad)
+        vel0 = 1 / (1 - betas[0] ** timestep) * nextvel0
+        vel1 = 1 / (1 - betas[1] ** timestep) * nextvel1
+        update = vel0 / f.sqrt(vel1 + eps) * learnrate
+    return update, (nextvel0, nextvel1)

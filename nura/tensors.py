@@ -2,7 +2,7 @@ import nura
 import nura.types as types
 from nura.types import Tensorlike, Scalar, dtype, dim, dimlike
 from nura.autograd.graph import Node
-from typing import Optional, Type, Any, Union, List
+from typing import Optional, Type, Any, Union, List, Self
 from numpy import ndarray
 
 
@@ -184,11 +184,19 @@ class Tensor:
     def __radd__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.add(self, other)
 
+    def __iadd__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.add(self, other).data)
+        return self
+
     def __sub__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.sub(self, other)
 
     def __rsub__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.sub(tensor(other, dtype=self.dtype), self)
+
+    def __isub__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.sub(self, other).data)
+        return self
 
     def __mul__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.mul(self, other)
@@ -196,11 +204,19 @@ class Tensor:
     def __rmul__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.mul(self, other)
 
+    def __imul__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.mul(self, other).data)
+        return self
+
     def __truediv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.div(self, other)
 
     def __rtruediv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.div(tensor(other, dtype=self.dtype), self)
+
+    def __itruediv__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.div(self, other).data)
+        return self
 
     def __floordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.floordiv(self, other)
@@ -208,20 +224,36 @@ class Tensor:
     def __rfloordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.floordiv(tensor(other, dtype=self.dtype), self)
 
+    def __ifloordiv__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.floordiv(self, other).data)
+        return self
+
     def __mod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.modulo(self, other)
 
     def __rmod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.modulo(tensor(other, dtype=self.dtype), self)
 
+    def __imod__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.modulo(self, other).data)
+        return self
+
     def __matmul__(self, other: "Tensor") -> "Tensor":
         return nura.matmul(self, other)
+
+    def __imatmul__(self, other: "Tensor") -> Self:
+        self.mutate(data=nura.matmul(self, other).data)
+        return self
 
     def __pow__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.pow(self, other)
 
     def __rpow__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.pow(tensor(other, dtype=self.dtype), self)
+
+    def __ipow__(self, other: Union["Tensor", Scalar]) -> Self:
+        self.mutate(data=nura.pow(self, other).data)
+        return self
 
     def __pos__(self) -> "Tensor":
         return nura.pos(self)
