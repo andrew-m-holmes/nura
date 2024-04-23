@@ -298,7 +298,7 @@ class Tensor:
 
     def __bool__(self) -> None:
         raise ValueError(
-            "Truth of Tensor is undefined for more than one element, use .any() or .all()"
+            "Truth of Tensor is undefined for more than one element, use any() or all()"
         )
 
     def __and__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -310,7 +310,7 @@ class Tensor:
     def __xor__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.tensorxor(self, other)
 
-    def to(self, dtype: Type[types.dtype]):
+    def to(self, dtype: Type[types.dtype]) -> "Tensor":
         return nura.to(self, dtype)
 
     def byte(self) -> "Tensor":
@@ -350,7 +350,7 @@ class Tensor:
                     f"Only floating-point Tensors can use gradient, received {dtype.name()}"
                 )
         if name == "_data" and name in self.__dict__ and "_graph" in self.__dict__:
-            if self.graph and nura.usegrad():
+            if self._graph and nura.usegrad():
                 raise ValueError(
                     "Cannot modify the data of a Tensor on the computational graph"
                 )
