@@ -21,6 +21,7 @@ class Tensor:
         self._backfn: Optional[Node] = backfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
+        self._graph: int = 0
 
     @property
     def data(self) -> ndarray:
@@ -53,6 +54,10 @@ class Tensor:
     @property
     def leaf(self) -> bool:
         return self._leaf
+
+    @property
+    def graph(self) -> int:
+        return self._graph
 
     @property
     def dtype(self) -> Type[dtype]:
@@ -185,7 +190,7 @@ class Tensor:
         return nura.add(self, other)
 
     def __iadd__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.add(self, other).data)
+        nura.iadd(self, other)
         return self
 
     def __sub__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -195,7 +200,7 @@ class Tensor:
         return nura.sub(tensor(other, dtype=self.dtype), self)
 
     def __isub__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.sub(self, other).data)
+        nura.isub(self, other)
         return self
 
     def __mul__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -205,7 +210,7 @@ class Tensor:
         return nura.mul(self, other)
 
     def __imul__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.mul(self, other).data)
+        nura.imul(self, other)
         return self
 
     def __truediv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -215,7 +220,7 @@ class Tensor:
         return nura.div(tensor(other, dtype=self.dtype), self)
 
     def __itruediv__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.div(self, other).data)
+        nura.idiv(self, other)
         return self
 
     def __floordiv__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -225,7 +230,7 @@ class Tensor:
         return nura.floordiv(tensor(other, dtype=self.dtype), self)
 
     def __ifloordiv__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.floordiv(self, other).data)
+        nura.ifloordiv(self, other)
         return self
 
     def __mod__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -235,14 +240,14 @@ class Tensor:
         return nura.modulo(tensor(other, dtype=self.dtype), self)
 
     def __imod__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.modulo(self, other).data)
+        nura.imodulo(self, other)
         return self
 
     def __matmul__(self, other: "Tensor") -> "Tensor":
         return nura.matmul(self, other)
 
     def __imatmul__(self, other: "Tensor") -> Self:
-        self.mutate(data=nura.matmul(self, other).data)
+        nura.imatmul(self, other)
         return self
 
     def __pow__(self, other: Union["Tensor", Scalar]) -> "Tensor":
@@ -252,7 +257,7 @@ class Tensor:
         return nura.pow(tensor(other, dtype=self.dtype), self)
 
     def __ipow__(self, other: Union["Tensor", Scalar]) -> Self:
-        self.mutate(data=nura.pow(self, other).data)
+        nura.ipow(self, other)
         return self
 
     def __pos__(self) -> "Tensor":
@@ -336,19 +341,18 @@ class Tensor:
         return self.to(types.bool)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        validattrs = (
-            "_data",
-            "_usegrad",
-            "_grad",
-            "_backfn",
-            "_leaf",
-        )
+        validattrs = ("_data", "_usegrad", "_grad", "_backfn", "_leaf", "_graph")
         if name not in validattrs:
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
         if name == "_usegrad":
             if value and self.dtype not in (types.half, types.float, types.double):
                 raise ValueError(
                     f"Only floating-point Tensors can use gradient, received {dtype.name()}"
+                )
+        if name == "_data" and name in self.__dict__ and "_graph" in self.__dict__:
+            if self.graph and nura.usegrad():
+                raise ValueError(
+                    "Cannot modify the data of a Tensor on the computational graph"
                 )
         self.__dict__[name] = value
 
@@ -371,7 +375,7 @@ class Tensor:
             s = s[:i]
         reprs = ["Tensor(", s]
         if self.backfn is not None:
-            reprs.append(f" backfn={self.backfn}")
+            reprs.append(f" backfn={self.backfn.function.__name__}")
         reprs.append(f" dtype={self.dtype.name()})")
         return "".join(reprs)
 

@@ -23,7 +23,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
         nodes = node.children()
         tensor = node.tensor
 
-        if node.leaf() and node.ongraph():
+        if node.accumulate():
             if tensor.grad is None:
                 tensor.zerograd()
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
@@ -131,7 +131,8 @@ def mismatch(tensor: Tensor, grad: Tensor) -> bool:
 
 def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
     dim = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
-    return grad.sum(dim=dim).reshape(tensor.dim)
+    keepdims = tensor.ndim == grad.ndim
+    return grad.sum(dim=dim, keepdims=keepdims)
 
 
 def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:

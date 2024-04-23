@@ -12,6 +12,8 @@ class Context:
         self._dict: Optional[Dict[Any, Any]] = None
 
     def save(self, *tensors: Tensor):
+        for t in tensors:
+            t.mutate(graph=t.graph + 1)
         self._tensors = tensors
 
     def tensors(self) -> Tuple[Tensor, ...]:
@@ -32,6 +34,10 @@ class Context:
     def __getitem__(self, key: Any) -> Any:
         assert self._dict is not None
         return self._dict[key]
+
+    def __del__(self):
+        for t in self.tensors():
+            t.mutate(graph=t.graph - 1)
 
     def __repr__(self) -> str:
         return self.__class__.__name__

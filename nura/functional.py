@@ -12,11 +12,23 @@ def add(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     return out
 
 
+def iadd(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data += b.data
+
+
 def sub(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Sub.apply(a, b)
     return out
+
+
+def isub(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data -= b.data
 
 
 def mul(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -26,11 +38,23 @@ def mul(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     return out
 
 
+def imul(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data *= b.data
+
+
 def div(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Div.apply(a, b)
     return out
+
+
+def idiv(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data /= b.data
 
 
 def floordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -40,11 +64,23 @@ def floordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     return out
 
 
+def ifloordiv(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data //= b.data
+
+
 def modulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Modulo.apply(a, b)
     return out
+
+
+def imodulo(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data %= b.data
 
 
 def dot(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -61,11 +97,27 @@ def matmul(a: Tensor, b: Tensor) -> Tensor:
     return out
 
 
+def imatmul(a: Tensor, b: Tensor) -> None:
+    if a.ndim < 2 or b.ndim < 2:
+        raise ValueError(
+            "Cannot compute inplace matmul() with tensors that aren't at least 2D"
+        )
+    a._data @= b.data
+
+
 def pow(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     out = fn._Pow.apply(a, b)
     return out
+
+
+def ipow(a: Tensor, b: Union[Tensor, Scalar]) -> None:
+    if a.usegrad:
+        raise RuntimeError("Cannot use inplace pow() with grad enabled")
+    if not isinstance(b, Tensor):
+        b = tensor(b, dtype=a.dtype)
+    a._data **= b.data
 
 
 def square(a: Tensor) -> Tensor:

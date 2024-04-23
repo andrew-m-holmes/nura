@@ -37,18 +37,15 @@ class Node:
         nodes = [getnode(t) for t in self.context.tensors()]
         return nodes
 
-    def ongraph(self):
-        return self.tensor.usegrad
-
-    def leaf(self) -> bool:
-        return self.tensor.leaf
+    def accumulate(self):
+        return self.tensor.leaf and self.tensor.usegrad
 
     def __repr__(self) -> str:
         if self.function is not None:
-            return f"{self.function.__name__}"
-        if self.leaf() and self.ongraph():
-            return "Accumulate"
-        return "OffGraph"
+            return f"{self.__class__.__name__}({self.function.__name__})"
+        if self.accumulate():
+            return f"{self.__class__.__name__}(Accumulate)"
+        return f"{self.__class__.__name__}()"
 
 
 def getnode(tensor):
@@ -68,7 +65,7 @@ def genout(out, function, context):
         return out
     node = Node(out, function, context)
     if nura.usegrad() and nura.reversemode():
-        out.mutate(backfn=node, usegrad=True, leaf=False)
+        out.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
     elif nura.usegrad() and nura.forwardmode():
         grads = getgrads(context)
         grad = node.apply(*grads, backward=False)
