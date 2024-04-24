@@ -4,10 +4,11 @@ from typing import List, Optional
 
 class Node:
 
-    def __init__(self, tensor, function, context):
+    def __init__(self, tensor, function, context, retain):
         self._tensor = tensor
         self._function = function
         self._context = context
+        self._retain = retain
 
     @property
     def tensor(self):
@@ -20,6 +21,10 @@ class Node:
     @property
     def context(self):
         return self._context
+
+    @property
+    def retain(self) -> bool:
+        return self._retain
 
     def apply(self, *grad, backward=True):
         if backward:
@@ -38,7 +43,7 @@ class Node:
         return nodes
 
     def accumulate(self):
-        return self.tensor.leaf and self.tensor.usegrad
+        return self.tensor.usegrad and self.retain
 
     def __repr__(self) -> str:
         if self.function is not None:
@@ -48,10 +53,12 @@ class Node:
         return f"{self.__class__.__name__}()"
 
 
-def getnode(tensor):
+def getnode(tensor) -> Node:
     if tensor.leaf and tensor.usegrad:
-        return Node(tensor, None, None)
-    return tensor.backfn
+        return Node(tensor, None, None, True)
+    if tensor.backfn is not None:
+        return tensor.backfn
+    return Node(tensor, None, None, False)
 
 
 def getgrads(context):
@@ -63,7 +70,7 @@ def getgrads(context):
 def genout(out, function, context):
     if not context.usesgrad():
         return out
-    node = Node(out, function, context)
+    node = Node(out, function, context, False)
     if nura.usegrad() and nura.reversemode():
         out.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
     elif nura.usegrad() and nura.forwardmode():

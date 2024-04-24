@@ -85,6 +85,14 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None) -> None:
         nura.backward(self, grad)
 
+    def retaingrad(self) -> Self:
+        if self.backfn is None:
+            raise ValueError(
+                "Cannot retain gradient for tensor, tensor is not intermediate node on graph"
+            )
+        self.backfn._retain = True
+        return self
+
     def cleargrad(self) -> None:
         self._grad = None
 
@@ -97,7 +105,7 @@ class Tensor:
 
     def zeroedgrad(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data, self.usegrad, nura.zeroslike(self), None, True)
+        return cls(self.data, self.usegrad, nura.zeroslike(self), self.backfn, True)
 
     def attach(self) -> None:
         self._usegrad = True
