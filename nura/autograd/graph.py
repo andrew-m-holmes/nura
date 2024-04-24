@@ -26,6 +26,10 @@ class Node:
     def retain(self) -> bool:
         return self._retain
 
+    def backprop(self, *grad):
+        # TODO should pair nodes with grads
+        pass
+
     def apply(self, *grad, backward=True):
         if backward:
             arr = self.function.backward(self.context, *grad)
