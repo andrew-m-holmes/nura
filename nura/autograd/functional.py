@@ -28,7 +28,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
                 tensor.zerograd()
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             tensor._grad += accumgrad
-        elif nodes:
+        if nodes:
             items = [
                 (n, g)
                 for n, g in zip(nodes, node.apply(grad, backward=True))
@@ -88,7 +88,6 @@ def _grad(
         if tensor in inptmap:
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             inptmap[tensor] += accumgrad
-
         if nodes:
             items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
             queue.extend(items)
@@ -131,8 +130,7 @@ def mismatch(tensor: Tensor, grad: Tensor) -> bool:
 
 def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
     dim = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
-    keepdims = tensor.ndim == grad.ndim
-    return grad.sum(dim=dim, keepdims=keepdims)
+    return grad.sum(dim=dim).reshape(tensor.dim)
 
 
 def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:

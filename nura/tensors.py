@@ -344,7 +344,7 @@ class Tensor:
         validattrs = ("_data", "_usegrad", "_grad", "_backfn", "_leaf", "_graph")
         if name not in validattrs:
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
-        if name == "_usegrad":
+        if name == "_usegrad" and "_data" in self.__dict__:
             if value and self.dtype not in (types.half, types.float, types.double):
                 raise ValueError(
                     f"Only floating-point Tensors can use gradient, received {dtype.name()}"
