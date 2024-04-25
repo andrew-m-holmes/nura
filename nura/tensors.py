@@ -346,9 +346,6 @@ class Tensor:
     def bool(self) -> "Tensor":
         return self.to(types.bool)
 
-    def __next__(self):
-        pass
-
     def __setattr__(self, name: str, value: Any) -> None:
         if name not in ("_data", "_usegrad", "_grad", "_backfn", "_leaf", "_graph"):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
