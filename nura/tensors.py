@@ -346,20 +346,23 @@ class Tensor:
     def bool(self) -> "Tensor":
         return self.to(types.bool)
 
+    def __next__(self):
+        pass
+
     def __setattr__(self, name: str, value: Any) -> None:
-        validattrs = ("_data", "_usegrad", "_grad", "_backfn", "_leaf", "_graph")
-        if name not in validattrs:
+        if name not in ("_data", "_usegrad", "_grad", "_backfn", "_leaf", "_graph"):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
-        if name == "_usegrad" and "_data" in self.__dict__:
-            if value and self.dtype not in (types.half, types.float, types.double):
-                raise ValueError(
-                    f"Only floating-point Tensors can use gradient, received {dtype.name()}"
-                )
-        if name == "_data" and name in self.__dict__ and "_graph" in self.__dict__:
-            if self._graph and nura.usegrad():
-                raise ValueError(
-                    "Cannot modify the data of a Tensor on the computational graph"
-                )
+
+        if name == "_usegrad" and value and not self.gradtensor:
+            raise ValueError(
+                f"Only floating-point tensors can use gradient, received {dtype.name()}"
+            )
+
+        if name == "_data" and self.__dict__.get("_graph", False) and nura.usegrad():
+            raise ValueError(
+                "Cannot modify the data of a tensor on computational graph"
+            )
+
         self.__dict__[name] = value
 
     def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
