@@ -362,8 +362,8 @@ class Tensor:
                 )
         self.__dict__[name] = value
 
-    def __getitem__(self, slc: Any) -> "Tensor":
-        return nura.slice(self, slc)
+    def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
+        return nura.select(self, slice_)
 
     def __setitem__(self, slc: Any, item: Any) -> None:
         if isinstance(slc, tuple):

@@ -413,6 +413,28 @@ class _Unsqueeze(Function):
         return arr
 
 
+class _Reshape(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, newdim: dim):
+        context.save(a)
+        context["newdim"] = newdim
+        arr = a.data.reshape(newdim)
+        return arr
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        arr = grad.data.reshape(a.dim)
+        return arr
+
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
+        newdim = context["newdim"]
+        arr = grad.data.reshape(newdim)
+        return arr
+
+
 class _Transpose(Function):
 
     @staticmethod
