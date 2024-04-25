@@ -58,7 +58,7 @@ class Function:
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args: Any, **kwargs: Any) -> Tensor:
+    def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
         irout = nura.tensor(rawout)

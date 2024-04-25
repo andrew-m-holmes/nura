@@ -1,4 +1,3 @@
-import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
 from nura.types import Tensorlike, Scalar, dimlike, dim

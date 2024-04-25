@@ -55,7 +55,6 @@ def getnode(tensor) -> Node:
 
 
 def genout(out, function, context):
-    # TODO figure out what you want to do with modes
     if not context.usesgrad():
         return out
     if nura.usegrad() and nura.reversemode():
@@ -76,17 +75,17 @@ def rmout(out, function, context):
     )
 
 
-def getgrads(context):
+def gettans(context):
     return tuple(
         t.grad if t.grad is not None else nura.zeroslike(t) for t in context.tensors()
     )
 
 
 def fmout(out, function, context):
-    inputgrads = getgrads(context)
+    tans = gettans(context)
     if not isinstance(out, tuple):
-        grad = nura.tensor(function.tangent(*inputgrads))
+        grad = nura.tensor(function.tangent(*tans))
         out.mutate(usegrad=True, grad=grad, leaf=False)
         return out
-    grads = [nura.tensor(g) for g in function.tangent(*inputgrads)]
+    grads = [nura.tensor(g) for g in function.tangent(*tans)]
     return tuple(o.mutate(usegrad=True, grad=g, leaf=False) for o, g in zip(out, grads))
