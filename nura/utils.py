@@ -178,17 +178,17 @@ def eye(
 
 
 def where(
-    logical: Union[Tensor, bool],
-    x: Union[Tensor, Scalar, bool],
-    y: Union[Tensor, Scalar, bool],
+    condition: Union[Tensor, bool],
+    x: Union[Tensor, Scalar],
+    y: Union[Tensor, Scalar],
 ) -> Tensor:
-    data = logical.data if isinstance(logical, Tensor) else logical
+    data = condition.data if isinstance(condition, Tensor) else condition
     xdata = x.data if isinstance(x, Tensor) else x
     ydata = y.data if isinstance(y, Tensor) else y
     return tensor(np.where(data, xdata, ydata))
 
 
-def indexwhere(logical: Union[Tensor, bool]) -> Tuple[Tensor, ...]:
+def indexwhere(logical: Union[Tensor, Scalar]) -> Tuple[Tensor, ...]:
     data = logical.data if isinstance(logical, Tensor) else logical
     return tuple(map(tensor, np.where(data)))
 
@@ -212,37 +212,37 @@ def hashtensor(a: Tensor) -> int:
     return hash(id(a))
 
 
-def equal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def equal(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.equal(a.data, b.data))
     return tensor(np.equal(a.data, b))
 
 
-def less(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def less(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.less(a.data, b.data))
     return tensor(np.less(a.data, b))
 
 
-def lesseq(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def lesseq(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.less_equal(a.data, b.data))
     return tensor(np.less_equal(a.data, b))
 
 
-def greater(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def greater(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.greater(a.data, b.data))
     return tensor(np.greater(a.data, b))
 
 
-def greatereq(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def greatereq(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.greater_equal(a.data, b.data))
     return tensor(np.greater_equal(a.data, b))
 
 
-def notequal(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def notequal(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.not_equal(a.data, b.data))
     return tensor(np.not_equal(a.data, b))
@@ -256,19 +256,19 @@ def tensorall(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tenso
     return tensor(np.all(a.data, axis=dim, keepdims=keepdims))
 
 
-def tensorand(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def tensorand(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.logical_and(a.data, b.data))
     return tensor(np.logical_and(a.data, b))
 
 
-def tensoror(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def tensoror(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.logical_or(a.data, b.data))
     return tensor(np.logical_or(a.data, b))
 
 
-def tensorxor(a: Tensor, b: Union[Tensor, Scalar, bool]) -> Tensor:
+def tensorxor(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.logical_xor(a.data, b.data))
     return tensor(np.logical_xor(a.data, b))
@@ -301,10 +301,6 @@ def tocontiguous(a: Tensor) -> Tensor:
     c = a.clone()
     data = np.ascontiguousarray(c.data)
     return c.mutated(data=data)
-
-
-def detached(a: Tensor) -> Tensor:
-    return tensor(a.data, False, a.dtype)
 
 
 def todim(dim: Tuple[Any, ...]) -> dim:

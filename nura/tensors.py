@@ -75,7 +75,7 @@ class Tensor:
     def item(self) -> Scalar:
         if self.nelem != 1:
             raise RuntimeError(
-                f"Cannot retrieve a single element from a Tensor with {self.nelem} elements"
+                f"Cannot retrieve single element from tensor with {self.nelem} elements"
             )
         return self.data.item()
 
@@ -118,7 +118,8 @@ class Tensor:
         self._usegrad = False
 
     def detached(self) -> "Tensor":
-        return nura.detached(self)
+        cls = type(self)
+        return cls(self.data, False, None, None, True)
 
     def mutate(self, **attrs: Any) -> None:
         for k, v in attrs.items():
