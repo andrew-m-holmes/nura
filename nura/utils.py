@@ -318,7 +318,7 @@ def onehot(indices: Tensor, n: int, dtype: Optional[Type[dtype]] = None) -> Tens
 
 
 def iscontiguous(a: Tensor) -> bool:
-    return a.data.flags["C_CONTIGUOUS"]
+    return a.data.flags.c_contiguous or a.data.flags.f_contiguous
 
 
 def typename(a: Tensor) -> str:

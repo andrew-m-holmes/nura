@@ -174,9 +174,6 @@ class Tensor:
     def unsqueeze(self, dim: dimlike) -> "Tensor":
         return nura.unsqueeze(self, dim)
 
-    def view(self, newdim: types.dim) -> "Tensor":
-        return nura.view(self, newdim)
-
     def reshape(self, newdim: types.dim) -> "Tensor":
         return nura.reshape(self, newdim)
 

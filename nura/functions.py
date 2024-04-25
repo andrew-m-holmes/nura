@@ -2,7 +2,7 @@ import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
 from nura.types import dim, dimlike
-from typing import Any
+from typing import Any, Tuple, Union, Optional
 
 np._set_promotion_state("weak")
 
@@ -372,7 +372,7 @@ class _Min(Function):
 class _Squeeze(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: dimlike):
+    def forward(context: Context, a: Tensor, dim: Optional[dimlike]):
         context.save(a)
         context["dim"] = dim
         arr = a.data.squeeze(axis=dim)
@@ -410,50 +410,6 @@ class _Unsqueeze(Function):
     def tangent(context: Context, grad: Tensor):
         dim = context["dim"]
         arr = np.expand_dims(grad.data, axis=dim)
-        return arr
-
-
-class _View(Function):
-
-    @staticmethod
-    def forward(context: Context, a: Tensor, newdim: dim):
-        context.save(a)
-        context["newdim"] = newdim
-        arr = a.data.reshape(newdim, order="C")
-        return arr
-
-    @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.tensors()[0]
-        arr = grad.data.reshape(a.dim, order="C")
-        return arr
-
-    @staticmethod
-    def tangent(context: Context, grad: Tensor):
-        newdim = context["newdim"]
-        arr = grad.data.reshape(newdim, order="C")
-        return arr
-
-
-class _Reshape(Function):
-
-    @staticmethod
-    def forward(context: Context, a: Tensor, newdim: dim):
-        context.save(a)
-        context["newdim"] = newdim
-        arr = a.data.reshape(newdim)
-        return arr
-
-    @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.tensors()[0]
-        arr = grad.data.reshape(a.dim)
-        return arr
-
-    @staticmethod
-    def tangent(context: Context, grad: Tensor):
-        newdim = context["newdim"]
-        arr = grad.data.reshape(newdim)
         return arr
 
 
@@ -578,22 +534,22 @@ class _Clone(Function):
 class _Slice(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, slc: slice):
+    def forward(context: Context, a: Tensor, slice_: Union[Tuple[slice, ...], slice]):
         context.save(a)
-        context["slc"] = slc
-        arr = a.data[slc]
+        context["slice_"] = slice_
+        arr = a.data[slice_]
         return arr.copy()
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        slc = context["slc"]
+        slice_ = context["slice_"]
         mask = np.zeros_like(a.data)
-        mask[slc] = grad.data
+        mask[slice_] = grad.data
         return mask
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        slc = context["slc"]
-        arr = grad.data[slc]
+        slice_ = context["slice_"]
+        arr = grad.data[slice_]
         return arr.copy()

@@ -1,8 +1,8 @@
 import nura.utils as utils
 import nura.functions as fn
 from nura.tensors import Tensor, tensor
-from nura.types import Scalar, dimlike, dim
-from typing import Optional, Union, Any
+from nura.types import Tensorlike, Scalar, dimlike, dim
+from typing import Optional, Union, Iterable
 
 
 def add(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -113,8 +113,6 @@ def pow(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 
 
 def ipow(a: Tensor, b: Union[Tensor, Scalar]) -> None:
-    if a.usegrad:
-        raise RuntimeError("Cannot use inplace pow() with grad enabled")
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
     a._data **= b.data
@@ -148,21 +146,21 @@ def cos(a: Tensor) -> Tensor:
     return out
 
 
-def sum(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tensor:
+def sum(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
     if dim is None:
         dim = tuple(range(a.ndim))
     out = fn._Sum.apply(a, dim, keepdims)
     return out
 
 
-def max(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tensor:
+def max(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
     if dim is None:
         dim = tuple(range(a.ndim))
     out = fn._Max.apply(a, dim, keepdims)
     return out
 
 
-def min(a: Tensor, dim: Optional[dimlike] = None, keepdims=False) -> Tensor:
+def min(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
     if dim is None:
         dim = tuple(range(a.ndim))
     out = fn._Min.apply(a, dim, keepdims)
@@ -180,8 +178,6 @@ def permute(a: Tensor, dims: dim) -> Tensor:
 
 
 def squeeze(a: Tensor, dim: Optional[dimlike] = None) -> Tensor:
-    if dim is None:
-        dim = tuple(i for i, d in enumerate(a.dim) if d == 1)
     out = fn._Squeeze.apply(a, dim=dim)
     return out
 
@@ -191,13 +187,7 @@ def unsqueeze(a: Tensor, dim: dimlike) -> Tensor:
     return out
 
 
-def view(a: Tensor, newdim: dim) -> Tensor:
-    out = fn._View.apply(a, newdim)
-    return out
-
-
 def reshape(a: Tensor, newdim: dim) -> Tensor:
-    a = utils.tocontiguous(a)
     out = fn._Reshape.apply(a, newdim)
     return out
 
@@ -219,10 +209,10 @@ def clone(a: Tensor) -> Tensor:
     return out
 
 
-def slice(a: Tensor, slc: Any) -> Tensor:
-    if isinstance(slc, tuple):
-        slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
-    if isinstance(slc, Tensor):
-        slc = slc.int().data
-    out = fn._Slice.apply(a, slc)
+def select(a: Tensor, slice_: Union[Tensorlike, slice]) -> Tensor:
+    if isinstance(slice_, Iterable):
+        slice_ = tuple(i.data if isinstance(i, Tensor) else i for i in slice_)
+    if isinstance(slice_, Tensor):
+        slice_ = slice_.data
+    out = fn._Slice.apply(a, slice_)
     return out
