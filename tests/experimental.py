@@ -24,9 +24,12 @@ def multiout(a):
 
 def main():
 
-    x = nura.randn(3, 4).attached()
-    y = multiout(x)
-    z = y[0] + 10
+    a = nura.tensor(3.0, usegrad=True)
+    b, c, d = multiout(a)
+    print(b, c, d)
+    e = b + c + d
+    print(e)
+    e.backward()
 
 
 if __name__ == "__main__":

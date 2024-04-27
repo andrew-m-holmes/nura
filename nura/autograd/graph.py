@@ -1,14 +1,17 @@
 import nura
+from numpy import ndarray
 from typing import List, Iterator, Tuple, Optional
 
 
 class Node:
 
-    def __init__(self, tensor, function, context, retain):
+    def __init__(self, tensor, function, context, retain, arg, nargs):
         self._tensor = tensor
         self._function = function
         self._context = context
         self._retain = retain
+        self._arg = arg
+        self._nargs = nargs
 
     @property
     def tensor(self):
@@ -26,10 +29,17 @@ class Node:
     def retain(self) -> bool:
         return self._retain
 
-    def apply(self, *grad) -> Iterator[Tuple]:
-        for t, o in zip(self.context.tensors(), self.function.backward(*grad)):
-            node, grad = getnode(t), nura.tensor(o)
-            yield node, grad
+    @property
+    def arg(self) -> int:
+        return self._arg
+
+    def apply(self, *grad):
+        out = self.function.backward(self.context, *grad)
+        return (
+            tuple(nura.tensor(o) for o in out)
+            if isinstance(out, tuple)
+            else nura.tensor(out)
+        )
 
     def children(self) -> List["Node"]:
         if self.context is None:
@@ -50,17 +60,17 @@ class Node:
         return self.tensor.usegrad and self.retain
 
     def __repr__(self) -> str:
-        if self.function is not None:
-            return f"{self.__class__.__name__}({self.function.name()})"
-        if self.accumulate():
-            return f"{self.__class__.__name__}(Accumulate)"
-        return f"{self.__class__.__name__}()"
+        fn = self.function.name() if self.function is not None else None
+        accumulate = self.accumulate()
+        arg = self.arg
+        nargs = self._nargs
+        return f"{self.__class__.__name__}({fn=} {accumulate=} {arg=} {nargs=})"
 
 
 def getnode(tensor) -> Node:
     if tensor.backfn is not None:
         return tensor.backfn
-    return Node(tensor, None, None, tensor.leaf)
+    return Node(tensor, None, None, tensor.leaf, -1, -1)
 
 
 def totensor(rawout):
@@ -84,10 +94,11 @@ def genout(rawout, function, context):
 
 def rmout(out, function, context):
     if not isinstance(out, tuple):
-        node = Node(out, function, context, False)
+        node = Node(out, function, context, False, 0, 1)
         out.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
         return out
-    nodes = [Node(o, function, context, False) for o in out]
+    nargs = len(out)
+    nodes = [Node(o, function, context, False, i, nargs) for i, o in enumerate(out)]
     for o, n in zip(out, nodes):
         o.mutate(backfn=n, usegrad=True, leaf=False, graph=1)
     return out

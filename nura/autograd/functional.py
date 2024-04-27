@@ -19,21 +19,22 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
     while queue:
         node, grad = queue.popleft()
-        backprops = node.apply(grad)
+        nodes = node.children()
         tensor = node.tensor
 
         if node.accumulate():
+            assert isinstance(grad, Tensor)
             if tensor.grad is None:
                 tensor.zerograd()
             accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
             tensor._grad += accumgrad
         if nodes:
-            items = [
-                (n, g)
-                for n, g in zip(nodes, node.apply(grad, backward=True))
-                if n is not None
-            ]
-            queue.extend(items)
+            nextgrad = node.apply(*tupify(grad))
+            pass
+
+
+def bindnodes(nodes, nextgrad):
+    pass
 
 
 def _backwarderr(
