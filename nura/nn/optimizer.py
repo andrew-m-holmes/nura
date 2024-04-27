@@ -1,6 +1,6 @@
 import nura.utils as utils
 import nura.functional as f
-from nura.autograd.mode import autograd
+from nura.autograd.mode import nograd
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
 from typing import Iterator, Optional, Tuple
@@ -36,7 +36,7 @@ class Optimizer:
         return cls.__name__
 
     def update(self, parameter: Tensor, gradstep: Tensor) -> None:
-        with autograd(enabled=False):
+        with nograd():
             parameter -= gradstep
 
     def zerograd(self) -> None:
@@ -110,7 +110,7 @@ def sgd(
 ) -> Tensor:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with autograd(enabled=False):
+    with nograd():
         grad = computedecay(parameter, parameter.grad, decay)
         if nesterov:
             grad += momentum * velocity
@@ -169,7 +169,7 @@ def rmsprop(
 ) -> Tuple[Tensor, Tensor]:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with autograd(enabled=False):
+    with nograd():
         grad = computedecay(parameter, parameter.grad, decay)
         nextvel = alpha * velocity + (1 - alpha) * f.square(grad)
         update = learnrate / f.sqrt(nextvel + eps) * grad
@@ -228,14 +228,13 @@ def adam(
     decay: Optional[float] = None,
     eps: float = 1e-8,
 ) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
-
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with autograd(enabled=False):
+    with nograd():
         grad = computedecay(parameter, parameter.grad, decay)
-        nextvel0 = betas[0] * velocities[0] + (1 - betas[0]) * grad
-        nextvel1 = betas[1] * velocities[1] + (1 - betas[1]) * f.square(grad)
-        vel0 = 1 / (1 - betas[0] ** timestep) * nextvel0
-        vel1 = 1 / (1 - betas[1] ** timestep) * nextvel1
-        update = vel0 / f.sqrt(vel1 + eps) * learnrate
-    return update, (nextvel0, nextvel1)
+        mt = betas[0] * velocities[0] + (1 - betas[0]) * grad
+        vt = betas[1] * velocities[1] + (1 - betas[1]) * f.square(grad)
+        mthat = 1 / (1 - betas[0] ** timestep) * mt
+        vthat = 1 / (1 - betas[1] ** timestep) * vt
+        update = mthat / f.sqrt(vthat + eps) * learnrate
+    return update, (mt, vt)
