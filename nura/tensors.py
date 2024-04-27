@@ -355,7 +355,7 @@ class Tensor:
                 f"Only floating-point tensors can use gradient, received {dtype.name()}"
             )
 
-        if name == "_data" and self.__dict__.get("_graph", False) and nura.usegrad():
+        if name == "_data" and self.__dict__.get("_graph", 0) and nura.reversemode():
             raise ValueError(
                 "Cannot modify the data of a tensor on computational graph"
             )
@@ -380,7 +380,7 @@ class Tensor:
             s = s[:i]
         reprs = ["Tensor(", s]
         if self.backfn is not None:
-            reprs.append(f" backfn={self.backfn.function.__name__}")
+            reprs.append(f" backfn={self.backfn.function.name()}")
         reprs.append(f" dtype={self.dtype.name()})")
         return "".join(reprs)
 
