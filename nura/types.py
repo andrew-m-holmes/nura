@@ -106,5 +106,5 @@ def dtypeof(data: Any) -> Type[dtype]:
         return dtypeof(data[0])
     dtype = type(data)
     if dtype not in _dtypemap:
-        raise KeyError(f"Couldn't find {dtype} in dtype table")
+        raise KeyError(f"Couldn't find {dtype} in dtype map")
     return _dtypemap[dtype]
