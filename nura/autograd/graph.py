@@ -1,17 +1,14 @@
 import nura
-from numpy import ndarray
-from typing import List, Iterator, Tuple, Optional
+from typing import List, Optional
 
 
 class Node:
 
-    def __init__(self, tensor, function, context, retain, arg, nargs):
+    def __init__(self, tensor, function, context, retain):
         self._tensor = tensor
         self._function = function
         self._context = context
         self._retain = retain
-        self._arg = arg
-        self._nargs = nargs
 
     @property
     def tensor(self):
@@ -28,10 +25,6 @@ class Node:
     @property
     def retain(self) -> bool:
         return self._retain
-
-    @property
-    def arg(self) -> int:
-        return self._arg
 
     def apply(self, *grad):
         out = self.function.backward(self.context, *grad)
@@ -62,15 +55,13 @@ class Node:
     def __repr__(self) -> str:
         fn = self.function.name() if self.function is not None else None
         accumulate = self.accumulate()
-        arg = self.arg
-        nargs = self._nargs
-        return f"{self.__class__.__name__}({fn=} {accumulate=} {arg=} {nargs=})"
+        return f"{self.__class__.__name__}({fn=} {accumulate=})"
 
 
 def getnode(tensor) -> Node:
     if tensor.backfn is not None:
         return tensor.backfn
-    return Node(tensor, None, None, tensor.leaf, -1, -1)
+    return Node(tensor, None, None, tensor.leaf)
 
 
 def totensor(rawout):
@@ -94,11 +85,10 @@ def genout(rawout, function, context):
 
 def rmout(out, function, context):
     if not isinstance(out, tuple):
-        node = Node(out, function, context, False, 0, 1)
+        node = Node(out, function, context, False)
         out.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
         return out
-    nargs = len(out)
-    nodes = [Node(o, function, context, False, i, nargs) for i, o in enumerate(out)]
+    nodes = [Node(o, function, context, False) for o in out]
     for o, n in zip(out, nodes):
         o.mutate(backfn=n, usegrad=True, leaf=False, graph=1)
     return out
