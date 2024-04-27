@@ -61,8 +61,7 @@ class Function:
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
-        irout = nura.tensor(rawout)
-        out = genout(irout, cls, context)
+        out = genout(rawout, cls, context)
         return out
 
     @classmethod

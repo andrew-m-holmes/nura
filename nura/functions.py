@@ -7,19 +7,6 @@ from typing import Any, Tuple, Union, Optional
 np._set_promotion_state("weak")
 
 
-class _MultiOutput(Function):
-
-    @staticmethod
-    def forward(context: Context, a: Tensor):
-        context.save(a)
-        return a.data * a.data, a.data + a.data, a.data - 1
-
-    @staticmethod
-    def backward(context: Context, grad0: Tensor, grad1: Tensor, grad2: Tensor):
-        a = context.tensors()[0]
-        return 2 * a.data * grad0.data + 2 * grad1.data + 1 * grad2.data
-
-
 class _Add(Function):
 
     @staticmethod

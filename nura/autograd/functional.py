@@ -19,8 +19,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
     while queue:
         node, grad = queue.popleft()
-        assert isinstance(grad, Tensor)
-        nodes = node.children()
+        backprops = node.apply(grad)
         tensor = node.tensor
 
         if node.accumulate():
