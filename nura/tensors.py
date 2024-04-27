@@ -359,7 +359,6 @@ class Tensor:
             raise ValueError(
                 "Cannot modify the data of a tensor on computational graph"
             )
-
         self.__dict__[name] = value
 
     def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
@@ -392,8 +391,8 @@ def tensor(
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if isinstance(data, Tensor):
-        data = data.data
         dtype = data.dtype
+        data = data.data.copy()
     if dtype is None:
         dtype = nura.dtypeof(data)
     data = dtype.numpy(data)
