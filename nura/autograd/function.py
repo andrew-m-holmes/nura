@@ -8,22 +8,20 @@ from numpy import ndarray
 class Context:
 
     def __init__(self) -> None:
-        self._tensors: Optional[Tuple[Tensor, ...]] = None
+        self._tensors: Optional[Tuple[Tuple[Tensor, int], ...]] = None
         self._dict: Optional[Dict[Any, Any]] = None
 
     def save(self, *tensors: Tensor):
-        for t in tensors:
-            t.mutate(graph=t.graph + 1)
-        self._tensors = tensors
+        self._tensors = tuple((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
-        return self._tensors if self._tensors else ()
+        return tuple(i[0] for i in self._tensors) if self._tensors is not None else ()
 
     def usesgrad(self) -> bool:
         if self._tensors is None:
             return False
-        return any(t.usegrad for t in self._tensors) and all(
-            t.gradtensor for t in self._tensors
+        return any(t.usegrad for t, v in self._tensors) and all(
+            t.gradtensor for t, v in self._tensors
         )
 
     def __setitem__(self, key: Any, value: Any):
@@ -34,10 +32,6 @@ class Context:
     def __getitem__(self, key: Any) -> Any:
         assert self._dict is not None
         return self._dict[key]
-
-    def __del__(self):
-        for t in self.tensors():
-            t.mutate(graph=t.graph - 1)
 
     def __repr__(self) -> str:
         return self.__class__.__name__

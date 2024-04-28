@@ -57,10 +57,10 @@ def genout(rawout, function, context):
 def rmout(out, function, context):
     node = Node(function, context, False)
     if not isinstance(out, tuple):
-        out.mutate(gradfn=node, usegrad=True, leaf=False, graph=1)
+        out.mutate(gradfn=node, usegrad=True, leaf=False)
         return out
     for i, o in enumerate(out):
-        o.mutate(gradfn=node, usegrad=True, leaf=False, graph=1, outnum=i)
+        o.mutate(gradfn=node, usegrad=True, leaf=False, outnum=i)
     return out
 
 

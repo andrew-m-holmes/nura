@@ -22,6 +22,7 @@ class Tensor:
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
         self._outnum: int = 0
+        self._version: int = 0
 
     @property
     def data(self) -> ndarray:
@@ -58,6 +59,10 @@ class Tensor:
     @property
     def outnum(self) -> int:
         return self._outnum
+
+    @property
+    def version(self) -> int:
+        return self._version
 
     @property
     def dtype(self) -> Type[dtype]:
@@ -351,6 +356,7 @@ class Tensor:
             "_gradfn",
             "_leaf",
             "_outnum",
+            "_version",
         ):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
 
