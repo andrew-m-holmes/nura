@@ -5,7 +5,7 @@ from typing import List, Optional
 class Node:
 
     def __init__(self, tensor, function, context, retain):
-        self._tensor = tensor
+        self._tensor = tensor if isinstance(tensor, tuple) else (tensor,)
         self._function = function
         self._context = context
         self._retain = retain
@@ -25,6 +25,18 @@ class Node:
     @property
     def retain(self) -> bool:
         return self._retain
+
+    @property
+    def outputs(self) -> int:
+        if isinstance(self.tensor, tuple):
+            return len(self.tensor)
+        return 1
+
+    def indexof(self, tensor) -> int:
+        for i in range(self.outputs):
+            if self.tensor[i] is tensor:
+                return i
+        return -1
 
     def apply(self, *grad):
         out = self.function.backward(self.context, *grad)
@@ -61,7 +73,7 @@ class Node:
 def getnode(tensor) -> Node:
     if tensor.backfn is not None:
         return tensor.backfn
-    return Node(tensor, None, None, tensor.leaf)
+    return Node(tensor, None, None, tensor.leaf, -1)
 
 
 def totensor(rawout):
@@ -84,27 +96,22 @@ def genout(rawout, function, context):
 
 
 def rmout(out, function, context):
+    node = Node(out, function, context, False, 0)
     if not isinstance(out, tuple):
-        node = Node(out, function, context, False)
         out.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
         return out
-    nodes = [Node(o, function, context, False) for o in out]
-    for o, n in zip(out, nodes):
-        o.mutate(backfn=n, usegrad=True, leaf=False, graph=1)
+    for o in out:
+        o.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
     return out
 
 
-def getgrads(context):
-    return tuple(
+def fmout(out, function, context):
+    inputgrads = tuple(
         t.grad if t.grad is not None else nura.zeroslike(t) for t in context.tensors()
     )
-
-
-def fmout(out, function, context):
-    inputgrads = getgrads(context)
     if not isinstance(out, tuple):
         grad = nura.tensor(function.tangent(*inputgrads))
         out.mutate(usegrad=True, grad=grad, leaf=False)
         return out
-    grads = [nura.tensor(g) for g in function.tangent(*inputgrads)]
+    grads = (nura.tensor(g) for g in function.tangent(*inputgrads))
     return tuple(o.mutate(usegrad=True, grad=g, leaf=False) for o, g in zip(out, grads))

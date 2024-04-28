@@ -33,7 +33,7 @@ def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
             pass
 
 
-def bindnodes(nodes, nextgrad):
+def getgrads(node, grad):
     pass
 
 
