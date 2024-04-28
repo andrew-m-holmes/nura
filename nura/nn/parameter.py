@@ -13,10 +13,10 @@ class Parameter(Tensor):
         data: ndarray,
         usegrad=True,
         grad: Optional["Tensor"] = None,
-        backfn: Optional[Node] = None,
+        gradfn: Optional[Node] = None,
         leaf=True,
     ) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
+        super().__init__(data, usegrad, grad, gradfn, leaf)
 
     def to(self, dtype: Type[dtype]):
         return parameter(super().to(dtype), self.usegrad, dtype)

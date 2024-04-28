@@ -21,9 +21,10 @@ mulfunc = MulFunc.apply
 
 def main():
 
-    a = nura.tensor(2.0, usegrad=True)
+    a = nura.rand().attached()
     b, c = mulfunc(a)
-    b.backward()
+    d = b * c
+    print(d.gradfn.nextfunctions())
 
 
 if __name__ == "__main__":

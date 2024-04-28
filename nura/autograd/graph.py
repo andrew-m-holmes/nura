@@ -1,18 +1,13 @@
 import nura
-from typing import List, Optional
+from typing import List, Tuple, Optional
 
 
 class Node:
 
-    def __init__(self, tensor, function, context, retain):
-        self._tensor = tensor if isinstance(tensor, tuple) else (tensor,)
+    def __init__(self, function, context, accumulate):
         self._function = function
         self._context = context
-        self._retain = retain
-
-    @property
-    def tensor(self):
-        return self._tensor
+        self._accumulate = accumulate
 
     @property
     def function(self):
@@ -23,57 +18,21 @@ class Node:
         return self._context
 
     @property
-    def retain(self) -> bool:
-        return self._retain
+    def accumulate(self) -> bool:
+        return self._accumulate
 
-    @property
-    def outputs(self) -> int:
-        if isinstance(self.tensor, tuple):
-            return len(self.tensor)
-        return 1
-
-    def indexof(self, tensor) -> int:
-        for i in range(self.outputs):
-            if self.tensor[i] is tensor:
-                return i
-        return -1
-
-    def apply(self, *grad):
-        out = self.function.backward(self.context, *grad)
-        return (
-            tuple(nura.tensor(o) for o in out)
-            if isinstance(out, tuple)
-            else nura.tensor(out)
-        )
-
-    def children(self) -> List["Node"]:
-        if self.context is None:
-            return []
-        nodes = [getnode(t) for t in self.context.tensors()]
-        return nodes
-
-    def topological(self, mem: Optional[List["Node"]] = None) -> List["Node"]:
-        if mem is None:
-            mem = []
-        children = self.children()
-        mem.extend(self.children())
-        for c in children:
-            c.topological(mem)
-        return mem
-
-    def accumulate(self):
-        return self.tensor.usegrad and self.retain
+    def nextfunctions(self) -> List[Tuple[Optional["Node"], int]]:
+        return [(getnode(t), t.outnum) for t in self.context.tensors()]
 
     def __repr__(self) -> str:
         fn = self.function.name() if self.function is not None else None
-        accumulate = self.accumulate()
-        return f"{self.__class__.__name__}({fn=} {accumulate=})"
+        return f"{self.__class__.__name__}({fn=})"
 
 
-def getnode(tensor) -> Node:
-    if tensor.backfn is not None:
-        return tensor.backfn
-    return Node(tensor, None, None, tensor.leaf, -1)
+def getnode(tensor) -> Optional[Node]:
+    if tensor.usegrad and tensor.leaf:
+        return Node(None, None, True)
+    return tensor.gradfn
 
 
 def totensor(rawout):
@@ -96,12 +55,12 @@ def genout(rawout, function, context):
 
 
 def rmout(out, function, context):
-    node = Node(out, function, context, False, 0)
+    node = Node(function, context, False)
     if not isinstance(out, tuple):
-        out.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
+        out.mutate(gradfn=node, usegrad=True, leaf=False, graph=1)
         return out
-    for o in out:
-        o.mutate(backfn=node, usegrad=True, leaf=False, graph=1)
+    for i, o in enumerate(out):
+        o.mutate(gradfn=node, usegrad=True, leaf=False, graph=1, outnum=i)
     return out
 
 

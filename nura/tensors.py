@@ -13,15 +13,15 @@ class Tensor:
         data: ndarray,
         usegrad: bool,
         grad: Optional["Tensor"],
-        backfn: Optional[Node],
+        gradfn: Optional[Node],
         leaf: bool,
     ) -> None:
         self._data: ndarray = data
         self._grad: Optional[Tensor] = grad
-        self._backfn: Optional[Node] = backfn
+        self._gradfn: Optional[Node] = gradfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._graph: int = 0
+        self._outnum: int = 0
 
     @property
     def data(self) -> ndarray:
@@ -48,16 +48,16 @@ class Tensor:
         return self._grad
 
     @property
-    def backfn(self) -> Optional[Node]:
-        return self._backfn
+    def gradfn(self) -> Optional[Node]:
+        return self._gradfn
 
     @property
     def leaf(self) -> bool:
         return self._leaf
 
     @property
-    def graph(self) -> int:
-        return self._graph
+    def outnum(self) -> int:
+        return self._outnum
 
     @property
     def dtype(self) -> Type[dtype]:
@@ -73,11 +73,7 @@ class Tensor:
         return self.permute(revdims)
 
     def item(self) -> Scalar:
-        if self.nelem != 1:
-            raise RuntimeError(
-                f"Cannot retrieve single element from tensor with {self.nelem} elements"
-            )
-        return self.data.item()
+        return nura.item(self)
 
     def list(self) -> List[Any]:
         return self.data.tolist()
@@ -85,34 +81,35 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None) -> None:
         nura.backward(self, grad)
 
-    def retaingrad(self) -> Self:
-        if self.backfn is None:
-            raise ValueError(
-                "Cannot retain gradient for tensor, tensor is not intermediate node on graph"
-            )
-        self.backfn._retain = True
-        return self
+    # TODO how should a node be told to accumulate the grad for a tensor?
+    # def retaingrad(self) -> Self:
+    #     if self.gradfn is None:
+    #         raise ValueError(
+    #             "Cannot retain gradient for tensor, tensor is not intermediate node on graph"
+    #         )
+    #
+    #     return self
 
     def cleargrad(self) -> None:
         self._grad = None
 
     def clearedgrad(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data, self.usegrad, None, self.backfn, self.leaf)
+        return cls(self.data, self.usegrad, None, self.gradfn, self.leaf)
 
     def zerograd(self) -> None:
         self._grad = nura.zeroslike(self)
 
     def zeroedgrad(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data, self.usegrad, nura.zeroslike(self), self.backfn, True)
+        return cls(self.data, self.usegrad, nura.zeroslike(self), self.gradfn, True)
 
     def attach(self) -> None:
         self._usegrad = True
 
     def attached(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data, True, self.grad, self.backfn, self.leaf)
+        return cls(self.data, True, self.grad, self.gradfn, self.leaf)
 
     def detach(self) -> None:
         self._usegrad = False
@@ -127,7 +124,7 @@ class Tensor:
 
     def mutated(self, **attrs: Any) -> "Tensor":
         cls = type(self)
-        t = cls(self.data, self.usegrad, self.grad, self.backfn, self.leaf)
+        t = cls(self.data, self.usegrad, self.grad, self.gradfn, self.leaf)
         for k, v in attrs.items():
             setattr(t, f"_{k}", v)
         return t
@@ -347,7 +344,14 @@ class Tensor:
         return self.to(types.bool)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name not in ("_data", "_usegrad", "_grad", "_backfn", "_leaf", "_graph"):
+        if name not in (
+            "_data",
+            "_usegrad",
+            "_grad",
+            "_gradfn",
+            "_leaf",
+            "_outnum",
+        ):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
 
         if name == "_usegrad" and value and not self.gradtensor:
@@ -355,10 +359,11 @@ class Tensor:
                 f"Only floating-point tensors can use gradient, received {dtype.name()}"
             )
 
-        if name == "_data" and self.__dict__.get("_graph", 0) and nura.reversemode():
-            raise ValueError(
-                "Cannot modify the data of a tensor on computational graph"
-            )
+        # TODO, use the context and keep track of a version number
+        # if name == "_data" and self.__dict__.get("_graph", 0) and nura.reversemode():
+        #     raise ValueError(
+        #         "Cannot modify the data of a tensor on computational graph"
+        #     )
         self.__dict__[name] = value
 
     def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
@@ -379,8 +384,8 @@ class Tensor:
             i = s.index(" dtype")
             s = s[:i]
         reprs = ["Tensor(", s]
-        if self.backfn is not None:
-            reprs.append(f" backfn={self.backfn.function.name()}")
+        if self.gradfn is not None:
+            reprs.append(f" gradfn={self.gradfn.function.name()}")
         reprs.append(f" dtype={self.dtype.name()})")
         return "".join(reprs)
 

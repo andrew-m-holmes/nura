@@ -286,6 +286,14 @@ def typesmatch(*tensors: Tensor) -> bool:
     return len(set(t.dtype for t in tensors)) == 1
 
 
+def item(a: Tensor) -> Scalar:
+    if a.nelem != 1:
+        raise RuntimeError(
+            f"Cannot retrieve single element from tensor with {a.nelem} elements"
+        )
+    return a.data.item()
+
+
 def to(a: Tensor, dtype: Type[dtype]) -> Tensor:
     if not isinstance(a, Tensor):
         raise ValueError(f"Expected Tensor, received {a.__class__.__name__}")

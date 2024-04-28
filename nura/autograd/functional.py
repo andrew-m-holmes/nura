@@ -15,14 +15,14 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
 def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
     queue = deque()
-    queue.append((out.backfn, grad))
+    queue.append((out.gradfn, grad))
 
     while queue:
         node, grad = queue.popleft()
         nodes = node.children()
         tensor = node.tensor
 
-        if node.accumulate():
+        if node.accumulate:
             assert isinstance(grad, Tensor)
             if tensor.grad is None:
                 tensor.zerograd()
@@ -40,7 +40,7 @@ def getgrads(node, grad):
 def _backwarderr(
     out: Tensor, grad: Optional[Tensor] = None
 ) -> Optional[Union[RuntimeError, ValueError]]:
-    if out.backfn is None:
+    if out.gradfn is None:
         return RuntimeError(
             "Cannot backpropagate gradients for Tensor with no backward function"
         )
@@ -77,7 +77,7 @@ def _grad(
     grads = tuple(nura.zeroslike(t) for t in inpt)
     inptmap = mapify(inpt, grads)
     queue = deque()
-    queue.append((out.backfn, grad))
+    queue.append((out.gradfn, grad))
 
     while queue:
         node, grad = queue.popleft()
@@ -101,7 +101,7 @@ def _graderr(
         return ValueError(
             "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
         )
-    if out.backfn is None:
+    if out.gradfn is None:
         return ValueError(
             "Cannot backpropagate gradients for Tensor with no backward function"
         )
@@ -159,7 +159,7 @@ def vjp(
     inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
     vec = vec.mutated(usegrad=False, grad=None)
     out, grads = _vjp(inpt, vec, f, *args, **kwargs)
-    return out.mutated(usegrad=False, backfn=None, leaf=True), grads
+    return out.mutated(usegrad=False, gradfn=None, leaf=True), grads
 
 
 def _vjp(
