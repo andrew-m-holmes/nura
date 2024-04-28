@@ -14,26 +14,6 @@ def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
 
 
 def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    queue = deque()
-    queue.append((out.gradfn, grad))
-
-    while queue:
-        node, grad = queue.popleft()
-        nodes = node.children()
-        tensor = node.tensor
-
-        if node.accumulate:
-            assert isinstance(grad, Tensor)
-            if tensor.grad is None:
-                tensor.zerograd()
-            accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            tensor._grad += accumgrad
-        if nodes:
-            nextgrad = node.apply(*tupify(grad))
-            pass
-
-
-def getgrads(node, grad):
     pass
 
 

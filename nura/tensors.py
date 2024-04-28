@@ -21,7 +21,8 @@ class Tensor:
         self._gradfn: Optional[Node] = gradfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._outnum: int = 0
+        self._retain: bool = leaf
+        self._index: int = 0
         self._version: int = 0
 
     @property
@@ -57,8 +58,12 @@ class Tensor:
         return self._leaf
 
     @property
-    def outnum(self) -> int:
-        return self._outnum
+    def retain(self) -> bool:
+        return self._retain
+
+    @property
+    def index(self) -> int:
+        return self._index
 
     @property
     def version(self) -> int:
@@ -86,14 +91,14 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None) -> None:
         nura.backward(self, grad)
 
-    # TODO how should a node be told to accumulate the grad for a tensor?
-    # def retaingrad(self) -> Self:
-    #     if self.gradfn is None:
-    #         raise ValueError(
-    #             "Cannot retain gradient for tensor, tensor is not intermediate node on graph"
-    #         )
-    #
-    #     return self
+    def retaingrad(self) -> None:
+        self._retain = True
+
+    def retainedgrad(self) -> "Tensor":
+        cls = type(self)
+        t = cls(self.data, self.usegrad, self.grad, self.gradfn, self.leaf)
+        t.mutate(retain=True)
+        return t
 
     def cleargrad(self) -> None:
         self._grad = None
@@ -118,10 +123,13 @@ class Tensor:
 
     def detach(self) -> None:
         self._usegrad = False
+        self._retain = False
 
     def detached(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data, False, None, None, True)
+        t = cls(self.data, False, None, None, True)
+        t.mutate(retain=False)
+        return t
 
     def mutate(self, **attrs: Any) -> None:
         for k, v in attrs.items():

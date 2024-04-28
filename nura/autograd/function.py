@@ -15,7 +15,7 @@ class Context:
         self._tensors = tuple((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
-        return tuple(i[0] for i in self._tensors) if self._tensors is not None else ()
+        return tuple(t for t, v in self._tensors) if self._tensors is not None else ()
 
     def usesgrad(self) -> bool:
         if self._tensors is None:
