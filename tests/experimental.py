@@ -25,6 +25,7 @@ def main():
     b, c = mulfunc(a)
     d = b * c
     print(d.gradfn.nextfunctions())
+    print(d.gradfn.nextfunctions()[0][0].nextfunctions())
 
 
 if __name__ == "__main__":

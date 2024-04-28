@@ -4,10 +4,11 @@ from typing import Tuple, Optional
 
 class Node:
 
-    def __init__(self, function, context, accumulate):
+    def __init__(self, function, context, accumulate, outputs):
         self._function = function
         self._context = context
         self._accumulate = accumulate
+        self._outputs = outputs
 
     @property
     def function(self):
@@ -21,17 +22,22 @@ class Node:
     def accumulate(self) -> bool:
         return self._accumulate
 
+    @property
+    def outputs(self):
+        return self._outputs
+
     def nextfunctions(self) -> Tuple[Tuple[Optional["Node"], int], ...]:
         return tuple((getnode(t), t.index) for t in self.context.tensors())
 
     def __repr__(self) -> str:
         fn = self.function.name() if self.function is not None else None
-        return f"{self.__class__.__name__}({fn=})"
+        accumulate = self.accumulate
+        return f"{self.__class__.__name__}({fn=} {accumulate=})"
 
 
 def getnode(tensor) -> Optional[Node]:
     if tensor.usegrad and tensor.leaf:
-        return Node(None, None, True)
+        return Node(None, None, True, 0)
     return tensor.gradfn
 
 
@@ -55,10 +61,11 @@ def genout(rawout, function, context):
 
 
 def rmout(out, function, context):
-    node = Node(function, context, False)
     if not isinstance(out, tuple):
+        node = Node(function, context, False, 1)
         out.mutate(gradfn=node, usegrad=True, leaf=False)
         return out
+    node = Node(function, context, False, len(out))
     for i, o in enumerate(out):
         o.mutate(gradfn=node, usegrad=True, leaf=False, index=i)
     return out
