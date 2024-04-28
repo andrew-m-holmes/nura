@@ -1,5 +1,5 @@
 import nura
-from typing import List, Tuple, Optional
+from typing import Tuple, Optional
 
 
 class Node:
@@ -21,8 +21,8 @@ class Node:
     def accumulate(self) -> bool:
         return self._accumulate
 
-    def nextfunctions(self) -> List[Tuple[Optional["Node"], int]]:
-        return [(getnode(t), t.outnum) for t in self.context.tensors()]
+    def nextfunctions(self) -> Tuple[Tuple[Optional["Node"], int], ...]:
+        return tuple((getnode(t), t.index) for t in self.context.tensors())
 
     def __repr__(self) -> str:
         fn = self.function.name() if self.function is not None else None
@@ -60,7 +60,7 @@ def rmout(out, function, context):
         out.mutate(gradfn=node, usegrad=True, leaf=False)
         return out
     for i, o in enumerate(out):
-        o.mutate(gradfn=node, usegrad=True, leaf=False, outnum=i)
+        o.mutate(gradfn=node, usegrad=True, leaf=False, index=i)
     return out
 
 

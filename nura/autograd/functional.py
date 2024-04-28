@@ -1,7 +1,8 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union
+from nura.autograd.graph import Node
+from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union, List
 from collections import deque
 
 
@@ -98,6 +99,10 @@ def _graderr(
             f"Expected grad argument of type {out.dtype.name()}, received {grad.dtype.name()}"
         )
     return None
+
+
+def getgrads(node: Node) -> List[Tensor]:
+    return []
 
 
 def mapify(keys, values) -> Dict[Tensor, Any]:

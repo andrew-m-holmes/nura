@@ -363,7 +363,8 @@ class Tensor:
             "_grad",
             "_gradfn",
             "_leaf",
-            "_outnum",
+            "_retain",
+            "_index",
             "_version",
         ):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
