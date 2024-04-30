@@ -1,6 +1,7 @@
 import numpy as np
 import nura
 import nura.nn as nn
+import torch
 from nura.autograd.function import Function
 
 
@@ -21,11 +22,12 @@ mulfunc = MulFunc.apply
 
 def main():
 
-    a = nura.rand().attached()
-    b, c = mulfunc(a)
-    d = b * c
-    print(d.gradfn.nextfunctions())
-    print(d.gradfn.nextfunctions()[0][0].nextfunctions())
+    a = torch.tensor([1.0, 2.0], requires_grad=True)
+    b, c = a.unbind()
+    print(b.grad_fn.next_functions[0][0])
+    d = a + b
+    print(d.grad_fn.next_functions[0][0] is (b.grad_fn.next_functions[0][0]))
+    print(d.grad_fn.next_functions[1][0])
 
 
 if __name__ == "__main__":
