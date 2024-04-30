@@ -1,4 +1,3 @@
-import nura
 from typing import Tuple, Optional
 
 
@@ -39,8 +38,13 @@ class AccumulateGrad:
             pass
 
 
-def getnextfunctions(out, function, context) -> Tuple[Tuple[Optional[Node], int], ...]:
-    raise NotImplementedError
+def getnextfunctions(function, context) -> Tuple[Tuple[Optional[Node], int], ...]:
+    if not context.usesgrad():
+        raise ValueError("Received context that does not use gradients")
+
+    nextfunctions = []
+    for t in context.tensors():
+        pass
 
 
 def genout(out, function, context):

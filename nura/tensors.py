@@ -21,7 +21,6 @@ class Tensor:
         self._gradfn: Optional[Node] = gradfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._retain: bool = leaf
         self._index: int = 0
         self._version: int = 0
 
@@ -58,10 +57,6 @@ class Tensor:
         return self._leaf
 
     @property
-    def retain(self) -> bool:
-        return self._retain
-
-    @property
     def index(self) -> int:
         return self._index
 
@@ -90,15 +85,6 @@ class Tensor:
 
     def backward(self, grad: Optional["Tensor"] = None) -> None:
         nura.backward(self, grad)
-
-    def retaingrad(self) -> None:
-        self._retain = True
-
-    def retainedgrad(self) -> "Tensor":
-        cls = type(self)
-        t = cls(self.data, self.usegrad, self.grad, self.gradfn, self.leaf)
-        t.mutate(retain=True)
-        return t
 
     def cleargrad(self) -> None:
         self._grad = None
@@ -363,7 +349,6 @@ class Tensor:
             "_grad",
             "_gradfn",
             "_leaf",
-            "_retain",
             "_index",
             "_version",
         ):
