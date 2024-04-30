@@ -27,7 +27,7 @@ def main():
     print(b.grad_fn.next_functions[0][0])
     d = a + b
     print(d.grad_fn.next_functions[0][0] is (b.grad_fn.next_functions[0][0]))
-    print(d.grad_fn.next_functions[1][0])
+    print(d.grad_fn.next_functions[0][0].metadata)
 
 
 if __name__ == "__main__":

@@ -342,6 +342,9 @@ class Tensor:
     def bool(self) -> "Tensor":
         return self.to(types.bool)
 
+    def __del__(self):
+        pass
+
     def __setattr__(self, name: str, value: Any) -> None:
         if name not in (
             "_data",

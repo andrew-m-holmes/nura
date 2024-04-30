@@ -32,10 +32,21 @@ class Node:
 
 class AccumulateGrad:
 
+    def __init__(self, tensor) -> None:
+        self._tensor = tensor
+        self._buffer = None
+
     @staticmethod
     def apply(tensor, grad):
         if tensor.dim != grad.dim and tensor.ndim <= grad.ndim:
             pass
+
+
+class GradientEdge:
+
+    def __init__(self, gradfn, index):
+        self._gradfn = gradfn
+        self._index = index
 
 
 def getnextfunctions(function, context) -> Tuple[Tuple[Optional[Node], int], ...]:
@@ -44,7 +55,8 @@ def getnextfunctions(function, context) -> Tuple[Tuple[Optional[Node], int], ...
 
     nextfunctions = []
     for t in context.tensors():
-        pass
+        if t.gradfn is None and t.leaf:
+            pass
 
 
 def genout(out, function, context):
