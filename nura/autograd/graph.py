@@ -4,10 +4,10 @@ from typing import Tuple, Optional
 
 class Node:
 
-    def __init__(self, function, context, accumulate, outputs):
+    def __init__(self, function, context, nextfunctions, outputs):
         self._function = function
         self._context = context
-        self._accumulate = accumulate
+        self._nextfunctions = nextfunctions
         self._outputs = outputs
 
     @property
@@ -19,13 +19,10 @@ class Node:
         return self._context
 
     @property
-    def accumulate(self) -> bool:
-        return self._accumulate
-
-    @property
     def outputs(self) -> int:
         return self._outputs
 
+    @property
     def nextfunctions(self) -> Tuple[Tuple[Optional["Node"], int], ...]:
         raise NotImplementedError
 
@@ -34,24 +31,17 @@ class Node:
         return f"{self.__class__.__name__}({fn=})"
 
 
-def totensor(rawout):
-    tensor = (
-        tuple(nura.tensor(ro) for ro in rawout)
-        if isinstance(rawout, tuple)
-        else nura.tensor(rawout)
-    )
-    return tensor
+class AccumulateGrad:
+
+    @staticmethod
+    def apply(tensor, grad):
+        if tensor.dim != grad.dim and tensor.ndim <= grad.ndim:
+            pass
 
 
 def getnextfunctions(out, function, context) -> Tuple[Tuple[Optional[Node], int], ...]:
     raise NotImplementedError
 
 
-def genout(rawout, function, context):
-    out = totensor(rawout)
-    if not context.usesgrad():
-        return out
-    if nura.reversemode():
-        return rmout(out, function, context)
-    if nura.forwardmode():
-        return fmout(out, function, context)
+def genout(out, function, context):
+    return out

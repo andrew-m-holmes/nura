@@ -101,10 +101,6 @@ def _graderr(
     return None
 
 
-def getgrads(node: Node) -> List[Tensor]:
-    return []
-
-
 def mapify(keys, values) -> Dict[Tensor, Any]:
     return {k: v for k, v in zip(keys, values)}
 

@@ -40,7 +40,9 @@ class Context:
 class Function:
 
     @staticmethod
-    def forward(context: Context, *args: Any, **kwargs: Any) -> ndarray:
+    def forward(
+        context: Context, *args: Any, **kwargs: Any
+    ) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
@@ -48,13 +50,18 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def tangent(context: Context, *grad: Tensor) -> ndarray:
+    def tangent(context: Context, *grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @classmethod
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
+        out = (
+            tuple(nura.tensor(ro) for ro in rawout)
+            if isinstance(rawout, tuple)
+            else nura.tensor(rawout)
+        )
         out = genout(rawout, cls, context)
         return out
 
