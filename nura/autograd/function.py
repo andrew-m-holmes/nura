@@ -1,6 +1,5 @@
 import nura
 from nura.tensors import Tensor
-from nura.autograd.graph import genout
 from typing import Tuple, Any, Optional, Dict, Union
 from numpy import ndarray
 
@@ -62,7 +61,6 @@ class Function:
             if isinstance(rawout, tuple)
             else nura.tensor(rawout)
         )
-        out = genout(rawout, cls, context)
         return out
 
     @classmethod

@@ -21,43 +21,6 @@ class Node:
     def outputs(self) -> int:
         return self._outputs
 
-    @property
-    def nextfunctions(self) -> Tuple[Tuple[Optional["Node"], int], ...]:
-        raise NotImplementedError
-
     def __repr__(self) -> str:
         fn = self.function.name() if self.function is not None else None
         return f"{self.__class__.__name__}({fn=})"
-
-
-class AccumulateGrad:
-
-    def __init__(self, tensor) -> None:
-        self._tensor = tensor
-        self._buffer = None
-
-    @staticmethod
-    def apply(tensor, grad):
-        if tensor.dim != grad.dim and tensor.ndim <= grad.ndim:
-            pass
-
-
-class GradientEdge:
-
-    def __init__(self, gradfn, index):
-        self._gradfn = gradfn
-        self._index = index
-
-
-def getnextfunctions(function, context) -> Tuple[Tuple[Optional[Node], int], ...]:
-    if not context.usesgrad():
-        raise ValueError("Received context that does not use gradients")
-
-    nextfunctions = []
-    for t in context.tensors():
-        if t.gradfn is None and t.leaf:
-            pass
-
-
-def genout(out, function, context):
-    return out
