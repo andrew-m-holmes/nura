@@ -2,6 +2,7 @@ import numpy as np
 import nura
 import nura.nn as nn
 from nura.autograd.function import Function
+from nura.autograd.graph import constructgraph, topological
 
 
 class Unbind(Function):
@@ -25,6 +26,10 @@ def main():
     b, c, d = unbind(a)
     e = b * c
     f = e * d
+
+    graph = constructgraph((f.gradfn,))
+    sorted = topological(graph)
+    print(sorted)
 
 
 if __name__ == "__main__":
