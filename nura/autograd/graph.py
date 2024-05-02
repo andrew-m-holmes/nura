@@ -39,11 +39,19 @@ class Accumulate:
 
     def __init__(self, tensor) -> None:
         self._tensor = tensor
+        self._buffer = None
+
+    def push(self, grad):
+        if self._buffer is None:
+            self._buffer = []
+        self._buffer.append(grad)
 
     def backward(self, context, grad) -> None:
         if self._tensor.grad is None:
             self._tensor.zerograd()
-        self._tensor._grad += grad
+        if self._buffer is not None:
+            for grad in self._buffer:
+                self._tensor._grad += grad
         return None
 
     @classmethod

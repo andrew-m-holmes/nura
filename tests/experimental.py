@@ -23,11 +23,12 @@ unbind = Unbind.apply
 
 def main():
 
-    a = nura.tensor([1.0, 2.0, 3.0], usegrad=True)
-    b, c, d = unbind(a)
-    e = b * c
-    f = e * d
-    f.backward()
+    a = nura.tensor(3.0, usegrad=True)
+    b = nura.tensor(2.0)
+    c = a * b
+    d = a * c
+    d.backward()
+    assert d.gradfn is not None
 
 
 if __name__ == "__main__":

@@ -27,19 +27,19 @@ def _backward(
     order = topological(graph)
     nodegrads = _makenodegrads(order, nodes, _grad)
     queue = deque(order)
+
+    # TODO handle accumulate
     while queue:
         node = queue.popleft()
         outputgrad = nodegrads[node]
         edgearr = node.apply(*outputgrad)
-        # nodegrads.pop(node)
+        nodegrads.pop(node)
         if node.edges is None:
             continue
         edgegrad = _postapply(edgearr)
         for (child, index), childgrad in zip(node.edges, edgegrad):
             if child is not None:
                 nodegrads[child][index] = childgrad
-    for k, v in nodegrads.items():
-        print(k, v)
 
 
 def _backwarderr(
