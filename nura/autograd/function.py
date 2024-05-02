@@ -1,6 +1,6 @@
 import nura
-from nura.autograd.graph import addtograph
 from nura.tensors import Tensor
+from nura.autograd.graph import addtograph
 from numpy import ndarray
 from typing import Tuple, Any, Optional, Union, OrderedDict
 
@@ -52,11 +52,11 @@ class Function:
     @classmethod
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
-        rawoutputs = cls.forward(context, *args, **kwargs)
-        outputs = cls.prepoutput(rawoutputs)
+        rawoutput = cls.forward(context, *args, **kwargs)
+        output = cls.prepoutput(rawoutput)
         if context.usesgrad():
-            addtograph(outputs, cls, context)
-        return outputs
+            addtograph(output, cls, context)
+        return output
 
     @classmethod
     def name(cls) -> str:
@@ -64,10 +64,10 @@ class Function:
 
     @staticmethod
     def prepoutput(
-        rawout: Union[Tuple[ndarray, ...], ndarray]
+        rawoutput: Union[Tuple[ndarray, ...], ndarray]
     ) -> Union[Tuple[Tensor, ...], Tensor]:
-        if isinstance(rawout, tuple):
+        if isinstance(rawoutput, tuple):
             return tuple(
-                nura.tensor(ro).mutated(index=i) for i, ro in enumerate(rawout)
+                nura.tensor(ro).mutated(index=i) for i, ro in enumerate(rawoutput)
             )
-        return nura.tensor(rawout)
+        return nura.tensor(rawoutput)

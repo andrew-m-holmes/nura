@@ -3,12 +3,13 @@ from typing import Optional, Tuple
 
 class Node:
 
-    def __init__(self, function=None, context=None, outputs: int = -1):
+    def __init__(
+        self, function, context=None, nextfunctions=None, outputs: Optional[int] = None
+    ):
         self._function = function
         self._context = context
+        self._nextfunctions = nextfunctions
         self._outputs = outputs
-        self._leaf = outputs == -1
-        self.grads = None
 
     @property
     def function(self):
@@ -19,43 +20,36 @@ class Node:
         return self._context
 
     @property
-    def outputs(self) -> int:
+    def outputs(self) -> Optional[int]:
         return self._outputs
 
     @property
-    def leaf(self) -> bool:
-        return self._leaf
-
-    @property
-    def ready(self) -> bool:
-        if self.grads is None:
-            return False
-        return len(self.grads) == self.outputs
-
-    @property
-    def nextfunctions(self) -> Optional[Tuple[Tuple, ...]]:
-        if self.context is None:
-            return None
-        return tuple((self.getnode(t), t.version) for t in self.context.tensors())
-
-    @staticmethod
-    def getnode(tensor) -> Optional["Node"]:
-        if tensor.leaf and tensor.usegrad:
-            return Node()
-        return tensor.gradfn
-
-    @staticmethod
-    def accumulate(tensor, grad):
-        pass
-
-    def pushedge(self, edge, grad):
-        if self.grads is None:
-            self._grads = [None] * self.outputs
-        self._grads[edge[1]] = grad
+    def nextfunctions(self) -> Optional[Tuple[Tuple["Node", int], ...]]:
+        return self._nextfunctions
 
     def __repr__(self) -> str:
-        fn = self.function.name() if self.function is not None else "_Accumulate"
+        fn = self.function.name()
         return f"{self.__class__.__name__}({fn=})"
+
+
+class Accumulate:
+
+    def __init__(self, tensor) -> None:
+        self._tensor = tensor
+
+    def backward(self, grad):
+        pass
+
+
+def getnextfunctions(context) -> Tuple[Tuple[Optional[Node], int], ...]:
+    return tuple((getnode(t), t.index) for t in context.tensors())
+
+
+def getnode(tensor) -> Optional["Node"]:
+    if tensor.leaf and tensor.usegrad and tensor.gradfn is None:
+        node = Node(Accumulate(tensor))
+        tensor.mutate(gradfn=node)
+    return tensor.gradfn
 
 
 def addtograph(outputs, function, context) -> None:
