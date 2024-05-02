@@ -1,4 +1,5 @@
-from typing import Optional, Tuple, List, Dict
+from numpy import ndarray
+from typing import Optional, Tuple, List, Dict, Union
 from collections import deque
 
 
@@ -26,8 +27,8 @@ class Node:
     def edges(self) -> Optional[Tuple[Tuple["Node", int], ...]]:
         return self._edges
 
-    def apply(self, *grad):
-        pass
+    def apply(self, *grad) -> Union[Tuple[ndarray, ...], ndarray]:
+        return self.function.backward(self.context, *grad)
 
     def __repr__(self) -> str:
         fn = self.function.name()
@@ -39,8 +40,11 @@ class Accumulate:
     def __init__(self, tensor) -> None:
         self._tensor = tensor
 
-    def backward(self, grad):
-        pass
+    def backward(self, context, grad) -> None:
+        if self._tensor.grad is None:
+            self._tensor.zerograd()
+        self._tensor._grad += grad
+        return None
 
     @classmethod
     def name(cls) -> str:
@@ -69,7 +73,7 @@ def addtograph(outputs, function, context) -> None:
         outputs.mutate(gradfn=node, usegrad=True, leaf=False)
 
 
-def constructgraph(nodes: Tuple[Node]) -> Dict[Node, List[Node,]]:
+def constructgraph(nodes: Tuple[Node, ...]) -> Dict[Node, List[Node,]]:
     graph = dict()
     visit = set(nodes)
     queue = deque(visit)

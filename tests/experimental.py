@@ -14,6 +14,7 @@ class Unbind(Function):
 
     @staticmethod
     def backward(context, *grad):
+        grad = tuple(g.data for g in grad)
         return np.concatenate(grad, axis=0)
 
 
@@ -26,10 +27,7 @@ def main():
     b, c, d = unbind(a)
     e = b * c
     f = e * d
-
-    graph = constructgraph((f.gradfn,))
-    sorted = topological(graph)
-    print(sorted)
+    f.backward()
 
 
 if __name__ == "__main__":
