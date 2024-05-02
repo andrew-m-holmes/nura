@@ -1,123 +1,50 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from nura.autograd.graph import Node
 from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union, List
 from collections import deque
 
 
 def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    if err := _backwarderr(out, grad):
-        raise err
-    if grad is None:
-        grad = nura.oneslike(out)
-    _backward(out, grad)
+    raise NotImplemented
 
 
-def _backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    pass
+def _backward(
+    out: Union[Tuple[Tensor, ...], Tensor],
+    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+) -> None:
+    raise NotImplemented
 
 
 def _backwarderr(
     out: Tensor, grad: Optional[Tensor] = None
 ) -> Optional[Union[RuntimeError, ValueError]]:
-    if out.gradfn is None:
-        return RuntimeError(
-            "Cannot backpropagate gradients for Tensor with no backward function"
-        )
-    if grad is None and out.nelem != 1:
-        return RuntimeError(
-            f"A gradient (grad) must be passed if the Tensor has more than one elements, received Tensor with {out.nelem}"
-        )
-    elif grad is not None and not grad.gradtensor:
-        return ValueError(
-            f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
-        )
-    elif grad is not None and grad.dtype != out.dtype:
-        return RuntimeError(
-            f"Expected grad argument of type {out.dtype.name()}, received {grad.dtype.name()}"
-        )
-    return None
+    raise NotImplemented
 
 
 def grad(
-    inpt: Union[Tensor, Tuple[Tensor, ...]], out: Tensor, grad: Optional[Tensor] = None
+    out: Union[Tuple[Tensor, ...], Tensor],
+    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> Tuple[Tensor, ...]:
-    inpt = tupify(inpt)
-    if err := _graderr(inpt, out, grad):
-        raise err
-    if grad is None:
-        grad = nura.oneslike(out)
-    inptmap = _grad(inpt, out, grad)
-    return tuple(inptmap.values())
+    raise NotImplemented
 
 
 def _grad(
     inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
 ) -> Dict[Tensor, Tensor]:
-    grads = tuple(nura.zeroslike(t) for t in inpt)
-    inptmap = mapify(inpt, grads)
-    queue = deque()
-    queue.append((out.gradfn, grad))
-
-    while queue:
-        node, grad = queue.popleft()
-        assert isinstance(grad, Tensor)
-        nodes = node.children()
-        tensor = node.tensor
-
-        if tensor in inptmap:
-            accumgrad = sumgrad(tensor, grad) if mismatch(tensor, grad) else grad
-            inptmap[tensor] += accumgrad
-        if nodes:
-            items = [[n, g] for n, g in zip(nodes, node.apply(grad, backward=True))]
-            queue.extend(items)
-    return inptmap
+    raise NotImplemented
 
 
 def _graderr(
     inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
 ) -> Optional[Union[ValueError, RuntimeError]]:
-    if not all(t.gradtensor for t in inpt):
-        return ValueError(
-            "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
-        )
-    if out.gradfn is None:
-        return ValueError(
-            "Cannot backpropagate gradients for Tensor with no backward function"
-        )
-    if grad is None and out.nelem != 1:
-        return RuntimeError(
-            f"A gradient (grad) must be passed if the output Tensor (out) has more than one elements, received Tensor with {out.nelem}"
-        )
-    elif grad is not None and not grad.gradtensor:
-        return ValueError(
-            f"Expected grad argument to a floating-point type, received {grad.dtype.name()}"
-        )
-    elif grad is not None and grad.dtype != out.dtype:
-        return RuntimeError(
-            f"Expected grad argument of type {out.dtype.name()}, received {grad.dtype.name()}"
-        )
-    return None
+    raise NotImplemented
 
 
 def mapify(keys, values) -> Dict[Tensor, Any]:
     return {k: v for k, v in zip(keys, values)}
-
-
-def mismatch(tensor: Tensor, grad: Tensor) -> bool:
-    return tensor.dim != grad.dim and tensor.ndim <= grad.ndim
-
-
-def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
-    dim = sumdims(tensor.dim, grad.dim, tensor.ndim, grad.ndim)
-    return grad.sum(dim=dim).reshape(tensor.dim)
-
-
-def sumdims(tdim, gdim, tndim, gndim) -> Tuple[int, ...]:
-    paddim = np.pad(tdim, (gndim - tndim, 0), constant_values=0)
-    mask = paddim != np.array(gdim)
-    return tuple(np.where(mask)[0])
 
 
 def tupify(inpt) -> Tuple[Tensor, ...]:

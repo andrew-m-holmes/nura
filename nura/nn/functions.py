@@ -14,17 +14,17 @@ class _Sigmoid(Function):
     def forward(context: Context, x: Tensor):
         context.save(x)
         arr = 1 / (1 + np.exp(np.negative(x.data)))
-        context["arr"] = arr
+        context.arr = arr
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        arr = context["arr"]
+        arr = context.arr
         return arr * (1 - arr) * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        arr = context["arr"]
+        arr = context.arr
         return arr * (1 - arr) * grad.data
 
 
@@ -34,17 +34,17 @@ class _Tanh(Function):
     def forward(context: Context, x: Tensor):
         context.save(x)
         arr = np.tanh(x.data)
-        context["arr"] = arr
+        context.arr = arr
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        arr = context["arr"]
+        arr = context.arr
         return (1 - np.square(arr)) * grad.data
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        arr = context["arr"]
+        arr = context.arr
         return (1 - np.square(arr)) * grad.data
 
 
@@ -55,14 +55,14 @@ class _Softmax(Function):
         context.save(x)
         exp = np.exp(x.data - x.data.max(axis=dim, keepdims=True))
         p = exp * (1 / exp.sum(axis=dim, keepdims=True))
-        context["p"] = p
-        context["dim"] = dim
+        context.p = p
+        context.dim = dim
         return p
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        p = context["p"]
-        dim = context["dim"]
+        p = context.p
+        dim = context.dim
         outshape = p.shape
         if p.ndim == 1:
             diagonal = np.diagflat(p)
@@ -76,8 +76,8 @@ class _Softmax(Function):
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        p = context["p"]
-        dim = context["dim"]
+        p = context.p
+        dim = context.dim
         outshape = p.shape
         if p.ndim == 1:
             diagonal = np.diagflat(p)
@@ -158,13 +158,13 @@ class _LeakyReLU(Function):
     @staticmethod
     def forward(context: Context, x: Tensor, alpha: float):
         context.save(x)
-        context["alpha"] = alpha
+        context.alpha = alpha
         return np.maximum(x.data * alpha, x.data)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        alpha = context["alpha"]
+        alpha = context.alpha
         dtype = x.data.dtype
         mask = np.where(
             x.data > 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
@@ -174,7 +174,7 @@ class _LeakyReLU(Function):
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        alpha = context["alpha"]
+        alpha = context.alpha
         dtype = x.data.dtype
         mask = np.where(
             x.data > 0, np.array(1, dtype=dtype), np.array(alpha, dtype=dtype)
@@ -187,13 +187,13 @@ class _ELU(Function):
     @staticmethod
     def forward(context: Context, x: Tensor, alpha: float):
         context.save(x)
-        context["alpha"] = alpha
+        context.alpha = alpha
         return np.where(x.data > 0, x.data, alpha * (np.exp(x.data) - 1))
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        alpha = context["alpha"]
+        alpha = context.alpha
         dtype = x.data.dtype
         mask = np.where(x.data > 0, np.array(1, dtype=dtype), alpha * np.exp(x.data))
         return mask * grad.data
@@ -201,7 +201,7 @@ class _ELU(Function):
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        alpha = context["alpha"]
+        alpha = context.alpha
         dtype = x.data.dtype
         mask = np.where(x.data > 0, np.array(1, dtype=dtype), alpha * np.exp(x.data))
         return mask * grad.data
@@ -212,7 +212,7 @@ class _CELU(Function):
     @staticmethod
     def forward(context: Context, x: Tensor, alpha: float):
         context.save(x)
-        context["alpha"] = alpha
+        context.alpha = alpha
         arr0 = np.maximum(x.data, 0)
         arr1 = np.minimum(0, alpha * (np.exp(x.data * (1 / alpha)) - 1))
         return arr0 + arr1
@@ -220,7 +220,7 @@ class _CELU(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        alpha = context["alpha"]
+        alpha = context.alpha
         dtype = x.data.dtype
         mask = np.where(
             x.data >= 0, np.array(1, dtype=dtype), np.exp(x.data * (1 / alpha))
@@ -230,7 +230,7 @@ class _CELU(Function):
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        alpha = context["alpha"]
+        alpha = context.alpha
         dtype = x.data.dtype
         mask = np.where(
             x.data >= 0, np.array(1, dtype=dtype), np.exp(x.data * (1 / alpha))
@@ -245,22 +245,20 @@ class _GELU(Function):
         context.save(x)
         PICONST = 0.79788456
         CONST = 0.044715
-        context["PICONST"] = PICONST
-        context["CONST"] = CONST
 
         tanh = np.tanh(PICONST * (x.data + CONST * x.data * x.data * x.data))
         inner = tanh + 1.0
-        context["tanh"] = tanh
-        context["inner"] = inner
+        context.tanh = tanh
+        context.inner = inner
         return 0.5 * x.data * inner
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        PICONST = context["PICONST"]
-        CONST = context["CONST"]
-        tanh = context["tanh"]
-        inner = context["inner"]
+        PICONST = 0.79788456
+        CONST = 0.044715
+        tanh = context.tanh
+        inner = context.inner
         dtanh = 1 - np.square(tanh)
         dgelu = 0.5 * (
             inner + x.data * PICONST * dtanh * (1 + 3 * CONST * np.square(x.data))
@@ -270,10 +268,10 @@ class _GELU(Function):
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         x = context.tensors()[0]
-        PICONST = context["PICONST"]
-        CONST = context["CONST"]
-        tanh = context["tanh"]
-        inner = context["inner"]
+        PICONST = 0.79788456
+        CONST = 0.044715
+        tanh = context.tanh
+        inner = context.inner
         dtanh = 1 - np.square(tanh)
         dgelu = 0.5 * (
             inner + x.data * PICONST * dtanh * (1 + 3 * CONST * np.square(x.data))
@@ -286,8 +284,8 @@ class _Embedding(Function):
     @staticmethod
     def forward(context: Context, x: Tensor, w: Tensor, padid: Optional[int]):
         context.save(w)
-        context["xdata"] = x.data
-        context["padid"] = padid
+        context.xdata = x.data
+        context.padid = padid
         mask = x.data != padid
         mask = np.expand_dims(mask, -1)
         return w.data[x.data] * mask
@@ -295,8 +293,8 @@ class _Embedding(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         w = context.tensors()[0]
-        xdata = context["xdata"]
-        padid = context["padid"]
+        xdata = context.xdata
+        padid = context.padid
 
         arr = np.zeros_like(w.data)
         mask = xdata != padid
@@ -314,10 +312,10 @@ class _CrossEntropy(Function):
         context.save(x)
         xmax = x.data.max(axis=-1, keepdims=True)
         log = x.data - xmax - np.log(np.exp(x.data - xmax).sum(axis=-1, keepdims=True))
-        context["log"] = log
-        context["ignoreid"] = ignoreid
-        context["labels"] = y.data
-        context["reduction"] = reduction
+        context.log = log
+        context.ignoreid = ignoreid
+        context.labels = y.data
+        context.reduction = reduction
         mask = y.data != ignoreid
         classes = y.data[mask]
         nll = np.negative(log[mask, classes])
@@ -331,10 +329,10 @@ class _CrossEntropy(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        log = context["log"]
-        ignoreid = context["ignoreid"]
-        labels = context["labels"]
-        reduction = context["reduction"]
+        log = context.log
+        ignoreid = context.ignoreid
+        labels = context.labels
+        reduction = context.reduction
 
         a = np.exp(log)
         mask = labels != ignoreid
@@ -355,7 +353,7 @@ class _BinaryCrossEntropy(Function):
     def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
         context.save(a, y)
         nll = np.negative(y.data * np.log(a.data) + (1 - y.data) * np.log(1 - a.data))
-        context["reduction"] = reduction
+        context.reduction = reduction
 
         if reduction == "mean":
             return nll.mean()
@@ -367,7 +365,7 @@ class _BinaryCrossEntropy(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, y = context.tensors()
-        reduction = context["reduction"]
+        reduction = context.reduction
         arr = np.negative(y.data) * (1 / a.data) + (1 - y.data) * (1 / (1 - a.data))
 
         if reduction == "mean":
@@ -381,7 +379,7 @@ class _MSE(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
         context.save(a, y)
-        context["reduction"] = reduction
+        context.reduction = reduction
         mse = 0.5 * np.square(a.data - y.data)
         if reduction == "mean":
             return mse.mean()
@@ -393,7 +391,7 @@ class _MSE(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, y = context.tensors()
-        reduction = context["reduction"]
+        reduction = context.reduction
         if reduction == "mean":
             return (1 / y.data.size) * (a.data - y.data) * grad.data
         if reduction == "sum" or reduction is None:
@@ -406,15 +404,15 @@ class _Dropout(Function):
     def forward(context: Context, x: Tensor, p: float):
         context.save(x)
         mask = np.random.binomial(1, 1 - p, size=x.data.shape).astype(x.data.dtype)
-        context["p"] = p
-        context["mask"] = mask
+        context.p = p
+        context.mask = mask
         scale = 1 / (1 - p) if p < 1 else np.inf
         return x.data * mask * scale
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        p = context["p"]
-        mask = context["mask"]
+        p = context.p
+        mask = context.mask
         scale = 1 / (1 - p) if p < 1 else np.inf
         return grad.data * mask * scale
 
@@ -437,22 +435,22 @@ class _LayerNorm(Function):
         istd = 1 / np.sqrt(var + eps)
         norm = (x.data - mu) * istd
 
-        context["dim"] = dim
-        context["mu"] = mu
-        context["istd"] = istd
-        context["norm"] = norm
-        context["correction"] = correction
-        context["eps"] = eps
+        context.dim = dim
+        context.mu = mu
+        context.istd = istd
+        context.norm = norm
+        context.correction = correction
+        context.eps = eps
         return gamma.data * norm + beta.data
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         x, gamma, beta = context.tensors()
-        dim = context["dim"]
-        mu = context["mu"]
-        istd = context["istd"]
-        norm = context["norm"]
-        correction = context["correction"]
+        dim = context.dim
+        mu = context.mu
+        istd = context.istd
+        norm = context.norm
+        correction = context.correction
 
         n = (
             x.data.shape[dim]

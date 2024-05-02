@@ -1,36 +1,32 @@
 import nura
 from nura.tensors import Tensor
-from typing import Tuple, Any, Optional, Dict, Union
 from numpy import ndarray
+from typing import Tuple, Any, Optional, Union, OrderedDict
 
 
 class Context:
 
     def __init__(self) -> None:
-        self._tensors: Optional[Tuple[Tuple[Tensor, int], ...]] = None
-        self._dict: Optional[Dict[Any, Any]] = None
+        self._memory: Optional[OrderedDict[Tensor, int]] = None
 
-    def save(self, *tensors: Tensor):
-        self._tensors = tuple((t, t.version) for t in tensors)
+    def save(self, *tensors: Tensor) -> None:
+        self._memory = OrderedDict((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
-        return tuple(t for t, v in self._tensors) if self._tensors is not None else ()
+        return tuple(self._memory.keys()) if self._memory is not None else ()
 
     def usesgrad(self) -> bool:
-        if self._tensors is None:
+        if self._memory is None:
             return False
-        return any(t.usegrad for t, v in self._tensors) and all(
-            t.gradtensor for t, v in self._tensors
+        return any(t.usegrad for t in self._memory.keys()) and all(
+            t.gradtensor for t in self._memory.keys()
         )
 
-    def __setitem__(self, key: Any, value: Any):
-        if self._dict is None:
-            self._dict = dict()
-        self._dict[key] = value
+    def __getattr__(self, name: str) -> Any:
+        return self.__dict__[name]
 
-    def __getitem__(self, key: Any) -> Any:
-        assert self._dict is not None
-        return self._dict[key]
+    def __setattr__(self, name: str, value: Any) -> None:
+        self.__dict__[name] = value
 
     def __repr__(self) -> str:
         return self.__class__.__name__
