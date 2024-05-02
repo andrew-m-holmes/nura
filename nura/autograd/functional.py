@@ -1,94 +1,133 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union, List
+from nura.autograd.graph import Node
+from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union, List, Deque
 from collections import deque
 
 
-def backward(out: Tensor, grad: Optional[Tensor] = None) -> None:
-    raise NotImplemented
+def backward(
+    outputs: Union[Tuple[Tensor, ...], Tensor],
+    grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+) -> None:
+    outputs, grads, inputs = tupify(outputs), tupify(grads), tupify(inputs)
+    _backward(outputs, grads, inputs)
 
 
 def _backward(
-    out: Union[Tuple[Tensor, ...], Tensor],
-    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
-    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    outputs: Tuple[Tensor, ...],
+    grads: Tuple[Tensor, ...],
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]],
 ) -> None:
-    raise NotImplemented
+    _grads = _makegrads(outputs, grads)
+    queue = deque([(o.gradfn, g) for o, g in zip(outputs, _grads)])
+    nodemap = dict((o.gradfn, o.gradfn.outputs) for o in outputs)
+
+    while queue:
+        node, grads = queue.popleft()
+        pass
 
 
 def _backwarderr(
-    out: Tensor, grad: Optional[Tensor] = None
+    outputs: Union[Tuple[Tensor, ...], Tensor],
+    grads: Optional[Union[Tuple[Tensor, ...], Tensor]],
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]],
 ) -> Optional[Union[RuntimeError, ValueError]]:
-    raise NotImplemented
+    pass
 
 
 def grad(
-    out: Union[Tuple[Tensor, ...], Tensor],
-    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    outputs: Union[Tuple[Tensor, ...], Tensor],
+    grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
     inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> Tuple[Tensor, ...]:
     raise NotImplemented
 
 
 def _grad(
-    inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
+    inputs: Tuple[Tensor, ...], outputs: Tensor, grads: Optional[Tensor] = None
 ) -> Dict[Tensor, Tensor]:
     raise NotImplemented
 
 
 def _graderr(
-    inpt: Tuple[Tensor, ...], out: Tensor, grad: Optional[Tensor] = None
+    inputs: Tuple[Tensor, ...], outputs: Tensor, grads: Optional[Tensor] = None
 ) -> Optional[Union[ValueError, RuntimeError]]:
     raise NotImplemented
+
+
+def _makegrads(
+    outputs: Tuple[Tensor, ...],
+    grads: Tuple[Tensor, ...],
+) -> Tuple[Tuple[Tensor, ...], ...]:
+    _grads = []
+    for i, o in enumerate(outputs):
+        g = grads[i] if i < len(grads) else nura.ones()
+        ograds = _nodegrads(o, g)
+        _grads.append(ograds)
+    return tuple(_grads)
+
+
+def _nodegrads(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
+    if tensor.gradfn is None:
+        return ()
+    return tuple(
+        [
+            grad if tensor.index == i else nura.zeros()
+            for i in range(tensor.gradfn.outputs)
+        ]
+    )
 
 
 def mapify(keys, values) -> Dict[Tensor, Any]:
     return {k: v for k, v in zip(keys, values)}
 
 
-def tupify(inpt) -> Tuple[Tensor, ...]:
-    if isinstance(inpt, Tensor):
-        return (inpt,)
-    return inpt
+def tupify(inputs: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
+    if inputs is None:
+        return ()
+    if isinstance(inputs, Tensor):
+        return (inputs,)
+    return inputs
 
 
 def vjp(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inputs: Union[Tuple[Tensor, ...], Tensor],
     vec: Tensor,
     f: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
 
-    inpt = tupify(inpt)
-    if err := _vjperr(inpt, vec):
+    inputs = tupify(inputs)
+    if err := _vjperr(inputs, vec):
         raise err
-    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
-    vec = vec.mutated(usegrad=False, grad=None)
-    out, grads = _vjp(inpt, vec, f, *args, **kwargs)
-    return out.mutated(usegrad=False, gradfn=None, leaf=True), grads
+    inputs = tuple(t.mutated(usegrads=True, grads=None, leaf=True) for t in inputs)
+    vec = vec.mutated(usegrads=False, grads=None)
+    outputs, gradss = _vjp(inputs, vec, f, *args, **kwargs)
+    return outputs.mutated(usegrads=False, gradsfn=None, leaf=True), gradss
 
 
 def _vjp(
-    inpt: Tuple[Tensor, ...],
+    inputs: Tuple[Tensor, ...],
     vec: Tensor,
     f: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
-    if err := _vjperr(inpt, vec):
+    if err := _vjperr(inputs, vec):
         raise err
     with nura.autograd(enabled=True, reverse=True, forward=False):
-        out = f(*inpt, *args, **kwargs)
-    inptmap = _grad(inpt, out, vec)
-    return out, tuple(inptmap.values())
+        outputs = f(*inputs, *args, **kwargs)
+    inputsmap = _grads(inputs, outputs, vec)
+    return outputs, tuple(inputsmap.values())
 
 
-def _vjperr(inpt: Tuple[Tensor, ...], vec: Tensor) -> Optional[ValueError]:
-    if not all(t.gradtensor for t in inpt):
+def _vjperr(inputs: Tuple[Tensor, ...], vec: Tensor) -> Optional[ValueError]:
+    if not all(t.gradtensor for t in inputs):
         return ValueError(
-            "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
+            "One or more Tensors passed to argument 'inputs' cannot have their gradsients computed because they're not differentiable types"
         )
     if not vec.gradtensor:
         return ValueError(
@@ -98,39 +137,41 @@ def _vjperr(inpt: Tuple[Tensor, ...], vec: Tensor) -> Optional[ValueError]:
 
 
 def jvp(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inputs: Union[Tuple[Tensor, ...], Tensor],
     vec: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
-    inpt = tupify(inpt)
+    inputs = tupify(inputs)
     vec = tupify(vec)
-    if err := _jvperr(inpt, vec):
+    if err := _jvperr(inputs, vec):
         raise err
     gen = (v for v in vec)
-    inpt = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in inpt)
-    out, grad = _jvp(inpt, f, *args, **kwargs)
-    return out.mutated(usegrad=False, leaf=True), grad
+    inputs = tuple(t.mutated(usegrads=True, grads=next(gen)) for t in inputs)
+    outputs, grads = _jvp(inputs, f, *args, **kwargs)
+    return outputs.mutated(usegrads=False, leaf=True), grads
 
 
 def _jvp(
-    inpt: Tuple[Tensor, ...],
+    inputs: Tuple[Tensor, ...],
     f: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
     with nura.autograd(enabled=True, reverse=False, forward=True):
-        out = f(*inpt, *args, **kwargs)
-    assert out.grad is not None
-    return out, out.grad
+        outputs = f(*inputs, *args, **kwargs)
+    assert outputs.grad is not None
+    return outputs, outputs.grad
 
 
-def _jvperr(inpt: Tuple[Tensor, ...], vec: Tuple[Tensor, ...]) -> Optional[ValueError]:
-    if not all(t.gradtensor for t in inpt):
+def _jvperr(
+    inputs: Tuple[Tensor, ...], vec: Tuple[Tensor, ...]
+) -> Optional[ValueError]:
+    if not all(t.gradtensor for t in inputs):
         return ValueError(
-            "One or more Tensors passed to argument 'inpt' cannot have their gradients computed because they're not differentiable types"
+            "One or more Tensors passed to argument 'inputs' cannot have their gradsients computed because they're not differentiable types"
         )
     if not all(v.gradtensor for v in vec):
         return ValueError(
@@ -140,63 +181,63 @@ def _jvperr(inpt: Tuple[Tensor, ...], vec: Tuple[Tensor, ...]) -> Optional[Value
 
 
 def jacrev(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inputs: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     pos=0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
-    inpt = tupify(inpt)
-    if err := _jacerr(inpt):
+    inputs = tupify(inputs)
+    if err := _jacerr(inputs):
         raise err
-    inpt = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in inpt)
+    inputs = tuple(t.mutated(usegrads=True, grads=None, leaf=True) for t in inputs)
     with nura.autograd(enabled=True, reverse=True, forward=False):
-        out = f(*inpt, *args, **kwargs)
-    tensor = inpt[pos]
-    jac = getjac(tensor, out)
-    perts = getperts(out)
+        outputs = f(*inputs, *args, **kwargs)
+    tensor = inputs[pos]
+    jac = getjac(tensor, outputs)
+    perts = getperts(outputs)
 
-    for row, pert in zip(np.ndindex(out.dim), perts):
-        _, grads = _vjp(inpt, pert, f, *args, **kwargs)
-        jacrow = grads[pos]
+    for row, pert in zip(np.ndindex(outputs.dim), perts):
+        _, gradss = _vjp(inputs, pert, f, *args, **kwargs)
+        jacrow = gradss[pos]
         slc = row + (...,)
         jac[slc] = jacrow
-    return out, jac
+    return outputs, jac
 
 
 def jacfwd(
-    inpt: Union[Tuple[Tensor, ...], Tensor],
+    inputs: Union[Tuple[Tensor, ...], Tensor],
     f: Callable[..., Tensor],
     pos=0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
-    inpt = tupify(inpt)
-    if err := _jacerr(inpt):
+    inputs = tupify(inputs)
+    if err := _jacerr(inputs):
         raise err
     with nura.autograd(enabled=False):
-        out = f(*inpt, *args, **kwargs)
-    tensor = inpt[pos]
+        outputs = f(*inputs, *args, **kwargs)
+    tensor = inputs[pos]
     perts = getperts(tensor)
-    jac = getjac(tensor, out)
-    colinpt = [
-        t.mutated(usegrad=True, grad=nura.zeroslike(t)) if i != pos else t
-        for i, t in enumerate(inpt)
+    jac = getjac(tensor, outputs)
+    colinputs = [
+        t.mutated(usegrads=True, grads=nura.zeroslike(t)) if i != pos else t
+        for i, t in enumerate(inputs)
     ]
     for col, pert in zip(np.ndindex(tensor.dim), perts):
-        colinpt[pos] = colinpt[pos].mutated(usegrad=True, grad=pert)
-        _, jaccol = _jvp(tuple(colinpt), f, *args, **kwargs)
+        colinputs[pos] = colinputs[pos].mutated(usegrads=True, grads=pert)
+        _, jaccol = _jvp(tuple(colinputs), f, *args, **kwargs)
         slc = (...,) + col
         jac[slc] = jaccol
-    return out, jac
+    return outputs, jac
 
 
-def _jacerr(inpt: Tuple[Tensor, ...]) -> Optional[ValueError]:
-    if not all(t.gradtensor for t in inpt):
+def _jacerr(inputs: Tuple[Tensor, ...]) -> Optional[ValueError]:
+    if not all(t.gradtensor for t in inputs):
         return ValueError(
-            "Cannot compute Jacobian because one or more Tensors passed to 'inpt' are not a floating-point type"
+            "Cannot compute Jacobian because one or more Tensors passed to 'inputs' are not a floating-point type"
         )
     return None
 
@@ -211,7 +252,7 @@ def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:
     return (perts[i] for i in range(nelem))
 
 
-def getjac(tensor: Tensor, out: Tensor) -> Tensor:
-    dim = out.dim + tensor.dim
-    jac = nura.zeros(dim).to(out.dtype)
+def getjac(tensor: Tensor, outputs: Tensor) -> Tensor:
+    dim = outputs.dim + tensor.dim
+    jac = nura.zeros(dim).to(outputs.dtype)
     return jac

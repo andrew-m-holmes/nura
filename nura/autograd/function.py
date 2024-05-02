@@ -1,4 +1,5 @@
 import nura
+from nura.autograd.graph import addtograph
 from nura.tensors import Tensor
 from numpy import ndarray
 from typing import Tuple, Any, Optional, Union, OrderedDict
@@ -51,12 +52,11 @@ class Function:
     @classmethod
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
-        rawout = cls.forward(context, *args, **kwargs)
-        out = cls.prepoutput(rawout)
+        rawoutputs = cls.forward(context, *args, **kwargs)
+        outputs = cls.prepoutput(rawoutputs)
         if context.usesgrad():
-            # TODO pass to graph
-            pass
-        return out
+            addtograph(outputs, cls, context)
+        return outputs
 
     @classmethod
     def name(cls) -> str:
