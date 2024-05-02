@@ -52,13 +52,22 @@ class Function:
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
         rawout = cls.forward(context, *args, **kwargs)
-        out = (
-            tuple(nura.tensor(ro) for ro in rawout)
-            if isinstance(rawout, tuple)
-            else nura.tensor(rawout)
-        )
+        out = cls.prepoutput(rawout)
+        if context.usesgrad():
+            # TODO pass to graph
+            pass
         return out
 
     @classmethod
     def name(cls) -> str:
         return cls.__name__
+
+    @staticmethod
+    def prepoutput(
+        rawout: Union[Tuple[ndarray, ...], ndarray]
+    ) -> Union[Tuple[Tensor, ...], Tensor]:
+        if isinstance(rawout, tuple):
+            return tuple(
+                nura.tensor(ro).mutated(index=i) for i, ro in enumerate(rawout)
+            )
+        return nura.tensor(rawout)

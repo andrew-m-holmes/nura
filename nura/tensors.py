@@ -1,6 +1,7 @@
 import nura
 import nura.types as types
-from nura.types import Tensorlike, Scalar, Node, dtype, dim, dimlike
+from nura.autograd.graph import Node
+from nura.types import Tensorlike, Scalar, dtype, dim, dimlike
 from typing import Optional, Type, Any, Union, List, Self
 from numpy import ndarray
 

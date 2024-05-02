@@ -1,14 +1,13 @@
-from nura.tensors import Tensor
-from nura.autograd.function import Function, Context
-from typing import Optional, Tuple
+from typing import Optional
+from nura.interface import Tensor, Function, Context
 
 
 class Node:
 
     def __init__(
         self,
-        function: Optional[Function],
-        context: Optional[Context],
+        function: Optional[Function] = None,
+        context: Optional[Context] = None,
         outputs: int = -1,
     ):
         self._function = function
@@ -32,5 +31,11 @@ class Node:
         return f"{self.__class__.__name__}({fn=})"
 
 
-def getnode(tensor: Tensor) -> Optional[Node]:
-    return None
+def getnode(tensor: Tensor):
+    if tensor.leaf and tensor.usegrad:
+        return Node()
+    return tensor.gradfn
+
+
+def addtograph(outputs: Tensor, function: Function, context: Context):
+    pass
