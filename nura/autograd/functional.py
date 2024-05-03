@@ -12,7 +12,7 @@ def backward(
     grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
     input: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> None:
-    output, grad, input = tupify(output), tupify(grad), tupify(input)
+    output, grad, input = _tupify(output), _tupify(grad), _tupify(input)
     _backward(output, grad, input)
 
 
@@ -22,9 +22,10 @@ def _backward(
     input: Tuple[Tensor, ...],
 ) -> None:
     nodes = tuple(o.gradfn for o in output if o.gradfn is not None)
-    _grad = _make_grads(output, grad)
     graph = constructgraph(nodes)
     order = topological(graph)
+
+    _grad = _make_grads(output, grad)
     accumulates = _make_accumulation_set(graph, input)
     grad_map = _make_grad_map(order, nodes, _grad)
     queue = deque(order)
@@ -36,8 +37,8 @@ def _backward(
             _accumulate_grad(node, outputgrad)
         if node.edges:
             edgearr = node.apply(*outputgrad)
-            edgegrad = _postapply(edgearr)
-            _backprop(node.edges, edgegrad, grad_map)
+            edge_grad = array_to_tensor(edgearr)
+            _backprop(node.edges, edge_grad, grad_map)
         grad_map.pop(node)
 
 
@@ -69,6 +70,23 @@ def _graderr(
     raise NotImplemented
 
 
+def _backprop(
+    edges: Tuple[Tuple[Node, int], ...],
+    edge_grad: Tuple[Tensor, ...],
+    grad_map: Dict[Node, List[Optional[Tensor]]],
+) -> None:
+    for (node, index), grad in zip(edges, edge_grad):
+        if node is None:
+            continue
+        if is_leaf(node):
+            grad_map[node].append(grad)
+        else:
+            if grad_map[node][index] is None:
+                grad_map[node][index] = grad
+            else:
+                grad_map[node][index] += grad
+
+
 def _retains_grad(node: Node, accumulates: Set[Tensor]) -> bool:
     if node._tensors is None:
         return False
@@ -86,32 +104,10 @@ def _accumulate_grad(node: Node, output_grad: List[Optional[Tensor]]) -> None:
             tensor._grad += grad
     else:
         for tensor in node._tensors:
+            if tensor.grad is None:
+                tensor.zerograd()
             if output_grad[tensor.index] is not None:
                 tensor._grad += output_grad[tensor.index]
-
-
-def _make_accumulation_set(
-    graph: Dict[Node, List[Node]], input: Tuple[Tensor, ...]
-) -> Set[Tensor]:
-    accumulates = set(input)
-    for node in graph.keys():
-        if node._tensors is not None:
-            accumulates.update(node._tensors)
-    return accumulates
-
-
-def _backprop(
-    edges: Tuple[Tuple[Node, int], ...],
-    edgegrad: Tuple[Tensor, ...],
-    grad_map: Dict[Node, List[Optional[Tensor]]],
-) -> None:
-    for (node, index), grad in zip(edges, edgegrad):
-        if node is None:
-            continue
-        if is_leaf(node):
-            grad_map[node].append(grad)
-        else:
-            grad_map[node][index] = grad
 
 
 def is_leaf(node: Node) -> bool:
@@ -128,37 +124,50 @@ def _make_grads(
     _grad = []
     for i, o in enumerate(output):
         g = grad[i] if i < len(grad) else nura.ones()
-        ograd = _nodegrad(o, g)
+        ograd = _get_node_grad(o, g)
         _grad.append(ograd)
     return tuple(_grad)
 
 
-def _postapply(edgegrad: Union[Tuple[ndarray, ...], ndarray]) -> Tuple[Tensor, ...]:
-    if isinstance(edgegrad, tuple):
-        return tuple(nura.tensor(g) for g in edgegrad)
-    return (nura.tensor(edgegrad),)
-
-
-def _nodegrad(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
-    assert tensor.gradfn is not None
+def _get_node_grad(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
+    if tensor.gradfn is None:
+        raise ValueError("Cannot get node gradient, received tensor without node")
     return tuple(
         grad if tensor.index == i else nura.zeros()
         for i in range(tensor.gradfn.outputs)
     )
 
 
+def _make_accumulation_set(
+    graph: Dict[Node, List[Node]], input: Tuple[Tensor, ...]
+) -> Set[Tensor]:
+    accumulates = set(input)
+    for node in graph.keys():
+        if node._tensors is not None:
+            accumulates.update(node._tensors)
+    return accumulates
+
+
 def _make_grad_map(
-    toposort: List[Node], nodes: Tuple[Node, ...], grad: Tuple[Tuple[Tensor, ...], ...]
+    toposort: List[Node], nodes: Tuple[Node, ...], grads: Tuple[Tuple[Tensor, ...], ...]
 ) -> Dict[Node, List[Optional[Tensor]]]:
     grad_map: Dict[Node, List[Optional[Tensor]]] = {
         n: [None] * n.outputs for n in toposort
     }
-    for n, g in zip(nodes, grad):
+    for n, g in zip(nodes, grads):
         grad_map[n] = list(g)
     return grad_map
 
 
-def tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
+def array_to_tensor(
+    edge_grad: Union[Tuple[ndarray, ...], ndarray]
+) -> Tuple[Tensor, ...]:
+    if isinstance(edge_grad, tuple):
+        return tuple(nura.tensor(g) for g in edge_grad)
+    return (nura.tensor(edge_grad),)
+
+
+def _tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
     if input is None:
         return ()
     if isinstance(input, Tensor):
@@ -174,7 +183,7 @@ def vjp(
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
 
-    input = tupify(input)
+    input = _tupify(input)
     if err := _vjperr(input, vec):
         raise err
     input = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in input)
@@ -218,8 +227,8 @@ def jvp(
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
-    input = tupify(input)
-    vec = tupify(vec)
+    input = _tupify(input)
+    vec = _tupify(vec)
     if err := _jvperr(input, vec):
         raise err
     gen = (v for v in vec)
@@ -260,7 +269,7 @@ def jacrev(
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
-    input = tupify(input)
+    input = _tupify(input)
     if err := _jacerr(input):
         raise err
     input = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in input)
@@ -286,7 +295,7 @@ def jacfwd(
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
-    input = tupify(input)
+    input = _tupify(input)
     if err := _jacerr(input):
         raise err
     with nura.autograd(enabled=False):

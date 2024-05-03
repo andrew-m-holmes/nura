@@ -26,8 +26,12 @@ def main():
     a = nura.tensor(3.0, usegrad=True)
     b = nura.tensor(2.0, usegrad=True)
     c = a * b
+    c.retaingrad()
     d = a * c
+    d.retaingrad()
     d.backward()
+    print(c.grad)
+    print(d.grad)
 
 
 if __name__ == "__main__":

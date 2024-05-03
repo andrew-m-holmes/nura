@@ -86,6 +86,11 @@ class Tensor:
     def backward(self, grad: Optional["Tensor"] = None) -> None:
         nura.backward(self, grad)
 
+    def retaingrad(self):
+        if self.gradfn is None:
+            raise RuntimeError("Tensor is not on computational graph")
+        self.gradfn.retain(self)
+
     def cleargrad(self) -> None:
         self._grad = None
 
