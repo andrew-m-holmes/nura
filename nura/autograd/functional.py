@@ -3,8 +3,8 @@ import nura
 from numpy import ndarray
 from nura.tensors import Tensor
 from nura.autograd.graph import Node, constructgraph, topological
-from typing import Dict, Generator, Tuple, Optional, Callable, Any, Union, List
-from collections import deque, defaultdict
+from typing import Dict, Generator, Tuple, Optional, Callable, Union, List
+from collections import deque
 
 
 def backward(
@@ -25,21 +25,19 @@ def _backward(
     nodes = tuple(o.gradfn for o in output if o.gradfn is not None)
     graph = constructgraph(nodes)
     order = topological(graph)
-    nodegrads = _makenodegrads(order, nodes, _grad)
+    gradmap = _makegradmap(order, nodes, _grad)
     queue = deque(order)
 
-    # TODO handle accumulate
     while queue:
         node = queue.popleft()
-        outputgrad = nodegrads[node]
-        edgearr = node.apply(*outputgrad)
-        nodegrads.pop(node)
-        if node.edges is None:
-            continue
-        edgegrad = _postapply(edgearr)
-        for (child, index), childgrad in zip(node.edges, edgegrad):
-            if child is not None:
-                nodegrads[child][index] = childgrad
+        if node.leaf:
+            node.function.accumulate()
+        else:
+            outputgrad = gradmap[node]
+            edgearr = node.apply(*outputgrad)
+            edgegrad = _postapply(edgearr)
+            gradmap.pop(node)
+            _backprop(node.edges, edgegrad, gradmap)
 
 
 def _backwarderr(
@@ -70,12 +68,6 @@ def _graderr(
     raise NotImplemented
 
 
-def _postapply(edgegrad: Union[Tuple[ndarray, ...], ndarray]) -> Tuple[Tensor, ...]:
-    if isinstance(edgegrad, tuple):
-        return tuple(nura.tensor(g) for g in edgegrad)
-    return (nura.tensor(edgegrad),)
-
-
 def _makegrad(
     output: Tuple[Tensor, ...],
     grad: Tuple[Tensor, ...],
@@ -88,28 +80,41 @@ def _makegrad(
     return tuple(_grad)
 
 
-def _makenodegrads(
-    toposort: List[Node], nodes: Tuple[Node, ...], grad: Tuple[Tuple[Tensor, ...], ...]
-) -> Dict[Node, List[Optional[Tensor]]]:
-    nodegrads: Dict[Node, List[Optional[Tensor]]] = {
-        n: [None] * n.outputs for n in toposort
-    }
-    for n, g in zip(nodes, grad):
-        nodegrads[n] = list(g)
-    return nodegrads
+def _backprop(
+    edges: Tuple[Tuple[Node, int], ...],
+    edgegrad: Tuple[Tensor, ...],
+    gradmap: Dict[Node, List[Optional[Tensor]]],
+) -> None:
+    for (child, index), childgrad in zip(edges, edgegrad):
+        if child is not None and not child.leaf:
+            gradmap[child][index] = childgrad
+        elif child is not None:
+            child.function.add(childgrad)
+
+
+def _postapply(edgegrad: Union[Tuple[ndarray, ...], ndarray]) -> Tuple[Tensor, ...]:
+    if isinstance(edgegrad, tuple):
+        return tuple(nura.tensor(g) for g in edgegrad)
+    return (nura.tensor(edgegrad),)
 
 
 def _nodegrad(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
-    if tensor.gradfn is None:
-        return ()
+    assert tensor.gradfn is not None
     return tuple(
         grad if tensor.index == i else nura.zeros()
         for i in range(tensor.gradfn.outputs)
     )
 
 
-def mapify(keys, values) -> Dict[Tensor, Any]:
-    return {k: v for k, v in zip(keys, values)}
+def _makegradmap(
+    toposort: List[Node], nodes: Tuple[Node, ...], grad: Tuple[Tuple[Tensor, ...], ...]
+) -> Dict[Node, List[Optional[Tensor]]]:
+    gradmap: Dict[Node, List[Optional[Tensor]]] = {
+        n: [None] * n.outputs for n in toposort if not n.leaf
+    }
+    for n, g in zip(nodes, grad):
+        gradmap[n] = list(g)
+    return gradmap
 
 
 def tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:

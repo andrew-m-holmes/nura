@@ -28,7 +28,7 @@ def main():
     c = a * b
     d = a * c
     d.backward()
-    assert d.gradfn is not None
+    print(a.grad)
 
 
 if __name__ == "__main__":

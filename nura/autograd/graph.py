@@ -24,8 +24,14 @@ class Node:
         return self._outputs
 
     @property
-    def edges(self) -> Optional[Tuple[Tuple["Node", int], ...]]:
+    def edges(self) -> Tuple[Tuple["Node", int], ...]:
+        if self._edges is None:
+            return tuple()
         return self._edges
+
+    @property
+    def leaf(self):
+        return isinstance(self.function, Accumulate)
 
     def apply(self, *grad) -> Union[Tuple[ndarray, ...], ndarray]:
         return self.function.backward(self.context, *grad)
@@ -41,22 +47,34 @@ class Accumulate:
         self._tensor = tensor
         self._buffer = None
 
-    def push(self, grad):
+    def add(self, grad):
+        # TODO handle broadcast logic
         if self._buffer is None:
-            self._buffer = []
-        self._buffer.append(grad)
+            self._buffer = grad
+        else:
+            self._buffer += grad
 
-    def backward(self, context, grad) -> None:
+    def accumulate(self):
+        if self._buffer is None:
+            raise RuntimeError("Cannot accumulate gradient, buffer is None")
         if self._tensor.grad is None:
             self._tensor.zerograd()
-        if self._buffer is not None:
-            for grad in self._buffer:
-                self._tensor._grad += grad
-        return None
+        self._tensor._grad += self._buffer
 
     @classmethod
     def name(cls) -> str:
         return cls.__name__
+
+
+def addtograph(output, function, context) -> None:
+    edges = getedges(context)
+    if isinstance(output, tuple):
+        node = Node(function, context, edges, outputs=len(output))
+        for o in output:
+            o.mutate(gradfn=node, usegrad=True, leaf=False)
+    else:
+        node = Node(function, context, edges, outputs=1)
+        output.mutate(gradfn=node, usegrad=True, leaf=False)
 
 
 def getedges(context) -> Tuple[Tuple[Optional[Node], int], ...]:
@@ -65,20 +83,9 @@ def getedges(context) -> Tuple[Tuple[Optional[Node], int], ...]:
 
 def getnode(tensor) -> Optional["Node"]:
     if tensor.leaf and tensor.usegrad and tensor.gradfn is None:
-        node = Node(Accumulate(tensor), outputs=1)
+        node = Node(Accumulate(tensor))
         tensor.mutate(gradfn=node)
     return tensor.gradfn
-
-
-def addtograph(outputs, function, context) -> None:
-    edges = getedges(context)
-    if isinstance(outputs, tuple):
-        node = Node(function, context, edges, len(outputs))
-        for o in outputs:
-            o.mutate(gradfn=node, usegrad=True, leaf=False)
-    else:
-        node = Node(function, context, edges, 1)
-        outputs.mutate(gradfn=node, usegrad=True, leaf=False)
 
 
 def constructgraph(nodes: Tuple[Node, ...]) -> Dict[Node, List[Node,]]:
@@ -90,9 +97,7 @@ def constructgraph(nodes: Tuple[Node, ...]) -> Dict[Node, List[Node,]]:
         node = queue.popleft()
         if node not in graph:
             graph[node] = []
-        if node.edges is None:
-            continue
-        for n, i in node.edges:
+        for n, _ in node.edges:
             if n is not None:
                 graph[node].append(n)
                 if n not in visit:
