@@ -68,18 +68,6 @@ def _graderr(
     raise NotImplemented
 
 
-def _makegrad(
-    output: Tuple[Tensor, ...],
-    grad: Tuple[Tensor, ...],
-) -> Tuple[Tuple[Tensor, ...], ...]:
-    _grad = []
-    for i, o in enumerate(output):
-        g = grad[i] if i < len(grad) else nura.ones()
-        ograd = _nodegrad(o, g)
-        _grad.append(ograd)
-    return tuple(_grad)
-
-
 def _backprop(
     edges: Tuple[Tuple[Node, int], ...],
     edgegrad: Tuple[Tensor, ...],
@@ -90,6 +78,18 @@ def _backprop(
             gradmap[child][index] = childgrad
         elif child is not None:
             child.function.add(childgrad)
+
+
+def _makegrad(
+    output: Tuple[Tensor, ...],
+    grad: Tuple[Tensor, ...],
+) -> Tuple[Tuple[Tensor, ...], ...]:
+    _grad = []
+    for i, o in enumerate(output):
+        g = grad[i] if i < len(grad) else nura.ones()
+        ograd = _nodegrad(o, g)
+        _grad.append(ograd)
+    return tuple(_grad)
 
 
 def _postapply(edgegrad: Union[Tuple[ndarray, ...], ndarray]) -> Tuple[Tensor, ...]:
@@ -115,6 +115,10 @@ def _makegradmap(
     for n, g in zip(nodes, grad):
         gradmap[n] = list(g)
     return gradmap
+
+
+def _makeaccumulatemap():
+    pass
 
 
 def tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:

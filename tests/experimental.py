@@ -14,7 +14,7 @@ class Unbind(Function):
 
     @staticmethod
     def backward(context, *grad):
-        grad = tuple(g.data for g in grad)
+        grad = tuple(np.reshape(g.data, 1) for g in grad)
         return np.concatenate(grad, axis=0)
 
 
@@ -23,12 +23,11 @@ unbind = Unbind.apply
 
 def main():
 
-    a = nura.tensor(3.0, usegrad=True)
-    b = nura.tensor(2.0)
-    c = a * b
-    d = a * c
-    d.backward()
-    print(a.grad)
+    a = nura.rand(3, usegrad=True)
+    b, c, d = unbind(a)
+    e = b * c
+    f = e * d
+    f.backward()
 
 
 if __name__ == "__main__":
