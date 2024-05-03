@@ -5,11 +5,12 @@ from collections import deque
 
 class Node:
 
-    def __init__(self, function, context=None, edges=None, outputs: int = 0):
+    def __init__(self, function, context, edges, outputs):
         self._function = function
         self._context = context
         self._edges = edges
         self._outputs = outputs
+        self._tensors = None
 
     @property
     def function(self):
@@ -25,45 +26,19 @@ class Node:
 
     @property
     def edges(self) -> Tuple[Tuple["Node", int], ...]:
-        if self._edges is None:
-            return tuple()
         return self._edges
 
-    @property
-    def leaf(self):
-        return isinstance(self.function, Accumulate)
+    def retain(self, tensor):
+        if self._tensors is None:
+            self._tensors = set()
+        self._tensors.add(tensor)
 
     def apply(self, *grad) -> Union[Tuple[ndarray, ...], ndarray]:
         return self.function.backward(self.context, *grad)
 
     def __repr__(self) -> str:
-        fn = self.function.name()
-        return f"{self.__class__.__name__}({fn=})"
-
-
-class Accumulate:
-
-    def __init__(self, tensor) -> None:
-        self._tensor = tensor
-        self._buffer = None
-
-    def add(self, grad):
-        # TODO handle broadcast logic
-        if self._buffer is None:
-            self._buffer = grad
-        else:
-            self._buffer += grad
-
-    def accumulate(self):
-        if self._buffer is None:
-            raise RuntimeError("Cannot accumulate gradient, buffer is None")
-        if self._tensor.grad is None:
-            self._tensor.zerograd()
-        self._tensor._grad += self._buffer
-
-    @classmethod
-    def name(cls) -> str:
-        return cls.__name__
+        name = self.function.name() if self.function is not None else "Accumulate"
+        return f"{self.__class__.__name__}({name=})"
 
 
 def addtograph(output, function, context) -> None:
@@ -82,13 +57,16 @@ def getedges(context) -> Tuple[Tuple[Optional[Node], int], ...]:
 
 
 def getnode(tensor) -> Optional["Node"]:
-    if tensor.leaf and tensor.usegrad and tensor.gradfn is None:
-        node = Node(Accumulate(tensor))
-        tensor.mutate(gradfn=node)
+    if tensor.leaf and tensor.usegrad:
+        node = Node(None, None, (), 0)
+        node.retain(tensor)
+        return node
     return tensor.gradfn
 
 
-def constructgraph(nodes: Tuple[Node, ...]) -> Dict[Node, List[Node,]]:
+def constructgraph(nodes: Union[Tuple[Node, ...], Node]) -> Dict[Node, List[Node,]]:
+    if isinstance(nodes, Node):
+        nodes = (nodes,)
     graph = dict()
     visit = set(nodes)
     queue = deque(visit)

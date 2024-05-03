@@ -23,11 +23,11 @@ unbind = Unbind.apply
 
 def main():
 
-    a = nura.rand(3, usegrad=True)
-    b, c, d = unbind(a)
-    e = b * c
-    f = e * d
-    f.backward()
+    a = nura.tensor(3.0, usegrad=True)
+    b = nura.tensor(2.0, usegrad=True)
+    c = a * b
+    d = a * c
+    d.backward()
 
 
 if __name__ == "__main__":
