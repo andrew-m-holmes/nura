@@ -58,7 +58,7 @@ def getedges(context) -> Tuple[Tuple[Optional[Node], int], ...]:
 
 def getnode(tensor) -> Optional["Node"]:
     if tensor.leaf and tensor.usegrad:
-        node = Node(None, None, (), 0)
+        node = Node(None, None, (), 1)
         node.retain(tensor)
         return node
     return tensor.gradfn
