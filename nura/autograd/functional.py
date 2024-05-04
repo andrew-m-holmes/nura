@@ -12,8 +12,8 @@ def backward(
     grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
     inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> None:
-    output, grad, input = _tupify(outputs), _tupify(grads), _tupify(inputs)
-    _backward(output, grad, input)
+    outputs, grads, inputs = _tupify(outputs), _tupify(grads), _tupify(inputs)
+    _backward(outputs, grads, inputs)
 
 
 def _backward(
@@ -21,10 +21,30 @@ def _backward(
     grads: Tuple[Tensor, ...],
     inputs: Tuple[Tensor, ...],
 ) -> None:
-    nodes = tuple(o.gradfn for o in outputs if o.gradfn is not None)
-    graph = construct_graph(nodes)
+    output_nodes = tuple(o.gradfn for o in outputs if o.gradfn is not None)
+    graph = construct_graph(output_nodes)
     order = topological(graph)
-    _grad = _make_grads(outputs, grads)
+    output_grads = _make_output_grads(outputs, grads)
+    grad_map = {n: [nura.zeroslike(o) for o in n.outputs] for n in order}
+    print(grad_map)
+
+
+def _make_output_grads(
+    outputs: Tuple[Tensor, ...], grads: Tuple[Tensor, ...]
+) -> List[List[Tensor]]:
+    output_grads = []
+    output_nodes = tuple(o.gradfn for o in outputs if o.gradfn is not None)
+    for i, output in enumerate(outputs):
+        node_grads = []
+        for node_output in output_nodes[i].outputs:
+            if node_output is output and i < len(grads):
+                node_grads.append(grads[i])
+            elif node_output is output:
+                node_grads.append(nura.oneslike(output))
+            else:
+                node_grads.append(nura.zeroslike(node_output))
+        output_grads.append(node_grads)
+    return output_grads
 
 
 def grad(
@@ -39,40 +59,6 @@ def _grad(
     input: Tuple[Tensor, ...], output: Tensor, grad: Optional[Tensor] = None
 ) -> Dict[Tensor, Tensor]:
     raise NotImplemented
-
-
-def _make_grad_map(order: List[Node], grads: Tuple[Tuple[Tensor, ...], ...]):
-    grad_map = {n: [nura.zeroslike(t) for t in n.outputs] for n in order}
-    pass
-
-
-def _make_grads(
-    outputs: Tuple[Tensor, ...],
-    grads: Tuple[Tensor, ...],
-) -> Tuple[Tuple[Tensor, ...], ...]:
-    _grad = []
-    for i, output in enumerate(outputs):
-        grad = grads[i] if i < len(grads) else nura.oneslike(output)
-        node_grads = _get_node_grads(output, grad)
-        _grad.append(node_grads)
-    return tuple(_grad)
-
-
-def _get_node_grads(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
-    if tensor.gradfn is None:
-        raise ValueError("Cannot get node gradient, received tensor without node")
-    return tuple(
-        grad if tensor.index == i else nura.zeroslike(tensor)
-        for i in range(len(tensor.gradfn.outputs))
-    )
-
-
-def _array_to_tensor(
-    edge_grad: Union[Tuple[ndarray, ...], ndarray]
-) -> Tuple[Tensor, ...]:
-    if isinstance(edge_grad, tuple):
-        return tuple(nura.tensor(g) for g in edge_grad)
-    return (nura.tensor(edge_grad),)
 
 
 def _tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
