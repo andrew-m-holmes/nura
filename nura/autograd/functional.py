@@ -8,38 +8,29 @@ from collections import deque
 
 
 def backward(
-    output: Union[Tuple[Tensor, ...], Tensor],
-    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
-    input: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    outputs: Union[Tuple[Tensor, ...], Tensor],
+    grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> None:
-    output, grad, input = _tupify(output), _tupify(grad), _tupify(input)
+    output, grad, input = _tupify(outputs), _tupify(grads), _tupify(inputs)
     _backward(output, grad, input)
 
 
 def _backward(
-    output: Tuple[Tensor, ...],
-    grad: Tuple[Tensor, ...],
-    input: Tuple[Tensor, ...],
+    outputs: Tuple[Tensor, ...],
+    grads: Tuple[Tensor, ...],
+    inputs: Tuple[Tensor, ...],
 ) -> None:
-    nodes = tuple(o.gradfn for o in output if o.gradfn is not None)
+    nodes = tuple(o.gradfn for o in outputs if o.gradfn is not None)
     graph = construct_graph(nodes)
     order = topological(graph)
-
-    _grad = _make_grads(output, grad)
-
-
-def _backwarderr(
-    output: Union[Tuple[Tensor, ...], Tensor],
-    grad: Optional[Union[Tuple[Tensor, ...], Tensor]],
-    input: Optional[Union[Tuple[Tensor, ...], Tensor]],
-) -> Optional[Union[RuntimeError, ValueError]]:
-    pass
+    _grad = _make_grads(outputs, grads)
 
 
 def grad(
-    output: Union[Tuple[Tensor, ...], Tensor],
-    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
-    input: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    outputs: Union[Tuple[Tensor, ...], Tensor],
+    grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> Tuple[Tensor, ...]:
     raise NotImplemented
 
@@ -50,30 +41,29 @@ def _grad(
     raise NotImplemented
 
 
-def _graderr(
-    input: Tuple[Tensor, ...], output: Tensor, grad: Optional[Tensor] = None
-) -> Optional[Union[ValueError, RuntimeError]]:
-    raise NotImplemented
+def _make_grad_map(order: List[Node], grads: Tuple[Tuple[Tensor, ...], ...]):
+    grad_map = {n: [nura.zeroslike(t) for t in n.outputs] for n in order}
+    pass
 
 
 def _make_grads(
-    output: Tuple[Tensor, ...],
-    grad: Tuple[Tensor, ...],
+    outputs: Tuple[Tensor, ...],
+    grads: Tuple[Tensor, ...],
 ) -> Tuple[Tuple[Tensor, ...], ...]:
     _grad = []
-    for i, o in enumerate(output):
-        g = grad[i] if i < len(grad) else nura.ones()
-        ograd = _get_node_grad(o, g)
-        _grad.append(ograd)
+    for i, output in enumerate(outputs):
+        grad = grads[i] if i < len(grads) else nura.oneslike(output)
+        node_grads = _get_node_grads(output, grad)
+        _grad.append(node_grads)
     return tuple(_grad)
 
 
-def _get_node_grad(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
+def _get_node_grads(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
     if tensor.gradfn is None:
         raise ValueError("Cannot get node gradient, received tensor without node")
     return tuple(
-        grad if tensor.index == i else nura.zeros()
-        for i in range(tensor.gradfn.outputs)
+        grad if tensor.index == i else nura.zeroslike(tensor)
+        for i in range(len(tensor.gradfn.outputs))
     )
 
 

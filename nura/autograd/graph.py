@@ -1,7 +1,6 @@
-import nura
 from nura.tensors import Tensor
 from nura.autograd.function import Function, Context
-from typing import Optional, Type, Tuple, List, Dict, Union, Callable
+from typing import Optional, Type, Tuple, List, Union, Callable, DefaultDict, Dict
 from collections import deque, defaultdict
 
 
@@ -69,12 +68,15 @@ def define_closure(
 
 
 def get_node(tensor: Tensor) -> Optional[Node]:
-    if tensor.leaf and tensor.usegrad:
-        return Node((tensor,), None, None)
+    if tensor.leaf and tensor.usegrad and tensor.gradfn is None:
+        node = Node((tensor,), None, None)
+        tensor.mutate(gradfn=node)
     return tensor.gradfn
 
 
-def construct_graph(nodes: Union[Tuple[Node, ...], Node]) -> Dict[Node, List[Node]]:
+def construct_graph(
+    nodes: Union[Tuple[Node, ...], Node]
+) -> DefaultDict[Node, List[Node]]:
     if isinstance(nodes, Node):
         nodes = (nodes,)
     graph = defaultdict(list)
@@ -83,6 +85,7 @@ def construct_graph(nodes: Union[Tuple[Node, ...], Node]) -> Dict[Node, List[Nod
 
     while queue:
         node = queue.popleft()
+        graph[node]
         for child_node, _ in node.edges:
             if child_node is None:
                 continue
@@ -94,7 +97,7 @@ def construct_graph(nodes: Union[Tuple[Node, ...], Node]) -> Dict[Node, List[Nod
 
 
 def topological(graph: Dict[Node, List[Node]]) -> List[Node]:
-    indegree = {n: 0 for n in graph.keys()}
+    indegree = defaultdict.fromkeys(graph.keys(), 0)
     for node, edges in graph.items():
         for child_node in set(edges):
             indegree[child_node] += 1 * len(node.outputs)

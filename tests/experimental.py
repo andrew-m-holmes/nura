@@ -1,7 +1,9 @@
 import numpy as np
 import nura
 import nura.nn as nn
+import torch
 from nura.autograd.function import Function
+from nura.autograd.graph import construct_graph, topological
 
 
 class Unbind(Function):
@@ -22,10 +24,11 @@ unbind = Unbind.apply
 
 def main():
 
-    a = nura.tensor(3.0, usegrad=True)
-    b = nura.tensor(2.0, usegrad=True)
-    c = a * b
-    print(c)
+    a = torch.tensor([1.0, 2.0, 3], requires_grad=True)
+    b, c, d = a.unbind()
+    e = b * c
+    f = e * d
+    torch.autograd.backward(f)
 
 
 if __name__ == "__main__":
