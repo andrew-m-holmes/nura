@@ -1,6 +1,5 @@
 import nura.utils as utils
 import nura.functional as f
-from nura.autograd.mode import nograd
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
 from typing import Iterator, Optional, Tuple
@@ -36,8 +35,7 @@ class Optimizer:
         return cls.__name__
 
     def update(self, parameter: Tensor, gradstep: Tensor) -> None:
-        with nograd():
-            parameter -= gradstep
+        parameter -= gradstep
 
     def zerograd(self) -> None:
         for p in self._parameters:

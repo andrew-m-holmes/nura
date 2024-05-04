@@ -2,7 +2,6 @@ import numpy as np
 import nura
 import nura.nn as nn
 from nura.autograd.function import Function
-from nura.autograd.graph import constructgraph, topological
 
 
 class Unbind(Function):
@@ -26,12 +25,7 @@ def main():
     a = nura.tensor(3.0, usegrad=True)
     b = nura.tensor(2.0, usegrad=True)
     c = a * b
-    c.retaingrad()
-    d = a * c
-    d.retaingrad()
-    d.backward()
-    print(c.grad)
-    print(d.grad)
+    print(c)
 
 
 if __name__ == "__main__":

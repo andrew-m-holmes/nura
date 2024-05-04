@@ -1,9 +1,11 @@
 import nura
 import nura.types as types
-from nura.autograd.graph import Node
 from nura.types import Tensorlike, Scalar, dtype, dim, dimlike
-from typing import Optional, Type, Any, Union, List, Self
+from typing import Optional, Type, Any, Union, List, Self, TYPE_CHECKING
 from numpy import ndarray
+
+if TYPE_CHECKING:
+    from nura.autograd.graph import Node
 
 
 class Tensor:
@@ -13,7 +15,7 @@ class Tensor:
         data: ndarray,
         usegrad: bool,
         grad: Optional["Tensor"],
-        gradfn: Optional[Node],
+        gradfn: Optional["Node"],
         leaf: bool,
     ) -> None:
         self._data: ndarray = data
@@ -49,7 +51,7 @@ class Tensor:
         return self._grad
 
     @property
-    def gradfn(self) -> Optional[Node]:
+    def gradfn(self) -> Optional["Node"]:
         return self._gradfn
 
     @property
@@ -89,7 +91,6 @@ class Tensor:
     def retaingrad(self):
         if self.gradfn is None:
             raise RuntimeError("Tensor is not on computational graph")
-        self.gradfn.retain(self)
 
     def cleargrad(self) -> None:
         self._grad = None
@@ -393,7 +394,7 @@ class Tensor:
             s = s[:i]
         reprs = ["Tensor(", s]
         if self.gradfn is not None:
-            reprs.append(f" gradfn={self.gradfn.function.name()}")
+            reprs.append(f" gradfn={self.gradfn.name()}")
         reprs.append(f" dtype={self.dtype.name()})")
         return "".join(reprs)
 

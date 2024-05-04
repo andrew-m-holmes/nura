@@ -2,7 +2,7 @@ import numpy as np
 import nura
 from numpy import ndarray
 from nura.tensors import Tensor
-from nura.autograd.graph import Node, constructgraph, topological
+from nura.autograd.graph import Node, construct_graph, topological
 from typing import Dict, Generator, Tuple, Optional, Callable, Union, List, Set
 from collections import deque
 
@@ -22,28 +22,10 @@ def _backward(
     input: Tuple[Tensor, ...],
 ) -> None:
     nodes = tuple(o.gradfn for o in output if o.gradfn is not None)
-    graph = constructgraph(nodes)
+    graph = construct_graph(nodes)
     order = topological(graph)
 
     _grad = _make_grads(output, grad)
-    accumulates = _make_accumulates(graph, input)
-    grad_map = _make_grad_map(order, nodes, _grad)
-    queue = deque(order)
-
-    while queue:
-        node = queue.popleft()
-        outputgrad = grad_map[node]
-        if _retains_grad(node, accumulates):
-            _accumulate_grad(node, outputgrad)
-        if node.edges:
-            edge_array = node.apply(*outputgrad)
-            edge_grad = _array_to_tensor(edge_array)
-            filtered = filter(
-                lambda tup: tup[0][0] is not None, zip(node.edges, edge_grad)
-            )
-            for (child_node, index), child_grad in filtered:
-                grad_map[child_node][index] = grad_map[child_node][index] + child_grad
-        grad_map.pop(node)
 
 
 def _backwarderr(
@@ -74,20 +56,6 @@ def _graderr(
     raise NotImplemented
 
 
-def _retains_grad(node: Node, accumulates: Set[Tensor]) -> bool:
-    retained_tensors = filter(lambda tup: tup[1], node.outputs.values())
-    return len(node._tensors.intersection(accumulates)) > 0
-
-
-def _accumulate_grad(node: Node, output_grad: List[Tensor]) -> None:
-    if node._tensors is None:
-        raise RuntimeError("Cannot accumulate gradient, Node has no tensors")
-    for tensor in node._tensors:
-        if tensor.grad is None:
-            tensor.zerograd()
-        tensor._grad += output_grad[tensor.index]
-
-
 def _make_grads(
     output: Tuple[Tensor, ...],
     grad: Tuple[Tensor, ...],
@@ -107,22 +75,6 @@ def _get_node_grad(tensor: Tensor, grad: Tensor) -> Tuple[Tensor, ...]:
         grad if tensor.index == i else nura.zeros()
         for i in range(tensor.gradfn.outputs)
     )
-
-
-def _make_accumulates(
-    graph: Dict[Node, List[Node]], input: Tuple[Tensor, ...]
-) -> Set[Tensor]:
-    accumulates = set(input)
-    return accumulates
-
-
-def _make_grad_map(
-    toposort: List[Node], nodes: Tuple[Node, ...], grads: Tuple[Tuple[Tensor, ...], ...]
-) -> Dict[Node, List[Tensor]]:
-    grad_map = {n: [nura.zeros()] * n.outputs for n in toposort}
-    for n, g in zip(nodes, grads):
-        grad_map[n] = list(g)
-    return grad_map
 
 
 def _array_to_tensor(
