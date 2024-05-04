@@ -75,8 +75,7 @@ def _graderr(
 
 
 def _retains_grad(node: Node, accumulates: Set[Tensor]) -> bool:
-    if node._tensors is None:
-        return False
+    retained_tensors = filter(lambda tup: tup[1], node.outputs.values())
     return len(node._tensors.intersection(accumulates)) > 0
 
 
@@ -114,9 +113,6 @@ def _make_accumulates(
     graph: Dict[Node, List[Node]], input: Tuple[Tensor, ...]
 ) -> Set[Tensor]:
     accumulates = set(input)
-    for node in graph.keys():
-        if node._tensors is not None:
-            accumulates.update(node._tensors)
     return accumulates
 
 
