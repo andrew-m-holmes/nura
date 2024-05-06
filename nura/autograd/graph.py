@@ -1,3 +1,5 @@
+import numpy as np
+import nura
 from nura.tensors import Tensor
 from nura.autograd.function import Function, Context
 from typing import Optional, Type, Tuple, List, Union, Callable, DefaultDict, Dict
@@ -15,6 +17,7 @@ class Node:
         self._outputs = outputs
         self._closure = closure
         self._edges = edges
+        self._retained_outputs = None
 
     @property
     def outputs(self) -> Tuple[Tensor, ...]:
@@ -26,17 +29,39 @@ class Node:
             return ()
         return self._edges
 
-    def apply(self, *grad) -> Tuple[Tensor, ...]:
+    def retain(self, index: int):
+        if self._retained_outputs is None:
+            self._retained_outputs = [False] * len(self._outputs)
+        self._retained_outputs[index] = True
+
+    def unretain(self, index: int):
+        if self._retained_outputs is None:
+            raise RuntimeError(
+                "Cannot remove gradient accumulation, tensor never retained gradient"
+            )
+        self._retained_outputs[index] = False
+
+    def apply(self, *grads: Tensor) -> Tuple[Tensor, ...]:
         if self._closure is None:
             raise RuntimeError("Cannot apply closure function, closure does not exist")
-        return self._closure(*grad)
+        return self._closure(*grads)
+
+    def accumulate(self, *grads: Tensor):
+        if self._retained_outputs is None:
+            raise RuntimeError("Cannot accumulate gradient, no outputs retain gradient")
+        for output in self._outputs:
+            grad = grads[output.index]
+            if self._retained_outputs[output.index]:
+                if output._grad is None:
+                    output._grad = nura.zeroslike(output)
+                output._grad += grad
 
     def name(self) -> str:
         name = self._closure.__name__ if self._closure is not None else "Accumulate"
         return name
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.name()})"
+        return f"Node({self.name()})"
 
 
 def add_to_graph(
@@ -70,6 +95,7 @@ def define_closure(
 def get_node(tensor: Tensor) -> Optional[Node]:
     if tensor.leaf and tensor.usegrad and tensor.gradfn is None:
         node = Node((tensor,), None, None)
+        node.retain(0)
         tensor.mutate(gradfn=node)
     return tensor.gradfn
 
@@ -96,7 +122,7 @@ def construct_graph(
     return graph
 
 
-def topological(graph: Dict[Node, List[Node]]) -> List[Node]:
+def topological(graph: Dict[Node, List[Node]]) -> Tuple[Node, ...]:
     indegree = defaultdict.fromkeys(graph.keys(), 0)
     for node, edges in graph.items():
         for child_node in set(edges):
@@ -112,4 +138,4 @@ def topological(graph: Dict[Node, List[Node]]) -> List[Node]:
             indegree[child_node] -= 1 * len(node.outputs)
             if not indegree[child_node]:
                 queue.append(child_node)
-    return order
+    return tuple(order)

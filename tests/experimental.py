@@ -27,7 +27,7 @@ def main():
     b, c, d = unbind(a)
     e = b * c
     f = e * d
-    c.backward()
+    f.backward()
 
 
 if __name__ == "__main__":
