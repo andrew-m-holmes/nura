@@ -1,5 +1,6 @@
 import numpy as np
 import nura.types as types
+from numpy import ndarray
 from nura.types import Scalar, dimlike, dim, dtype
 from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
@@ -331,3 +332,11 @@ def iscontiguous(a: Tensor) -> bool:
 
 def typename(a: Tensor) -> str:
     return f"{a.dtype.name().capitalize()}{a.__class__.__name__}"
+
+
+def atot(arr: Union[Tuple[ndarray, ...], ndarray]) -> Union[Tuple[Tensor, ...], Tensor]:
+    if not arr:
+        raise ValueError("Received no arrays")
+    if len(arr) > 1:
+        return tuple(tensor(a) for a in arr)
+    return tensor(arr)

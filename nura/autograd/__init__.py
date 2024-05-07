@@ -1,1 +1,2 @@
-from nura.autograd.functional import backward, grad
+import nura.autograd.graph as graph
+from .mode import Autograd, usegrad, nograd, setgrad

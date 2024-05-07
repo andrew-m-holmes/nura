@@ -23,7 +23,6 @@ class Tensor:
         self._gradfn: Optional[Node] = gradfn
         self._usegrad: bool = usegrad
         self._leaf: bool = leaf
-        self._index: int = 0
         self._version: int = 0
 
     @property
@@ -58,9 +57,6 @@ class Tensor:
     def leaf(self) -> bool:
         return self._leaf
 
-    @property
-    def index(self) -> int:
-        return self._index
 
     @property
     def version(self) -> int:
@@ -86,12 +82,8 @@ class Tensor:
         return self.data.tolist()
 
     def backward(self, grad: Optional["Tensor"] = None) -> None:
-        nura.backward(self, grad)
+        pass
 
-    def retaingrad(self) -> None:
-        if self.gradfn is None:
-            raise RuntimeError("Cannot retain gradient, tensor is not on computational graph")
-        self.gradfn.retain(self.index)
 
     def cleargrad(self) -> None:
         self._grad = None

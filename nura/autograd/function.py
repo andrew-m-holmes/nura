@@ -7,19 +7,19 @@ from typing import Tuple, Any, Optional, Union, OrderedDict
 class Context:
 
     def __init__(self) -> None:
-        self._memory: Optional[OrderedDict[Tensor, int]] = None
+        self._context: Optional[OrderedDict[Tensor, int]] = None
 
     def save(self, *tensors: Tensor) -> None:
-        self._memory = OrderedDict((t, t.version) for t in tensors)
+        self._context = OrderedDict((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
-        return tuple(self._memory.keys()) if self._memory is not None else ()
+        return tuple(self._context.keys()) if self._context is not None else ()
 
     def usesgrad(self) -> bool:
-        if self._memory is None:
+        if self._context is None:
             return False
-        return any(t.usegrad for t in self._memory.keys()) and all(
-            t.gradtensor for t in self._memory.keys()
+        return any(t.usegrad for t in self._context.keys()) and all(
+            t.gradtensor for t in self._context.keys()
         )
 
     def __getattr__(self, name: str) -> Any:
@@ -35,9 +35,7 @@ class Context:
 class Function:
 
     @staticmethod
-    def forward(
-        context: Context, *args: Any, **kwargs: Any
-    ) -> Union[Tuple[ndarray, ...], ndarray]:
+    def forward(context: Context, *args: Any, **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
@@ -45,28 +43,20 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def tangent(context: Context, *grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
+    def tangent(
+        context: Context, *grads: Tensor
+    ) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @classmethod
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
-        array_outputs = cls.forward(context, *args, **kwargs)
-        outputs = cls.array_to_tensors(array_outputs)
-        if context.usesgrad():
-            nura.autograd.graph.add_to_graph(outputs, cls, context)
-        return outputs
+        arr = cls.forward(context, *args, **kwargs)
+        output = nura.tensor(arr)
+        if context.usesgrad() and nura.Autograd.enabled():
+            nura.graph.addtograph(output, cls, context)
+        return output
 
     @classmethod
     def name(cls) -> str:
         return cls.__name__
-
-    @staticmethod
-    def array_to_tensors(
-        array_outputs: Union[Tuple[ndarray, ...], ndarray]
-    ) -> Union[Tuple[Tensor, ...], Tensor]:
-        if isinstance(array_outputs, tuple):
-            return tuple(
-                nura.tensor(ro).mutated(index=i) for i, ro in enumerate(array_outputs)
-            )
-        return nura.tensor(array_outputs)

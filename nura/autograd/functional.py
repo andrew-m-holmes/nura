@@ -1,7 +1,7 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from nura.autograd.graph import Node, construct_graph, topological
+from nura.autograd.graph import Node
 from typing import Dict, Generator, Tuple, Optional, Callable, Union, List, Set
 from collections import deque
 from timeit import default_timer as timer
@@ -12,80 +12,7 @@ def backward(
     grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
     inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> None:
-    outputs, grads, inputs = _tupify(outputs), _tupify(grads), _tupify(inputs)
-    _backward(outputs, grads, inputs)
-
-
-def _backward(
-    outputs: Tuple[Tensor, ...],
-    grads: Tuple[Tensor, ...],
-    inputs: Tuple[Tensor, ...],
-) -> None:
-    start = timer()
-    output_nodes = tuple(o.gradfn for o in outputs if o.gradfn is not None)
-    inputs_nodes = tuple(o.gradfn for o in inputs if o.gradfn is not None)
-    graph = construct_graph(output_nodes)
-    node_order = topological(graph)
-    accumulates = _get_accumulates(node_order, inputs_nodes)
-    output_grads = _get_output_grads(outputs, grads, output_nodes)
-    grad_map = {node: grads for node, grads in zip(output_nodes, output_grads)}
-    queue = deque(node_order)
-
-    while queue:
-        node = queue.popleft()
-        node_grads = grad_map[node]
-        if node in accumulates:
-            node.accumulate(*node_grads)
-        else:
-            edge_grads = node.apply(*node_grads)
-            for (edge_node, index), edge_grad in zip(node.edges, edge_grads):
-                if edge_node is None:
-                    continue
-                if edge_node not in grad_map:
-                    grad_map[edge_node] = [
-                        nura.zeroslike(output) for output in edge_node.outputs
-                    ]
-                grad_map[edge_node][index] += edge_grad
-        grad_map.pop(node)
-    end = timer()
-    print(f"Elapsed time: {end - start:.10f}s")
-
-def _sum_grad(output: Tensor, grad: Tensor):
-    pad = np.pad(output.dim, grad.ndim - output.ndim, constant_values=0)
-    dim = tuple(np.where(pad != np.array(grad.dim))[0])
-    grad.sum(dim=dim).reshape(output.dim)
     pass
-
-
-def _get_accumulates(
-    nodes: Tuple[Node, ...], input_nodes: Tuple[Node, ...]
-) -> Set[Node]:
-    accumulates = set()
-    for node in nodes:
-        if node._retained_outputs is not None and any(node._retained_outputs):
-            accumulates.add(node)
-    accumulates.update(input_nodes)
-    return accumulates
-
-
-def _get_output_grads(
-    outputs: Tuple[Tensor, ...],
-    grads: Tuple[Tensor, ...],
-    output_nodes: Tuple[Node, ...],
-) -> Tuple[List[Tensor], ...]:
-    assert len(outputs) == len(output_nodes)
-    output_grads = []
-    for i, (output, output_node) in enumerate(zip(outputs, output_nodes)):
-        node_grads = []
-        for node_output in output_node.outputs:
-            if i < len(grads) and node_output is output:
-                node_grads.append(grads[i])
-            elif node_output is output:
-                node_grads.append(nura.oneslike(output))
-            else:
-                node_grads.append(nura.zeroslike(output))
-        output_grads.append(node_grads)
-    return tuple(output_grads)
 
 
 def grad(
@@ -102,12 +29,23 @@ def _grad(
     raise NotImplemented
 
 
-def _tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
+def tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
     if input is None:
         return ()
     if isinstance(input, Tensor):
         return (input,)
     return input
+
+
+def mismatch(tensor: Tensor, grad: Tensor) -> bool:
+    return tensor.dim != grad.dim
+
+
+def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
+    if tensor.ndim <= grad.ndim:
+        pass
+    else:
+        pass
 
 
 def vjp(
