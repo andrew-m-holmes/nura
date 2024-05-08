@@ -77,15 +77,15 @@ def linkedges(context: Context) -> Tuple[Optional[Node], ...]:
     return tuple(edges)
 
 
-def toposort(nodes: Union[Sequence[Node], Node]) -> Tuple[Node, ...]:
-    if not isinstance(nodes, Sequence):
-        nodes = (nodes,)
-    if not all(nodes):
-        raise ValueError(f"Received an invalid node entry: {nodes}")
+def toposort(node: Union[Sequence[Node], Node]) -> Tuple[Node, ...]:
+    if not isinstance(node, Sequence):
+        node = (node,)
+    if not all(node):
+        raise ValueError(f"Received an invalid node entry: {node}")
 
-    visit = set(nodes)
-    queue = deque(nodes)
-    indegree = dict.fromkeys(nodes, 0)
+    visit = set(node)
+    queue = deque(node)
+    indegree = dict.fromkeys(node, 0)
 
     while queue:
         node = queue.popleft()

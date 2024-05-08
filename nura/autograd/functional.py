@@ -1,24 +1,74 @@
 import numpy as np
 import nura
 from nura.tensors import Tensor
-from nura.autograd.graph import Node
-from typing import Dict, Generator, Tuple, Optional, Callable, Union, List, Set
+from nura.autograd.graph import Node, toposort
+from typing import Dict, Generator, Tuple, Optional, Callable, Union, Set
 from collections import deque
-from timeit import default_timer as timer
 
 
 def backward(
-    outputs: Union[Tuple[Tensor, ...], Tensor],
-    grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
-    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    output: Union[Tuple[Tensor, ...], Tensor],
+    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    input: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> None:
-    pass
+    output, grad, input = tupify(output), tupify(grad), tupify(input)
+    if not all(t.gradfn is not None and t.gradtensor for t in output):
+        raise ValueError(
+            "Cannot run backward, all tensors must be on computational graph"
+        )
+    if any(output[i].nelem > 1 and i >= len(grad) for i in range(len(output))):
+        raise ValueError(
+            "Cannot run backward, gradient must be supplied for outputs that are not scalars"
+        )
+    if len(grad) > len(set(output)):
+        raise ValueError(
+            "Cannot run backward, received more gradients than output tensors"
+        )
+    if not all(grad[i].dtype is output[i].dtype for i in range(len(grad))):
+        raise ValueError(
+            "Cannot run backward, received one or more gradients with different types than output tensors"
+        )
+    if not all(grad[i].dim == output[i].dim for i in range(len(grad))):
+        raise ValueError(
+            "Cannot run backward, received one or more gradients with different dimensions than output tensors"
+        )
+    if not all(i.gradtensor and i.usegrad and i.gradfn is not None for i in input):
+        raise ValueError(
+            "Cannot run backward, received inputs not on computational graph"
+        )
+    _backward(output, grad, input)
+
+
+def _backward(
+    output: Tuple[Tensor, ...], grad: Tuple[Tensor, ...], input: Tuple[Tensor, ...]
+) -> None:
+    nodes = tuple(o.gradfn for o in output if o.gradfn is not None)
+    topotuple = toposort(nodes)
+    retain = getretain(topotuple, input)
+    gradmap = getgradmap(nodes, output, grad)
+    queue = deque(topotuple)
+
+    while queue:
+        node = queue.popleft()
+        nodegrad = gradmap[node]
+        if node in retain:
+            accumulate(node, nodegrad)
+        if node.edges:
+            gradoutput = tupify(node.apply(nodegrad))
+            for edge, edgegrad in zip(node.edges, gradoutput):
+                if edge is None:
+                    continue
+                if edge not in gradmap:
+                    gradmap[edge] = nura.zeroslike(edge.output)
+                if mismatch(edge.output, edgegrad):
+                    edgegrad = sumgrad(edge.output, edgegrad)
+                gradmap[edge] += edgegrad
 
 
 def grad(
-    outputs: Union[Tuple[Tensor, ...], Tensor],
-    grads: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
-    inputs: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    output: Union[Tuple[Tensor, ...], Tensor],
+    grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
+    input: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> Tuple[Tensor, ...]:
     raise NotImplemented
 
@@ -27,6 +77,29 @@ def _grad(
     input: Tuple[Tensor, ...], output: Tensor, grad: Optional[Tensor] = None
 ) -> Dict[Tensor, Tensor]:
     raise NotImplemented
+
+
+def getretain(node: Tuple[Node, ...], input: Tuple[Tensor, ...]) -> Set[Node]:
+    retain = set()
+    for n in node:
+        if n.retain:
+            retain.add(n)
+    for i in input:
+        if i.gradfn is not None and i.gradfn.retain:
+            retain.add(i.gradfn)
+    return retain
+
+
+def getgradmap(
+    node: Tuple[Node, ...], output: Tuple[Tensor, ...], grad: Tuple[Tensor, ...]
+) -> Dict[Node, Tensor]:
+    gradmap = {}
+    for i, (n, o) in enumerate(zip(node, output)):
+        if i < len(grad):
+            gradmap[n] = grad[i]
+        else:
+            gradmap[n] = nura.oneslike(o)
+    return gradmap
 
 
 def tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
@@ -43,9 +116,26 @@ def mismatch(tensor: Tensor, grad: Tensor) -> bool:
 
 def sumgrad(tensor: Tensor, grad: Tensor) -> Tensor:
     if tensor.ndim <= grad.ndim:
-        pass
+        pad = np.pad(tensor.dim, (grad.ndim - tensor.ndim, 0), constant_values=0)
+        mismatched = pad != grad.dim
+        dim = np.nonzero(mismatched)[0]
+        grad = grad.sum(dim=tuple(dim), keepdims=True)
+        if tensor.ndim < grad.ndim:
+            dim = tuple(range(grad.ndim - tensor.ndim))
+            grad = grad.squeeze(dim)
     else:
-        pass
+        grad = nura.zeroslike(tensor) + grad
+    return grad
+
+
+def accumulate(node: Node, grad: Tensor) -> None:
+    if node.output.dim != grad.dim:
+        raise ValueError(
+            f"Cannot accumulate gradient, node output dimensions don't match gradient dimensions ({node.output.dim} != {grad.dim})"
+        )
+    if node.output._grad is None:
+        node.output._grad = nura.zeroslike(node.output)
+    node.output._grad += grad
 
 
 def vjp(
