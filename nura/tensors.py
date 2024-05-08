@@ -82,8 +82,7 @@ class Tensor:
         return self.data.tolist()
 
     def backward(self, grad: Optional["Tensor"] = None) -> None:
-        pass
-
+        nura.backward(self, grad)
 
     def cleargrad(self) -> None:
         self._grad = None

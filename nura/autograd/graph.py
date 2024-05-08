@@ -1,7 +1,8 @@
 import nura
 from nura.tensors import Tensor
-from typing import Optional, Type, Tuple, Union
+from typing import Optional, Type, Tuple, Union, Sequence
 from nura.autograd.function import Function, Context
+from collections import deque, defaultdict
 
 
 class Node:
@@ -69,8 +70,44 @@ def addtograph(output: Tensor, function: Type[Function], context: Context) -> No
 def linkedges(context: Context) -> Tuple[Optional[Node], ...]:
     edges = []
     for t in context.tensors():
-        if t.usegrad and t.gradfn is None:
+        if t.usegrad and t.leaf and t.gradfn is None:
             node = Node(t, retain=True)
             t.mutate(gradfn=node)
         edges.append(t.gradfn)
     return tuple(edges)
+
+
+def toposort(nodes: Union[Sequence[Node], Node]) -> Tuple[Node, ...]:
+    if not isinstance(nodes, Sequence):
+        nodes = (nodes,)
+    if not all(nodes):
+        raise ValueError(f"Received an invalid node entry: {nodes}")
+
+    visit = set(nodes)
+    queue = deque(nodes)
+    indegree = dict.fromkeys(nodes, 0)
+
+    while queue:
+        node = queue.popleft()
+        for edge in node.edges:
+            if edge is None:
+                continue
+            if edge not in visit:
+                indegree[edge] = 0
+                visit.add(edge)
+                queue.append(edge)
+            indegree[edge] += 1
+
+    topolist = []
+    queue = deque([n for n, d in indegree.items() if not d])
+
+    while queue:
+        node = queue.popleft()
+        topolist.append(node)
+        for edge in node.edges:
+            if edge is None:
+                continue
+            indegree[edge] -= 1
+            if not indegree[edge]:
+                queue.append(edge)
+    return tuple(topolist)
