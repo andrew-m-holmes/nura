@@ -10,8 +10,9 @@ def main():
     c = a * b
     d = a * c
     d.backward()
-    print(a.grad)
-    print(b.grad)
+    e = d * 15.0
+    e.backward(input=c)
+    print(c.grad)
 
 
 if __name__ == "__main__":

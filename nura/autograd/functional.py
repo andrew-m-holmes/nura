@@ -85,7 +85,7 @@ def getretain(node: Tuple[Node, ...], input: Tuple[Tensor, ...]) -> Set[Node]:
         if n.retain:
             retain.add(n)
     for i in input:
-        if i.gradfn is not None and i.gradfn.retain:
+        if i.gradfn is not None:
             retain.add(i.gradfn)
     return retain
 
