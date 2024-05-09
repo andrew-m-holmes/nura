@@ -335,8 +335,8 @@ def typename(a: Tensor) -> str:
 
 
 def atot(arr: Union[Tuple[ndarray, ...], ndarray]) -> Union[Tuple[Tensor, ...], Tensor]:
-    if not arr:
-        raise ValueError("Received no arrays")
-    if len(arr) > 1:
+    if isinstance(arr, tuple):
+        if not arr:
+            raise ValueError("Received no arrays")
         return tuple(tensor(a) for a in arr)
     return tensor(arr)
