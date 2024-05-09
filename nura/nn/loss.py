@@ -16,8 +16,11 @@ class Loss:
     def name(cls) -> str:
         return cls.__name__
 
-    def forward(self, *args, **kwargs) -> Any:
+    def forward(self, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.forward(*args, **kwargs)
 
     def __repr__(self) -> str:
         reduction = self.reduction
