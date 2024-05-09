@@ -1,4 +1,4 @@
-import nura.utils as utils
+import nura
 import nura.functional as f
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
@@ -35,7 +35,8 @@ class Optimizer:
         return cls.__name__
 
     def update(self, parameter: Tensor, gradstep: Tensor) -> None:
-        parameter -= gradstep
+        with nura.nograd():
+            parameter -= gradstep
 
     def zerograd(self) -> None:
         for p in self._parameters:
@@ -87,7 +88,7 @@ class SGD(Optimizer):
         for p in self._parameters:
             if p.grad is None or not p.usegrad:
                 continue
-            v = self._moments.get(p, utils.zeroslike(p))
+            v = self._moments.get(p, nura.zeroslike(p))
             g = sgd(p, v, self.learnrate, self.momentum, self.nesterov, self.decay)
             self._moments[p] = g
             self.update(p, g)
@@ -146,7 +147,7 @@ class RMSProp(Optimizer):
         for p in self._parameters:
             if p.grad is None or not p.usegrad:
                 continue
-            v = self._moments.get(p, utils.zeroslike(p))
+            v = self._moments.get(p, nura.zeroslike(p))
             g, v_ = rmsprop(p, v, self.learnrate, self.alpha, self.decay, self.eps)
             self._moments[p] = v_
             self.update(p, g)
@@ -166,7 +167,7 @@ def rmsprop(
 ) -> Tuple[Tensor, Tensor]:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with nograd():
+    with nura.nograd():
         grad = computedecay(parameter, parameter.grad, decay)
         nextvel = alpha * velocity + (1 - alpha) * f.square(grad)
         update = learnrate / f.sqrt(nextvel + eps) * grad
@@ -204,7 +205,7 @@ class Adam(Optimizer):
         for p in self._parameters:
             if p.grad is None or not p.usegrad:
                 continue
-            vs = self._moments.get(p, (utils.zeroslike(p), utils.zeroslike(p)))
+            vs = self._moments.get(p, (nura.zeroslike(p), nura.zeroslike(p)))
             g, vs = adam(
                 p, vs, self.learnrate, self.stepnum, self.betas, self.decay, self.eps
             )
@@ -227,7 +228,7 @@ def adam(
 ) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with nograd():
+    with nura.nograd():
         grad = computedecay(parameter, parameter.grad, decay)
         mt = betas[0] * velocities[0] + (1 - betas[0]) * grad
         vt = betas[1] * velocities[1] + (1 - betas[1]) * f.square(grad)
