@@ -8,7 +8,9 @@ def main():
     a = nura.tensor(3.0, usegrad=True)
     b = nura.tensor(4.0, usegrad=True)
     c = a * b
-    d = a * c
+    c += 1
+    d = a - c
+    c += 1
     d.backward()
     e = d * 15.0
     e.backward(input=c)

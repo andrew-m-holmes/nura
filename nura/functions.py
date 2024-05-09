@@ -7,7 +7,7 @@ from typing import Any, Tuple, Union, Optional
 np._set_promotion_state("weak")
 
 
-class _Add(Function):
+class Add(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -25,7 +25,7 @@ class _Add(Function):
         return arr
 
 
-class _Sub(Function):
+class Sub(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -43,7 +43,7 @@ class _Sub(Function):
         return arr
 
 
-class _Mul(Function):
+class Mul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -65,7 +65,7 @@ class _Mul(Function):
         return arr
 
 
-class _Div(Function):
+class Div(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -89,7 +89,7 @@ class _Div(Function):
         return arr
 
 
-class _Floordiv(Function):
+class Floordiv(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -97,7 +97,7 @@ class _Floordiv(Function):
         return arr
 
 
-class _Modulo(Function):
+class Modulo(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -105,7 +105,7 @@ class _Modulo(Function):
         return arr
 
 
-class _Dot(Function):
+class Dot(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -136,7 +136,7 @@ class _Dot(Function):
         return arr
 
 
-class _Matmul(Function):
+class Matmul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -160,7 +160,7 @@ class _Matmul(Function):
         return arr
 
 
-class _Pow(Function):
+class Pow(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -186,7 +186,7 @@ class _Pow(Function):
         return arr0 + arr1
 
 
-class _Exp(Function):
+class Exp(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -206,7 +206,7 @@ class _Exp(Function):
         return arr * grad.data
 
 
-class _Log(Function):
+class Log(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -227,7 +227,7 @@ class _Log(Function):
         return arr
 
 
-class _Sin(Function):
+class Sin(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -248,7 +248,7 @@ class _Sin(Function):
         return arr
 
 
-class _Cos(Function):
+class Cos(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -269,7 +269,7 @@ class _Cos(Function):
         return arr
 
 
-class _Sum(Function):
+class Sum(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
@@ -297,7 +297,7 @@ class _Sum(Function):
         return arr
 
 
-class _Max(Function):
+class Max(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
@@ -333,7 +333,7 @@ class _Max(Function):
         return np.max(graddata, axis=dim, keepdims=keepdims)
 
 
-class _Min(Function):
+class Min(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
@@ -369,7 +369,7 @@ class _Min(Function):
         return np.min(graddata, axis=dim, keepdims=keepdims)
 
 
-class _Squeeze(Function):
+class Squeeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: Optional[dimlike]):
@@ -391,7 +391,7 @@ class _Squeeze(Function):
         return arr
 
 
-class _Unsqueeze(Function):
+class Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike):
@@ -413,7 +413,7 @@ class _Unsqueeze(Function):
         return arr
 
 
-class _Reshape(Function):
+class Reshape(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, newdim: dim):
@@ -435,7 +435,7 @@ class _Reshape(Function):
         return arr
 
 
-class _Transpose(Function):
+class Transpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim0: int, dim1: int):
@@ -460,7 +460,7 @@ class _Transpose(Function):
         return arr
 
 
-class _Permute(Function):
+class Permute(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: dim):
@@ -482,7 +482,7 @@ class _Permute(Function):
         return arr
 
 
-class _Abs(Function):
+class Abs(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -502,7 +502,7 @@ class _Abs(Function):
         return grad.data * mask
 
 
-class _Pos(Function):
+class Pos(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -518,7 +518,7 @@ class _Pos(Function):
         return grad.data.copy()
 
 
-class _Neg(Function):
+class Neg(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -536,7 +536,7 @@ class _Neg(Function):
         return np.negative(grad.data)
 
 
-class _Clone(Function):
+class Clone(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -553,7 +553,7 @@ class _Clone(Function):
         return grad.data.copy()
 
 
-class _Slice(Function):
+class Slice(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, slice_: Union[Tuple[slice, ...], slice]):
