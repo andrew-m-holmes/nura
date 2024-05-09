@@ -12,19 +12,19 @@ class Linear(Module):
 
     def __init__(
         self,
-        indim: int,
-        outdim: int,
-        bias=True,
+        inputdim: int,
+        outputdim: int,
+        bias: bool = True,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
         super().__init__()
         if dtype is None:
             dtype = types.float
-        self._indim = indim
-        self._outdim = outdim
+        self._inputdim = inputdim
+        self._outputdim = outputdim
         self._dtype = dtype
-        self._weight = parameter(utils.randn((outdim, indim)), dtype=dtype)
-        self._bias = parameter(utils.randn(outdim), dtype=dtype) if bias else None
+        self._weight = parameter(utils.randn((outputdim, inputdim)), dtype=dtype)
+        self._bias = parameter(utils.randn(outputdim), dtype=dtype) if bias else None
 
     @property
     def weight(self) -> Parameter:
@@ -35,12 +35,12 @@ class Linear(Module):
         return self._bias
 
     @property
-    def indim(self) -> int:
-        return self._indim
+    def inputdim(self) -> int:
+        return self._inputdim
 
     @property
-    def outdim(self) -> int:
-        return self._outdim
+    def outputdim(self) -> int:
+        return self._outputdim
 
     @property
     def dtype(self) -> Type[dtype]:
@@ -55,7 +55,7 @@ class Linear(Module):
         return mod
 
     def xrepr(self) -> str:
-        indim, outdim = self.indim, self.outdim
+        inputdim, outputdim = self.inputdim, self.outputdim
         bias = True if self.bias is not None else False
         dtype = self.dtype.name()
-        return f"{self.name()}({indim=} {outdim=} {bias=} {dtype=})"
+        return f"{self.name()}({inputdim=} {outputdim=} {bias=} {dtype=})"
