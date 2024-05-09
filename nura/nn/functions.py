@@ -8,7 +8,7 @@ from typing import Optional, Union
 np._set_promotion_state("weak")
 
 
-class _Sigmoid(Function):
+class Sigmoid(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor):
@@ -28,7 +28,7 @@ class _Sigmoid(Function):
         return arr * (1 - arr) * grad.data
 
 
-class _Tanh(Function):
+class Tanh(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor):
@@ -48,7 +48,7 @@ class _Tanh(Function):
         return (1 - np.square(arr)) * grad.data
 
 
-class _Softmax(Function):
+class Softmax(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, dim: int):
@@ -90,7 +90,7 @@ class _Softmax(Function):
         return jac.sum(axis=-1).reshape(outshape) * grad.data
 
 
-class _LogSoftmax(Function):
+class LogSoftmax(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, dim: int):
@@ -101,7 +101,7 @@ class _LogSoftmax(Function):
         return nll
 
 
-class _ReLU(Function):
+class ReLU(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor):
@@ -123,7 +123,7 @@ class _ReLU(Function):
         return mask * grad.data
 
 
-class _ReLU6(Function):
+class ReLU6(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor):
@@ -153,7 +153,7 @@ class _ReLU6(Function):
         return mask * grad.data
 
 
-class _LeakyReLU(Function):
+class LeakyReLU(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, alpha: float):
@@ -182,7 +182,7 @@ class _LeakyReLU(Function):
         return mask * grad.data
 
 
-class _ELU(Function):
+class ELU(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, alpha: float):
@@ -207,7 +207,7 @@ class _ELU(Function):
         return mask * grad.data
 
 
-class _CELU(Function):
+class CELU(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, alpha: float):
@@ -238,7 +238,7 @@ class _CELU(Function):
         return mask * grad.data
 
 
-class _GELU(Function):
+class GELU(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor):
@@ -279,7 +279,7 @@ class _GELU(Function):
         return dgelu * grad.data
 
 
-class _Embedding(Function):
+class Embedding(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, w: Tensor, padid: Optional[int]):
@@ -303,7 +303,7 @@ class _Embedding(Function):
         return arr
 
 
-class _CrossEntropy(Function):
+class CrossEntropy(Function):
 
     @staticmethod
     def forward(
@@ -347,7 +347,7 @@ class _CrossEntropy(Function):
             return a * grad.data
 
 
-class _BinaryCrossEntropy(Function):
+class BinaryCrossEntropy(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
@@ -374,7 +374,7 @@ class _BinaryCrossEntropy(Function):
             return arr * grad.data
 
 
-class _MSE(Function):
+class MSE(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, y: Tensor, reduction: Optional[str]):
@@ -398,7 +398,7 @@ class _MSE(Function):
             return (a.data - y.data) * grad.data
 
 
-class _Dropout(Function):
+class Dropout(Function):
 
     @staticmethod
     def forward(context: Context, x: Tensor, p: float):
@@ -417,7 +417,7 @@ class _Dropout(Function):
         return grad.data * mask * scale
 
 
-class _LayerNorm(Function):
+class LayerNorm(Function):
 
     @staticmethod
     def forward(
