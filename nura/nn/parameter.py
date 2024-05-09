@@ -22,7 +22,7 @@ class Parameter(Tensor):
         return parameter(super().to(dtype), self.usegrad, dtype)
 
     def __repr__(self) -> str:
-        return super().__repr__().replace("tensor", "param")
+        return super().__repr__().replace("tensor", "parameter")
 
 
 def parameter(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):

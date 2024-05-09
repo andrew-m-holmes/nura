@@ -108,11 +108,10 @@ def sgd(
 ) -> Tensor:
     if parameter.grad is None:
         raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with nograd():
-        grad = computedecay(parameter, parameter.grad, decay)
-        if nesterov:
-            grad += momentum * velocity
-        update = momentum * velocity + learnrate * grad
+    grad = computedecay(parameter, parameter.grad, decay)
+    if nesterov:
+        grad += momentum * velocity
+    update = momentum * velocity + learnrate * grad
     return update
 
 

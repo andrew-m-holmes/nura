@@ -57,7 +57,6 @@ class Tensor:
     def leaf(self) -> bool:
         return self._leaf
 
-
     @property
     def version(self) -> int:
         return self._version
@@ -72,8 +71,8 @@ class Tensor:
 
     @property
     def T(self) -> "Tensor":
-        revdims = tuple(range(self.ndim - 1, -1, -1))
-        return self.permute(revdims)
+        dim = tuple(range(self.ndim - 1, -1, -1))
+        return self.permute(dim)
 
     def item(self) -> Scalar:
         return nura.item(self)
@@ -91,6 +90,15 @@ class Tensor:
         cls = type(self)
         return cls(self.data, self.usegrad, None, self.gradfn, self.leaf)
 
+
+
+
+
+
+
+
+
+
     def zerograd(self) -> None:
         self._grad = nura.zeroslike(self)
 
@@ -107,12 +115,11 @@ class Tensor:
 
     def detach(self) -> None:
         self._usegrad = False
-        self._retain = False
+        self._gradfn = None
 
     def detached(self) -> "Tensor":
         cls = type(self)
         t = cls(self.data, False, None, None, True)
-        t.mutate(retain=False)
         return t
 
     def mutate(self, **attrs: Any) -> None:
@@ -279,13 +286,13 @@ class Tensor:
         return nura.less(self, other)
 
     def __le__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.lesseq(self, other)
+        return nura.lessequal(self, other)
 
     def __gt__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.greater(self, other)
 
     def __ge__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.greatereq(self, other)
+        return nura.greaterequal(self, other)
 
     def __ne__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.notequal(self, other)
@@ -340,8 +347,6 @@ class Tensor:
     def bool(self) -> "Tensor":
         return self.to(types.bool)
 
-    def __del__(self):
-        pass
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name not in (
@@ -350,8 +355,7 @@ class Tensor:
             "_grad",
             "_gradfn",
             "_leaf",
-            "_index",
-            "_version",
+            "_version"
         ):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
 
@@ -370,26 +374,31 @@ class Tensor:
     def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
         return nura.select(self, slice_)
 
-    def __setitem__(self, slc: Any, item: Any) -> None:
-        if isinstance(slc, tuple):
-            slc = tuple(i.data if isinstance(i, Tensor) else i for i in slc)
-        if isinstance(slc, Tensor):
-            slc = slc.data
+    def __setitem__(self, slice_: Any, item: Any) -> None:
+        if isinstance(slice_, tuple):
+            slice_ = tuple(i.data if isinstance(i, Tensor) else i for i in slice_)
+        if isinstance(slice_, Tensor):
+            slice_ = slice_.data
         if isinstance(item, Tensor):
             item = item.data
-        self.data[slc] = item
+        self.data[slice_] = item
 
     def __repr__(self) -> str:
         s = repr(self._data).replace("array(", "").replace(",", "").replace(")", "")
         if " dtype" in s:
             i = s.index(" dtype")
             s = s[:i]
-        reprs = ["Tensor(", s]
+        r = ["Tensor(", s]
         if self.gradfn is not None:
-            reprs.append(f" gradfn={self.gradfn.name()}")
-        reprs.append(f" dtype={self.dtype.name()})")
-        return "".join(reprs)
+            r.append(f" gradfn={self.gradfn.name()}")
+        r.append(f" dtype={self.dtype.name()})")
+        return "".join(r)
 
+class DualTensor(Tensor):
+
+    def __init__(self, data: ndarray, usegrad: bool, tangent: Optional[Tensor], grad: Optional[Tensor], gradfn: Optional[Node], leaf: bool) -> None:
+        super().__init__(data, usegrad, grad, gradfn, leaf)
+        self._tangent: Optional[Tensor] = tangent
 
 def tensor(
     data: Union[Tensor, Tensorlike],
