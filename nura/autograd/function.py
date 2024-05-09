@@ -13,7 +13,13 @@ class Context:
         self._context = OrderedDict((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
-        return tuple(self._context.keys()) if self._context is not None else ()
+        if self._context is None:
+            return ()
+        if not all(t.version == v for t, v in self._context.items()):
+            raise RuntimeError(
+                "Cannot retrieve tensors, one or more tensor's version(s) has changed between initial save and retrieval"
+            )
+        return tuple(self._context.keys())
 
     def usesgrad(self) -> bool:
         if self._context is None:
@@ -39,13 +45,13 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def backward(context: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
+    def backward(
+        context: Context, *args: Any, **kwargs: Any
+    ) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
-    def tangent(
-        context: Context, *grads: Tensor
-    ) -> Union[Tuple[ndarray, ...], ndarray]:
+    def tangent(context: Context, *args: Any, **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @classmethod
