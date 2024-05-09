@@ -21,7 +21,7 @@ class Module:
     def name(cls) -> str:
         return cls.__name__
 
-    def forward(self) -> Any:
+    def forward(self, *args: Any, **kwargs: Any) -> Any:
         raise NotImplemented
 
     def modules(self) -> Iterator["Module"]:
