@@ -80,7 +80,9 @@ class Tensor:
     def list(self) -> List[Any]:
         return self.data.tolist()
 
-    def backward(self, grad: Optional["Tensor"] = None, input: Optional["Tensor"] = None) -> None:
+    def backward(
+        self, grad: Optional["Tensor"] = None, input: Optional["Tensor"] = None
+    ) -> None:
         nura.backward(self, grad, input)
 
     def cleargrad(self) -> None:
@@ -90,21 +92,22 @@ class Tensor:
         cls = type(self)
         return cls(self.data, self.usegrad, None, self.gradfn, self.leaf)
 
-
-
-
-
-
-
-
-
-
     def zerograd(self) -> None:
         self._grad = nura.zeroslike(self)
 
     def zeroedgrad(self) -> "Tensor":
         cls = type(self)
         return cls(self.data, self.usegrad, nura.zeroslike(self), self.gradfn, True)
+
+    def retain(self) -> None:
+        if self.gradfn is None:
+            raise ValueError("Tensor has no gradient function to retain gradient")
+        self.gradfn._retain = True
+
+    def unretain(self) -> None:
+        if self.gradfn is None:
+            raise ValueError("Tensor has no gradient function to unretain gradient")
+        self.gradfn._retain = False
 
     def attach(self) -> None:
         self._usegrad = True
@@ -347,28 +350,15 @@ class Tensor:
     def bool(self) -> "Tensor":
         return self.to(types.bool)
 
-
     def __setattr__(self, name: str, value: Any) -> None:
-        if name not in (
-            "_data",
-            "_usegrad",
-            "_grad",
-            "_gradfn",
-            "_leaf",
-            "_version"
-        ):
+        if name not in ("_data", "_usegrad", "_grad", "_gradfn", "_leaf", "_version"):
             raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
-
         if name == "_usegrad" and value and not self.gradtensor:
             raise ValueError(
                 f"Only floating-point tensors can use gradient, received {dtype.name()}"
             )
-
-        # TODO, use the context and keep track of a version number
-        # if name == "_data" and self.__dict__.get("_graph", 0) and nura.reversemode():
-        #     raise ValueError(
-        #         "Cannot modify the data of a tensor on computational graph"
-        #     )
+        if name == "_data" and "_version" in self.__dict__ and self._usegrad:
+            self._version += 1
         self.__dict__[name] = value
 
     def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
@@ -394,11 +384,6 @@ class Tensor:
         r.append(f" dtype={self.dtype.name()})")
         return "".join(r)
 
-class DualTensor(Tensor):
-
-    def __init__(self, data: ndarray, usegrad: bool, tangent: Optional[Tensor], grad: Optional[Tensor], gradfn: Optional[Node], leaf: bool) -> None:
-        super().__init__(data, usegrad, grad, gradfn, leaf)
-        self._tangent: Optional[Tensor] = tangent
 
 def tensor(
     data: Union[Tensor, Tensorlike],
