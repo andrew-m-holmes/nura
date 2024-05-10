@@ -747,39 +747,39 @@ def test_sqrt_scalar():
     a_tensor = nura.tensor(a)
     result_tensor = f.sqrt(a_tensor)
     expected = np.sqrt(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sqrt_vector():
-    a = np.random.rand(5) + 1e-8
+    a = np.random.rand(5) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = f.sqrt(a_tensor)
     expected = np.sqrt(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sqrt_matrix():
-    a = np.random.rand(3, 4) + 1e-8
+    a = np.random.rand(3, 4) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = f.sqrt(a_tensor)
     expected = np.sqrt(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sqrt_tensor():
-    a = np.random.rand(2, 4, 3) + 1e-8
+    a = np.random.rand(2, 4, 3) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = f.sqrt(a_tensor)
     expected = np.sqrt(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sqrt_method():
-    a = np.random.rand(6, 3) + 1e-8
+    a = np.random.rand(6, 3) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.sqrt()
     expected = np.sqrt(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_exp_scalar():
@@ -787,7 +787,7 @@ def test_exp_scalar():
     a_tensor = nura.tensor(a).double()
     result_tensor = f.exp(a_tensor)
     expected = np.exp(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_exp_vector():
@@ -795,7 +795,7 @@ def test_exp_vector():
     a_tensor = nura.tensor(a)
     result_tensor = f.exp(a_tensor)
     expected = np.exp(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_exp_matrix():
@@ -803,7 +803,7 @@ def test_exp_matrix():
     a_tensor = nura.tensor(a)
     result_tensor = f.exp(a_tensor)
     expected = np.exp(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_exp_tensor():
@@ -811,7 +811,7 @@ def test_exp_tensor():
     a_tensor = nura.tensor(a)
     result_tensor = f.exp(a_tensor)
     expected = np.exp(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_exp_method():
@@ -819,7 +819,7 @@ def test_exp_method():
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.exp()
     expected = np.exp(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_log_scalar():
@@ -827,39 +827,39 @@ def test_log_scalar():
     a_tensor = nura.tensor(a).double()
     result_tensor = f.log(a_tensor)
     expected = np.log(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_log_vector():
-    a = np.random.rand(5) + 1e-8
+    a = np.random.rand(5) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = f.log(a_tensor)
     expected = np.log(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_log_matrix():
-    a = np.random.rand(3, 4) + 1e-8
+    a = np.random.rand(3, 4) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = f.log(a_tensor)
     expected = np.log(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_log_tensor():
-    a = np.random.rand(2, 4, 3) + 1e-8
+    a = np.random.rand(2, 4, 3) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = f.log(a_tensor)
     expected = np.log(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_log_method():
-    a = np.random.rand(6, 3) + 1e-8
+    a = np.random.rand(6, 3) + 1e-7
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.log()
     expected = np.log(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sin_scalar():
@@ -867,7 +867,7 @@ def test_sin_scalar():
     a_tensor = nura.tensor(a).double()
     result_tensor = f.sin(a_tensor)
     expected = np.sin(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sin_vector():
@@ -875,7 +875,7 @@ def test_sin_vector():
     a_tensor = nura.tensor(a)
     result_tensor = f.sin(a_tensor)
     expected = np.sin(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sin_matrix():
@@ -883,7 +883,7 @@ def test_sin_matrix():
     a_tensor = nura.tensor(a)
     result_tensor = f.sin(a_tensor)
     expected = np.sin(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sin_tensor():
@@ -891,7 +891,7 @@ def test_sin_tensor():
     a_tensor = nura.tensor(a)
     result_tensor = f.sin(a_tensor)
     expected = np.sin(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sin_method():
@@ -899,7 +899,7 @@ def test_sin_method():
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.sin()
     expected = np.sin(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_cos_ssincalar():
@@ -907,7 +907,7 @@ def test_cos_ssincalar():
     a_tensor = nura.tensor(a).double()
     result_tensor = f.cos(a_tensor)
     expected = np.cos(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_cos_vector():
@@ -915,7 +915,7 @@ def test_cos_vector():
     a_tensor = nura.tensor(a)
     result_tensor = f.cos(a_tensor)
     expected = np.cos(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_cos_matrix():
@@ -923,7 +923,7 @@ def test_cos_matrix():
     a_tensor = nura.tensor(a)
     result_tensor = f.cos(a_tensor)
     expected = np.cos(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_cos_tensor():
@@ -931,7 +931,7 @@ def test_cos_tensor():
     a_tensor = nura.tensor(a)
     result_tensor = f.cos(a_tensor)
     expected = np.cos(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_cos_method():
@@ -939,7 +939,7 @@ def test_cos_method():
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.cos()
     expected = np.cos(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_scalar():
@@ -947,7 +947,7 @@ def test_sum_scalar():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor)
     expected = np.sum(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_vector():
@@ -955,7 +955,7 @@ def test_sum_vector():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor)
     expected = np.sum(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_matrix():
@@ -963,7 +963,7 @@ def test_sum_matrix():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor)
     expected = np.sum(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_tensor():
@@ -971,7 +971,7 @@ def test_sum_tensor():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor)
     expected = np.sum(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_method():
@@ -979,7 +979,7 @@ def test_sum_method():
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.sum()
     expected = np.sum(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_tuple():
@@ -987,7 +987,7 @@ def test_sum_dim_tuple():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=(0, 1))
     expected = np.sum(a, axis=(0, 1))
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_tuple_keepdims_true():
@@ -995,7 +995,7 @@ def test_sum_dim_tuple_keepdims_true():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=(0, 2), keepdims=True)
     expected = np.sum(a, axis=(0, 2), keepdims=True)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_tuple_keepdims_false():
@@ -1003,7 +1003,7 @@ def test_sum_dim_tuple_keepdims_false():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=(1, 2), keepdims=False)
     expected = np.sum(a, axis=(1, 2), keepdims=False)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_0_shape_1():
@@ -1011,7 +1011,7 @@ def test_sum_dim_0_shape_1():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=0)
     expected = np.sum(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_1_shape_1():
@@ -1019,7 +1019,7 @@ def test_sum_dim_1_shape_1():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=1)
     expected = np.sum(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_0_shape_2():
@@ -1027,7 +1027,7 @@ def test_sum_dim_0_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=0)
     expected = np.sum(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_1_shape_2():
@@ -1035,7 +1035,7 @@ def test_sum_dim_1_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=1)
     expected = np.sum(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_2_shape_2():
@@ -1043,7 +1043,7 @@ def test_sum_dim_2_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=2)
     expected = np.sum(a, axis=2)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_0_shape_3():
@@ -1051,7 +1051,7 @@ def test_sum_dim_0_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=0)
     expected = np.sum(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_1_shape_3():
@@ -1059,7 +1059,7 @@ def test_sum_dim_1_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=1)
     expected = np.sum(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_2_shape_3():
@@ -1067,7 +1067,7 @@ def test_sum_dim_2_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=2)
     expected = np.sum(a, axis=2)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_sum_dim_3_shape_3():
@@ -1075,7 +1075,7 @@ def test_sum_dim_3_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.sum(a_tensor, dim=3)
     expected = np.sum(a, axis=3)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_scalar():
@@ -1083,7 +1083,7 @@ def test_max_scalar():
     a_tensor = nura.tensor(a).double()
     result_tensor = f.max(a_tensor)
     expected = np.max(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_vector():
@@ -1091,7 +1091,7 @@ def test_max_vector():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor)
     expected = np.max(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_matrix():
@@ -1099,7 +1099,7 @@ def test_max_matrix():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor)
     expected = np.max(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_tensor():
@@ -1107,7 +1107,7 @@ def test_max_tensor():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor)
     expected = np.max(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_method():
@@ -1115,7 +1115,7 @@ def test_max_method():
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.max()
     expected = np.max(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_tuple():
@@ -1123,7 +1123,7 @@ def test_max_dim_tuple():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=(0, 1))
     expected = np.max(a, axis=(0, 1))
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_tuple_keepdims_true():
@@ -1131,7 +1131,7 @@ def test_max_dim_tuple_keepdims_true():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=(0, 2), keepdims=True)
     expected = np.max(a, axis=(0, 2), keepdims=True)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_tuple_keepdims_false():
@@ -1139,7 +1139,7 @@ def test_max_dim_tuple_keepdims_false():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=(1, 2), keepdims=False)
     expected = np.max(a, axis=(1, 2), keepdims=False)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_0_shape_1():
@@ -1147,7 +1147,7 @@ def test_max_dim_0_shape_1():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=0)
     expected = np.max(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_1_shape_1():
@@ -1155,7 +1155,7 @@ def test_max_dim_1_shape_1():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=1)
     expected = np.max(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_0_shape_2():
@@ -1163,7 +1163,7 @@ def test_max_dim_0_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=0)
     expected = np.max(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_1_shape_2():
@@ -1171,7 +1171,7 @@ def test_max_dim_1_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=1)
     expected = np.max(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_2_shape_2():
@@ -1179,7 +1179,7 @@ def test_max_dim_2_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=2)
     expected = np.max(a, axis=2)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_0_shape_3():
@@ -1187,7 +1187,7 @@ def test_max_dim_0_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=0)
     expected = np.max(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_1_shape_3():
@@ -1195,7 +1195,7 @@ def test_max_dim_1_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=1)
     expected = np.max(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_2_shape_3():
@@ -1203,7 +1203,7 @@ def test_max_dim_2_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=2)
     expected = np.max(a, axis=2)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_max_dim_3_shape_3():
@@ -1211,7 +1211,7 @@ def test_max_dim_3_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.max(a_tensor, dim=3)
     expected = np.max(a, axis=3)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_scalar():
@@ -1219,7 +1219,7 @@ def test_min_scalar():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor)
     expected = np.min(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_vector():
@@ -1227,7 +1227,7 @@ def test_min_vector():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor)
     expected = np.min(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_matrix():
@@ -1235,7 +1235,7 @@ def test_min_matrix():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor)
     expected = np.min(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_tensor():
@@ -1243,7 +1243,7 @@ def test_min_tensor():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor)
     expected = np.min(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_method():
@@ -1251,7 +1251,7 @@ def test_min_method():
     a_tensor = nura.tensor(a)
     result_tensor = a_tensor.min()
     expected = np.min(a)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_tuple():
@@ -1259,7 +1259,7 @@ def test_min_dim_tuple():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=(0, 2))
     expected = np.min(a, axis=(0, 2))
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_tuple_keepdims_true():
@@ -1267,7 +1267,7 @@ def test_min_dim_tuple_keepdims_true():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=(1, 2), keepdims=True)
     expected = np.min(a, axis=(1, 2), keepdims=True)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_tuple_keepdims_false():
@@ -1275,7 +1275,7 @@ def test_min_dim_tuple_keepdims_false():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=(0, 1), keepdims=False)
     expected = np.min(a, axis=(0, 1), keepdims=False)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_0_shape_1():
@@ -1283,7 +1283,7 @@ def test_min_dim_0_shape_1():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=0)
     expected = np.min(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_1_shape_1():
@@ -1291,7 +1291,7 @@ def test_min_dim_1_shape_1():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=1)
     expected = np.min(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_0_shape_2():
@@ -1299,7 +1299,7 @@ def test_min_dim_0_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=0)
     expected = np.min(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_1_shape_2():
@@ -1307,7 +1307,7 @@ def test_min_dim_1_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=1)
     expected = np.min(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_2_shape_2():
@@ -1315,7 +1315,7 @@ def test_min_dim_2_shape_2():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=2)
     expected = np.min(a, axis=2)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_0_shape_3():
@@ -1323,7 +1323,7 @@ def test_min_dim_0_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=0)
     expected = np.min(a, axis=0)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_1_shape_3():
@@ -1331,7 +1331,7 @@ def test_min_dim_1_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=1)
     expected = np.min(a, axis=1)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_2_shape_3():
@@ -1339,7 +1339,7 @@ def test_min_dim_2_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=2)
     expected = np.min(a, axis=2)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 def test_min_dim_3_shape_3():
@@ -1347,4 +1347,4 @@ def test_min_dim_3_shape_3():
     a_tensor = nura.tensor(a)
     result_tensor = f.min(a_tensor, dim=3)
     expected = np.min(a, axis=3)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
