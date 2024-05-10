@@ -7,25 +7,25 @@ from typing import Tuple, Any, Optional, Union, OrderedDict
 class Context:
 
     def __init__(self) -> None:
-        self._context: Optional[OrderedDict[Tensor, int]] = None
+        self._context: Optional[Tuple[Tuple[Tensor, int], ...]] = None
 
     def save(self, *tensors: Tensor) -> None:
-        self._context = OrderedDict((t, t.version) for t in tensors)
+        self._context = tuple((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
         if self._context is None:
             return ()
-        if not all(t.version == v for t, v in self._context.items()):
+        if not all(t.version == v for t, v in self._context):
             raise RuntimeError(
                 "Cannot retrieve tensors, one or more tensor's version(s) has changed between initial save and retrieval"
             )
-        return tuple(self._context.keys())
+        return tuple(t for t, _ in self._context)
 
     def usesgrad(self) -> bool:
         if self._context is None:
             return False
-        return any(t.usegrad for t in self._context.keys()) and all(
-            t.gradtensor for t in self._context.keys()
+        return any(t.usegrad for t, _ in self._context) and all(
+            t.gradtensor for t, _ in self._context
         )
 
     def __getattr__(self, name: str) -> Any:
