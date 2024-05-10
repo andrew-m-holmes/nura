@@ -22,7 +22,9 @@ def emptylike(a: Tensor, dtype: Optional[Type[dtype]] = None) -> Tensor:
     return tensor(data, dtype=dtype)
 
 
-def zeros(*dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def zeros(
+    *dim: dimlike, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
@@ -30,7 +32,9 @@ def zeros(*dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
     return tensor(data, usegrad, dtype)
 
 
-def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def zeroslike(
+    a: Tensor, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
@@ -38,7 +42,9 @@ def zeroslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
     return tensor(data, usegrad, dtype)
 
 
-def ones(*dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def ones(
+    *dim: dimlike, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = types.float
     dim = todim(dim)
@@ -46,7 +52,9 @@ def ones(*dim: dimlike, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
     return tensor(data, usegrad, dtype)
 
 
-def oneslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def oneslike(
+    a: Tensor, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = types.float if dtype is types.bool else a.dtype
     data = a.data
@@ -56,7 +64,7 @@ def oneslike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> T
 
 def randn(
     *dim: dimlike,
-    usegrad=False,
+    usegrad: bool = False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
@@ -66,7 +74,9 @@ def randn(
     return tensor(data, usegrad, dtype)
 
 
-def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def randnlike(
+    a: Tensor, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = (
             types.float
@@ -79,7 +89,7 @@ def randnlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> 
 
 def rand(
     *dim: dimlike,
-    usegrad=False,
+    usegrad: bool = False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
@@ -89,7 +99,9 @@ def rand(
     return tensor(data, usegrad, dtype)
 
 
-def randlike(a: Tensor, usegrad=False, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def randlike(
+    a: Tensor, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
+) -> Tensor:
     if dtype is None:
         dtype = (
             types.float
@@ -132,21 +144,21 @@ def identity(n: int, dtype: Optional[Type[dtype]] = None) -> Tensor:
     return tensor(data, dtype=dtype)
 
 
-def tri(m: int, n: int, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def tri(m: int, n: int, k: int = 0, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = types.float
     data = np.tri(m, n, k)
     return tensor(data, dtype=dtype)
 
 
-def triu(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def triu(a: Tensor, k: int = 0, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = a.dtype
     data = np.triu(a.data, k)
     return tensor(data, dtype=dtype)
 
 
-def tril(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
+def tril(a: Tensor, k: int = 0, dtype: Optional[Type[dtype]] = None) -> Tensor:
     if dtype is None:
         dtype = a.dtype
     data = np.tril(a.data, k)
@@ -156,7 +168,7 @@ def tril(a: Tensor, k=0, dtype: Optional[Type[dtype]] = None) -> Tensor:
 def full(
     *dim: dimlike,
     num: float,
-    usegrad=False,
+    usegrad: bool = False,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
@@ -169,7 +181,7 @@ def full(
 def eye(
     n: int,
     m: Optional[int] = None,
-    k=0,
+    k: int = 0,
     dtype: Optional[Type[dtype]] = None,
 ) -> Tensor:
     if dtype is None:
