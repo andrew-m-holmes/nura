@@ -63,12 +63,3 @@ class MSE(Loss):
 
     def forward(self, a: Tensor, y: Tensor) -> Tensor:
         return f.mse(a, y)
-
-
-class RMSE(Loss):
-
-    def __init__(self, reduction: Optional[str] = "mean"):
-        super().__init__(reduction)
-
-    def forward(self, a: Tensor, y: Tensor) -> Tensor:
-        return f.rmse(a, y)

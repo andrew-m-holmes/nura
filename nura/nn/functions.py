@@ -319,13 +319,11 @@ class CrossEntropy(Function):
         mask = y.data != ignoreid
         classes = y.data[mask]
         nll = np.negative(log[mask, classes])
-
-        if reduction == "mean":
-            return nll.mean()
-        if reduction == "sum":
-            return nll.sum()
-        if reduction is None:
-            return nll
+        return (
+            nll.mean()
+            if reduction == "mean"
+            else nll.sum() if reduction == "sum" else nll
+        )
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
@@ -341,10 +339,9 @@ class CrossEntropy(Function):
         a[mask, classes] -= 1
         a[ignore] = 0
 
-        if reduction == "mean":
-            return (1 / labels.size) * a * grad.data
-        if reduction == "sum" or reduction is None:
-            return a * grad.data
+        return (
+            (1 / labels.size) * a * grad.data if reduction is "mean" else a * grad.data
+        )
 
 
 class BinaryCrossEntropy(Function):
@@ -354,24 +351,22 @@ class BinaryCrossEntropy(Function):
         context.save(a, y)
         nll = np.negative(y.data * np.log(a.data) + (1 - y.data) * np.log(1 - a.data))
         context.reduction = reduction
-
-        if reduction == "mean":
-            return nll.mean()
-        if reduction == "sum":
-            return nll.sum()
-        if reduction is None:
-            return nll
+        return (
+            nll.mean()
+            if reduction == "mean"
+            else nll.sum() if reduction == "sum" else nll
+        )
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, y = context.tensors()
         reduction = context.reduction
         arr = np.negative(y.data) * (1 / a.data) + (1 - y.data) * (1 / (1 - a.data))
-
-        if reduction == "mean":
-            return (1 / y.data.size) * arr * grad.data
-        if reduction == "sum" or reduction is None:
-            return arr * grad.data
+        return (
+            (1 / y.data.size) * arr * grad.data
+            if reduction == "mean"
+            else arr * grad.data
+        )
 
 
 class MSE(Function):
@@ -381,21 +376,21 @@ class MSE(Function):
         context.save(a, y)
         context.reduction = reduction
         mse = 0.5 * np.square(a.data - y.data)
-        if reduction == "mean":
-            return mse.mean()
-        if reduction == "sum":
-            return mse.sum()
-        if reduction is None:
-            return mse
+        return (
+            mse.mean()
+            if reduction == "mean"
+            else mse.sum() if reduction == "sum" else mse
+        )
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, y = context.tensors()
         reduction = context.reduction
-        if reduction == "mean":
-            return (1 / y.data.size) * (a.data - y.data) * grad.data
-        if reduction == "sum" or reduction is None:
-            return (a.data - y.data) * grad.data
+        return (
+            (1 / y.data.size) * (a.data - y.data) * grad.data
+            if reduction is "mean"
+            else (a.data - y.data) * grad.data
+        )
 
 
 class Dropout(Function):
