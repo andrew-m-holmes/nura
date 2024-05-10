@@ -7,6 +7,7 @@ def main():
     a = nura.tensor(3.0, usegrad=True)
     b = nura.tensor(4.0, usegrad=True)
     c = a + b
+
     print(c)
 
 
