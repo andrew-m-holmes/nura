@@ -1,5 +1,5 @@
 import nura
-import nura.functional as f
+import nura.nn.optimizer.functional as f
 from nura.tensors import Tensor
 from nura.nn.parameter import Parameter
 from typing import Iterator, Optional, Tuple
@@ -14,7 +14,7 @@ class Optimizer:
         decay: Optional[float] = None,
     ) -> None:
         self._stepnum = 0
-        self._parameters = list(parameters)
+        self._parameters = tuple(parameters)
         self._learnrate = learnrate
         self._decay = decay
 
@@ -50,12 +50,6 @@ class Optimizer:
         return f"{self.name()}({learnrate=:.2e} {decay=})"
 
 
-def computedecay(tensor: Tensor, grad: Tensor, decay: Optional[float]) -> Tensor:
-    if decay is not None:
-        return grad + tensor * decay
-    return grad
-
-
 class SGD(Optimizer):
 
     def __init__(
@@ -89,7 +83,15 @@ class SGD(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
             v = self._moments.get(p, nura.zeroslike(p))
-            g = sgd(p, v, self.learnrate, self.momentum, self.nesterov, self.decay)
+            g = f.sgd(
+                parameter=p,
+                velocity=v,
+                learnrate=self.learnrate,
+                momentum=self.momentum,
+                nesterov=self.nesterov,
+                decay=self.decay,
+                graph=False,
+            )
             self._moments[p] = g
             self.update(p, g)
 
@@ -97,23 +99,6 @@ class SGD(Optimizer):
         learnrate, momentum = self.learnrate, self.momentum
         nesterov, decay = self.nesterov, self.decay
         return f"{self.name()}({learnrate=:.2e} {momentum=} {nesterov=} {decay=})"
-
-
-def sgd(
-    parameter: Parameter,
-    velocity: Tensor,
-    learnrate: float,
-    momentum: float = 0.9,
-    nesterov: bool = False,
-    decay: Optional[float] = None,
-) -> Tensor:
-    if parameter.grad is None:
-        raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    grad = computedecay(parameter, parameter.grad, decay)
-    if nesterov:
-        grad += momentum * velocity
-    update = momentum * velocity + learnrate * grad
-    return update
 
 
 class RMSProp(Optimizer):
@@ -148,30 +133,21 @@ class RMSProp(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
             v = self._moments.get(p, nura.zeroslike(p))
-            g, v_ = rmsprop(p, v, self.learnrate, self.alpha, self.decay, self.eps)
+            g, v_ = f.rmsprop(
+                parameter=p,
+                velocity=v,
+                learnrate=self.learnrate,
+                alpha=self.alpha,
+                decay=self.decay,
+                eps=self.eps,
+                graph=False,
+            )
             self._moments[p] = v_
             self.update(p, g)
 
     def __repr__(self) -> str:
         learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
         return f"{self.name()}({learnrate=:.2e} {alpha=} {decay=} {eps=:.3e})"
-
-
-def rmsprop(
-    parameter: Parameter,
-    velocity: Tensor,
-    learnrate: float,
-    alpha: float = 0.9,
-    decay: Optional[float] = None,
-    eps: float = 1e-8,
-) -> Tuple[Tensor, Tensor]:
-    if parameter.grad is None:
-        raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with nura.nograd():
-        grad = computedecay(parameter, parameter.grad, decay)
-        nextvel = alpha * velocity + (1 - alpha) * f.square(grad)
-        update = learnrate / f.sqrt(nextvel + eps) * grad
-    return update, nextvel
 
 
 class Adam(Optimizer):
@@ -206,8 +182,15 @@ class Adam(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
             vs = self._moments.get(p, (nura.zeroslike(p), nura.zeroslike(p)))
-            g, vs = adam(
-                p, vs, self.learnrate, self.stepnum, self.betas, self.decay, self.eps
+            g, vs = f.adam(
+                parameter=p,
+                velocities=vs,
+                learnrate=self.learnrate,
+                timestep=self.stepnum,
+                betas=self.betas,
+                decay=self.decay,
+                eps=self.eps,
+                graph=False,
             )
             self._moments[p] = vs
             self.update(p, g)
@@ -215,24 +198,3 @@ class Adam(Optimizer):
     def __repr__(self) -> str:
         learnrate, betas, eps, decay = self.learnrate, self.betas, self.eps, self.decay
         return f"{self.name()}({learnrate=:.2e} {betas=} {decay=} {eps=})"
-
-
-def adam(
-    parameter: Parameter,
-    velocities: Tuple[Tensor, Tensor],
-    learnrate: float,
-    timestep: int,
-    betas: Tuple[float, float] = (0.9, 0.99),
-    decay: Optional[float] = None,
-    eps: float = 1e-8,
-) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
-    if parameter.grad is None:
-        raise ValueError("Cannot compute update gradient, parameter.grad is None")
-    with nura.nograd():
-        grad = computedecay(parameter, parameter.grad, decay)
-        mt = betas[0] * velocities[0] + (1 - betas[0]) * grad
-        vt = betas[1] * velocities[1] + (1 - betas[1]) * f.square(grad)
-        mthat = 1 / (1 - betas[0] ** timestep) * mt
-        vthat = 1 / (1 - betas[1] ** timestep) * vt
-        update = mthat / f.sqrt(vthat + eps) * learnrate
-    return update, (mt, vt)
