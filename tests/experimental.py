@@ -1,14 +1,18 @@
 import nura
 import nura.nn as nn
+import nura.autograd.functional as f
 
 
 def main():
 
-    a = nura.tensor(3.0, usegrad=True)
-    b = nura.tensor(4.0, usegrad=True)
-    c = a + b
+    x = nura.randn(5, 4)
+    w = nura.randn(6, 4, usegrad=True)
+    b = nura.randn(6, usegrad=True)
 
-    print(c)
+    def func(x, w, b):
+        return (x @ w.T + b).sum()
+
+    output, vjps = f.vjp((x, w, b), nura.rand(), func)
 
 
 if __name__ == "__main__":

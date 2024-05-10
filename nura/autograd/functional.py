@@ -81,33 +81,27 @@ def grad(
     if len(output) != len(set(output)):
         raise ValueError("Cannot run backward, received duplicate output tensors")
     if not all(t.gradfn is not None and t.gradtensor for t in output):
-        raise ValueError(
-            "Cannot run backward, all tensors must be on computational graph"
-        )
+        raise ValueError("Cannot run grad, all tensors must be on computational graph")
     if any(output[i].nelem > 1 and i >= len(grad) for i in range(len(output))):
         raise ValueError(
-            "Cannot run backward, gradient must be supplied for outputs that are not scalars"
+            "Cannot run grad, gradient must be supplied for outputs that are not scalars"
         )
     if len(grad) != len(set(grad)):
         raise ValueError("Cannot run backward, received duplicate gradient tensors")
     if len(grad) > len(output):
-        raise ValueError(
-            "Cannot run backward, received more gradients than output tensors"
-        )
+        raise ValueError("Cannot run grad, received more gradients than output tensors")
     if not all(grad[i].dtype is output[i].dtype for i in range(len(grad))):
         raise ValueError(
-            "Cannot run backward, received one or more gradients with different types than output tensors"
+            "Cannot run grad, received one or more gradients with different types than output tensors"
         )
     if not all(grad[i].dim == output[i].dim for i in range(len(grad))):
         raise ValueError(
-            "Cannot run backward, received one or more gradients with different dimensions than output tensors"
+            "Cannot run grad, received one or more gradients with different dimensions than output tensors"
         )
     if len(input) != len(set(input)):
         raise ValueError("Cannot run backward, received duplicate input tensors")
     if not all(i.gradtensor and i.usegrad and i.gradfn is not None for i in input):
-        raise ValueError(
-            "Cannot run backward, received inputs not on computational graph"
-        )
+        raise ValueError("Cannot run grad, received inputs not on computational graph")
     return _grad(input, output, grad)
 
 
@@ -135,7 +129,7 @@ def _grad(
                 gradmap[edge] += edgegrad
         if node not in retain:
             gradmap.pop(node)
-    return tuple(gradmap.values())
+    return tuple(gradmap[i.gradfn] for i in input if i.gradfn is not None)
 
 
 def getretain(node: Tuple[Node, ...], input: Tuple[Tensor, ...]) -> Set[Node]:
@@ -204,51 +198,42 @@ def accumulate(node: Node, grad: Tensor) -> None:
 def vjp(
     input: Union[Tuple[Tensor, ...], Tensor],
     vector: Tensor,
-    f: Callable[..., Tensor],
+    func: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
-
+    if not all(i.gradtensor for i in input):
+        raise ValueError(
+            "Cannot run vector-jacobian product, all input tensors must be differentiable"
+        )
+    if not vector.gradtensor:
+        raise ValueError(
+            "Cannot run vector-jacobian product, vector must be differentiable"
+        )
     input = tupify(input)
-    if err := _vjperr(input, vector):
-        raise err
     input = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in input)
     vector = vector.mutated(usegrad=False, grad=None)
-    output, grads = _vjp(input, vector, f, *args, **kwargs)
-    return output.mutated(usegrad=False, gradfn=None, leaf=True), grads
+    output, vjps = _vjp(input, vector, func, *args, **kwargs)
+    return output.mutated(usegrad=False, gradfn=None, leaf=True), vjps
 
 
 def _vjp(
     input: Tuple[Tensor, ...],
     vector: Tensor,
-    f: Callable[..., Tensor],
+    func: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
-    if err := _vjperr(input, vector):
-        raise err
-    with nura.autograd(enabled=True, reverse=True, forward=False):
-        output = f(*input, *args, **kwargs)
-    inputmap = _grad(input, output, vector)
-    return output, tuple(inputmap.values())
-
-
-def _vjperr(input: Tuple[Tensor, ...], vector: Tensor) -> Optional[ValueError]:
-    if not all(t.gradtensor for t in input):
-        return ValueError(
-            "One or more Tensors passed to argument 'input' cannot have their grads computed because they're not differentiable types"
-        )
-    if not vector.gradtensor:
-        return ValueError(
-            f"Expected Tensor passed to 'vector' to be a floating-point type, received {vector.dtype.name()}"
-        )
-    return None
+    with nura.usegrad():
+        output = func(*input, *args, **kwargs)
+    vjps = _grad(input, (output,), (vector,))
+    return output, vjps
 
 
 def jvp(
     input: Union[Tuple[Tensor, ...], Tensor],
     vector: Union[Tuple[Tensor, ...], Tensor],
-    f: Callable[..., Tensor],
+    func: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
@@ -265,7 +250,7 @@ def jvp(
 
 def _jvp(
     input: Tuple[Tensor, ...],
-    f: Callable[..., Tensor],
+    func: Callable[..., Tensor],
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
@@ -291,7 +276,7 @@ def _jvperr(
 
 def jacrev(
     input: Union[Tuple[Tensor, ...], Tensor],
-    f: Callable[..., Tensor],
+    func: Callable[..., Tensor],
     pos=0,
     *args,
     **kwargs,
@@ -317,7 +302,7 @@ def jacrev(
 
 def jacfwd(
     input: Union[Tuple[Tensor, ...], Tensor],
-    f: Callable[..., Tensor],
+    func: Callable[..., Tensor],
     pos=0,
     *args,
     **kwargs,
