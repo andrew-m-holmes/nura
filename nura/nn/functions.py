@@ -340,7 +340,7 @@ class CrossEntropy(Function):
         a[ignore] = 0
 
         return (
-            (1 / labels.size) * a * grad.data if reduction is "mean" else a * grad.data
+            (1 / labels.size) * a * grad.data if reduction == "mean" else a * grad.data
         )
 
 
@@ -388,7 +388,7 @@ class MSE(Function):
         reduction = context.reduction
         return (
             (1 / y.data.size) * (a.data - y.data) * grad.data
-            if reduction is "mean"
+            if reduction == "mean"
             else (a.data - y.data) * grad.data
         )
 
