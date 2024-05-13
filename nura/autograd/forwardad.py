@@ -16,7 +16,7 @@ def primal(
     tensor: Union[Tensor, Tensorlike], grad: Optional[Union[Tensor, Tensorlike]] = None
 ) -> Tensor:
     if not nura.Autograd.forwardmode():
-        raise RuntimeError("Cannot create dual tensor, forward mode AD is disabled")
+        raise RuntimeError("Cannot create primal, forward mode AD is disabled")
     if not isinstance(tensor, Tensor):
         tensor = nura.tensor(tensor)
     if grad is not None:
@@ -24,11 +24,11 @@ def primal(
             grad = nura.tensor(grad)
         if tensor.dtype is not grad.dtype:
             raise ValueError(
-                f"Cannot create dual tensor, type mismtach between tensor and grad ({tensor.dtype.name()} != {grad.dtype.name()})"
+                f"Cannot create primal, type mismtach between tensor and grad ({tensor.dtype.name()} != {grad.dtype.name()})"
             )
         if tensor.dim != grad.dim:
             raise ValueError(
-                f"Cannot create dual tensor, dimension mismtach between tensor and grad ({tensor.dim} != {grad.dim})"
+                f"Cannot create primal, dimension mismtach between tensor and grad ({tensor.dim} != {grad.dim})"
             )
     else:
         grad = nura.zeroslike(tensor)
