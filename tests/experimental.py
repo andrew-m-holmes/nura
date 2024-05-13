@@ -1,16 +1,14 @@
 import nura
 import nura.nn as nn
+import nura.autograd.functional as f
 
 
 def main():
 
-    a = nura.tensor(3.0, usegrad=True)
-    with nura.forwardmode():
-        b = nura.forwardad.primal(a, 10.0)
-        c = nura.forwardad.primal(20.0, 8.0)
-        print(b.grad)
-        d = b * c
-        print(d.grad)
+    a = nura.tensor(15).float().attached()
+    b = a * 3
+    f.backward(b, 1.0)
+    print(a.grad)
 
 
 if __name__ == "__main__":

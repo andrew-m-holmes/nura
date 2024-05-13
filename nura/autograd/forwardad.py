@@ -1,7 +1,7 @@
 import nura
 from nura.tensors import Tensor
 from nura.autograd.function import Function, Context
-from nura.types import Tensorlike
+from nura.types import Scalar
 from typing import Optional, Set, Union, Type
 
 primals: Set[Tensor] = set()
@@ -13,7 +13,7 @@ def cleanup():
 
 
 def primal(
-    tensor: Union[Tensor, Tensorlike], grad: Optional[Union[Tensor, Tensorlike]] = None
+    tensor: Union[Tensor, Scalar], grad: Optional[Union[Tensor, Scalar]] = None
 ) -> Tensor:
     if not nura.Autograd.forwardmode():
         raise RuntimeError("Cannot create primal, forward mode AD is disabled")

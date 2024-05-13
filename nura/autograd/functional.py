@@ -5,6 +5,8 @@ from nura.autograd.graph import Node, toposort
 from typing import Dict, Generator, Tuple, Optional, Callable, Union, Set
 from collections import deque
 
+from nura.types import Scalar
+
 
 def backward(
     output: Union[Tuple[Tensor, ...], Tensor],
@@ -158,12 +160,14 @@ def getgradmap(
     return gradmap
 
 
-def tupify(input: Optional[Union[Tuple[Tensor, ...], Tensor]]) -> Tuple[Tensor, ...]:
+def tupify(
+    input: Optional[Union[Tuple[Union[Tensor, Scalar], ...], Union[Tensor, Scalar]]]
+) -> Tuple[Tensor, ...]:
     if input is None:
         return ()
-    if isinstance(input, Tensor):
-        return (input,)
-    return input
+    if not isinstance(input, tuple):
+        return (input,) if isinstance(input, Tensor) else (nura.tensor(input),)
+    return tuple(i if isinstance(i, Tensor) else nura.tensor(i) for i in input)
 
 
 def mismatch(tensor: Tensor, grad: Tensor) -> bool:
