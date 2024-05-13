@@ -11,6 +11,7 @@ def backward(
     grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
     input: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> None:
+
     output, grad, input = tupify(output), tupify(grad), tupify(input)
     if len(output) != len(set(output)):
         raise ValueError("Cannot run backward, received duplicate output tensors")
@@ -48,6 +49,7 @@ def backward(
 def _backward(
     output: Tuple[Tensor, ...], grad: Tuple[Tensor, ...], input: Tuple[Tensor, ...]
 ) -> None:
+
     nodes = tuple(o.gradfn for o in output if o.gradfn is not None)
     topotuple = toposort(nodes)
     retain = getretain(topotuple, input)
@@ -77,6 +79,7 @@ def grad(
     output: Union[Tuple[Tensor, ...], Tensor],
     grad: Optional[Union[Tuple[Tensor, ...], Tensor]] = None,
 ) -> Tuple[Tensor, ...]:
+
     output, grad, input = tupify(output), tupify(grad), tupify(input)
     if len(output) != len(set(output)):
         raise ValueError("Cannot run backward, received duplicate output tensors")
@@ -202,6 +205,7 @@ def vjp(
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
+
     if not all(i.gradtensor for i in input):
         raise ValueError(
             "Cannot run vector-jacobian product, all input tensors must be differentiable"
@@ -210,6 +214,7 @@ def vjp(
         raise ValueError(
             "Cannot run vector-jacobian product, vector must be differentiable"
         )
+
     input = tupify(input)
     input = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in input)
     vector = vector.mutated(usegrad=False, grad=None)
@@ -262,21 +267,25 @@ def _jvp(
 ) -> Tuple[Tensor, Tensor]:
     with nura.forwardmode():
         output = func(*input, *args, **kwargs)
-    assert output.grad is not None
-    return output, output.grad
+        assert output.grad is not None
+        grad = output.grad
+    return output, grad
 
 
 def jacrev(
     input: Union[Tuple[Tensor, ...], Tensor],
     func: Callable[..., Tensor],
-    pos=0,
+    pos: int = 0,
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
 
     input = tupify(input)
-    if err := _jacerr(input):
-        raise err
+    if not all(t.gradtensor for t in input):
+        raise ValueError(
+            "Cannot compute Jacobian because one or more Tensors passed to 'input' are not a floating-point type"
+        )
+
     input = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in input)
     with nura.usegrad():
         output = func(*input, *args, **kwargs)
@@ -285,7 +294,7 @@ def jacrev(
     perts = getperts(output)
 
     for row, pert in zip(np.ndindex(output.dim), perts):
-        _, grads = _vjp(input, pert, f, *args, **kwargs)
+        _, grads = _vjp(input, pert, func, *args, **kwargs)
         jacrow = grads[pos]
         slc = row + (...,)
         jac[slc] = jacrow
@@ -301,10 +310,13 @@ def jacfwd(
 ) -> Tuple[Tensor, Tensor]:
 
     input = tupify(input)
-    if err := _jacerr(input):
-        raise err
-    with nura.autograd(enabled=False):
-        output = f(*input, *args, **kwargs)
+    if not all(t.gradtensor for t in input):
+        raise ValueError(
+            "Cannot compute Jacobian because one or more Tensors passed to 'input' are not a floating-point type"
+        )
+
+    with nura.forwardmode(), nura.usegrad():
+        output = func(*input, *args, **kwargs)
     tensor = input[pos]
     perts = getperts(tensor)
     jac = getjac(tensor, output)
@@ -312,20 +324,13 @@ def jacfwd(
         t.mutated(usegrad=True, grad=nura.zeroslike(t)) if i != pos else t
         for i, t in enumerate(input)
     ]
+
     for col, pert in zip(np.ndindex(tensor.dim), perts):
         colinput[pos] = colinput[pos].mutated(usegrad=True, grad=pert)
-        _, jaccol = _jvp(tuple(colinput), f, *args, **kwargs)
+        _, jaccol = _jvp(tuple(colinput), func, *args, **kwargs)
         slc = (...,) + col
         jac[slc] = jaccol
     return output, jac
-
-
-def _jacerr(input: Tuple[Tensor, ...]) -> Optional[ValueError]:
-    if not all(t.gradtensor for t in input):
-        return ValueError(
-            "Cannot compute Jacobian because one or more Tensors passed to 'input' are not a floating-point type"
-        )
-    return None
 
 
 def getperts(tensor: Tensor) -> Generator[Tensor, None, None]:

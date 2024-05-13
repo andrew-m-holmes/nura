@@ -9,30 +9,25 @@ class Autograd:
     _forwardmode = False
 
     @classmethod
-    def enabled(cls) -> bool:
-        return cls._usegrad
-
-    @classmethod
-    def disabled(cls) -> bool:
-        return not cls._usegrad
+    def reversemode(cls) -> bool:
+        return cls._usegrad and not cls._forwardmode
 
     @classmethod
     def forwardmode(cls) -> bool:
-        return cls._forwardmode
-
-    @classmethod
-    def reversead(cls) -> bool:
-        return not cls._forwardmode
+        return cls._forwardmode and not cls._usegrad
 
 
 @contextmanager
 def usegrad() -> Generator:
     usegrad = Autograd._usegrad
+    forwardmode = Autograd._forwardmode
     Autograd._usegrad = True
+    Autograd._forwardmode = False
     try:
         yield
     finally:
         Autograd._usegrad = usegrad
+        Autograd._forwardmode = forwardmode
 
 
 @contextmanager
@@ -48,19 +43,24 @@ def nograd() -> Generator:
 @contextmanager
 def setgrad(state: bool) -> Generator:
     usegrad = Autograd._usegrad
+    forwardmode = Autograd._forwardmode
     Autograd._usegrad = state
+    Autograd._forwardmode = not state
     try:
         yield
     finally:
         Autograd._usegrad = usegrad
+        Autograd._forwardmode = forwardmode
 
 
 @contextmanager
 def forwardmode() -> Generator:
+    usegrad = Autograd._usegrad
     forwardmode = Autograd._forwardmode
+    Autograd._usegrad = False
     Autograd._forwardmode = True
     try:
         yield
     finally:
+        Autograd._usegrad = usegrad
         Autograd._forwardmode = forwardmode
-        nura.forwardad.cleanup()
