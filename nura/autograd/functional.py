@@ -240,11 +240,17 @@ def jvp(
 
     input = tupify(input)
     vector = tupify(vector)
-    if err := _jvperr(input, vector):
-        raise err
+    if not all(t.gradtensor for t in input):
+        raise ValueError(
+            "One or more Tensors passed to argument 'input' cannot have their grads computed because they're not differentiable types"
+        )
+    if not all(v.gradtensor for v in vector):
+        raise ValueError(
+            "One or more Tensors passed to argument 'vector' cannot be used to compute jvp() because they're not a floating-point type"
+        )
     gen = (v for v in vector)
     input = tuple(t.mutated(usegrad=True, grad=next(gen)) for t in input)
-    output, grad = _jvp(input, f, *args, **kwargs)
+    output, grad = _jvp(input, func, *args, **kwargs)
     return output.mutated(usegrad=False, leaf=True), grad
 
 
@@ -260,20 +266,6 @@ def _jvp(
     return output, output.grad
 
 
-def _jvperr(
-    input: Tuple[Tensor, ...], vector: Tuple[Tensor, ...]
-) -> Optional[ValueError]:
-    if not all(t.gradtensor for t in input):
-        return ValueError(
-            "One or more Tensors passed to argument 'input' cannot have their grads computed because they're not differentiable types"
-        )
-    if not all(v.gradtensor for v in vector):
-        return ValueError(
-            "One or more Tensors passed to argument 'vector' cannot be used to compute jvp() because they're not a floating-point type"
-        )
-    return None
-
-
 def jacrev(
     input: Union[Tuple[Tensor, ...], Tensor],
     func: Callable[..., Tensor],
@@ -286,8 +278,8 @@ def jacrev(
     if err := _jacerr(input):
         raise err
     input = tuple(t.mutated(usegrad=True, grad=None, leaf=True) for t in input)
-    with nura.autograd(enabled=True, reverse=True, forward=False):
-        output = f(*input, *args, **kwargs)
+    with nura.usegrad():
+        output = func(*input, *args, **kwargs)
     tensor = input[pos]
     jac = getjac(tensor, output)
     perts = getperts(output)
