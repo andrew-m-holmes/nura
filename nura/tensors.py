@@ -1,7 +1,7 @@
 import nura
 import nura.types as types
 from nura.types import Tensorlike, Scalar, dtype, dim, dimlike
-from typing import Optional, Type, Any, Union, List, Self, TYPE_CHECKING
+from typing import Optional, Tuple, Type, Any, Union, List, Self, TYPE_CHECKING
 from numpy import ndarray
 
 if TYPE_CHECKING:
@@ -118,7 +118,9 @@ class Tensor:
 
     def detach(self) -> None:
         self._usegrad = False
-        self._gradfn = None
+        if self._gradfn is not None:
+            self._gradfn._retain = False
+            self._gradfn = None
 
     def detached(self) -> "Tensor":
         cls = type(self)
@@ -378,10 +380,15 @@ class Tensor:
         if " dtype" in s:
             i = s.index(" dtype")
             s = s[:i]
-        r = ["Tensor(", s]
-        if self.gradfn is not None:
-            r.append(f" gradfn={self.gradfn.name()}")
-        r.append(f" dtype={self.dtype.name()})")
+        if nura.Autograd.forwardmode():
+            r = ["Primal(", s]
+        else:
+            r = ["Tensor(", s]
+            if self.usegrad:
+                gradfn = self.gradfn.name() if self.gradfn is not None else None
+                r.append(f" {gradfn=}")
+        dtype = self.dtype.name()
+        r.append(f" {dtype=})")
         return "".join(r)
 
 

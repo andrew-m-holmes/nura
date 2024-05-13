@@ -59,8 +59,11 @@ class Function:
         context = Context()
         arr = cls.forward(context, *args, **kwargs)
         output = nura.tensor(arr)
-        if context.usesgrad() and nura.Autograd.enabled():
-            nura.graph.addtograph(output, cls, context)
+        if nura.Autograd.enabled() and context.usesgrad():
+            if nura.Autograd.forwardmode():
+                nura.forwardad.primalify(output, cls, context)
+            else:
+                nura.graph.addtograph(output, cls, context)
         return output
 
     @classmethod

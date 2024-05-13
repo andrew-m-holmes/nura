@@ -47,7 +47,7 @@ class Node:
         if self.function is None or self.context is None:
             raise RuntimeError("Cannot apply backward, function and/or context is None")
         arr = self.function.backward(self.context, grad)
-        return nura.atot(arr)
+        return nura.totensor(arr)
 
     def name(self) -> str:
         name = (

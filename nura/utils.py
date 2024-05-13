@@ -1,7 +1,7 @@
 import numpy as np
 import nura.types as types
 from numpy import ndarray
-from nura.types import Scalar, dimlike, dim, dtype
+from nura.types import Scalar, Tensorlike, dimlike, dim, dtype
 from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
 
@@ -346,9 +346,11 @@ def typename(a: Tensor) -> str:
     return f"{a.dtype.name().capitalize()}{a.__class__.__name__}"
 
 
-def atot(arr: Union[Tuple[ndarray, ...], ndarray]) -> Union[Tuple[Tensor, ...], Tensor]:
-    if isinstance(arr, tuple):
-        if not arr:
+def totensor(
+    obj: Union[Tuple[Tensorlike, ...], Tensorlike]
+) -> Union[Tuple[Tensor, ...], Tensor]:
+    if isinstance(obj, tuple):
+        if not obj:
             raise ValueError("Received no arrays")
-        return tuple(tensor(a) for a in arr)
-    return tensor(arr)
+        return tuple(tensor(o) for o in obj)
+    return tensor(obj)

@@ -254,8 +254,8 @@ def _jvp(
     *args,
     **kwargs,
 ) -> Tuple[Tensor, Tensor]:
-    with nura.autograd(enabled=True, reverse=False, forward=True):
-        output = f(*input, *args, **kwargs)
+    with nura.forwardmode():
+        output = func(*input, *args, **kwargs)
     assert output.grad is not None
     return output, output.grad
 
