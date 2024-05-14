@@ -1776,3 +1776,102 @@ def test_clone_method():
     assert result_tensor is not a_tensor
     assert result_tensor.data is not a_tensor.data
     np.testing.assert_allclose(result_tensor.data, a_tensor.data, rtol=1e-8, atol=1e-8)
+
+
+def test_select_scalar():
+    a = np.random.randn(3, 7)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.select(a_tensor, (0, 1))
+    expected = a[0, 1]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_vector():
+    a = np.random.randn(7)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.select(a_tensor, (3,))
+    expected = a[3]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_matrix():
+    a = np.random.randn(4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.select(a_tensor, (2, 3))
+    expected = a[2, 3]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_tensor():
+    a = np.random.randn(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.select(a_tensor, (1, 2, 3))
+    expected = a[1, 2, 3]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_slice():
+    a = np.random.randn(4, 5, 6)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.select(a_tensor, (slice(1, 3), slice(2, 5), slice(1, 4)))
+    expected = a[1:3, 2:5, 1:4]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_combined():
+    a = np.random.randn(5, 6, 7)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.select(a_tensor, (2, slice(1, 4), 3))
+    expected = a[2, 1:4, 3]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_operator():
+    a = np.random.randn(4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor[1, 3]
+    expected = a[1, 3]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+
+def test_select_slice_all_rows():
+    a = np.random.randn(4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor[:, 2]
+    expected = a[:, 2]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_ellipsis():
+    a = np.random.randn(4, 5, 6)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor[..., 3]
+    expected = a[..., 3]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_ellipsis_middle():
+    a = np.random.randn(4, 5, 6)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor[:, ..., 4]
+    expected = a[:, ..., 4]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_with_tensor_index():
+    a = np.random.randn(4, 5)
+    indices = np.array([0, 2])
+    a_tensor = nura.tensor(a)
+    indices_tensor = nura.tensor(indices)
+    result_tensor = a_tensor[indices_tensor]
+    expected = a[indices]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_with_tensor_index_2d():
+    a = np.random.randn(4, 5, 6)
+    indices = np.array([[0, 1], [2, 3]])
+    a_tensor = nura.tensor(a)
+    indices_tensor = nura.tensor(indices)
+    result_tensor = a_tensor[indices_tensor, 1, 2]
+    expected = a[indices, 1, 2]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_select_with_tensor_index_3d():
+    a = np.random.randn(4, 5, 6)
+    indices = np.array([[[0, 1], [2, 3]], [[1, 0], [3, 2]]])
+    a_tensor = nura.tensor(a)
+    indices_tensor = nura.tensor(indices)
+    result_tensor = a_tensor[indices_tensor, 2, 1]
+    expected = a[indices, 2, 1]
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)

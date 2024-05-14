@@ -208,7 +208,7 @@ def clone(a: Tensor) -> Tensor:
     return out
 
 
-def select(a: Tensor, slice_: Union[Tensorlike, Tensor, slice]) -> Tensor:
+def select(a: Tensor, slice_: Union[Iterable, Tensor, slice]) -> Tensor:
     if isinstance(slice_, Iterable):
         slice_ = tuple(i.data if isinstance(i, Tensor) else i for i in slice_)
     if isinstance(slice_, Tensor):
