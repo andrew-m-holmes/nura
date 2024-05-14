@@ -1348,3 +1348,431 @@ def test_min_dim_3_shape_3():
     result_tensor = f.min(a_tensor, dim=3)
     expected = np.min(a, axis=3)
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_transpose_matrix():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.transpose(a_tensor)
+    expected = np.swapaxes(a, -2, -1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_transpose_tensor():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.transpose(a_tensor)
+    expected = np.swapaxes(a, -2, -1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_transpose_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.transpose(a_tensor, 0, 2)
+    expected = np.swapaxes(a, 0, 2)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_transpose_method():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.transpose()
+    expected = np.swapaxes(a, -2, -1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_transpose_custom_dims():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.transpose(a_tensor, dim0=1, dim1=3)
+    expected = np.swapaxes(a, 1, 3)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_transpose_negative_dims():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.transpose(a_tensor, dim0=-3, dim1=-1)
+    expected = np.swapaxes(a, -3, -1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_transpose_same_dims():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.transpose(a_tensor, dim0=2, dim1=2)
+    expected = a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_permute_vector():
+    a = np.random.rand(4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.permute(a_tensor, dims=(0,))
+    expected = a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_permute_matrix():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.permute(a_tensor, dims=(1, 0))
+    expected = np.transpose(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_permute_tensor():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.permute(a_tensor, dims=(2, 0, 1))
+    expected = np.transpose(a, axes=(2, 0, 1))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_permute_higher_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.permute(a_tensor, dims=(3, 1, 2, 0))
+    expected = np.transpose(a, axes=(3, 1, 2, 0))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_permute_method():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.permute(dims=(2, 0, 1))
+    expected = np.transpose(a, axes=(2, 0, 1))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_permute_inverse_permutation():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    permuted_tensor = f.permute(a_tensor, dims=(3, 1, 2, 0))
+    result_tensor = f.permute(permuted_tensor, dims=(3, 1, 2, 0))
+    expected = a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_scalar():
+    a = np.array(3.14)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor)
+    expected = np.squeeze(a)
+    assert isinstance(result_tensor.data, np.ndarray)
+    assert result_tensor.data.shape == ()
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_vector():
+    a = np.random.rand(4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor)
+    expected = np.squeeze(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_matrix():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor)
+    expected = np.squeeze(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_tensor():
+    a = np.random.rand(1, 2, 3, 1, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor)
+    expected = np.squeeze(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_method():
+    a = np.random.rand(1, 3, 1, 4, 1)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.squeeze()
+    expected = np.squeeze(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_specific_dimension():
+    a = np.random.rand(1, 2, 3, 1, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor, dim=3)
+    expected = np.squeeze(a, axis=3)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_multiple_dimensions():
+    a = np.random.rand(1, 2, 1, 3, 1, 4, 1)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor, dim=(0, 2, 4, 6))
+    expected = np.squeeze(a, axis=(0, 2, 4, 6))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_squeeze_no_singleton_dimensions():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.squeeze(a_tensor)
+    expected = np.squeeze(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_scalar():
+    a = np.array(3.14)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=0)
+    expected = np.expand_dims(a, axis=0)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_vector():
+    a = np.random.rand(4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=1)
+    expected = np.expand_dims(a, axis=1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_matrix():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=0)
+    expected = np.expand_dims(a, axis=0)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_tensor():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=2)
+    expected = np.expand_dims(a, axis=2)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_high_rank_tensor():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=1)
+    expected = np.expand_dims(a, axis=1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_method():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.unsqueeze(dim=-1)
+    expected = np.expand_dims(a, axis=-1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_multiple_dimensions():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=(0, 1))
+    expected = np.expand_dims(np.expand_dims(a, axis=0), axis=1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_negative_dimension():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=-2)
+    expected = np.expand_dims(a, axis=-2)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_unsqueeze_in_place_dimension():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.unsqueeze(a_tensor, dim=1)
+    expected = np.expand_dims(a, axis=1)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_scalar():
+    a = np.array(3.14)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=())
+    expected = np.reshape(a, newshape=())
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_vector():
+    a = np.random.rand(4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=(2, 2))
+    expected = np.reshape(a, newshape=(2, 2))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_matrix():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=(6, 2))
+    expected = np.reshape(a, newshape=(6, 2))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_tensor():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=(4, 6))
+    expected = np.reshape(a, newshape=(4, 6))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_method():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.reshape(newdim=(12, 5))
+    expected = np.reshape(a, newshape=(12, 5))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_higher_dimensions():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=(6, 4, 5))
+    expected = np.reshape(a, newshape=(6, 4, 5))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_unknown_dimension():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=(4, -1))
+    expected = np.reshape(a, newshape=(4, -1))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_to_scalar():
+    a = np.random.rand(1, 1, 1)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=())
+    expected = np.reshape(a, newshape=())
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_reshape_to_vector():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.reshape(a_tensor, newdim=(12,))
+    expected = np.reshape(a, newshape=(12,))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_abs_scalar():
+    a = np.array(-3.14)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.abs(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_abs_vector():
+    a = np.random.randn(5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.abs(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_abs_matrix():
+    a = np.random.randn(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.abs(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_abs_tensor():
+    a = np.random.randn(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.abs(a_tensor)
+    expected = np.abs(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_abs_method():
+    a = np.random.randn(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.abs()
+    expected = np.abs(a)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_pos_scalar():
+    a = np.array(-3.14)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = +a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_pos_vector():
+    a = np.random.randn(5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = +a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_pos_matrix():
+    a = np.random.randn(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = +a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_pos_tensor():
+    a = np.random.randn(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.pos(a_tensor)
+    expected = +a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_pos_operator():
+    a = np.random.randn(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = +a_tensor
+    expected = +a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_neg_scalar():
+    a = np.array(2.5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = -a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_neg_vector():
+    a = np.random.randn(4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = -a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_neg_matrix():
+    a = np.random.randn(2, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = -a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_neg_tensor():
+    a = np.random.randn(3, 2, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = -a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_neg_operator():
+    a = np.random.randn(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = -a_tensor
+    expected = -a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_neg_scalar_zero():
+    a = np.array(0.0)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.neg(a_tensor)
+    expected = -a
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-8, atol=1e-8)
+
+def test_clone_scalar():
+    a = np.array(3.7)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.clone(a_tensor)
+    assert result_tensor is not a_tensor
+    assert result_tensor.data is not a_tensor.data
+    np.testing.assert_allclose(result_tensor.data, a_tensor.data, rtol=1e-8, atol=1e-8)
+
+def test_clone_vector():
+    a = np.random.randn(5)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.clone(a_tensor)
+    assert result_tensor is not a_tensor
+    assert result_tensor.data is not a_tensor.data
+    np.testing.assert_allclose(result_tensor.data, a_tensor.data, rtol=1e-8, atol=1e-8)
+
+def test_clone_matrix():
+    a = np.random.randn(3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.clone(a_tensor)
+    assert result_tensor is not a_tensor
+    assert result_tensor.data is not a_tensor.data
+    np.testing.assert_allclose(result_tensor.data, a_tensor.data, rtol=1e-8, atol=1e-8)
+
+def test_clone_tensor():
+    a = np.random.randn(2, 3, 4)
+    a_tensor = nura.tensor(a)
+    result_tensor = f.clone(a_tensor)
+    assert result_tensor is not a_tensor
+    assert result_tensor.data is not a_tensor.data
+    np.testing.assert_allclose(result_tensor.data, a_tensor.data, rtol=1e-8, atol=1e-8)
+
+def test_clone_method():
+    a = np.random.randn(2, 3, 4, 5)
+    a_tensor = nura.tensor(a)
+    result_tensor = a_tensor.clone()
+    assert result_tensor is not a_tensor
+    assert result_tensor.data is not a_tensor.data
+    np.testing.assert_allclose(result_tensor.data, a_tensor.data, rtol=1e-8, atol=1e-8)

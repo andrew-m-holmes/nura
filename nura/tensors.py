@@ -189,6 +189,9 @@ class Tensor:
     def permute(self, dims: types.dim) -> "Tensor":
         return nura.permute(self, dims)
 
+    def abs(self) -> "Tensor":
+        return nura.abs(self)
+
     def any(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.tensorany(self, dim, keepdims)
 

@@ -347,10 +347,10 @@ def typename(a: Tensor) -> str:
 
 
 def totensor(
-    obj: Union[Tuple[Tensorlike, ...], Tensorlike]
+    value: Union[Tuple[Tensorlike, ...], Tuple[Tensor, ...], Tensor, Tensorlike]
 ) -> Union[Tuple[Tensor, ...], Tensor]:
-    if isinstance(obj, tuple):
-        if not obj:
-            raise ValueError("Received no arrays")
-        return tuple(tensor(o) for o in obj)
-    return tensor(obj)
+    if isinstance(value, tuple):
+        if not value:
+            raise ValueError("Cannot create tensor(s), received empty tuple")
+        return tuple(v if isinstance(v, Tensor) else tensor(v) for v in value)
+    return value if isinstance(value, Tensor) else tensor(value)
