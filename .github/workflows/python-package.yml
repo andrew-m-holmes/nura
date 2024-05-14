@@ -34,4 +34,4 @@ jobs:
         continue-on-error: true
       - name: Test with pytest
         run: |
-          cd tests && pytest
+          cd test && pytest
