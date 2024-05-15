@@ -82,16 +82,20 @@ def imodulo(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     a._data %= b.data
 
 
-def dot(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
-    if not isinstance(b, Tensor):
-        b = tensor(b, dtype=a.dtype)
+def inner(a: Tensor, b: Tensor) -> Tensor:
+    raise NotImplementedError
+
+
+def dot(a: Tensor, b: Tensor) -> Tensor:
+    if a.ndim != 1 or b.ndim != 1:
+        raise ValueError("Cannot compute dot product, tensors must 1D")
     out = functions.Dot.apply(a, b)
     return out
 
 
 def matmul(a: Tensor, b: Tensor) -> Tensor:
-    if a.ndim < 2 or b.ndim < 2:
-        raise ValueError("Cannot compute matmul() with tensors that aren't at least 2D")
+    if a.ndim == 0 or b.ndim == 0:
+        raise ValueError("Cannot compute matrix multiplication, received scalar(s)")
     out = functions.Matmul.apply(a, b)
     return out
 

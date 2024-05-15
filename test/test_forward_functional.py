@@ -519,15 +519,6 @@ def test_modulo_different_types_reversed():
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
-def test_dot_scalar():
-    a, b = 2.0, 3.0
-    a_tensor = nura.tensor(a)
-    b_tensor = nura.tensor(b)
-    result_tensor = f.dot(a_tensor, b_tensor)
-    expected = np.dot(a, b)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
-
-
 def test_dot_vector():
     a = np.random.rand(4)
     b = np.random.rand(4)
@@ -537,43 +528,24 @@ def test_dot_vector():
     expected = np.dot(a, b)
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
-
-def test_dot_matrix_vector():
-    a = np.random.rand(3, 4)
+def test_dot_method():
+    a = np.random.rand(4)
     b = np.random.rand(4)
     a_tensor = nura.tensor(a)
     b_tensor = nura.tensor(b)
-    result_tensor = f.dot(a_tensor, b_tensor)
+    result_tensor = a_tensor.dot(b_tensor)
     expected = np.dot(a, b)
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
-
-
-def test_dot_matrix():
-    a = np.random.rand(2, 3)
-    b = np.random.rand(3, 4)
-    a_tensor = nura.tensor(a)
-    b_tensor = nura.tensor(b)
-    result_tensor = f.dot(a_tensor, b_tensor)
-    expected = np.dot(a, b)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
-
-
-def test_dot_tensor():
-    a = np.random.rand(2, 3, 4)
-    b = np.random.rand(2, 4, 5)
-    a_tensor = nura.tensor(a)
-    b_tensor = nura.tensor(b)
-    result_tensor = f.dot(a_tensor, b_tensor)
-    expected = np.dot(a, b)
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
-
 
 def test_dot_different_types():
     a = np.random.rand(3)
-    a_tensor = nura.tensor(a)
-    result_tensor = nura.dot(a_tensor, 2)
-    expected = np.dot(a, 2)
+    a_tensor = nura.tensor(a, dtype=nura.float)
+    b = np.random.rand(3)
+    b_tensor = nura.tensor(b, dtype=nura.double)
+    result_tensor = nura.dot(a_tensor, b_tensor)
+    expected = np.dot(a.astype(np.float32), b.astype(np.float64))
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
 
 
 def test_matmul_matrix():
@@ -605,6 +577,32 @@ def test_matmul_higher_rank_tensor():
     expected = np.matmul(a, b)
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
+def test_matmul_vector_tensor():
+    a = np.random.rand(4)
+    b = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    expected = np.matmul(a, b)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_matmul_tensor_vector():
+    a = np.random.rand(3, 4, 5)
+    b = np.random.rand(5)
+    a_tensor = nura.tensor(a)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    expected = np.matmul(a, b)
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
+
+def test_matmul_different_types():
+    a = np.random.rand(2, 4, 3)
+    a_tensor = nura.tensor(a, dtype=nura.float)
+    b = np.random.rand(2, 3, 5)
+    b_tensor = nura.tensor(b, dtype=nura.double)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    expected = np.matmul(a.astype(np.float32), b.astype(np.float64))
+    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 def test_matmul_operator():
     a = np.random.rand(3, 4)

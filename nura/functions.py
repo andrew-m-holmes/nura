@@ -116,15 +116,8 @@ class Dot(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        if a.ndim == 1 and b.ndim > 1:
-            arr0 = np.dot(b.data, grad.data)
-            arr1 = np.outer(a.data, grad.data)
-        elif b.ndim == 1 and a.ndim > 1:
-            arr0 = np.outer(grad.data, b.data)
-            arr1 = np.dot(a.data.T, grad.data)
-        else:
-            arr0 = np.dot(grad.data, b.data.T)
-            arr1 = np.dot(a.data.T, grad.data)
+        arr0 = b.data * grad.data
+        arr1 = a.data * grad.data
         return arr0, arr1
 
     @staticmethod
@@ -141,14 +134,15 @@ class Matmul(Function):
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         context.save(a, b)
-        arr = np.matmul(a.data, b.data)
-        return arr
+        return np.matmul(a.data, b.data)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr0 = np.matmul(grad.data, np.swapaxes(b.data, -2, -1))
-        arr1 = np.matmul(np.swapaxes(a.data, -2, -1), grad.data)
+        adata = np.expand_dims(a.data, 0) if a.ndim == 1 else a.data
+        bdata = np.expand_dims(b.data, 1) if b.ndim == 1 else b.data
+        arr0 = np.matmul(grad.data, bdata.swapaxes(-2, -1))
+        arr1 = np.matmul(adata.swapaxes(-2, -1), grad.data)
         return arr0, arr1
 
     @staticmethod
