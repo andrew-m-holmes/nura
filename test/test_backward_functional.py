@@ -651,3 +651,213 @@ def test_div_different_types_reversed_backward():
     np.testing.assert_allclose(
         a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
     )
+
+
+def test_dot_backward():
+    a = np.random.rand(4)
+    b = np.random.rand(4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.dot(a_tensor, b_tensor)
+    result_tensor.backward()
+
+    expected_grad_a = b
+    expected_grad_b = a
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_dot_method_backward():
+    a = np.random.rand(4)
+    b = np.random.rand(4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = a_tensor.dot(b_tensor)
+    result_tensor.backward()
+
+    expected_grad_a = b
+    expected_grad_b = a
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_matrix_matrix_backward():
+    a = np.random.rand(3, 4)
+    b = np.random.rand(4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.dot(np.ones((3, 5)), b.T)
+    expected_grad_b = np.dot(a.T, np.ones((3, 5)))
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_tensor_tensor_backward():
+    a = np.random.rand(2, 3, 4)
+    b = np.random.rand(2, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.matmul(np.ones((2, 3, 5)), b.swapaxes(-1, -2))
+    expected_grad_b = np.matmul(a.swapaxes(-1, -2), np.ones((2, 3, 5)))
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_higher_rank_tensor_tensor_backward():
+    a = np.random.rand(2, 3, 4, 6)
+    b = np.random.rand(2, 3, 6, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.matmul(np.ones((2, 3, 4, 5)), b.swapaxes(-1, -2))
+    expected_grad_b = np.matmul(a.swapaxes(-1, -2), np.ones((2, 3, 4, 5)))
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_tensor_vector_backward():
+    a = np.random.rand(2, 3, 4)
+    b = np.random.rand(4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.einsum("ij,k->ijk", np.ones((2, 3)), b)
+    expected_grad_b = np.einsum("ijk,ij->k", a, np.ones((2, 3)))
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_vector_tensor_backward():
+    a = np.random.rand(4)
+    b = np.random.rand(2, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.einsum("ijk,ik->j", b, np.ones((2, 5)))
+    expected_grad_b = np.einsum("ik,j->ijk", np.ones((2, 5)), a)
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_higher_rank_tensor_vector_backward():
+    a = np.random.rand(2, 3, 6, 4)
+    b = np.random.rand(4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.einsum("ijk,l->ijkl", np.ones((2, 3, 6)), b)
+    expected_grad_b = np.einsum("ijkl,ijk->l", a, np.ones((2, 3, 6)))
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_vector_higher_rank_tensor_backward():
+    a = np.random.rand(4)
+    b = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = f.matmul(a_tensor, b_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.einsum("ijkl,ijl->k", b, np.ones((2, 3, 5)))
+    expected_grad_b = np.einsum("ijl,k->ijkl", np.ones((2, 3, 5)), a)
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_matmul_operator_backward():
+    a = np.random.rand(3, 4)
+    b = np.random.rand(4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    b_tensor = nura.tensor(b, usegrad=True)
+    result_tensor = a_tensor @ b_tensor
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.dot(np.ones((3, 5)), b.T)
+    expected_grad_b = np.dot(a.T, np.ones((3, 5)))
+
+    assert a_tensor.grad is not None
+    assert b_tensor.grad is not None
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )

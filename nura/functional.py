@@ -91,7 +91,13 @@ def dot(a: Tensor, b: Tensor) -> Tensor:
 
 def matmul(a: Tensor, b: Tensor) -> Tensor:
     if a.ndim == 0 or b.ndim == 0:
-        raise ValueError("Cannot compute matrix multiplication, received scalar(s)")
+        raise ValueError(
+            "Cannot compute matrix multiplication, received one or more scalars, use mul()"
+        )
+    if a.ndim == 1 and b.ndim == 1:
+        raise ValueError(
+            "Cannot compute matrix multiplication, received vectors, use dot()"
+        )
     out = functions.Matmul.apply(a, b)
     return out
 

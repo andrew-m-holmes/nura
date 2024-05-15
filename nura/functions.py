@@ -139,10 +139,17 @@ class Matmul(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        adata = np.expand_dims(a.data, 0) if a.ndim == 1 else a.data
-        bdata = np.expand_dims(b.data, 1) if b.ndim == 1 else b.data
-        arr0 = np.matmul(grad.data, bdata.swapaxes(-2, -1))
-        arr1 = np.matmul(adata.swapaxes(-2, -1), grad.data)
+        if a.ndim == 1:
+            axis = tuple(range(b.ndim - 2)) + (b.ndim - 1,)
+            arr0 = (b.data * np.expand_dims(grad.data, -2)).sum(axis=axis)
+            arr1 = np.einsum("...jl,k->...jkl", grad.data, a.data)
+        elif b.ndim == 1:
+            axis = tuple(range(a.ndim - 1))
+            arr0 = np.einsum("...,l->...l", grad.data, b.data)
+            arr1 = (a.data * np.expand_dims(grad.data, -1)).sum(axis=axis)
+        else:
+            arr1 = np.matmul(a.data.swapaxes(-2, -1), grad.data)
+            arr0 = np.matmul(grad.data, b.data.swapaxes(-2, -1))
         return arr0, arr1
 
     @staticmethod
