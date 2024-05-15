@@ -144,7 +144,7 @@ class Tensor:
     def contiguous(self) -> "Tensor":
         return nura.tocontiguous(self)
 
-    def dot(self, other: Union["Tensor", Scalar]) -> "Tensor":
+    def dot(self, other: "Tensor") -> "Tensor":
         return nura.dot(self, other)
 
     def square(self) -> "Tensor":

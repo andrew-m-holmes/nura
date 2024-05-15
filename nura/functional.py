@@ -103,9 +103,13 @@ def matmul(a: Tensor, b: Tensor) -> Tensor:
 
 
 def imatmul(a: Tensor, b: Tensor) -> None:
-    if a.ndim < 2 or b.ndim < 2:
+    if a.ndim == 0 or b.ndim == 0:
         raise ValueError(
-            "Cannot compute inplace matmul() with tensors that aren't at least 2D"
+            "Cannot compute matrix multiplication, received one or more scalars, use mul()"
+        )
+    if a.ndim == 1 and b.ndim == 1:
+        raise ValueError(
+            "Cannot compute matrix multiplication, received vectors, use dot()"
         )
     a._data @= b.data
 

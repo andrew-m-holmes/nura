@@ -1615,7 +1615,7 @@ def test_sum_dim_tuple_keepdims_false_backward():
     a = np.random.rand(4, 2, 1)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=(1, 2), keepdims=False)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
@@ -1626,7 +1626,7 @@ def test_sum_dim_0_shape_1_backward():
     a = np.random.rand(5, 3)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=0)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
@@ -1637,7 +1637,7 @@ def test_sum_dim_1_shape_1_backward():
     a = np.random.rand(4, 6)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=1)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
@@ -1648,7 +1648,7 @@ def test_sum_dim_0_shape_2_backward():
     a = np.random.rand(3, 4, 5)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=0)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
@@ -1659,7 +1659,7 @@ def test_sum_dim_1_shape_2_backward():
     a = np.random.rand(2, 5, 3)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=1)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
@@ -1670,7 +1670,7 @@ def test_sum_dim_2_shape_2_backward():
     a = np.random.rand(4, 2, 6)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=2)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
@@ -1681,7 +1681,7 @@ def test_sum_dim_0_shape_3_backward():
     a = np.random.rand(2, 3, 4, 5)
     a_tensor = nura.tensor(a, usegrad=True)
     result_tensor = f.sum(a_tensor, dim=0)
-    result_tensor.backward(nura.oneslike(result_tensor))
+    result_tensor.backward()
 
     expected_grad_a = np.ones_like(a)
 
