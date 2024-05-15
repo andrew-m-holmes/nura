@@ -7,8 +7,8 @@ import numpy as np
 def main():
 
     a = np.random.rand(4, 3, 5)
-    b = np.random.rand(1, 5, 2)
-    c = np.dot(a, b)
+    b = np.random.rand(3, 2, 5)
+    c = np.inner(a, b)
     print(c.shape)
 
 

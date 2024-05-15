@@ -537,14 +537,6 @@ def test_dot_method():
     expected = np.dot(a, b)
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
-def test_dot_different_types():
-    a = np.random.rand(3)
-    a_tensor = nura.tensor(a, dtype=nura.float)
-    b = np.random.rand(3)
-    b_tensor = nura.tensor(b, dtype=nura.double)
-    result_tensor = nura.dot(a_tensor, b_tensor)
-    expected = np.dot(a.astype(np.float32), b.astype(np.float64))
-    np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
 
 

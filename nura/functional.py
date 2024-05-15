@@ -82,10 +82,6 @@ def imodulo(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     a._data %= b.data
 
 
-def inner(a: Tensor, b: Tensor) -> Tensor:
-    raise NotImplementedError
-
-
 def dot(a: Tensor, b: Tensor) -> Tensor:
     if a.ndim != 1 or b.ndim != 1:
         raise ValueError("Cannot compute dot product, tensors must 1D")
