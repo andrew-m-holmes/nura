@@ -5,8 +5,9 @@ import numpy as np
 
 
 def main():
-
-    a = nura.randn(5, 1).int()
+    a = nura.randn(3, 5, usegrad=True)
+    a.data = 2
+    print(a)
 
 
 if __name__ == "__main__":

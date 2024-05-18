@@ -29,19 +29,9 @@ class Tensor:
     def data(self) -> ndarray:
         return self._data
 
-    @data.setter
-    def data(self, data: ndarray) -> None:
-        if nura.Autograd._usegrad:
-            self._version += 1
-        self._data = data
-
     @property
     def dim(self) -> dim:
         return self._data.shape
-
-    @dim.setter
-    def dim(self, dim: dimlike) -> None:
-        self.data = self.data.reshape(dim)
 
     @property
     def ndim(self) -> int:
@@ -54,15 +44,6 @@ class Tensor:
     @property
     def usegrad(self) -> bool:
         return self._usegrad
-
-    @usegrad.setter
-    def usegrad(self, state: bool) -> None:
-        if state and not self.gradtensor:
-            raise ValueError(
-                f"Cannot use gradient for tensor of type {self.dtype.name()}, "
-                "only floating-point tensors can use gradient"
-            )
-        self._usegrad = state
 
     @property
     def grad(self) -> Optional["Tensor"]:
@@ -84,14 +65,6 @@ class Tensor:
     def dtype(self) -> Type[dtype]:
         return types.dtypeof(self.data)
 
-    @dtype.setter
-    def dtype(self, dtype: Type[types.dtype]) -> None:
-        if self.usegrad and dtype not in (types.half, types.float, types.double):
-            raise ValueError(
-                f"Cannot cast tensor to {dtype.name()}, tensor uses gradient but {dtype.name()} cannot"
-            )
-        self.data = self.data.astype(dtype._wrapping)
-
     @property
     def gradtensor(self) -> bool:
         return self.dtype in (types.half, types.float, types.double)
@@ -100,6 +73,41 @@ class Tensor:
     def T(self) -> "Tensor":
         dim = tuple(reversed(range(self.ndim)))
         return self.permute(dim)
+
+    @data.setter
+    def data(self, data: Union[Scalar, ndarray]) -> None:
+        dtype = types.dtypeof(data)
+        if self.usegrad and dtype not in (types.half, types.float, types.double):
+            raise ValueError(
+                "Cannot mutate data, tensor uses gradient but dtype "
+                f"wrapping input array ({dtype.name()}) cannot"
+            )
+        if nura.Autograd._usegrad:
+            self._version += 1
+        if not isinstance(data, ndarray):
+            data = dtype.numpy(data)
+        self._data = data
+
+    @usegrad.setter
+    def usegrad(self, state: bool) -> None:
+        if state and not self.gradtensor:
+            raise ValueError(
+                f"Cannot use gradient for tensor of type {self.dtype.name()}, "
+                "only floating-point tensors can use gradient"
+            )
+        self._usegrad = state
+
+    @dim.setter
+    def dim(self, dim: dimlike) -> None:
+        self.data = self.data.reshape(dim)
+
+    @dtype.setter
+    def dtype(self, dtype: Type[types.dtype]) -> None:
+        if self.usegrad and dtype not in (types.half, types.float, types.double):
+            raise ValueError(
+                f"Cannot cast tensor to {dtype.name()}, tensor uses gradient but {dtype.name()} cannot"
+            )
+        self.data = self.data.astype(dtype._wrapping)
 
     def item(self) -> Scalar:
         return nura.item(self)
