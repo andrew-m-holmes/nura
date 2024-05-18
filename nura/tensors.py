@@ -29,9 +29,18 @@ class Tensor:
     def data(self) -> ndarray:
         return self._data
 
+    @data.setter
+    def data(self, value: ndarray) -> None:
+        self._data = value
+        self._version += 1
+
     @property
     def dim(self) -> dim:
         return self._data.shape
+
+    @dim.setter
+    def dim(self, dim: dimlike) -> None:
+        self.data = self.data.reshape(dim)
 
     @property
     def ndim(self) -> int:
@@ -44,6 +53,10 @@ class Tensor:
     @property
     def usegrad(self) -> bool:
         return self._usegrad
+
+    @usegrad.setter
+    def usegrad(self, state: bool) -> None:
+        self._usegrad = False
 
     @property
     def grad(self) -> Optional["Tensor"]:
@@ -65,13 +78,17 @@ class Tensor:
     def dtype(self) -> Type[dtype]:
         return types.dtypeof(self.data)
 
+    @dtype.setter
+    def dtype(self, dtype: Type[types.dtype]) -> None:
+        self.data = self.data.astype(dtype._wrapping)
+
     @property
     def gradtensor(self) -> bool:
         return self.dtype in (types.half, types.float, types.double)
 
     @property
     def T(self) -> "Tensor":
-        dim = tuple(range(self.ndim - 1, -1, -1))
+        dim = tuple(reversed(range(self.ndim)))
         return self.permute(dim)
 
     def item(self) -> Scalar:
@@ -88,44 +105,26 @@ class Tensor:
     def cleargrad(self) -> None:
         self._grad = None
 
-    def clearedgrad(self) -> "Tensor":
-        cls = type(self)
-        return cls(self.data, self.usegrad, None, self.gradfn, self.leaf)
-
     def zerograd(self) -> None:
         self._grad = nura.zeroslike(self)
-
-    def zeroedgrad(self) -> "Tensor":
-        cls = type(self)
-        return cls(self.data, self.usegrad, nura.zeroslike(self), self.gradfn, True)
 
     def retain(self) -> None:
         if self.gradfn is None:
             raise ValueError("Tensor has no gradient function to retain gradient")
-        self.gradfn._retain = True
+        self.gradfn.retain()
 
     def unretain(self) -> None:
         if self.gradfn is None:
             raise ValueError("Tensor has no gradient function to unretain gradient")
-        self.gradfn._retain = False
+        self.gradfn.unretain()
 
-    def attach(self) -> None:
-        self._usegrad = True
-
-    def attached(self) -> "Tensor":
+    def attach(self) -> "Tensor":
         cls = type(self)
-        return cls(self.data, True, self.grad, self.gradfn, self.leaf)
+        return cls(self.data, True, None, None, True)
 
-    def detach(self) -> None:
-        self._usegrad = False
-        if self._gradfn is not None:
-            self._gradfn._retain = False
-            self._gradfn = None
-
-    def detached(self) -> "Tensor":
+    def detach(self) -> "Tensor":
         cls = type(self)
-        t = cls(self.data, False, None, None, True)
-        return t
+        return cls(self.data, False, None, None, True)
 
     def mutate(self, **attrs: Any) -> None:
         for k, v in attrs.items():
@@ -356,15 +355,30 @@ class Tensor:
         return self.to(types.bool)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name not in ("_data", "_usegrad", "_grad", "_gradfn", "_leaf", "_version"):
-            raise AttributeError(f"{name} cannot be assigned to {nura.typename(self)}")
-        if name == "_usegrad" and value and not self.gradtensor:
-            raise ValueError(
-                f"Only floating-point tensors can use gradient, received {dtype.name()}"
+        if name not in set(
+            (
+                "data",
+                "dim",
+                "dtype",
+                "_data",
+                "_usegrad",
+                "_grad",
+                "_gradfn",
+                "_leaf",
+                "_version",
             )
-        if name == "_data" and "_version" in self.__dict__ and self._usegrad:
-            self._version += 1
-        self.__dict__[name] = value
+        ):
+            raise AttributeError(
+                f"Cannot assign {type(value)} to {name} of {nura.typename(self)}"
+            )
+        if name == "data":
+            self.__class__.data.__set__(self, value)
+        elif name == "dim":
+            self.__class__.dim.__set__(self, value)
+        elif name == "dtype":
+            self.__class__.dtype.__set__(self, value)
+        else:
+            self.__dict__[name] = value
 
     def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
         return nura.select(self, slice_)

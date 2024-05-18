@@ -13,13 +13,13 @@ class Node:
         function: Optional[Type[Function]] = None,
         context: Optional[Context] = None,
         edges: Optional[Tuple[Optional["Node"], ...]] = None,
-        retain: bool = False,
+        accumulate: bool = False,
     ) -> None:
         self._output = output
         self._function = function
         self._context = context
         self._edges = edges
-        self._retain = retain
+        self._accumulate = accumulate
 
     @property
     def output(self) -> Tensor:
@@ -40,8 +40,14 @@ class Node:
         return self._edges
 
     @property
-    def retain(self) -> bool:
-        return self._retain
+    def accumulate(self) -> bool:
+        return self._accumulate and self.output.usegrad
+
+    def retain(self) -> None:
+        self._accumulate = True
+
+    def unretain(self) -> None:
+        self._accumulate = False
 
     def apply(self, grad: Tensor) -> Union[Tuple[Tensor, ...], Tensor]:
         if self.function is None or self.context is None:
@@ -63,7 +69,7 @@ class Node:
 
 def addtograph(output: Tensor, function: Type[Function], context: Context) -> None:
     edges = linkedges(context)
-    node = Node(output, function, context, edges, retain=False)
+    node = Node(output, function, context, edges, accumulate=False)
     output.mutate(usegrad=True, gradfn=node, leaf=False)
 
 
@@ -71,7 +77,7 @@ def linkedges(context: Context) -> Tuple[Optional[Node], ...]:
     edges = []
     for t in context.tensors():
         if t.usegrad and t.leaf and t.gradfn is None:
-            node = Node(t, retain=True)
+            node = Node(t, accumulate=True)
             t.mutate(gradfn=node)
         edges.append(t.gradfn)
     return tuple(edges)

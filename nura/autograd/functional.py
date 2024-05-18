@@ -138,7 +138,7 @@ def _grad(
 def _getretain(node: Tuple[Node, ...], input: Tuple[Tensor, ...]) -> Set[Node]:
     retain = set()
     for n in node:
-        if n.retain:
+        if n.accumulate:
             retain.add(n)
     for i in input:
         if i.gradfn is not None:
