@@ -32,7 +32,8 @@ class Tensor:
     @data.setter
     def data(self, value: ndarray) -> None:
         self._data = value
-        self._version += 1
+        if nura.Autograd._usegrad:
+            self._version += 1
 
     @property
     def dim(self) -> dim:
@@ -56,7 +57,7 @@ class Tensor:
 
     @usegrad.setter
     def usegrad(self, state: bool) -> None:
-        self._usegrad = False
+        self._usegrad = state
 
     @property
     def grad(self) -> Optional["Tensor"]:
@@ -358,6 +359,7 @@ class Tensor:
         if name not in set(
             (
                 "data",
+                "usegrad",
                 "dim",
                 "dtype",
                 "_data",
@@ -373,6 +375,8 @@ class Tensor:
             )
         if name == "data":
             self.__class__.data.__set__(self, value)
+        elif name == "usegrad":
+            self.__class__.usegrad.__set__(self, value)
         elif name == "dim":
             self.__class__.dim.__set__(self, value)
         elif name == "dtype":

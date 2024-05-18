@@ -1720,3 +1720,407 @@ def test_sum_dim_3_shape_3_backward():
 
     assert a_tensor.grad is not None
     np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_scalar_backward():
+    a = 5.0
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor)
+    result_tensor.backward()
+
+    expected_grad_a = np.ones_like(a)
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_vector_backward():
+    a = np.array([1.0, 2.0, 3.0, 4.0])
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.max()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_matrix_backward():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.max()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_tensor_backward():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.max()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_method_backward():
+    a = np.random.rand(5, 2)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = a_tensor.max()
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.max()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_tuple_backward():
+    a = np.random.rand(2, 4, 7)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=(0, 1))
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=(0, 1), keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_tuple_keepdims_true_backward():
+    a = np.random.rand(1, 3, 2)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=(0, 2), keepdims=True)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=(0, 2), keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_0_shape_1_backward():
+    a = np.random.rand(5, 3)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=0)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=0, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_1_shape_1_backward():
+    a = np.random.rand(4, 6)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=1, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_0_shape_2_backward():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=0)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=0, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_1_shape_2_backward():
+    a = np.random.rand(2, 5, 3)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=1, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_2_shape_2_backward():
+    a = np.random.rand(4, 2, 6)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=2)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=2, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_0_shape_3_backward():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=0)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=0, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_1_shape_3_backward():
+    a = np.random.rand(3, 4, 2, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=1, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_2_shape_3_backward():
+    a = np.random.rand(4, 3, 5, 2)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=2)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=2, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_max_dim_3_shape_3_backward():
+    a = np.random.rand(2, 4, 3, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.max(a_tensor, dim=3)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    max_vals = a.max(axis=3, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == max_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_scalar_backward():
+    a = 5.0
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor)
+    result_tensor.backward()
+
+    expected_grad_a = np.ones_like(a)
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_vector_backward():
+    a = np.array([3.0, 2.0, 1.0, 4.0])
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.min()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_matrix_backward():
+    a = np.random.rand(3, 4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.min()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_tensor_backward():
+    a = np.random.rand(2, 3, 4)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.min()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_method_backward():
+    a = np.random.rand(5, 2)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = a_tensor.min()
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == a.min()] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_tuple_backward():
+    a = np.random.rand(2, 4, 7)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=(0, 1))
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=(0, 1), keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_tuple_keepdims_true_backward():
+    a = np.random.rand(1, 3, 2)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=(0, 2), keepdims=True)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=(0, 2), keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_0_shape_1_backward():
+    a = np.random.rand(5, 3)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=0)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=0, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_1_shape_1_backward():
+    a = np.random.rand(4, 6)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=1, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_0_shape_2_backward():
+    a = np.random.rand(3, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=0)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=0, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_1_shape_2_backward():
+    a = np.random.rand(2, 5, 3)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=1, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_2_shape_2_backward():
+    a = np.random.rand(4, 2, 6)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=2)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=2, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_0_shape_3_backward():
+    a = np.random.rand(2, 3, 4, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=0)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=0, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_1_shape_3_backward():
+    a = np.random.rand(3, 4, 2, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=1, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_2_shape_3_backward():
+    a = np.random.rand(4, 3, 5, 2)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=2)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=2, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+
+def test_min_dim_3_shape_3_backward():
+    a = np.random.rand(2, 4, 3, 5)
+    a_tensor = nura.tensor(a, usegrad=True)
+    result_tensor = f.min(a_tensor, dim=3)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    min_vals = a.min(axis=3, keepdims=True)
+    expected_grad_a = np.zeros_like(a)
+    expected_grad_a[a == min_vals] = 1
+
+    assert a_tensor.grad is not None
+    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
