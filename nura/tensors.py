@@ -86,6 +86,10 @@ class Tensor:
 
     @dtype.setter
     def dtype(self, dtype: Type[types.dtype]) -> None:
+        if self.usegrad and dtype not in (types.half, types.float, types.double):
+            raise ValueError(
+                f"Cannot cast tensor to {dtype.name()}, tensor uses gradient but {dtype.name()} cannot"
+            )
         self.data = self.data.astype(dtype._wrapping)
 
     @property
