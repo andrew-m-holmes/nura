@@ -57,6 +57,11 @@ class Tensor:
 
     @usegrad.setter
     def usegrad(self, state: bool) -> None:
+        if state and not self.gradtensor:
+            raise ValueError(
+                f"Cannot use gradient for tensor of type {self.dtype.name()}, "
+                "only floating-point tensors can use gradient"
+            )
         self._usegrad = state
 
     @property
