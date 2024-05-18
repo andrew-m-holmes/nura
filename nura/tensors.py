@@ -1,7 +1,7 @@
 import nura
 import nura.types as types
 from nura.types import Tensorlike, Scalar, dtype, dim, dimlike
-from typing import Optional, Tuple, Type, Any, Union, List, Self, TYPE_CHECKING
+from typing import Optional, Iterable, Type, Any, Union, List, Self, TYPE_CHECKING
 from numpy import ndarray
 
 if TYPE_CHECKING:
@@ -30,10 +30,10 @@ class Tensor:
         return self._data
 
     @data.setter
-    def data(self, value: ndarray) -> None:
-        self._data = value
+    def data(self, data: ndarray) -> None:
         if nura.Autograd._usegrad:
             self._version += 1
+        self._data = data
 
     @property
     def dim(self) -> dim:
@@ -371,7 +371,7 @@ class Tensor:
             )
         ):
             raise AttributeError(
-                f"Cannot assign {type(value)} to {name} of {nura.typename(self)}"
+                f"Cannot assign value of type {type(value)} to {name} of {nura.typename(self)}"
             )
         if name == "data":
             self.__class__.data.__set__(self, value)
@@ -384,7 +384,12 @@ class Tensor:
         else:
             self.__dict__[name] = value
 
-    def __getitem__(self, slice_: Union[Tensorlike, "Tensor", slice]) -> "Tensor":
+    def __getitem__(
+        self,
+        slice_: Union[
+            Iterable[Union["Tensor", Tensorlike, slice]], Tensorlike, "Tensor", slice
+        ],
+    ) -> "Tensor":
         return nura.select(self, slice_)
 
     def __setitem__(self, slice_: Any, item: Any) -> None:

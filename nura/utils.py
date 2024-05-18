@@ -321,7 +321,7 @@ def to(a: Tensor, dtype: Type[dtype]) -> Tensor:
 def tocontiguous(a: Tensor) -> Tensor:
     c = a.clone()
     data = np.ascontiguousarray(c.data)
-    return c.mutated(data=data)
+    return c._mutated(data=data)
 
 
 def todim(dim: Tuple[Any, ...]) -> dim:

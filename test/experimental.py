@@ -7,9 +7,6 @@ import numpy as np
 def main():
 
     a = nura.randn(5, 1).int()
-    a.dtype = nura.double
-    print(a.version)
-    print(a)
 
 
 if __name__ == "__main__":

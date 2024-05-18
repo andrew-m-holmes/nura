@@ -32,7 +32,7 @@ def primal(
             )
     else:
         grad = nura.zeroslike(tensor)
-    p = tensor.mutated(grad=grad)
+    p = tensor._mutated(grad=grad)
     primals.add(p)
     return p
 

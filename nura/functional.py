@@ -14,7 +14,7 @@ def add(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def iadd(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data += b.data
+    a.data += b.data
 
 
 def sub(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -27,7 +27,7 @@ def sub(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def isub(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data -= b.data
+    a.data -= b.data
 
 
 def mul(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -40,7 +40,7 @@ def mul(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def imul(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data *= b.data
+    a.data *= b.data
 
 
 def div(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -53,7 +53,7 @@ def div(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def idiv(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data /= b.data
+    a.data /= b.data
 
 
 def floordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -66,7 +66,7 @@ def floordiv(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def ifloordiv(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data //= b.data
+    a.data //= b.data
 
 
 def modulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -79,7 +79,7 @@ def modulo(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def imodulo(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data %= b.data
+    a.data %= b.data
 
 
 def dot(a: Tensor, b: Tensor) -> Tensor:
@@ -111,7 +111,7 @@ def imatmul(a: Tensor, b: Tensor) -> None:
         raise ValueError(
             "Cannot compute matrix multiplication, received vectors, use dot()"
         )
-    a._data @= b.data
+    a.data @= b.data
 
 
 def pow(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
@@ -124,7 +124,7 @@ def pow(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
 def ipow(a: Tensor, b: Union[Tensor, Scalar]) -> None:
     if not isinstance(b, Tensor):
         b = tensor(b, dtype=a.dtype)
-    a._data **= b.data
+    a.data **= b.data
 
 
 def square(a: Tensor) -> Tensor:
