@@ -187,6 +187,8 @@ def permute(a: Tensor, dims: dim) -> Tensor:
 
 
 def squeeze(a: Tensor, dim: Optional[dimlike] = None) -> Tensor:
+    if dim is None:
+        dim = tuple(i for i, d in enumerate(a.dim) if d == 1)
     out = functions.Squeeze.apply(a, dim=dim)
     return out
 
