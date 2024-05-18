@@ -467,18 +467,21 @@ class Permute(Function):
     def forward(context: Context, a: Tensor, dims: dim):
         context.save(a)
         context.dims = dims
+        context.ndim = a.ndim
         arr = a.data.transpose(dims)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        dims = np.argsort(context.dims)
+        normed = tuple(i + context.ndim if i < 0 else i for i in (context.dims))
+        dims = np.argsort(normed)
         arr = grad.data.transpose(dims)
         return arr
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        dims = np.argsort(context.dims)
+        normed = tuple(i + context.ndim if i < 0 else i for i in (context.dims))
+        dims = np.argsort(normed)
         arr = grad.data.transpose(dims)
         return arr
 
