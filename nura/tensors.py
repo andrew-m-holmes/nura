@@ -82,7 +82,7 @@ class Tensor:
                 "Cannot mutate data, tensor uses gradient but dtype "
                 f"wrapping input array ({dtype.name()}) cannot"
             )
-        if nura.Autograd._usegrad:
+        if nura.Autograd.reversemode():
             self._version += 1
         if not isinstance(data, ndarray):
             data = dtype.numpy(data)
