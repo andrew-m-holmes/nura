@@ -83,3 +83,26 @@ def adam(
         vthat = 1 / (1 - betas[1] ** timestep) * vt
         update = mthat / nura.sqrt(vthat + eps) * learnrate
         return update, (mt, vt)
+
+
+def adagrad(
+    parameter: Parameter,
+    squaregrads: Tensor,
+    learnrate: float,
+    decay: Optional[float] = None,
+    eps: float = 1e-8,
+    graph: bool = False,
+) -> Tuple[Tensor, Tensor]:
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+
+    with nura.setgrad(graph):
+        grad = (
+            computedecay(parameter, parameter.grad, decay)
+            if decay is not None
+            else parameter.grad
+        )
+
+        squaregrad = nura.square(grad)
+        update = learnrate / nura.sqrt(squaregrad + eps) * grad
+        return update, squaregrads + squaregrad

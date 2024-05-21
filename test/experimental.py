@@ -6,7 +6,8 @@ import numpy as np
 
 def main():
     a = nura.randn(3, 5, usegrad=True)
-    a.data = 2
+    print(a)
+    a.data -= 2
     print(a)
 
 
