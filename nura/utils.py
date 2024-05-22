@@ -237,7 +237,7 @@ def less(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     return tensor(np.less(a.data, b))
 
 
-def lessequal(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+def lesseq(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.less_equal(a.data, b.data))
     return tensor(np.less_equal(a.data, b))
@@ -249,13 +249,13 @@ def greater(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     return tensor(np.greater(a.data, b))
 
 
-def greaterequal(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+def greatereq(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.greater_equal(a.data, b.data))
     return tensor(np.greater_equal(a.data, b))
 
 
-def notequal(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
+def noteq(a: Tensor, b: Union[Tensor, Scalar]) -> Tensor:
     if isinstance(b, Tensor):
         return tensor(np.not_equal(a.data, b.data))
     return tensor(np.not_equal(a.data, b))

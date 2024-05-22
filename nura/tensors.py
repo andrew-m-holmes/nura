@@ -311,16 +311,16 @@ class Tensor:
         return nura.less(self, other)
 
     def __le__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.lessequal(self, other)
+        return nura.lesseq(self, other)
 
     def __gt__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.greater(self, other)
 
     def __ge__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.greaterequal(self, other)
+        return nura.greatereq(self, other)
 
     def __ne__(self, other: Union["Tensor", Scalar]) -> "Tensor":
-        return nura.notequal(self, other)
+        return nura.noteq(self, other)
 
     def __hash__(self) -> int:
         return nura.hashtensor(self)
