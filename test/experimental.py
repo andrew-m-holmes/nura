@@ -1,6 +1,7 @@
 import nura
 import nura.nn as nn
 import nura.nn.functional as f
+import nura.nn.optimizer.optimizer
 import numpy as np
 
 
