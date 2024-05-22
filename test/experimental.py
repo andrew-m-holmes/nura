@@ -3,8 +3,6 @@ import nura.nn as nn
 import nura.nn.functional as f
 import numpy as np
 
-print(f)
-
 
 class Model(nn.Module):
 
@@ -33,6 +31,7 @@ def main():
     loss.backward()
 
     optimizer.step()
+    print(optimizer)
 
 
 if __name__ == "__main__":

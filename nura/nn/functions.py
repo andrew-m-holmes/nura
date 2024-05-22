@@ -446,7 +446,6 @@ class LayerNorm(Function):
         istd = context.istd
         norm = context.norm
         correction = context.correction
-
         n = (
             x.data.shape[dim]
             if isinstance(dim, int)

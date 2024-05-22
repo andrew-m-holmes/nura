@@ -1,7 +1,8 @@
 import nura
 import nura.nn.optimizers.functional as f
 from nura.nn.optimizers.optimizer import Optimizer
-from nura.nn import Tensor, Parameter
+from nura.nn.parameter import Parameter
+from nura.tensors import Tensor
 from typing import Optional, Iterator, Tuple
 
 
