@@ -104,5 +104,6 @@ def adagrad(
         )
 
         squaregrad = nura.square(grad)
-        update = learnrate / nura.sqrt(squaregrad + eps) * grad
-        return update, squaregrads + squaregrad
+        squaregrads = squaregrads + squaregrad
+        update = learnrate / nura.sqrt(squaregrads + eps) * grad
+        return update, squaregrads
