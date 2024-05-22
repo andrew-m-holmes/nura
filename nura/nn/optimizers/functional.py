@@ -107,3 +107,15 @@ def adagrad(
         squaregrads = squaregrads + squaregrad
         update = learnrate / nura.sqrt(squaregrads + eps) * grad
         return update, squaregrads
+
+
+def adadelta(
+    parameter: Parameter,
+    delta: Tensor,
+    square: Tensor,
+    learnrate: float,
+    decay: Optional[float] = None,
+    eps: float = 1e-8,
+    graph: bool = False,
+) -> Tuple[Tensor, Tensor, Tensor]:
+    raise NotImplementedError
