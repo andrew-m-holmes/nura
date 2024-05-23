@@ -123,7 +123,6 @@ def layernorm(
     gamma: Tensor,
     beta: Tensor,
     dim: dimlike = -1,
-    correction: int = 1,
     eps: float = 1e-5,
 ) -> Tensor:
-    return functions.LayerNorm.apply(x, gamma, beta, dim, correction, eps)
+    return functions.LayerNorm.apply(x, gamma, beta, dim, eps)

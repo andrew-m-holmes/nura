@@ -71,7 +71,9 @@ class Softmax(Function):
             p = p.reshape(-1, p.shape[dim])
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
+
         jac = diagonal - offdiagonal
+        # TODO fix (should be matrix vector product)
         return jac.sum(axis=-1).reshape(outshape) * grad.data
 
     @staticmethod
@@ -421,12 +423,11 @@ class LayerNorm(Function):
         gamma: Tensor,
         beta: Tensor,
         dim: Optional[dimlike],
-        correction: Union[bool, int],
         eps: float,
     ):
         context.save(x, gamma, beta)
         mu = x.data.mean(axis=dim, keepdims=True)
-        var = x.data.var(axis=dim, keepdims=True, ddof=correction)
+        var = x.data.var(axis=dim, keepdims=True, ddof=0)
         istd = 1 / np.sqrt(var + eps)
         norm = (x.data - mu) * istd
 
@@ -434,7 +435,6 @@ class LayerNorm(Function):
         context.mu = mu
         context.istd = istd
         context.norm = norm
-        context.correction = correction
         context.eps = eps
         return gamma.data * norm + beta.data
 
@@ -445,7 +445,6 @@ class LayerNorm(Function):
         mu = context.mu
         istd = context.istd
         norm = context.norm
-        correction = context.correction
         n = (
             x.data.shape[dim]
             if isinstance(dim, int)
@@ -456,18 +455,5 @@ class LayerNorm(Function):
         dbeta = grad.data.copy()
         dnorm = grad.data * gamma.data
 
-        xdiffmu = x.data - mu
-        dvar = np.sum(
-            dnorm * xdiffmu * -0.5 * np.power(istd, 1.5),
-            axis=dim,
-            keepdims=True,
-        )
-
-        scale = 2 / (n - correction)
-        dmu = np.sum(np.negative(dnorm) * istd, axis=dim, keepdims=True)
-        dmu += np.negative(scale) * dvar * np.sum(xdiffmu, axis=dim, keepdims=True)
-
-        dx = dnorm * istd
-        dx += scale * dvar * xdiffmu
-        dx += (1 / n) * dmu
-        return dx, dgamma, dbeta
+        diff = x - mu
+        dvar = np.sum(-0.5 * dnorm * diff * np.power(istd, 3), axis=dim, keepdims=True)
