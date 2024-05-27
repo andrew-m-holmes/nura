@@ -54,9 +54,7 @@ class LayerNorm(Module):
         return self._beta
 
     def forward(self, x: Tensor) -> Tensor:
-        return f.layernorm(
-            x, self.gamma, self.beta, self._dim, self.correction, self.eps
-        )
+        return f.layernorm(x, self.gamma, self.beta, self._dim, self.eps)
 
     def xrepr(self) -> str:
         normdim, correction = self.normdim, self.correction

@@ -435,7 +435,6 @@ class LayerNorm(Function):
         context.mu = mu
         context.istd = istd
         context.norm = norm
-        context.eps = eps
         return gamma.data * norm + beta.data
 
     @staticmethod
@@ -455,5 +454,15 @@ class LayerNorm(Function):
         dbeta = grad.data.copy()
         dnorm = grad.data * gamma.data
 
-        diff = x - mu
+        diff = x.data - mu
         dvar = np.sum(-0.5 * dnorm * diff * np.power(istd, 3), axis=dim, keepdims=True)
+        dmu0 = np.sum(-1 * dnorm * istd, axis=dim, keepdims=True)
+        dmu1 = (-2 / n) * dvar * np.sum(diff, axis=dim, keepdims=True)
+        dmu = dmu0 + dmu1
+
+        dx0 = dnorm * istd
+        dx1 = (2 / n) * dvar * diff
+        dx2 = (1 / n) * dmu
+        dx = dx0 + dx1 + dx2
+
+        return dx, dgamma, dbeta
