@@ -23,7 +23,7 @@ def main():
     lossfn = nn.CrossEntropy()
     optimizer = nn.AdaGrad(model.parameters(), learnrate=1.0)
 
-    inputs = nura.randn(2, 128)
+    inputs = nura.randn(2, 128) * 0.1
     labels = nura.randint(0, 10, 2)
 
     outputs = model(inputs)
