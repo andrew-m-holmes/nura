@@ -64,32 +64,40 @@ class Softmax(Function):
         p = context.p
         dim = context.dim
         outshape = p.shape
+
         if p.ndim == 1:
             diagonal = np.diagflat(p)
             offdiagonal = np.outer(p, p)
+            gdata = grad.data
         else:
             p = p.reshape(-1, p.shape[dim])
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
+            gdata = grad.data.reshape(-1, p.shape[dim], 1)
 
         jac = diagonal - offdiagonal
-        # TODO fix (should be matrix vector product)
-        return jac.sum(axis=-1).reshape(outshape) * grad.data
+        gout = np.matmul(jac, gdata)
+        return gout.reshape(outshape) if p.ndim > 1 else gout
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
         p = context.p
         dim = context.dim
         outshape = p.shape
+
         if p.ndim == 1:
             diagonal = np.diagflat(p)
             offdiagonal = np.outer(p, p)
+            gdata = grad.data
         else:
             p = p.reshape(-1, p.shape[dim])
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
+            gdata = grad.data.reshape(-1, p.shape[dim], 1)
+
         jac = diagonal - offdiagonal
-        return jac.sum(axis=-1).reshape(outshape) * grad.data
+        gout = np.matmul(jac, gdata)
+        return gout.reshape(outshape) if p.ndim > 1 else gout
 
 
 class LogSoftmax(Function):
@@ -101,6 +109,11 @@ class LogSoftmax(Function):
         logsum = np.log(np.exp(x.data - xmax).sum(axis=dim, keepdims=True))
         nll = np.negative(x.data - xmax - logsum)
         return nll
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        # TODO impl backward
+        raise NotImplementedError
 
 
 class ReLU(Function):
