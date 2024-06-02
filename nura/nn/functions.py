@@ -69,6 +69,7 @@ class Softmax(Function):
             diagonal = np.diagflat(p)
             offdiagonal = np.outer(p, p)
             gdata = grad.data
+            jac = diagonal - offdiagonal
         else:
             p = p.reshape(-1, p.shape[dim])
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))

@@ -6,7 +6,7 @@ import numpy as np
 
 def main():
 
-    x = nura.randint(0, 100, 7).float().attach()
+    x = nura.randint(0, 100, (1, 7)).float().attach()
     y = f.softmax(x, dim=-1)
     loss = y.sum()
     loss.backward()
