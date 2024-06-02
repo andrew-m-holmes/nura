@@ -11,14 +11,19 @@ class AdaDelta(Optimizer):
     def __init__(
         self,
         parameters: Iterator[Parameter],
-        learnrate: float,
+        gamma: float = 0.9,
         decay: Optional[float] = None,
         eps: float = 1e-8,
     ) -> None:
-        super().__init__(parameters, learnrate, decay)
+        super().__init__(parameters, 0.0, decay)
+        self._gamma = gamma
+        self._eps = eps
         self._deltas = {}
         self._squares = {}
-        self._eps = eps
+
+    @property
+    def gamma(self) -> float:
+        return self._gamma
 
     @property
     def eps(self) -> float:
@@ -36,5 +41,21 @@ class AdaDelta(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
 
+            d = self._deltas.get(p, nura.sqrt(nura.zeroslike(p) + self.eps))
             s = self._squares.get(p, nura.zeroslike(p))
-            d = self._deltas.get(p, nura.zeroslike(p))
+            u, d_, s_ = f.adadelta(
+                parameter=p,
+                delta=d,
+                square=s,
+                decay=self.decay,
+                eps=self.eps,
+                graph=False,
+            )
+
+            self._deltas[p] = d_
+            self._squares[p] = s_
+            self.update(p, u)
+
+    def __repr__(self) -> str:
+        gamma, eps, decay = self.gamma, self.eps, self.decay
+        return f"{self.name()}({gamma=:.3e} {decay=} {eps=})"

@@ -113,9 +113,24 @@ def adadelta(
     parameter: Parameter,
     delta: Tensor,
     square: Tensor,
-    learnrate: float,
+    gamma: float = 0.9,
     decay: Optional[float] = None,
     eps: float = 1e-8,
     graph: bool = False,
 ) -> Tuple[Tensor, Tensor, Tensor]:
-    raise NotImplementedError
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+
+    with nura.setgrad(graph):
+        grad = (
+            computedecay(parameter, parameter.grad, decay)
+            if decay is not None
+            else parameter.grad
+        )
+
+    emasquare = gamma * square + (1 - gamma) * grad.square()
+    nextsquare = nura.sqrt(emasquare + eps)
+    emadelta = gamma * delta + (1 - gamma) * delta.square()
+    nextdelta = nura.sqrt(emadelta + eps)
+    update = (delta / nextsquare) * grad  # 'delta' intentional
+    return update, nextdelta, nextsquare
