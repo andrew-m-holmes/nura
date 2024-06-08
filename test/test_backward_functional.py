@@ -871,12 +871,15 @@ def test_pow_scalar_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_a = (func(a + h, b) - func(a - h, b)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_vector_backward():
     a = np.random.rand(3)
@@ -888,12 +891,15 @@ def test_pow_vector_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_a = (func(a + h, b) - func(a - h, b)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_matrix_backward():
     a = np.random.rand(4, 3)
@@ -905,12 +911,15 @@ def test_pow_matrix_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_a = (func(a + h, b) - func(a - h, b)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -922,12 +931,15 @@ def test_pow_tensor_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_a = (func(a + h, b) - func(a - h, b)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_broadcast_backward():
     a = np.random.rand(5, 3, 2)
@@ -939,12 +951,15 @@ def test_pow_broadcast_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_a = (func(a + h, b) - func(a - h, b)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_different_types_backward():
     a = np.random.rand(4)
@@ -954,12 +969,14 @@ def test_pow_different_types_backward():
     h = 1e-7
 
     def func(x):
-        return x ** 3
+        return x**3
 
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_pow_scalar_b_backward():
@@ -971,12 +988,15 @@ def test_pow_scalar_b_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_b = (func(a, b + h) - func(a, b - h)) / (2 * h)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_vector_b_backward():
     a = np.abs(np.random.rand(3))
@@ -988,12 +1008,15 @@ def test_pow_vector_b_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_b = (func(a, b + h) - func(a, b - h)) / (2 * h)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_matrix_b_backward():
     a = np.abs(np.random.rand(4, 3))
@@ -1005,12 +1028,15 @@ def test_pow_matrix_b_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_b = (func(a, b + h) - func(a, b - h)) / (2 * h)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_tensor_b_backward():
     a = np.abs(np.random.rand(2, 5, 3))
@@ -1022,12 +1048,15 @@ def test_pow_tensor_b_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_b = (func(a, b + h) - func(a, b - h)) / (2 * h)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_broadcast_b_backward():
     a = np.abs(np.random.rand(5, 3, 2))
@@ -1039,45 +1068,56 @@ def test_pow_broadcast_b_backward():
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
-    expected_grad_b = np.sum((func(a, b + h) - func(a, b - h)) / (2 * h), axis=(0, 2)).reshape(b.shape)
+    expected_grad_b = np.sum(
+        (func(a, b + h) - func(a, b - h)) / (2 * h), axis=(0, 2)
+    ).reshape(b.shape)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_different_types_b_backward():
     a = 3
     b = np.random.rand(4)
     b_tensor = nura.tensor(b, usegrad=True)
-    result_tensor = a ** b_tensor
+    result_tensor = a**b_tensor
     result_tensor.backward(nura.oneslike(result_tensor))
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_b = (func(a, b + h) - func(a, b - h)) / (2 * h)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pow_operator_b_backward():
     a = np.abs(np.random.rand(4))
     b = np.random.rand(4)
     a_tensor = nura.tensor(a, usegrad=False)
     b_tensor = nura.tensor(b, usegrad=True)
-    result_tensor = a_tensor ** b_tensor
+    result_tensor = a_tensor**b_tensor
     result_tensor.backward(nura.oneslike(result_tensor))
     h = 1e-7
 
     def func(x, y):
-        return x ** y
+        return x**y
 
     expected_grad_b = (func(a, b + h) - func(a, b - h)) / (2 * h)
 
     assert b_tensor.grad is not None
-    np.testing.assert_allclose(b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        b_tensor.grad.data, expected_grad_b, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_square_scalar_backward():
     a = 3.0
@@ -1087,12 +1127,15 @@ def test_square_scalar_backward():
     h = 1e-7
 
     def func(x):
-        return x ** 2
+        return x**2
 
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_square_vector_backward():
     a = np.random.rand(3)
@@ -1102,12 +1145,15 @@ def test_square_vector_backward():
     h = 1e-7
 
     def func(x):
-        return x ** 2
+        return x**2
 
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_square_matrix_backward():
     a = np.random.rand(4, 3)
@@ -1117,12 +1163,15 @@ def test_square_matrix_backward():
     h = 1e-7
 
     def func(x):
-        return x ** 2
+        return x**2
 
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_square_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -1132,12 +1181,15 @@ def test_square_tensor_backward():
     h = 1e-7
 
     def func(x):
-        return x ** 2
+        return x**2
 
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_square_method_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -1147,12 +1199,14 @@ def test_square_method_tensor_backward():
     h = 1e-7
 
     def func(x):
-        return x ** 2
+        return x**2
 
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_sqrt_scalar_backward():
@@ -1168,7 +1222,10 @@ def test_sqrt_scalar_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sqrt_vector_backward():
     a = np.random.rand(3)
@@ -1183,7 +1240,10 @@ def test_sqrt_vector_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sqrt_matrix_backward():
     a = np.random.rand(4, 3)
@@ -1198,7 +1258,10 @@ def test_sqrt_matrix_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sqrt_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -1213,7 +1276,10 @@ def test_sqrt_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sqrt_method_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -1228,7 +1294,9 @@ def test_sqrt_method_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_exp_scalar_backward():
@@ -1244,7 +1312,10 @@ def test_exp_scalar_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_exp_vector_backward():
     a = np.random.rand(3)
@@ -1259,7 +1330,10 @@ def test_exp_vector_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_exp_matrix_backward():
     a = np.random.rand(4, 3)
@@ -1274,7 +1348,10 @@ def test_exp_matrix_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_exp_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -1289,7 +1366,10 @@ def test_exp_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_exp_method_tensor_backward():
     a = np.random.rand(2, 5, 3)
@@ -1304,7 +1384,9 @@ def test_exp_method_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_log_scalar_backward():
@@ -1320,7 +1402,10 @@ def test_log_scalar_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_log_vector_backward():
     a = np.abs(np.random.rand(5))
@@ -1335,7 +1420,10 @@ def test_log_vector_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_log_matrix_backward():
     a = np.abs(np.random.rand(4, 3))
@@ -1350,7 +1438,10 @@ def test_log_matrix_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_log_tensor_backward():
     a = np.abs(np.random.rand(2, 4, 3))
@@ -1365,7 +1456,10 @@ def test_log_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_log_method_tensor_backward():
     a = np.abs(np.random.rand(3, 2, 4))
@@ -1380,7 +1474,9 @@ def test_log_method_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_sin_scalar_backward():
@@ -1396,7 +1492,10 @@ def test_sin_scalar_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sin_vector_backward():
     a = np.random.rand(5)
@@ -1411,7 +1510,10 @@ def test_sin_vector_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sin_matrix_backward():
     a = np.random.rand(4, 3)
@@ -1426,7 +1528,10 @@ def test_sin_matrix_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sin_tensor_backward():
     a = np.random.rand(2, 4, 3)
@@ -1441,7 +1546,10 @@ def test_sin_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sin_method_tensor_backward():
     a = np.random.rand(3, 2, 4)
@@ -1456,7 +1564,9 @@ def test_sin_method_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_cos_scalar_backward():
@@ -1472,7 +1582,10 @@ def test_cos_scalar_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_cos_vector_backward():
     a = np.random.rand(6)
@@ -1487,7 +1600,10 @@ def test_cos_vector_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_cos_matrix_backward():
     a = np.random.rand(4, 2)
@@ -1502,7 +1618,10 @@ def test_cos_matrix_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_cos_tensor_backward():
     a = np.random.rand(3, 3, 2)
@@ -1517,7 +1636,10 @@ def test_cos_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_cos_method_tensor_backward():
     a = np.random.rand(5, 3, 4)
@@ -1532,7 +1654,10 @@ def test_cos_method_tensor_backward():
     expected_grad_a = (func(a + h) - func(a - h)) / (2 * h)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_scalar_backward():
     a = 7.0
@@ -1543,7 +1668,10 @@ def test_sum_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_vector_backward():
     a = np.random.rand(4)
@@ -1554,7 +1682,10 @@ def test_sum_vector_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_matrix_backward():
     a = np.random.rand(3, 4)
@@ -1565,7 +1696,10 @@ def test_sum_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -1576,7 +1710,10 @@ def test_sum_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_method_backward():
     a = np.random.rand(8, 1)
@@ -1587,7 +1724,10 @@ def test_sum_method_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_tuple_backward():
     a = np.random.rand(2, 4, 7)
@@ -1598,7 +1738,10 @@ def test_sum_dim_tuple_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_tuple_keepdims_true_backward():
     a = np.random.rand(1, 3, 2)
@@ -1609,7 +1752,10 @@ def test_sum_dim_tuple_keepdims_true_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_tuple_keepdims_false_backward():
     a = np.random.rand(4, 2, 1)
@@ -1620,7 +1766,10 @@ def test_sum_dim_tuple_keepdims_false_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_0_shape_1_backward():
     a = np.random.rand(5, 3)
@@ -1631,7 +1780,10 @@ def test_sum_dim_0_shape_1_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_1_shape_1_backward():
     a = np.random.rand(4, 6)
@@ -1642,7 +1794,10 @@ def test_sum_dim_1_shape_1_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_0_shape_2_backward():
     a = np.random.rand(3, 4, 5)
@@ -1653,7 +1808,10 @@ def test_sum_dim_0_shape_2_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_1_shape_2_backward():
     a = np.random.rand(2, 5, 3)
@@ -1664,7 +1822,10 @@ def test_sum_dim_1_shape_2_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_2_shape_2_backward():
     a = np.random.rand(4, 2, 6)
@@ -1675,7 +1836,10 @@ def test_sum_dim_2_shape_2_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_0_shape_3_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -1686,7 +1850,10 @@ def test_sum_dim_0_shape_3_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_1_shape_3_backward():
     a = np.random.rand(3, 4, 2, 5)
@@ -1697,7 +1864,10 @@ def test_sum_dim_1_shape_3_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_2_shape_3_backward():
     a = np.random.rand(4, 3, 5, 2)
@@ -1708,7 +1878,10 @@ def test_sum_dim_2_shape_3_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_sum_dim_3_shape_3_backward():
     a = np.random.rand(2, 4, 3, 5)
@@ -1719,7 +1892,10 @@ def test_sum_dim_3_shape_3_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_scalar_backward():
     a = 5.0
@@ -1730,7 +1906,10 @@ def test_max_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_vector_backward():
     a = np.array([1.0, 2.0, 3.0, 4.0])
@@ -1742,7 +1921,10 @@ def test_max_vector_backward():
     expected_grad_a[a == a.max()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_matrix_backward():
     a = np.random.rand(3, 4)
@@ -1754,7 +1936,10 @@ def test_max_matrix_backward():
     expected_grad_a[a == a.max()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -1766,7 +1951,10 @@ def test_max_tensor_backward():
     expected_grad_a[a == a.max()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_method_backward():
     a = np.random.rand(5, 2)
@@ -1778,7 +1966,10 @@ def test_max_method_backward():
     expected_grad_a[a == a.max()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_tuple_backward():
     a = np.random.rand(2, 4, 7)
@@ -1791,7 +1982,10 @@ def test_max_dim_tuple_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_tuple_keepdims_true_backward():
     a = np.random.rand(1, 3, 2)
@@ -1804,7 +1998,10 @@ def test_max_dim_tuple_keepdims_true_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_0_shape_1_backward():
     a = np.random.rand(5, 3)
@@ -1817,7 +2014,10 @@ def test_max_dim_0_shape_1_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_1_shape_1_backward():
     a = np.random.rand(4, 6)
@@ -1830,7 +2030,10 @@ def test_max_dim_1_shape_1_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_0_shape_2_backward():
     a = np.random.rand(3, 4, 5)
@@ -1843,7 +2046,10 @@ def test_max_dim_0_shape_2_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_1_shape_2_backward():
     a = np.random.rand(2, 5, 3)
@@ -1856,7 +2062,10 @@ def test_max_dim_1_shape_2_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_2_shape_2_backward():
     a = np.random.rand(4, 2, 6)
@@ -1869,7 +2078,10 @@ def test_max_dim_2_shape_2_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_0_shape_3_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -1882,7 +2094,10 @@ def test_max_dim_0_shape_3_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_1_shape_3_backward():
     a = np.random.rand(3, 4, 2, 5)
@@ -1895,7 +2110,10 @@ def test_max_dim_1_shape_3_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_2_shape_3_backward():
     a = np.random.rand(4, 3, 5, 2)
@@ -1908,7 +2126,10 @@ def test_max_dim_2_shape_3_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_max_dim_3_shape_3_backward():
     a = np.random.rand(2, 4, 3, 5)
@@ -1921,7 +2142,10 @@ def test_max_dim_3_shape_3_backward():
     expected_grad_a[a == max_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_scalar_backward():
     a = 5.0
@@ -1932,7 +2156,10 @@ def test_min_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_vector_backward():
     a = np.array([3.0, 2.0, 1.0, 4.0])
@@ -1944,7 +2171,10 @@ def test_min_vector_backward():
     expected_grad_a[a == a.min()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_matrix_backward():
     a = np.random.rand(3, 4)
@@ -1956,7 +2186,10 @@ def test_min_matrix_backward():
     expected_grad_a[a == a.min()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -1968,7 +2201,10 @@ def test_min_tensor_backward():
     expected_grad_a[a == a.min()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_method_backward():
     a = np.random.rand(5, 2)
@@ -1980,7 +2216,10 @@ def test_min_method_backward():
     expected_grad_a[a == a.min()] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_tuple_backward():
     a = np.random.rand(2, 4, 7)
@@ -1993,7 +2232,10 @@ def test_min_dim_tuple_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_tuple_keepdims_true_backward():
     a = np.random.rand(1, 3, 2)
@@ -2006,7 +2248,10 @@ def test_min_dim_tuple_keepdims_true_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_0_shape_1_backward():
     a = np.random.rand(5, 3)
@@ -2019,7 +2264,10 @@ def test_min_dim_0_shape_1_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_1_shape_1_backward():
     a = np.random.rand(4, 6)
@@ -2032,7 +2280,10 @@ def test_min_dim_1_shape_1_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_0_shape_2_backward():
     a = np.random.rand(3, 4, 5)
@@ -2045,7 +2296,10 @@ def test_min_dim_0_shape_2_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_1_shape_2_backward():
     a = np.random.rand(2, 5, 3)
@@ -2058,7 +2312,10 @@ def test_min_dim_1_shape_2_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_2_shape_2_backward():
     a = np.random.rand(4, 2, 6)
@@ -2071,7 +2328,10 @@ def test_min_dim_2_shape_2_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_0_shape_3_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2084,7 +2344,10 @@ def test_min_dim_0_shape_3_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_1_shape_3_backward():
     a = np.random.rand(3, 4, 2, 5)
@@ -2097,7 +2360,10 @@ def test_min_dim_1_shape_3_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_2_shape_3_backward():
     a = np.random.rand(4, 3, 5, 2)
@@ -2110,7 +2376,10 @@ def test_min_dim_2_shape_3_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_min_dim_3_shape_3_backward():
     a = np.random.rand(2, 4, 3, 5)
@@ -2123,7 +2392,10 @@ def test_min_dim_3_shape_3_backward():
     expected_grad_a[a == min_vals] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_transpose_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2134,7 +2406,10 @@ def test_transpose_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_transpose_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2145,7 +2420,10 @@ def test_transpose_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_transpose_higher_rank_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2156,7 +2434,10 @@ def test_transpose_higher_rank_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_transpose_method_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2167,7 +2448,10 @@ def test_transpose_method_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_transpose_method_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2178,7 +2462,10 @@ def test_transpose_method_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_transpose_method_higher_rank_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2189,7 +2476,10 @@ def test_transpose_method_higher_rank_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_permute_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2200,7 +2490,10 @@ def test_permute_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_permute_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2211,7 +2504,10 @@ def test_permute_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_permute_higher_rank_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2222,7 +2518,10 @@ def test_permute_higher_rank_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_permute_method_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2233,7 +2532,10 @@ def test_permute_method_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_permute_method_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2244,7 +2546,10 @@ def test_permute_method_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_permute_method_higher_rank_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2255,7 +2560,10 @@ def test_permute_method_higher_rank_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_squeeze_scalar_backward():
     a = np.array(3.0)
@@ -2266,7 +2574,10 @@ def test_squeeze_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_squeeze_vector_backward():
     a = np.random.rand(1)
@@ -2277,7 +2588,10 @@ def test_squeeze_vector_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_squeeze_matrix_backward():
     a = np.random.rand(3, 1)
@@ -2288,7 +2602,10 @@ def test_squeeze_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_squeeze_tensor_backward():
     a = np.random.rand(2, 1, 3, 1)
@@ -2299,7 +2616,10 @@ def test_squeeze_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_squeeze_method_higher_order_tensor_backward():
     a = np.random.rand(1, 5, 1, 2, 1)
@@ -2310,7 +2630,10 @@ def test_squeeze_method_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_squeeze_higher_order_tensor_no_dim_backward():
     a = np.random.rand(1, 5, 1, 2, 1)
@@ -2321,7 +2644,10 @@ def test_squeeze_higher_order_tensor_no_dim_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_scalar_backward():
     a = np.array(3.0)
@@ -2332,7 +2658,10 @@ def test_unsqueeze_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_vector_backward():
     a = np.random.rand(4)
@@ -2343,7 +2672,10 @@ def test_unsqueeze_vector_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2354,7 +2686,10 @@ def test_unsqueeze_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2365,7 +2700,10 @@ def test_unsqueeze_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_higher_order_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2376,7 +2714,10 @@ def test_unsqueeze_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_method_higher_order_tensor_backward():
     a = np.random.rand(3, 1, 4, 2)
@@ -2387,7 +2728,10 @@ def test_unsqueeze_method_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_unsqueeze_mixed_indices_backward():
     a = np.random.rand(3, 4, 2)
@@ -2398,7 +2742,10 @@ def test_unsqueeze_mixed_indices_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_scalar_backward():
     a = np.array(7.0)
@@ -2409,7 +2756,10 @@ def test_reshape_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_vector_backward():
     a = np.random.rand(6)
@@ -2420,7 +2770,10 @@ def test_reshape_vector_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_matrix_backward():
     a = np.random.rand(4, 5)
@@ -2431,7 +2784,10 @@ def test_reshape_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2442,7 +2798,10 @@ def test_reshape_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_higher_order_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2453,7 +2812,10 @@ def test_reshape_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_method_higher_order_tensor_backward():
     a = np.random.rand(3, 4, 5, 2)
@@ -2464,7 +2826,10 @@ def test_reshape_method_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_with_negative_dimension_backward_1():
     a = np.random.rand(2, 3, 4)
@@ -2475,7 +2840,10 @@ def test_reshape_with_negative_dimension_backward_1():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_reshape_with_negative_dimension_backward_2():
     a = np.random.rand(6, 2, 3)
@@ -2486,7 +2854,10 @@ def test_reshape_with_negative_dimension_backward_2():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_abs_scalar_backward():
     a = np.array(-7.0)
@@ -2497,7 +2868,10 @@ def test_abs_scalar_backward():
     expected_grad_a = np.array(-1.0)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_abs_vector_backward():
     a = np.array([-1.0, 2.0, -3.0, 4.0])
@@ -2508,7 +2882,10 @@ def test_abs_vector_backward():
     expected_grad_a = np.where(a < 0, -1.0, 1.0)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_abs_matrix_backward():
     a = np.random.randn(3, 4)
@@ -2519,7 +2896,10 @@ def test_abs_matrix_backward():
     expected_grad_a = np.where(a < 0, -1.0, 1.0)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_abs_tensor_backward():
     a = np.random.randn(2, 3, 4)
@@ -2530,7 +2910,10 @@ def test_abs_tensor_backward():
     expected_grad_a = np.where(a < 0, -1.0, 1.0)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_abs_higher_order_tensor_backward():
     a = np.random.randn(2, 3, 4, 5)
@@ -2541,7 +2924,10 @@ def test_abs_higher_order_tensor_backward():
     expected_grad_a = np.where(a < 0, -1.0, 1.0)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_abs_method_higher_order_tensor_backward():
     a = np.random.randn(3, 4, 5, 2)
@@ -2552,7 +2938,10 @@ def test_abs_method_higher_order_tensor_backward():
     expected_grad_a = np.where(a < 0, -1.0, 1.0)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pos_scalar_backward():
     a = np.array(3.0)
@@ -2563,7 +2952,10 @@ def test_pos_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pos_vector_backward():
     a = np.random.rand(4)
@@ -2574,7 +2966,10 @@ def test_pos_vector_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pos_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2585,7 +2980,10 @@ def test_pos_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pos_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2596,7 +2994,10 @@ def test_pos_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_pos_higher_order_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2607,7 +3008,9 @@ def test_pos_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
 
 
 def test_pos_operator_backward():
@@ -2619,7 +3022,10 @@ def test_pos_operator_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_neg_scalar_backward():
     a = np.array(4.0)
@@ -2630,7 +3036,10 @@ def test_neg_scalar_backward():
     expected_grad_a = -np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_neg_vector_backward():
     a = np.random.rand(5)
@@ -2641,7 +3050,10 @@ def test_neg_vector_backward():
     expected_grad_a = -np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_neg_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2652,7 +3064,10 @@ def test_neg_matrix_backward():
     expected_grad_a = -np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_neg_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2663,7 +3078,10 @@ def test_neg_tensor_backward():
     expected_grad_a = -np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_neg_higher_order_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2674,7 +3092,10 @@ def test_neg_higher_order_tensor_backward():
     expected_grad_a = -np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_neg_operator_backward():
     a = np.random.rand(3, 4, 2)
@@ -2685,7 +3106,10 @@ def test_neg_operator_backward():
     expected_grad_a = -np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_clone_scalar_backward():
     a = np.array(4.0)
@@ -2696,7 +3120,10 @@ def test_clone_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_clone_vector_backward():
     a = np.random.rand(5)
@@ -2707,7 +3134,10 @@ def test_clone_vector_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_clone_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2718,7 +3148,10 @@ def test_clone_matrix_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_clone_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2729,7 +3162,10 @@ def test_clone_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_clone_higher_order_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2740,7 +3176,10 @@ def test_clone_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_clone_method_higher_order_tensor_backward():
     a = np.random.rand(3, 4, 5, 2)
@@ -2751,7 +3190,10 @@ def test_clone_method_higher_order_tensor_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_scalar_backward():
     a = np.array(4.0)
@@ -2762,7 +3204,10 @@ def test_select_scalar_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_scalar_operator_backward():
     a = np.array(4.0)
@@ -2773,7 +3218,10 @@ def test_select_scalar_operator_backward():
     expected_grad_a = np.ones_like(a)
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_vector_backward():
     a = np.random.rand(5)
@@ -2785,7 +3233,10 @@ def test_select_vector_backward():
     expected_grad_a[1:4] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_vector_operator_backward():
     a = np.random.rand(5)
@@ -2797,7 +3248,10 @@ def test_select_vector_operator_backward():
     expected_grad_a[1:4] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_matrix_backward():
     a = np.random.rand(3, 4)
@@ -2809,7 +3263,10 @@ def test_select_matrix_backward():
     expected_grad_a[1:3, 0:2] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_matrix_operator_backward():
     a = np.random.rand(3, 4)
@@ -2821,7 +3278,10 @@ def test_select_matrix_operator_backward():
     expected_grad_a[1:3, 0:2] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_tensor_backward():
     a = np.random.rand(2, 3, 4)
@@ -2833,7 +3293,10 @@ def test_select_tensor_backward():
     expected_grad_a[:, 1:3, 0:2] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_tensor_operator_backward():
     a = np.random.rand(2, 3, 4)
@@ -2845,19 +3308,27 @@ def test_select_tensor_operator_backward():
     expected_grad_a[:, 1:3, 0:2] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_higher_order_tensor_backward():
     a = np.random.rand(2, 3, 4, 5)
     a_tensor = nura.tensor(a, usegrad=True)
-    result_tensor = f.select(a_tensor, (slice(1, 2), slice(None), slice(0, 3), slice(2, 4)))
+    result_tensor = f.select(
+        a_tensor, (slice(1, 2), slice(None), slice(0, 3), slice(2, 4))
+    )
     result_tensor.backward(nura.oneslike(result_tensor))
 
     expected_grad_a = np.zeros_like(a)
     expected_grad_a[1:2, :, 0:3, 2:4] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_higher_order_tensor_operator_backward():
     a = np.random.rand(2, 3, 4, 5)
@@ -2869,7 +3340,10 @@ def test_select_higher_order_tensor_operator_backward():
     expected_grad_a[1:2, :, 0:3, 2:4] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_ellipsis_backward():
     a = np.random.rand(2, 3, 4)
@@ -2881,7 +3355,10 @@ def test_select_ellipsis_backward():
     expected_grad_a[:, :, 1:3] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_ellipsis_operator_backward():
     a = np.random.rand(2, 3, 4)
@@ -2893,7 +3370,10 @@ def test_select_ellipsis_operator_backward():
     expected_grad_a[:, :, 1:3] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_mixed_slices_backward():
     a = np.random.rand(3, 4, 5)
@@ -2905,7 +3385,10 @@ def test_select_mixed_slices_backward():
     expected_grad_a[1:3, :, 2] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_mixed_slices_operator_backward():
     a = np.random.rand(3, 4, 5)
@@ -2917,7 +3400,10 @@ def test_select_mixed_slices_operator_backward():
     expected_grad_a[1:3, :, 2] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_single_dimension_backward():
     a = np.random.rand(3, 4, 5)
@@ -2929,7 +3415,10 @@ def test_select_single_dimension_backward():
     expected_grad_a[1:2, :, :] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_select_single_dimension_operator_backward():
     a = np.random.rand(3, 4, 5)
@@ -2941,4 +3430,6 @@ def test_select_single_dimension_operator_backward():
     expected_grad_a[1:2, :, :] = 1
 
     assert a_tensor.grad is not None
-    np.testing.assert_allclose(a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
+    )

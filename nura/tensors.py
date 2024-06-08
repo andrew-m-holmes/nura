@@ -333,6 +333,12 @@ class Tensor:
             "Truth of Tensor is undefined for more than one element, use any() or all()"
         )
 
+    def __int__(self) -> int:
+        return int(self.item())
+
+    def __float__(self) -> float:
+        return float(self.item())
+
     def __and__(self, other: Union["Tensor", Scalar]) -> "Tensor":
         return nura.tensorand(self, other)
 
@@ -357,9 +363,6 @@ class Tensor:
     def int(self) -> "Tensor":
         return self.to(types.int)
 
-    def __int__(self) -> "Tensor":
-        return self.to(types.int)
-
     def long(self) -> "Tensor":
         return self.to(types.long)
 
@@ -367,9 +370,6 @@ class Tensor:
         return self.to(types.half)
 
     def float(self) -> "Tensor":
-        return self.to(types.float)
-
-    def __float__(self) -> "Tensor":
         return self.to(types.float)
 
     def double(self) -> "Tensor":
