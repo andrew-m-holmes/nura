@@ -1,5 +1,5 @@
 import nura
-import nura.nn.optimizers.functional as f
+import nura.nn.utils as utils
 from nura.nn.optimizers.optimizer import Optimizer
 from nura.nn.parameter import Parameter
 from nura.tensors import Tensor
@@ -33,7 +33,7 @@ class AdaGrad(Optimizer):
                 continue
 
             s = self._squares.get(p, nura.zeroslike(p))
-            u, s_ = f.adagrad(
+            u, s_ = adagrad(
                 parameter=p,
                 squaregrads=s,
                 learnrate=self.learnrate,
@@ -47,3 +47,27 @@ class AdaGrad(Optimizer):
     def __repr__(self) -> str:
         learnrate, eps, decay = self.learnrate, self.eps, self.decay
         return f"{self.name()}({learnrate=:.2e} {decay=} {eps=:.3e})"
+
+
+def adagrad(
+    parameter: Parameter,
+    squaregrads: Tensor,
+    learnrate: float,
+    decay: Optional[float] = None,
+    eps: float = 1e-8,
+    graph: bool = False,
+) -> Tuple[Tensor, Tensor]:
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+
+    with nura.setgrad(graph):
+        grad = (
+            utils.computedecay(parameter, parameter.grad, decay)
+            if decay is not None
+            else parameter.grad
+        )
+
+        squaregrad = nura.square(grad)
+        squaregrads = squaregrads + squaregrad
+        update = learnrate / nura.sqrt(squaregrads + eps) * grad
+        return update, squaregrads

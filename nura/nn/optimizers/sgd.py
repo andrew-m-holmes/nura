@@ -1,5 +1,5 @@
 import nura
-import nura.nn.optimizers.functional as f
+import nura.nn.utils as utils
 from nura.nn.optimizers.optimizer import Optimizer
 from nura.nn.parameter import Parameter
 from nura.tensors import Tensor
@@ -39,7 +39,7 @@ class SGD(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
             v = self._moments.get(p, nura.zeroslike(p))
-            g = f.sgd(
+            g = sgd(
                 parameter=p,
                 velocity=v,
                 learnrate=self.learnrate,
@@ -55,3 +55,28 @@ class SGD(Optimizer):
         learnrate, momentum = self.learnrate, self.momentum
         nesterov, decay = self.nesterov, self.decay
         return f"{self.name()}({learnrate=:.2e} {momentum=} {nesterov=} {decay=})"
+
+
+def sgd(
+    parameter: Parameter,
+    velocity: Tensor,
+    learnrate: float,
+    momentum: float = 0.9,
+    nesterov: bool = False,
+    decay: Optional[float] = None,
+    graph: bool = False,
+) -> Tensor:
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+
+    with nura.setgrad(graph):
+        grad = (
+            utils.computedecay(parameter, parameter.grad, decay)
+            if decay is not None
+            else parameter.grad
+        )
+
+        if nesterov:
+            grad += momentum * velocity
+        update = momentum * velocity + learnrate * grad
+        return update

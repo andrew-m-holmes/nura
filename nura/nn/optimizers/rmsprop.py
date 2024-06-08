@@ -1,5 +1,5 @@
 import nura
-import nura.nn.optimizers.functional as f
+import nura.nn.utils as utils
 from nura.nn.optimizers.optimizer import Optimizer
 from nura.nn.parameter import Parameter
 from nura.tensors import Tensor
@@ -38,7 +38,7 @@ class RMSProp(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
             v = self._moments.get(p, nura.zeroslike(p))
-            g, v_ = f.rmsprop(
+            g, v_ = rmsprop(
                 parameter=p,
                 velocity=v,
                 learnrate=self.learnrate,
@@ -53,3 +53,27 @@ class RMSProp(Optimizer):
     def __repr__(self) -> str:
         learnrate, alpha, eps, decay = self.learnrate, self.alpha, self.eps, self.decay
         return f"{self.name()}({learnrate=:.2e} {alpha=} {decay=} {eps=:.3e})"
+
+
+def rmsprop(
+    parameter: Parameter,
+    velocity: Tensor,
+    learnrate: float,
+    alpha: float = 0.9,
+    decay: Optional[float] = None,
+    eps: float = 1e-8,
+    graph: bool = False,
+) -> Tuple[Tensor, Tensor]:
+    if parameter.grad is None:
+        raise ValueError("Cannot compute update gradient, parameter.grad is None")
+
+    with nura.setgrad(graph):
+        grad = (
+            utils.computedecay(parameter, parameter.grad, decay)
+            if decay is not None
+            else parameter.grad
+        )
+
+        nextvel = alpha * velocity + (1 - alpha) * nura.square(grad)
+        update = learnrate / nura.sqrt(nextvel + eps) * grad
+        return update, nextvel
