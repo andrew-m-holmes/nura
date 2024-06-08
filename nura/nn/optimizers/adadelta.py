@@ -41,7 +41,7 @@ class AdaDelta(Optimizer):
             if p.grad is None or not p.usegrad:
                 continue
 
-            d = self._deltas.get(p, nura.sqrt(nura.zeroslike(p) + self.eps))
+            d = self._deltas.get(p, nura.zeroslike(p))
             s = self._squares.get(p, nura.zeroslike(p))
             u, d_, s_ = adadelta(
                 parameter=p,
@@ -80,9 +80,7 @@ def adadelta(
             else parameter.grad
         )
 
-    emasquare = gamma * square + (1 - gamma) * grad.square()
-    nextsquare = nura.sqrt(emasquare + eps)
-    emadelta = gamma * delta + (1 - gamma) * delta.square()
-    nextdelta = nura.sqrt(emadelta + eps)
-    update = (delta / nextsquare) * grad  # 'delta' intentional
+    nextsquare = gamma * square + (1 - gamma) * grad.square()
+    update = nura.sqrt(delta + eps) / nura.sqrt(nextsquare + eps) * grad
+    nextdelta = gamma * delta + (1 - gamma) * update.square()
     return update, nextdelta, nextsquare
