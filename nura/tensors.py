@@ -357,6 +357,9 @@ class Tensor:
     def int(self) -> "Tensor":
         return self.to(types.int)
 
+    def __int__(self) -> "Tensor":
+        return self.to(types.int)
+
     def long(self) -> "Tensor":
         return self.to(types.long)
 
@@ -364,6 +367,9 @@ class Tensor:
         return self.to(types.half)
 
     def float(self) -> "Tensor":
+        return self.to(types.float)
+
+    def __float__(self) -> "Tensor":
         return self.to(types.float)
 
     def double(self) -> "Tensor":
