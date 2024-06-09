@@ -2,7 +2,7 @@ import nura
 from nura.tensors import Tensor
 from typing import Optional, Type, Tuple, Union, Sequence
 from nura.autograd.function import Function, Context
-from collections import deque, defaultdict
+from collections import deque
 
 
 class Node:
