@@ -16,19 +16,19 @@ class Linear(Module):
         inputdim: int,
         outputdim: int,
         bias: bool = True,
-        dtype: Optional[Type[dtype]] = None,
         init: Optional[Callable[..., Tensor]] = None,
+        dtype: Optional[Type[dtype]] = None,
     ) -> None:
         super().__init__()
-        if dtype is None:
-            dtype = types.float
         if init is None:
             init = he
+        if dtype is None:
+            dtype = types.float
 
         self._inputdim = inputdim
         self._outputdim = outputdim
-        self._dtype = dtype
         self._init = init
+        self._dtype = dtype
         self._weight = parameter(init(inputdim, outputdim), dtype=dtype)
         self._bias = parameter(utils.randn(outputdim), dtype=dtype) if bias else None
 
@@ -47,6 +47,10 @@ class Linear(Module):
     @property
     def outputdim(self) -> int:
         return self._outputdim
+
+    @property
+    def init(self) -> Callable[..., Tensor]:
+        return self._init
 
     @property
     def dtype(self) -> Type[dtype]:
