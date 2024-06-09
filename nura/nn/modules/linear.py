@@ -3,9 +3,10 @@ import nura.nn.functional as f
 import nura.utils as utils
 from nura.nn.modules.module import Module
 from nura.nn.parameter import Parameter, parameter
+from nura.nn.utils import he
 from nura.tensors import Tensor
 from nura.types import dtype
-from typing import Type, Optional
+from typing import Type, Optional, Callable
 
 
 class Linear(Module):
@@ -16,14 +17,19 @@ class Linear(Module):
         outputdim: int,
         bias: bool = True,
         dtype: Optional[Type[dtype]] = None,
+        init: Optional[Callable[..., Tensor]] = None,
     ) -> None:
         super().__init__()
         if dtype is None:
             dtype = types.float
+        if init is None:
+            init = he
+
         self._inputdim = inputdim
         self._outputdim = outputdim
         self._dtype = dtype
-        self._weight = parameter(utils.randn((outputdim, inputdim)), dtype=dtype)
+        self._init = init
+        self._weight = parameter(init(inputdim, outputdim), dtype=dtype)
         self._bias = parameter(utils.randn(outputdim), dtype=dtype) if bias else None
 
     @property
