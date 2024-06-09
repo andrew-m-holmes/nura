@@ -53,6 +53,8 @@ from .utils import (
     zeroslike,
     ones,
     oneslike,
+    uniform,
+    uniformlike,
     randn,
     randnlike,
     rand,
