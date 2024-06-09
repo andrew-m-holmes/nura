@@ -1,6 +1,5 @@
 import numpy as np
 import nura.types as types
-from numpy import ndarray
 from nura.types import Scalar, Tensorlike, dimlike, dim, dtype
 from nura.tensors import Tensor, tensor
 from typing import Optional, Type, Any, Tuple, Union
@@ -56,9 +55,36 @@ def oneslike(
     a: Tensor, usegrad: bool = False, dtype: Optional[Type[dtype]] = None
 ) -> Tensor:
     if dtype is None:
-        dtype = types.float if dtype is types.bool else a.dtype
+        dtype = types.float if a.dtype is types.bool else a.dtype
     data = a.data
     data = np.ones_like(data)
+    return tensor(data, usegrad, dtype)
+
+
+def uniform(
+    low: float = 0.0,
+    high: float = 1.0,
+    dim: Optional[dimlike] = None,
+    usegrad: bool = False,
+    dtype: Optional[Type[dtype]] = None,
+) -> Tensor:
+    if dtype is None:
+        dtype = types.float
+    data = np.random.uniform(low, high, dim)
+    return tensor(data, usegrad, dtype)
+
+
+def uniformlike(
+    a: Tensor,
+    low: float = 0.0,
+    high: float = 1.0,
+    usegrad: bool = False,
+    dtype: Optional[Type[dtype]] = None,
+) -> Tensor:
+    if dtype is None:
+        dtype = a.dtype
+    dim = a.dim
+    data = np.random.uniform(low, high, dim)
     return tensor(data, usegrad, dtype)
 
 
