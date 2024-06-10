@@ -1,0 +1,1010 @@
+import numpy as np
+import nura
+import nura.nn.functional as f
+
+
+def test_linear_vector_no_bias():
+    x = np.random.rand(4)
+    w = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+
+    expected_result = np.dot(x, w.T)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_vector_with_bias():
+    x = np.random.rand(4)
+    w = np.random.rand(3, 4)
+    b = np.random.rand(3)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+
+    expected_result = np.dot(x, w.T) + b
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_matrix_no_bias():
+    x = np.random.rand(2, 4)
+    w = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+
+    expected_result = np.dot(x, w.T)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_matrix_with_bias():
+    x = np.random.rand(2, 4)
+    w = np.random.rand(3, 4)
+    b = np.random.rand(3)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+
+    expected_result = np.dot(x, w.T) + b
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_tensor_no_bias():
+    x = np.random.rand(2, 3, 4)
+    w = np.random.rand(5, 4)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+
+    expected_result = np.matmul(x, w.T)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_tensor_with_bias():
+    x = np.random.rand(2, 3, 4)
+    w = np.random.rand(5, 4)
+    b = np.random.rand(5)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+
+    expected_result = np.matmul(x, w.T) + b
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_higher_order_tensor_no_bias():
+    x = np.random.rand(2, 3, 4, 5)
+    w = np.random.rand(7, 5)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.linear(x_tensor, w_tensor)
+
+    expected_result = np.matmul(x, w.T)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_linear_higher_order_tensor_with_bias():
+    x = np.random.rand(2, 3, 4, 5)
+    w = np.random.rand(7, 5)
+    b = np.random.rand(7)
+    x_tensor = nura.tensor(x)
+    w_tensor = nura.tensor(w)
+    b_tensor = nura.tensor(b)
+    result_tensor = f.linear(x_tensor, w_tensor, b_tensor)
+
+    expected_result = np.matmul(x, w.T) + b
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+# TODO (linear test for 3D or higher weight)
+
+
+def test_sigmoid_scalar():
+    x = np.array(0.5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.sigmoid(x_tensor)
+
+    expected_result = 1 / (1 + np.exp(-x))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_sigmoid_vector():
+    x = np.random.rand(5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.sigmoid(x_tensor)
+
+    expected_result = 1 / (1 + np.exp(-x))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_sigmoid_matrix():
+    x = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.sigmoid(x_tensor)
+
+    expected_result = 1 / (1 + np.exp(-x))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_sigmoid_tensor():
+    x = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.sigmoid(x_tensor)
+
+    expected_result = 1 / (1 + np.exp(-x))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_sigmoid_higher_order_tensor():
+    x = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.sigmoid(x_tensor)
+
+    expected_result = 1 / (1 + np.exp(-x))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_tanh_scalar():
+    x = np.array(-0.5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.tanh(x_tensor)
+
+    expected_result = np.tanh(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_tanh_vector():
+    x = np.random.rand(4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.tanh(x_tensor)
+
+    expected_result = np.tanh(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_tanh_matrix():
+    x = np.random.rand(2, 3)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.tanh(x_tensor)
+
+    expected_result = np.tanh(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_tanh_tensor():
+    x = np.random.rand(3, 3, 2)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.tanh(x_tensor)
+
+    expected_result = np.tanh(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_tanh_higher_order_tensor():
+    x = np.random.rand(2, 4, 2, 3)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.tanh(x_tensor)
+
+    expected_result = np.tanh(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu_scalar():
+    x = np.array(-0.2)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu(x_tensor)
+
+    expected_result = np.maximum(0, x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu_vector():
+    x = np.random.randn(5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu(x_tensor)
+
+    expected_result = np.maximum(0, x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu_matrix():
+    x = np.random.randn(3, 2)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu(x_tensor)
+
+    expected_result = np.maximum(0, x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu_tensor():
+    x = np.random.randn(4, 3, 2)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu(x_tensor)
+
+    expected_result = np.maximum(0, x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu_higher_order_tensor():
+    x = np.random.randn(2, 3, 4, 2)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu(x_tensor)
+
+    expected_result = np.maximum(0, x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu6_scalar():
+    x = np.array(6.5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu6(x_tensor)
+
+    expected_result = np.minimum(np.maximum(0, x), 6)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu6_vector():
+    x = np.random.randn(6) * 2
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu6(x_tensor)
+
+    expected_result = np.minimum(np.maximum(0, x), 6)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu6_matrix():
+    x = np.random.randn(3, 5) * 3
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu6(x_tensor)
+
+    expected_result = np.minimum(np.maximum(0, x), 6)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu6_tensor():
+    x = np.random.randn(4, 3, 2) * 4
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu6(x_tensor)
+
+    expected_result = np.minimum(np.maximum(0, x), 6)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_relu6_higher_order_tensor():
+    x = np.random.randn(2, 3, 4, 2) * 5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.relu6(x_tensor)
+
+    expected_result = np.minimum(np.maximum(0, x), 6)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_scalar():
+    x = np.array(-1.0)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor)
+
+    expected_result = np.where(x > 0, x, x * 0.01)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_vector():
+    x = np.random.randn(5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor)
+
+    expected_result = np.where(x > 0, x, x * 0.01)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_matrix():
+    x = np.random.randn(3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor)
+
+    expected_result = np.where(x > 0, x, x * 0.01)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_tensor():
+    x = np.random.randn(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor)
+
+    expected_result = np.where(x > 0, x, x * 0.01)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_higher_order_tensor():
+    x = np.random.randn(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor)
+
+    expected_result = np.where(x > 0, x, x * 0.01)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_vector_custom_alpha():
+    x = np.random.randn(5)
+    alpha = 0.1
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor, alpha)
+
+    expected_result = np.where(x > 0, x, x * alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_matrix_custom_alpha():
+    x = np.random.randn(3, 4)
+    alpha = 0.2
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor, alpha)
+
+    expected_result = np.where(x > 0, x, x * alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_leakyrelu_tensor_custom_alpha():
+    x = np.random.randn(2, 3, 4)
+    alpha = 0.05
+    x_tensor = nura.tensor(x)
+    result_tensor = f.leakyrelu(x_tensor, alpha)
+
+    expected_result = np.where(x > 0, x, x * alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_scalar():
+    x = np.array(-1.0)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor)
+
+    expected_result = np.where(x > 0, x, 1.0 * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_vector():
+    x = np.random.randn(5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor)
+
+    expected_result = np.where(x > 0, x, 1.0 * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_matrix():
+    x = np.random.randn(3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor)
+
+    expected_result = np.where(x > 0, x, 1.0 * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_tensor():
+    x = np.random.randn(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor)
+
+    expected_result = np.where(x > 0, x, 1.0 * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_higher_order_tensor():
+    x = np.random.randn(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor)
+
+    expected_result = np.where(x > 0, x, 1.0 * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_vector_custom_alpha():
+    x = np.random.randn(5)
+    alpha = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor, alpha)
+
+    expected_result = np.where(x > 0, x, alpha * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_matrix_custom_alpha():
+    x = np.random.randn(3, 4)
+    alpha = 1.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor, alpha)
+
+    expected_result = np.where(x > 0, x, alpha * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_elu_tensor_custom_alpha():
+    x = np.random.randn(2, 3, 4)
+    alpha = 2.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.elu(x_tensor, alpha)
+
+    expected_result = np.where(x > 0, x, alpha * (np.exp(x) - 1))
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def gelu_reference(x):
+    return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * np.power(x, 3))))
+
+
+def test_gelu_scalar():
+    x = np.array(0.5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.gelu(x_tensor)
+
+    expected_result = gelu_reference(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_gelu_vector():
+    x = np.random.randn(4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.gelu(x_tensor)
+
+    expected_result = gelu_reference(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_gelu_matrix():
+    x = np.random.randn(3, 3)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.gelu(x_tensor)
+
+    expected_result = gelu_reference(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_gelu_tensor():
+    x = np.random.randn(2, 4, 3)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.gelu(x_tensor)
+
+    expected_result = gelu_reference(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_gelu_higher_order_tensor():
+    x = np.random.randn(2, 3, 4, 2)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.gelu(x_tensor)
+
+    expected_result = gelu_reference(x)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def celu_reference(x, alpha):
+    return np.where(x > 0, x, alpha * (np.exp(x / alpha) - 1))
+
+
+def test_celu_scalar():
+    x = np.array(-0.5)
+    alpha = 1.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_vector():
+    x = np.random.randn(5)
+    alpha = 1.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_matrix():
+    x = np.random.randn(3, 3)
+    alpha = 1.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_tensor():
+    x = np.random.randn(2, 4, 3)
+    alpha = 1.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_higher_order_tensor():
+    x = np.random.randn(2, 3, 4, 2)
+    alpha = 1.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_vector_custom_alpha():
+    x = np.random.randn(5)
+    alpha = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_matrix_custom_alpha():
+    x = np.random.randn(3, 4)
+    alpha = 2.0
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_celu_tensor_custom_alpha():
+    x = np.random.randn(2, 3, 4)
+    alpha = 1.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.celu(x_tensor, alpha)
+
+    expected_result = celu_reference(x, alpha)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def softmax_reference(x, dim):
+    exp_x = np.exp(x - np.max(x, axis=dim, keepdims=True))
+    return exp_x / np.sum(exp_x, axis=dim, keepdims=True)
+
+
+def test_softmax_vector():
+    x = np.random.rand(5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor)
+
+    expected_result = softmax_reference(x, dim=-1)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_matrix():
+    x = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor)
+
+    expected_result = softmax_reference(x, dim=-1)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_tensor():
+    x = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor)
+
+    expected_result = softmax_reference(x, dim=-1)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_higher_order_tensor():
+    x = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor)
+
+    expected_result = softmax_reference(x, dim=-1)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_matrix_dim_0():
+    x = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor, dim=0)
+
+    expected_result = softmax_reference(x, dim=0)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_tensor_dim_1():
+    x = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor, dim=1)
+
+    expected_result = softmax_reference(x, dim=1)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_higher_order_tensor_dim_2():
+    x = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor, dim=2)
+
+    expected_result = softmax_reference(x, dim=2)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_softmax_higher_order_tensor_dim_0():
+    x = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    result_tensor = f.softmax(x_tensor, dim=0)
+
+    expected_result = softmax_reference(x, dim=0)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def attention_reference(q, k, v, mask=None, maskfill=-1e9):
+    scores = np.matmul(q, np.swapaxes(k, -1, -2)) / np.sqrt(k.shape[-1])
+    if mask is not None:
+        scores = np.where(mask, scores, maskfill)
+    weights = softmax_reference(scores, dim=-1)
+    context = np.matmul(weights, v)
+    return context, weights
+
+
+def test_attention_basic():
+    q = np.random.rand(2, 3, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_with_mask():
+    q = np.random.rand(2, 3, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    mask = np.random.choice([True, False], size=(2, 3, 3))
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v, mask)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_with_pad_mask():
+    q = np.random.rand(2, 3, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    pad_id = 0
+    mask = np.random.choice([True, False], size=(2, 3, 3))
+    mask[:, pad_id] = False
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v, mask)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_no_peak():
+    q = np.random.rand(2, 3, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    mask = np.triu(np.ones((3, 3)), k=1).astype(bool)
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v, mask)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_with_dropout():
+    q = np.random.rand(2, 3, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    mask = np.triu(np.ones((3, 3)), k=1).astype(bool)
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor, drop=0.1)
+
+    assert np.any(weights.data == 0)
+
+
+def test_attention_basic_different_lengths():
+    q = np.random.rand(2, 4, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_with_mask_different_lengths():
+    q = np.random.rand(2, 4, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    mask = np.random.choice([True, False], size=(2, 4, 3))
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v, mask)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_with_pad_mask_different_lengths():
+    q = np.random.rand(2, 4, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    pad_id = 0
+    mask = np.random.choice([True, False], size=(2, 4, 3))
+    mask[:, pad_id, :] = False
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v, mask)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_no_peak_different_lengths():
+    q = np.random.rand(2, 4, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    mask = np.triu(np.ones((4, 3)), k=1).astype(bool)
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor)
+
+    expected_context, expected_weights = attention_reference(q, k, v, mask)
+
+    np.testing.assert_allclose(context.data, expected_context, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(weights.data, expected_weights, rtol=1e-7, atol=1e-7)
+
+
+def test_attention_with_dropout_different_lengths():
+    q = np.random.rand(2, 4, 4)
+    k = np.random.rand(2, 3, 4)
+    v = np.random.rand(2, 3, 4)
+    mask = np.triu(np.ones((4, 3)), k=1).astype(bool)
+    q_tensor = nura.tensor(q)
+    k_tensor = nura.tensor(k)
+    v_tensor = nura.tensor(v)
+    mask_tensor = nura.tensor(mask)
+    context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor, drop=0.1)
+
+    assert np.any(weights.data == 0)
