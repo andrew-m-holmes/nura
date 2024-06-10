@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 
 
 def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None) -> Tensor:
-    out = nura.matmul(x, w.T)
+    out = nura.matmul(x, w.transpose())
     if b is not None:
         out = out + b
     return out
@@ -69,7 +69,7 @@ def attention(
     norm = 1 / (k.dim[-1] ** 0.5)
     simscore = nura.matmul(q, k.transpose(-1, -2)) * norm
     if mask is not None:
-        simscore = utils.where(mask == True, simscore, maskfill)
+        simscore = utils.where(mask, simscore, maskfill)
     attn = softmax(simscore, -1)
     if drop is not None:
         attn = dropout(attn, drop)
