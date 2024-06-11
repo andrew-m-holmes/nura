@@ -126,3 +126,39 @@ def layernorm(
     eps: float = 1e-5,
 ) -> Tensor:
     return functions.LayerNorm.apply(x, gamma, beta, dim, eps)
+
+
+def conv1d():
+    raise NotImplementedError
+
+
+def conv2d():
+    raise NotImplementedError
+
+
+def conv3d():
+    raise NotImplementedError
+
+
+def maxpool1d():
+    raise NotImplementedError
+
+
+def maxpool2d():
+    raise NotImplementedError
+
+
+def maxpool3d():
+    raise NotImplementedError
+
+
+def avgpool1d():
+    raise NotImplementedError
+
+
+def avgpool2d():
+    raise NotImplementedError
+
+
+def avgpool3d():
+    raise NotImplementedError
