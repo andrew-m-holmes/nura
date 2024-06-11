@@ -1008,3 +1008,261 @@ def test_attention_with_dropout_different_lengths():
     context, weights = f.attention(q_tensor, k_tensor, v_tensor, mask_tensor, drop=0.1)
 
     assert np.any(weights.data == 0)
+
+
+def test_embedding_vector():
+    x = np.array([1, 2, 3])
+    w = np.random.rand(5, 4)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+
+    expected_result = w[x]
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_embedding_batch_vectors():
+    x = np.array([[1, 2, 3], [0, 2, 4]])
+    w = np.random.rand(5, 4)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor)
+
+    expected_result = w[x]
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_embedding_vector_with_padid():
+    x = np.array([1, 2, 3, 0])
+    w = np.random.rand(5, 4)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor, padid=0)
+
+    expected_result = w[x]
+    expected_result[x == 0] = 0
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_embedding_batch_vectors_with_padid():
+    x = np.array([[1, 2, 3], [0, 2, 4]])
+    w = np.random.rand(5, 4)
+    x_tensor = nura.tensor(x, dtype=nura.int)
+    w_tensor = nura.tensor(w)
+    result_tensor = f.embedding(x_tensor, w_tensor, padid=0)
+
+    expected_result = w[x]
+    expected_result[x == 0] = 0
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def binarycrossentropy_reference(x, y, reduction):
+    loss = -(y * np.log(x) + (1 - y) * np.log(1 - x))
+    if reduction == "mean":
+        return np.mean(loss)
+    elif reduction == "sum":
+        return np.sum(loss)
+    return loss
+
+
+def test_binarycrossentropy_vector_mean():
+    x = np.array([0.9, 0.8, 0.1])
+    y = np.array([1.0, 0.0, 1.0])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.binarycrossentropy(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = binarycrossentropy_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_binarycrossentropy_vector_sum():
+    x = np.array([0.9, 0.8, 0.1])
+    y = np.array([1.0, 0.0, 1.0])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.binarycrossentropy(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = binarycrossentropy_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_binarycrossentropy_vector_none():
+    x = np.array([0.9, 0.8, 0.1])
+    y = np.array([1.0, 0.0, 1.0])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.binarycrossentropy(x_tensor, y_tensor, reduction=None)
+
+    expected_result = binarycrossentropy_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_binarycrossentropy_batch_vectors_mean():
+    x = np.array([[0.9, 0.8, 0.1], [0.7, 0.4, 0.3]])
+    y = np.array([[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.binarycrossentropy(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = binarycrossentropy_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_binarycrossentropy_batch_vectors_sum():
+    x = np.array([[0.9, 0.8, 0.1], [0.7, 0.4, 0.3]])
+    y = np.array([[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.binarycrossentropy(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = binarycrossentropy_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_binarycrossentropy_batch_vectors_none():
+    x = np.array([[0.9, 0.8, 0.1], [0.7, 0.4, 0.3]])
+    y = np.array([[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.binarycrossentropy(x_tensor, y_tensor, reduction=None)
+
+    expected_result = binarycrossentropy_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def crossentropy_reference(x, y, ignoreid=None, reduction=None):
+    x = x - np.max(x, axis=1, keepdims=True) 
+    log_softmax_x = x - np.log(np.sum(np.exp(x), axis=1, keepdims=True))
+    nll_loss = -log_softmax_x[np.arange(len(y)), y]
+    if ignoreid is not None:
+        mask = y != ignoreid
+        nll_loss = nll_loss[mask]
+    if reduction == "mean":
+        return np.mean(nll_loss)
+    elif reduction == "sum":
+        return np.sum(nll_loss)
+    return nll_loss
+
+
+def test_crossentropy_basic_mean():
+    x = np.random.rand(3, 5)
+    y = np.array([0, 2, 1])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = crossentropy_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_crossentropy_basic_sum():
+    x = np.random.rand(3, 5)
+    y = np.array([0, 2, 1])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = crossentropy_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_crossentropy_basic_none():
+    x = np.random.rand(3, 5)
+    y = np.array([0, 2, 1])
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(x_tensor, y_tensor, reduction=None)
+
+    expected_result = crossentropy_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_crossentropy_with_ignoreid_mean():
+    x = np.random.rand(4, 5)
+    y = np.array([0, 2, 1, 3])
+    ignoreid = 2
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(
+        x_tensor, y_tensor, ignoreid=ignoreid, reduction="mean"
+    )
+
+    expected_result = crossentropy_reference(x, y, ignoreid=ignoreid, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_crossentropy_with_ignoreid_sum():
+    x = np.random.rand(4, 5)
+    y = np.array([0, 2, 1, 3])
+    ignoreid = 2
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(
+        x_tensor, y_tensor, ignoreid=ignoreid, reduction="sum"
+    )
+
+    expected_result = crossentropy_reference(x, y, ignoreid=ignoreid, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_crossentropy_with_ignoreid_none():
+    x = np.random.rand(4, 5)
+    y = np.array([0, 2, 1, 3])
+    ignoreid = 2
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y, dtype=nura.int)
+    result_tensor = f.crossentropy(
+        x_tensor, y_tensor, ignoreid=ignoreid, reduction=None
+    )
+
+    expected_result = crossentropy_reference(x, y, ignoreid=ignoreid, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
