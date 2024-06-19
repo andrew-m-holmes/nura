@@ -2,7 +2,7 @@ import numpy as np
 from nura.types import dimlike
 from nura.autograd.function import Function, Context
 from nura.tensors import Tensor
-from typing import Optional, Union
+from typing import Optional
 
 
 np._set_promotion_state("weak")
@@ -480,3 +480,13 @@ class LayerNorm(Function):
         dx = dx0 + dx1 + dx2
 
         return dx, dgamma, dbeta
+
+class BatchNorm(Function):
+
+    @staticmethod
+    def forward(context: Context, x: Tensor):
+        raise NotImplementedError
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        raise NotImplementedError
