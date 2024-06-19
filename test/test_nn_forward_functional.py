@@ -1485,3 +1485,57 @@ def test_mse_higher_order_tensor_none():
     np.testing.assert_allclose(
         result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
     )
+
+def test_dropout_scalar():
+    x = np.array(1.0)
+    p = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.dropout(x_tensor, p=p)
+    
+    assert result_tensor.data in [0.0, x / (1 - p)]
+
+def test_dropout_vector():
+    x = np.random.rand(5)
+    p = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.dropout(x_tensor, p=p)
+    
+    expected_values = x / (1 - p)
+    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+
+def test_dropout_matrix():
+    x = np.random.rand(3, 4)
+    p = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.dropout(x_tensor, p=p)
+    
+    expected_values = x / (1 - p)
+    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+
+def test_dropout_tensor():
+    x = np.random.rand(2, 3, 4)
+    p = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.dropout(x_tensor, p=p)
+    
+    expected_values = x / (1 - p)
+    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+
+def test_dropout_higher_order_tensor():
+    x = np.random.rand(2, 3, 4, 5)
+    p = 0.5
+    x_tensor = nura.tensor(x)
+    result_tensor = f.dropout(x_tensor, p=p)
+    
+    expected_values = x / (1 - p)
+    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+
+def test_dropout_high_rate():
+    x = np.random.rand(2, 3, 4, 5)
+    p = 0.9
+    x_tensor = nura.tensor(x)
+    result_tensor = f.dropout(x_tensor, p=p)
+    
+    assert np.any(result_tensor.data == 0.0)
+    expected_values = x / (1 - p)
+    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
