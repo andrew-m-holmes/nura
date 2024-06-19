@@ -1162,7 +1162,7 @@ def test_binarycrossentropy_batch_vectors_none():
 
 
 def crossentropy_reference(x, y, ignoreid=None, reduction=None):
-    x = x - np.max(x, axis=1, keepdims=True) 
+    x = x - np.max(x, axis=1, keepdims=True)
     log_softmax_x = x - np.log(np.sum(np.exp(x), axis=1, keepdims=True))
     nll_loss = -log_softmax_x[np.arange(len(y)), y]
     if ignoreid is not None:
@@ -1262,6 +1262,225 @@ def test_crossentropy_with_ignoreid_none():
     )
 
     expected_result = crossentropy_reference(x, y, ignoreid=ignoreid, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def mse_reference(x, y, reduction=None):
+    loss = 0.5 * np.power((x - y), 2)
+    if reduction == "mean":
+        return np.mean(loss)
+    elif reduction == "sum":
+        return np.sum(loss)
+    return loss
+
+
+def test_mse_scalar_mean():
+    x = np.array(2.0)
+    y = np.array(3.0)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = mse_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_scalar_sum():
+    x = np.array(2.0)
+    y = np.array(3.0)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = mse_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_scalar_none():
+    x = np.array(2.0)
+    y = np.array(3.0)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction=None)
+
+    expected_result = mse_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_vector_mean():
+    x = np.random.rand(5)
+    y = np.random.rand(5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = mse_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_vector_sum():
+    x = np.random.rand(5)
+    y = np.random.rand(5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = mse_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_vector_none():
+    x = np.random.rand(5)
+    y = np.random.rand(5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction=None)
+
+    expected_result = mse_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_matrix_mean():
+    x = np.random.rand(3, 4)
+    y = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = mse_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_matrix_sum():
+    x = np.random.rand(3, 4)
+    y = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = mse_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_matrix_none():
+    x = np.random.rand(3, 4)
+    y = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction=None)
+
+    expected_result = mse_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_tensor_mean():
+    x = np.random.rand(2, 3, 4)
+    y = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = mse_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_tensor_sum():
+    x = np.random.rand(2, 3, 4)
+    y = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = mse_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_tensor_none():
+    x = np.random.rand(2, 3, 4)
+    y = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction=None)
+
+    expected_result = mse_reference(x, y, reduction=None)
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_higher_order_tensor_mean():
+    x = np.random.rand(2, 3, 4, 5)
+    y = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="mean")
+
+    expected_result = mse_reference(x, y, reduction="mean")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_higher_order_tensor_sum():
+    x = np.random.rand(2, 3, 4, 5)
+    y = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction="sum")
+
+    expected_result = mse_reference(x, y, reduction="sum")
+
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+def test_mse_higher_order_tensor_none():
+    x = np.random.rand(2, 3, 4, 5)
+    y = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x)
+    y_tensor = nura.tensor(y)
+    result_tensor = f.mse(x_tensor, y_tensor, reduction=None)
+
+    expected_result = mse_reference(x, y, reduction=None)
 
     np.testing.assert_allclose(
         result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
