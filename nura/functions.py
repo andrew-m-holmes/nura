@@ -394,23 +394,31 @@ class Mean(Function):
 class Var(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
+    def forward(
+        context: Context, a: Tensor, correction: int, dim: dimlike, keepdims: bool
+    ):
         context.save(a)
+        context.correction = correction
         context.dim = dim
         context.keepdims = keepdims
         mean = a.data.mean(axis=dim, keepdims=keepdims)
         context.mean = mean
-        return a.data.var(axis=dim, keepdims=keepdims)
+        return a.data.var(ddof=correction, axis=dim, keepdims=keepdims)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
+        correction = context.correction
         dim = context.dim
         keepdims = context.keepdims
         mean = context.mean
         graddata = grad.data
 
-        n = np.prod(a.dim) if dim is None else np.prod(a.dim[dim])
+        n = (
+            np.prod(a.dim)
+            if dim is None
+            else np.prod(tuple(a.dim[i] for i in range(a.ndim))) - correction
+        )
         if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
         return graddata * (2 / n) * -mean

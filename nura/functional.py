@@ -183,15 +183,27 @@ def mean(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Te
     return out
 
 
-def var(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
+def var(
+    a: Tensor,
+    correction: int = 0,
+    dim: Optional[dimlike] = None,
+    keepdims: bool = False,
+) -> Tensor:
+    if correction < 0:
+        raise ValueError("Cannot compute vairance with bias correct less than zero")
     if dim is None:
         dim = tuple(range(a.ndim))
-    out = functions.Var.apply(a, dim, keepdims)
+    out = functions.Var.apply(a, correction, dim, keepdims)
     return out
 
 
-def std(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
-    return sqrt(var(a, dim, keepdims))
+def std(
+    a: Tensor,
+    correction: int = 0,
+    dim: Optional[dimlike] = None,
+    keepdims: bool = False,
+) -> Tensor:
+    return sqrt(var(a, correction, dim, keepdims))
 
 
 def transpose(a: Tensor, dim0: int = -2, dim1: int = -1) -> Tensor:
