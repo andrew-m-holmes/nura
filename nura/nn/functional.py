@@ -128,6 +128,19 @@ def layernorm(
     return functions.LayerNorm.apply(x, gamma, beta, dim, eps)
 
 
+def batchnorm1d(
+    x: Tensor,
+    gamma: Tensor,
+    beta: Tensor,
+    mean: Optional[Tensor] = None,
+    var: Optional[Tensor] = None,
+    eps: float = 1e-5,
+) -> Tensor:
+    if x.ndim < 1 or x.ndim > 3:
+        raise ValueError(f"Received input neither 2D or 3D: {x.ndim=}")
+    return functions.BatchNorm1D.apply(x, gamma, beta, mean, var, eps)
+
+
 def conv1d():
     raise NotImplementedError
 

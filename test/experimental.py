@@ -7,10 +7,17 @@ import numpy as np
 
 def main():
 
-    a = nura.randn(5, 1, 2, usegrad=True).double()
-    b = a.mean(dim=(-2, -1), keepdims=True)
-    c = a.std(correction=1, dim=(-3, -1), keepdims=True)
-    c.backward()
+    a = nura.randn(32, 10, usegrad=True)
+    gamma = nura.ones(10)
+    beta = nura.zeros(10)
+    out = f.batchnorm1d(a, gamma, beta)
+    print(out)
+
+    b = nura.randn(32, 7, 64, usegrad=True)
+    gamma = nura.ones(64)
+    beta = nura.zeros(64)
+    out = f.batchnorm1d(b, gamma, beta)
+    print(out)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import nura
 from nura.tensors import Tensor
 from numpy import ndarray
-from typing import Tuple, Any, Optional, Union, OrderedDict
+from typing import Tuple, Any, Optional, Union
 
 
 class Context:
@@ -41,9 +41,7 @@ class Context:
 class Function:
 
     @staticmethod
-    def forward(
-        context: Context, *args: Any, **kwargs: Any
-    ) -> Union[Tuple[ndarray, ...], ndarray]:
+    def forward(context: Context, *args: Any, **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @staticmethod
@@ -60,21 +58,13 @@ class Function:
     def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
         arr = cls.forward(context, *args, **kwargs)
-        aux = None
-
-        if isinstance(arr, tuple):
-            output, aux = (nura.tensor(a) for a in arr)
-        else:
-            output = nura.tensor(arr)
+        output = nura.tensor(arr)
         if context.usesgrad():
             if nura.Autograd.forwardmode():
                 nura.forwardad.primalify(output, cls, context)
             elif nura.Autograd.reversemode():
                 nura.graph.addtograph(output, cls, context)
-
-        if aux is None:
-            return output
-        return output, aux
+        return output
 
     @classmethod
     def name(cls) -> str:

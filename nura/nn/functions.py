@@ -481,11 +481,30 @@ class LayerNorm(Function):
 
         return dx, dgamma, dbeta
 
-class BatchNorm(Function):
+
+class BatchNorm1D(Function):
 
     @staticmethod
-    def forward(context: Context, x: Tensor):
-        raise NotImplementedError
+    def forward(
+        context: Context,
+        x: Tensor,
+        gamma: Tensor,
+        beta: Tensor,
+        mean: Optional[Tensor],
+        var: Optional[Tensor],
+        eps: float,
+    ):
+        dim = (0, 1) if x.ndim == 3 else -1
+        mu = x.data.mean(axis=dim, keepdims=True) if mean is None else mean.data
+        xvar = x.data.var(ddof=0, axis=dim, keepdims=True) if var is None else var.data
+        istd = 1 / np.sqrt(xvar + eps)
+        xnorm = (x.data - mu) * istd
+
+        context.save(x)
+        context.xnorm = xnorm
+        context.istd = istd
+        context.mu = mu
+        return gamma.data * xnorm + beta.data
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
