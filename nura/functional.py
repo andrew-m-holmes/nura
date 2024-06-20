@@ -176,6 +176,24 @@ def min(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Ten
     return out
 
 
+def mean(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
+    if dim is None:
+        dim = tuple(range(a.ndim))
+    out = functions.Mean.apply(a, dim, keepdims)
+    return out
+
+
+def var(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
+    if dim is None:
+        dim = tuple(range(a.ndim))
+    out = functions.Var.apply(a, dim, keepdims)
+    return out
+
+
+def std(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Tensor:
+    return sqrt(var(a, dim, keepdims))
+
+
 def transpose(a: Tensor, dim0: int = -2, dim1: int = -1) -> Tensor:
     out = functions.Transpose.apply(a, dim0, dim1)
     return out

@@ -191,6 +191,15 @@ class Tensor:
     def min(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
         return nura.min(self, dim, keepdims)
 
+    def mean(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
+        return nura.mean(self, dim, keepdims)
+
+    def var(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
+        return nura.var(self, dim, keepdims)
+
+    def std(self, dim: Optional[dimlike] = None, keepdims: bool = False) -> "Tensor":
+        return nura.std(self, dim, keepdims)
+
     def squeeze(self, dim: Optional[dimlike] = None) -> "Tensor":
         return nura.squeeze(self, dim)
 
