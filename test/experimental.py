@@ -3,21 +3,18 @@ import nura.nn as nn
 import nura.nn.utils as u
 import nura.nn.functional as f
 import numpy as np
+import torch
+import torch.nn as nn
 
 
 def main():
 
-    a = nura.randn(32, 10, usegrad=True)
-    gamma = nura.ones(10)
-    beta = nura.zeros(10)
-    out = f.batchnorm1d(a, gamma, beta)
-    print(out)
-
-    b = nura.randn(32, 7, 64, usegrad=True)
-    gamma = nura.ones(64)
-    beta = nura.zeros(64)
-    out = f.batchnorm1d(b, gamma, beta)
-    print(out)
+    a = np.random.randn(64, 3, 5)
+    b = a.swapaxes(1, 2)
+    amu = a.mean(axis=(0, 1))
+    bmu = b.mean(axis=(0, 2))
+    cmu = a.reshape(64, -1, 3).mean(axis=(0, 2))
+    print(a.shape, b.shape, amu, bmu, cmu, sep="\n")
 
 
 if __name__ == "__main__":
