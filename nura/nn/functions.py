@@ -498,14 +498,42 @@ class BatchNorm1D(Function):
         mu = x.data.mean(axis=dim, keepdims=True) if mean is None else mean.data
         xvar = x.data.var(ddof=0, axis=dim, keepdims=True) if var is None else var.data
         istd = 1 / np.sqrt(xvar + eps)
-        xnorm = (x.data - mu) * istd
+        norm = (x.data - mu) * istd
 
-        context.save(x)
-        context.xnorm = xnorm
+        context.save(x, gamma, beta)
+        context.dim = dim
+        context.norm = norm
         context.istd = istd
         context.mu = mu
-        return gamma.data * xnorm + beta.data
+        return gamma.data * norm + beta.data
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        raise NotImplementedError
+        x, gamma, beta = context.tensors()
+        dim = context.dim
+        mu = context.mu
+        istd = context.istd
+        norm = context.norm
+
+        n = (
+            x.data.shape[dim]
+            if isinstance(dim, int)
+            else np.prod([x.data[d] for d in dim])
+        )
+
+        dgamma = grad.data * norm
+        dbeta = grad.data.copy()
+        dnorm = grad.data * gamma.data
+
+        diff = x.data - mu
+        dvar = np.sum(-0.5 * dnorm * diff * np.power(istd, 3), axis=dim, keepdims=True)
+        dmu0 = np.sum(-1 * dnorm * istd, axis=dim, keepdims=True)
+        dmu1 = (-2 / n) * dvar * np.sum(diff, axis=dim, keepdims=True)
+        dmu = dmu0 + dmu1
+
+        dx0 = dnorm * istd
+        dx1 = (2 / n) * dvar * diff
+        dx2 = (1 / n) * dmu
+        dx = dx0 + dx1 + dx2
+
+        return dx, dgamma, dbeta
