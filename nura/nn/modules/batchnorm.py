@@ -1,4 +1,5 @@
 import nura
+import nura.nn.functional as f
 from nura.tensors import Tensor
 from nura.nn.modules.module import Module
 from nura.nn.parameter import Parameter, parameter
@@ -51,6 +52,15 @@ class BatchNorm1D(Module):
     @property
     def beta(self) -> Parameter:
         return self._beta
+
+    def forward(self, x: Tensor) -> Tensor:
+        if self.training:
+            mean = x.clone().detach().mean(dim=x.dim[:-1], keepdims=True)
+            var = x.clone().detach().var(dim=x.dim[:-1], keepdims=True)
+            varunbiased = (
+                x.clone().detach().var(correction=1, dim=x.dim[:-1], keepdims=True)
+            )
+        pass
 
 
 def ema(ema: Tensor, stat: Tensor, momentum: float, graph: bool = False) -> Tensor:
