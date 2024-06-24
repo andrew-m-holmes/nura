@@ -7,7 +7,7 @@ from nura.types import dtype
 from typing import Optional, Type
 
 
-class BatchNorm1D(Module):
+class BatchNorm(Module):
 
     def __init__(
         self,
@@ -26,8 +26,8 @@ class BatchNorm1D(Module):
         self._dtype = dtype
         self._gamma = parameter(nura.ones(normdim), usegrad=True, dtype=dtype)
         self._beta = parameter(nura.zeros(normdim), usegrad=True, dtype=dtype)
-        self._means = []
-        self._vars = []
+        self._mean = None
+        self._var = None
 
     @property
     def normdim(self) -> int:
@@ -55,14 +55,14 @@ class BatchNorm1D(Module):
 
     def forward(self, x: Tensor) -> Tensor:
         if self.training:
+            self._mean = nura.zeros(self.normdim).to(self.dtype)
+            self._var = nura.zeros(self.normdim).to(self.dtype)
             mean = x.clone().detach().mean(dim=x.dim[:-1], keepdims=True)
             var = x.clone().detach().var(dim=x.dim[:-1], keepdims=True)
             varunbiased = (
                 x.clone().detach().var(correction=1, dim=x.dim[:-1], keepdims=True)
             )
-        pass
-
-
-def ema(ema: Tensor, stat: Tensor, momentum: float, graph: bool = False) -> Tensor:
-    with nura.setgrad(graph):
-        return ema * momentum + (1 - momentum) * stat
+            self._mean = self.momentum * self._mean + (1 - self.momentum) * mean
+            self._var = self.momentum * self._var + (1 - self.momentum) * varunbiased
+            return f.batchnorm(x, self.gamma, self.beta, mean, var, self.eps)
+        return f.batchnorm(x, self.gamma, self.beta, self._mean, self._var, self.eps)

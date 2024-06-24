@@ -128,7 +128,7 @@ def layernorm(
     return functions.LayerNorm.apply(x, gamma, beta, dim, eps)
 
 
-def batchnorm1d(
+def batchnorm(
     x: Tensor,
     gamma: Tensor,
     beta: Tensor,
@@ -136,9 +136,14 @@ def batchnorm1d(
     var: Optional[Tensor] = None,
     eps: float = 1e-5,
 ) -> Tensor:
-    if x.ndim < 1 or x.ndim > 3:
-        raise ValueError(f"Received input neither 2D or 3D: {x.ndim=}")
-    return functions.BatchNorm1D.apply(x, gamma, beta, mean, var, eps)
+    if x.ndim < 1 or x.ndim > 5:
+        raise ValueError(f"Expected input to be 2D, 3D, 4D, or 5D, received {x.ndim}D")
+    dim = tuple(range(x.ndim))[:-1]
+    if mean is None:
+        mean = x.mean(dim=dim, keepdims=True)
+    if var is None:
+        var = x.var(dim=dim, keepdims=True)
+    return functions.BatchNorm.apply(x, gamma, beta, mean, var, dim, eps)
 
 
 def conv1d():

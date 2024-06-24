@@ -461,7 +461,7 @@ class LayerNorm(Function):
         n = (
             x.data.shape[dim]
             if isinstance(dim, int)
-            else np.prod([x.data[d] for d in dim])
+            else np.prod([x.data.shape[d] for d in dim])
         )
 
         dgamma = grad.data * norm
@@ -482,7 +482,7 @@ class LayerNorm(Function):
         return dx, dgamma, dbeta
 
 
-class BatchNorm1D(Function):
+class BatchNorm(Function):
 
     @staticmethod
     def forward(
@@ -490,13 +490,13 @@ class BatchNorm1D(Function):
         x: Tensor,
         gamma: Tensor,
         beta: Tensor,
-        mean: Optional[Tensor],
-        var: Optional[Tensor],
+        mean: Tensor,
+        var: Tensor,
+        dim: dimlike,
         eps: float,
     ):
-        dim = (0, 1) if x.ndim == 3 else -1
-        mu = x.data.mean(axis=dim, keepdims=True) if mean is None else mean.data
-        xvar = x.data.var(ddof=0, axis=dim, keepdims=True) if var is None else var.data
+        mu = mean.data
+        xvar = var.data
         istd = 1 / np.sqrt(xvar + eps)
         norm = (x.data - mu) * istd
 
@@ -518,7 +518,7 @@ class BatchNorm1D(Function):
         n = (
             x.data.shape[dim]
             if isinstance(dim, int)
-            else np.prod([x.data[d] for d in dim])
+            else np.prod([x.data.shape[d] for d in dim])
         )
 
         dgamma = grad.data * norm
