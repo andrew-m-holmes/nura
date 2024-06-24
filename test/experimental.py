@@ -7,15 +7,18 @@ import numpy as np
 
 def main():
 
-    x = nura.randn(2, 3, 10, 5, 4).attach()
-    gamma = nura.ones(4).attach()
-    beta = nura.zeroslike(gamma).attach()
-    y = f.batchnorm(x, gamma, beta)
-    y.backward(nura.oneslike(x))
+    x = nura.randn(2, 3, 2, 2, 4).attach()
+    m = nn.BatchNorm(4)
+    m.train()
+    print(m)
+    y = m(x)
     print(y)
-    print(x.grad)
-    print(gamma.grad)
-    print(beta.grad)
+    z = y.sum()
+    z.backward()
+    print(m.gamma.grad)
+    print(m.beta.grad)
+    print(m._mean)
+    print(m._var)
 
 
 if __name__ == "__main__":

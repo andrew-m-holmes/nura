@@ -54,15 +54,27 @@ class BatchNorm(Module):
         return self._beta
 
     def forward(self, x: Tensor) -> Tensor:
+        if x.dim[-1] != self.normdim:
+            raise ValueError(
+                f"Expected feature dimension to be {self.normdim} but received {x.dim[-1]}"
+            )
         if self.training:
             self._mean = nura.zeros(self.normdim).to(self.dtype)
             self._var = nura.zeros(self.normdim).to(self.dtype)
-            mean = x.clone().detach().mean(dim=x.dim[:-1], keepdims=True)
-            var = x.clone().detach().var(dim=x.dim[:-1], keepdims=True)
-            varunbiased = (
-                x.clone().detach().var(correction=1, dim=x.dim[:-1], keepdims=True)
-            )
+            dim = tuple(range(x.ndim))[:-1]
+            mean = x.clone().detach().mean(dim=dim, keepdims=True)
+            var = x.clone().detach().var(dim=dim, keepdims=True)
+            varunbiased = x.clone().detach().var(correction=1, dim=dim, keepdims=True)
             self._mean = self.momentum * self._mean + (1 - self.momentum) * mean
             self._var = self.momentum * self._var + (1 - self.momentum) * varunbiased
             return f.batchnorm(x, self.gamma, self.beta, mean, var, self.eps)
         return f.batchnorm(x, self.gamma, self.beta, self._mean, self._var, self.eps)
+
+    def xrepr(self) -> str:
+        nordim, momentum, eps, dtype = (
+            self.normdim,
+            self.momentum,
+            self.eps,
+            self.dtype.name(),
+        )
+        return f"{self.name()}({nordim=} {momentum=} {eps=:.2e} {dtype=})"

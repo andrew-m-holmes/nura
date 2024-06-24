@@ -5,3 +5,4 @@ from .embedding import Embedding
 from .multihead import MultiHeadAttention
 from .dropout import Dropout
 from .layernorm import LayerNorm
+from .batchnorm import BatchNorm
