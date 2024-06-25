@@ -71,14 +71,16 @@ class Softmax(Function):
             gdata = grad.data
             jac = diagonal - offdiagonal
         else:
-            p = p.reshape(-1, p.shape[dim])
+            p = p.swapaxes(dim, -1).reshape(-1, p.shape[dim])
             diagonal = np.einsum("ij,jk->ijk", p, np.eye(p.shape[dim]))
             offdiagonal = np.einsum("ij,ik->ijk", p, p)
             gdata = grad.data.reshape(-1, p.shape[dim], 1)
 
+        # TODO figure out backward method
+
         jac = diagonal - offdiagonal
         gout = np.matmul(jac, gdata)
-        return gout.reshape(outshape) if p.ndim > 1 else gout
+        return gout.reshape(outshape).swapaxes(dim, -1) if p.ndim > 1 else gout
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):

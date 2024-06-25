@@ -633,3 +633,26 @@ class Slice(Function):
         slice_ = context.slice_
         arr = grad.data[slice_]
         return arr.copy()
+
+
+class Flatten(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, pos: int):
+        context.save(a)
+        dim = a.data.shape
+        lastdim = np.prod(a.data.shape[pos:])
+        newdim = a.data.shape[:pos] + (lastdim,)
+        context.dim = dim
+        context.newdim = newdim
+        return a.data.reshape(newdim)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        dim = context.dim
+        return grad.data.reshape(dim)
+
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
+        newdim = context.newdim
+        return grad.data.reshape(newdim)
