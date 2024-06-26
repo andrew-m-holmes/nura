@@ -7,11 +7,12 @@ import numpy as np
 
 def main():
 
-    x = np.random.randn(3, 4)
-    print(x)
-    x = x.swapaxes(1, -1)
-    print(x)
-    print(x.shape)
+    a = nura.randn(3, 3, 4, usegrad=True)
+    b = nura.randn(3, 3, 1)
+    c = nura.concat(a, b, dim=-1)
+    print(c.dim)
+    c.backward(nura.oneslike(c))
+    print(a.grad)
 
 
 if __name__ == "__main__":

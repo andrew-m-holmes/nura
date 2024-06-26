@@ -262,3 +262,24 @@ def select(
         slice_ = slice_.data
     out = functions.Slice.apply(a, slice_)
     return out
+
+
+def flatten(a: Tensor, start: int = 0, end: int = -1) -> Tensor:
+    if a.ndim + end <= start:
+        raise ValueError(
+            "Cannot flatten Tensor, flatten ends at or before flatten starts"
+        )
+    return functions.Flatten.apply(a, start, end)
+
+
+def concat(a: Tensor, b: Tensor, dim: int = 0) -> Tensor:
+    if a.ndim != b.ndim:
+        raise ValueError(
+            "Cannot concatenate Tensors, they don't have the same number of dimensions"
+        )
+    dim = dim + a.ndim if dim < 0 else dim
+    if a.dim[:dim] + a.dim[dim + 1 :] != b.dim[:dim] + b.dim[dim + 1 :]:
+        raise ValueError(
+            "Cannot concatenate Tensors, they differ for more than one dimension"
+        )
+    return functions.Concat.apply(a, b, dim)

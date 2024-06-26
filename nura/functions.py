@@ -638,11 +638,14 @@ class Slice(Function):
 class Flatten(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, pos: int):
+    def forward(context: Context, a: Tensor, start: int, end: int):
         context.save(a)
-        dim = a.data.shape
-        lastdim = np.prod(a.data.shape[pos:])
-        newdim = a.data.shape[:pos] + (lastdim,)
+        dim = a.dim
+        if end < 0:
+            end += a.ndim
+        newdim = dim[:start] + (np.prod(dim[start : end + 1]),)
+        if end < a.ndim - 1:
+            newdim += dim[end + 1 :]
         context.dim = dim
         context.newdim = newdim
         return a.data.reshape(newdim)
@@ -656,3 +659,25 @@ class Flatten(Function):
     def tangent(context: Context, grad: Tensor):
         newdim = context.newdim
         return grad.data.reshape(newdim)
+
+
+class Concat(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor, dim: int):
+        context.save(a, b)
+        context.dim = dim
+        return np.concatenate((a.data, b.data), axis=dim)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a, b = context.tensors()
+        dim = context.dim
+        index = a.data.shape[dim]
+        output = tuple(np.split(grad.data, (index, index), axis=dim))
+        return (output[0].copy(), output[-1].copy())
+
+    @staticmethod
+    def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
+        dim = context.dim
+        return np.concatenate((agrad.data, bgrad.data), axis=dim)

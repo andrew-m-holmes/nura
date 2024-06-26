@@ -47,6 +47,8 @@ from .functional import (
     neg,
     clone,
     select,
+    flatten,
+    concat,
 )
 
 from .utils import (
