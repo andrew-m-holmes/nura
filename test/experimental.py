@@ -7,12 +7,10 @@ import numpy as np
 
 def main():
 
-    a = nura.randn(3, 3, 4, usegrad=True)
-    b = nura.randn(3, 3, 1)
-    c = nura.concat(a, b, dim=-1)
-    print(c.dim)
-    c.backward(nura.oneslike(c))
-    print(a.grad)
+    a = nura.randn(3, 3, 4, 5, usegrad=True)
+    b = nura.flatten(a, 1, 2)
+    print(b.dim)
+    b.backward(nura.oneslike(b))
 
 
 if __name__ == "__main__":
