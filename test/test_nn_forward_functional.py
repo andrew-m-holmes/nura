@@ -1486,65 +1486,83 @@ def test_mse_higher_order_tensor_none():
         result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
     )
 
+
 def test_dropout_scalar():
     x = np.array(1.0)
     p = 0.5
     x_tensor = nura.tensor(x)
     result_tensor = f.dropout(x_tensor, p=p)
-    
+
     assert result_tensor.data in [0.0, x / (1 - p)]
+
 
 def test_dropout_vector():
     x = np.random.rand(5)
     p = 0.5
     x_tensor = nura.tensor(x)
     result_tensor = f.dropout(x_tensor, p=p)
-    
+
     expected_values = x / (1 - p)
-    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+    assert np.all(
+        (result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values)
+    )
+
 
 def test_dropout_matrix():
     x = np.random.rand(3, 4)
     p = 0.5
     x_tensor = nura.tensor(x)
     result_tensor = f.dropout(x_tensor, p=p)
-    
+
     expected_values = x / (1 - p)
-    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+    assert np.all(
+        (result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values)
+    )
+
 
 def test_dropout_tensor():
     x = np.random.rand(2, 3, 4)
     p = 0.5
     x_tensor = nura.tensor(x)
     result_tensor = f.dropout(x_tensor, p=p)
-    
+
     expected_values = x / (1 - p)
-    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+    assert np.all(
+        (result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values)
+    )
+
 
 def test_dropout_higher_order_tensor():
     x = np.random.rand(2, 3, 4, 5)
     p = 0.5
     x_tensor = nura.tensor(x)
     result_tensor = f.dropout(x_tensor, p=p)
-    
+
     expected_values = x / (1 - p)
-    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+    assert np.all(
+        (result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values)
+    )
+
 
 def test_dropout_high_rate():
     x = np.random.rand(2, 3, 4, 5)
     p = 0.9
     x_tensor = nura.tensor(x)
     result_tensor = f.dropout(x_tensor, p=p)
-    
+
     assert np.any(result_tensor.data == 0.0)
     expected_values = x / (1 - p)
-    assert np.all((result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values))
+    assert np.all(
+        (result_tensor.data == 0.0) | np.isclose(result_tensor.data, expected_values)
+    )
+
 
 def layernorm_reference(x, gamma, beta, dim, eps=1e-5):
     mean = np.mean(x, axis=dim, keepdims=True)
     var = np.var(x, axis=dim, keepdims=True)
     normalized = (x - mean) / np.sqrt(var + eps)
     return gamma * normalized + beta
+
 
 def test_layernorm_vector():
     x = np.random.rand(5)
@@ -1554,10 +1572,13 @@ def test_layernorm_vector():
     gamma_tensor = nura.tensor(gamma)
     beta_tensor = nura.tensor(beta)
     result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1)
-    
+
     expected_result = layernorm_reference(x, gamma, beta, dim=-1)
 
-    np.testing.assert_allclose(result_tensor.data, expected_result, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_layernorm_matrix():
     x = np.random.rand(3, 4)
@@ -1567,10 +1588,13 @@ def test_layernorm_matrix():
     gamma_tensor = nura.tensor(gamma)
     beta_tensor = nura.tensor(beta)
     result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1)
-    
+
     expected_result = layernorm_reference(x, gamma, beta, dim=-1)
 
-    np.testing.assert_allclose(result_tensor.data, expected_result, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_layernorm_tensor():
     x = np.random.rand(2, 3, 4)
@@ -1580,10 +1604,13 @@ def test_layernorm_tensor():
     gamma_tensor = nura.tensor(gamma)
     beta_tensor = nura.tensor(beta)
     result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1)
-    
+
     expected_result = layernorm_reference(x, gamma, beta, dim=-1)
 
-    np.testing.assert_allclose(result_tensor.data, expected_result, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_layernorm_higher_order_tensor():
     x = np.random.rand(2, 3, 4, 5)
@@ -1593,10 +1620,13 @@ def test_layernorm_higher_order_tensor():
     gamma_tensor = nura.tensor(gamma)
     beta_tensor = nura.tensor(beta)
     result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=-1)
-    
+
     expected_result = layernorm_reference(x, gamma, beta, dim=-1)
 
-    np.testing.assert_allclose(result_tensor.data, expected_result, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
 
 def test_layernorm_tensor_with_tuple_dim():
     x = np.random.rand(2, 3, 4, 5)
@@ -1606,7 +1636,13 @@ def test_layernorm_tensor_with_tuple_dim():
     gamma_tensor = nura.tensor(gamma)
     beta_tensor = nura.tensor(beta)
     result_tensor = f.layernorm(x_tensor, gamma_tensor, beta_tensor, dim=(-2, -1))
-    
+
     expected_result = layernorm_reference(x, gamma, beta, dim=(-2, -1))
 
-    np.testing.assert_allclose(result_tensor.data, expected_result, rtol=1e-7, atol=1e-7)
+    np.testing.assert_allclose(
+        result_tensor.data, expected_result, rtol=1e-7, atol=1e-7
+    )
+
+
+# TODO add tests for batchnorm
+

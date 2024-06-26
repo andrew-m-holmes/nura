@@ -1342,7 +1342,9 @@ def test_min_dim_3_shape_3():
     expected = np.min(a, axis=3)
     np.testing.assert_allclose(result_tensor.data, expected, rtol=1e-7, atol=1e-7)
 
+
 # TODO add tests for mean, var, and std
+
 
 def test_transpose_matrix():
     a = np.random.rand(3, 4)
