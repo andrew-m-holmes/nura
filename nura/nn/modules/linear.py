@@ -1,62 +1,71 @@
 import nura.types as types
-from nura.nn import parameter
-from nura.utils import randn
-from nura.nn.module import Module
+import nura.nn.functional as f
+import nura.utils as utils
+from nura.nn.modules.module import Module
+from nura.nn.parameter import Parameter, parameter
+from nura.nn.utils import he
 from nura.tensors import Tensor
 from nura.types import dtype
-from nura.nn.functional import linear
-from typing import Type, Optional
+from typing import Type, Optional, Callable
 
 
 class Linear(Module):
 
     def __init__(
         self,
-        indim: int,
-        outdim: int,
-        bias=True,
+        inputdim: int,
+        outputdim: int,
+        bias: bool = True,
+        init: Optional[Callable[..., Tensor]] = None,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
-
         super().__init__()
+        if init is None:
+            init = he
         if dtype is None:
             dtype = types.float
-        self._indim = indim
-        self._outdim = outdim
+
+        self._inputdim = inputdim
+        self._outputdim = outputdim
+        self._init = init
         self._dtype = dtype
-        self._weight = parameter(randn((outdim, indim)), True, dtype)
-        self._bias = parameter(randn(outdim), True, dtype) if bias else None
+        self._weight = parameter(init(inputdim, outputdim), dtype=dtype)
+        self._bias = parameter(utils.randn(outputdim), dtype=dtype) if bias else None
 
     @property
-    def weight(self):
+    def weight(self) -> Parameter:
         return self._weight
 
     @property
-    def bias(self):
+    def bias(self) -> Optional[Parameter]:
         return self._bias
 
     @property
-    def indim(self):
-        return self._indim
+    def inputdim(self) -> int:
+        return self._inputdim
 
     @property
-    def outdim(self):
-        return self._outdim
+    def outputdim(self) -> int:
+        return self._outputdim
 
     @property
-    def dtype(self):
+    def init(self) -> Callable[..., Tensor]:
+        return self._init
+
+    @property
+    def dtype(self) -> Type[dtype]:
         return self._dtype
 
     def forward(self, x: Tensor) -> Tensor:
-        return linear(x, self.weight, self.bias)
+        return f.linear(x, self.weight, self.bias)
 
-    def to(self, dtype: Type[types.dtype]):
+    def to(self, dtype: Type[types.dtype]) -> Module:
         mod = super().to(dtype)
         mod._dtype = dtype
         return mod
 
     def xrepr(self) -> str:
-        indim, outdim = self.indim, self.outdim
+        inputdim, outputdim = self.inputdim, self.outputdim
         bias = True if self.bias is not None else False
         dtype = self.dtype.name()
-        return f"{self.name()}({indim=} {outdim=} {bias=} {dtype=})"
+        return f"{self.name()}({inputdim=} {outputdim=} {bias=} {dtype=})"

@@ -1,36 +1,66 @@
+import nura
+from nura.tensors import Tensor
 from contextlib import contextmanager
+from typing import Generator
 
 
-def usegrad():
-    return _Autograd._enabled
+class Autograd:
+    _usegrad = True
+    _forwardmode = False
 
+    @classmethod
+    def reversemode(cls) -> bool:
+        return cls._usegrad and not cls._forwardmode
 
-def forwardmode():
-    return _Autograd._forward
-
-
-def reversemode():
-    return _Autograd._reverse
-
-
-class _Autograd:
-
-    _enabled = True
-    _reverse = True
-    _forward = False
+    @classmethod
+    def forwardmode(cls) -> bool:
+        return cls._forwardmode and not cls._usegrad
 
 
 @contextmanager
-def autograd(enabled=True, reverse=True, forward=False):
-    prev_enabled = _Autograd._enabled
-    prev_reverse = _Autograd._reverse
-    prev_forward = _Autograd._forward
-    _Autograd._enabled = enabled
-    _Autograd._forward = forward
-    _Autograd._reverse = reverse
+def usegrad() -> Generator:
+    usegrad = Autograd._usegrad
+    forwardmode = Autograd._forwardmode
+    Autograd._usegrad = True
+    Autograd._forwardmode = False
     try:
         yield
     finally:
-        _Autograd._enabled = prev_enabled
-        _Autograd._forward = prev_forward
-        _Autograd._reverse = prev_reverse
+        Autograd._usegrad = usegrad
+        Autograd._forwardmode = forwardmode
+
+
+@contextmanager
+def nograd() -> Generator:
+    usegrad = Autograd._usegrad
+    Autograd._usegrad = False
+    try:
+        yield
+    finally:
+        Autograd._usegrad = usegrad
+
+
+@contextmanager
+def setgrad(state: bool) -> Generator:
+    usegrad = Autograd._usegrad
+    forwardmode = Autograd._forwardmode
+    Autograd._usegrad = state
+    Autograd._forwardmode = not state
+    try:
+        yield
+    finally:
+        Autograd._usegrad = usegrad
+        Autograd._forwardmode = forwardmode
+
+
+@contextmanager
+def forwardmode() -> Generator:
+    usegrad = Autograd._usegrad
+    forwardmode = Autograd._forwardmode
+    Autograd._usegrad = False
+    Autograd._forwardmode = True
+    try:
+        yield
+    finally:
+        Autograd._usegrad = usegrad
+        Autograd._forwardmode = forwardmode

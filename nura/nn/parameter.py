@@ -1,4 +1,4 @@
-import nura
+import nura.types as types
 from nura.types import dtype
 from nura.tensors import Tensor
 from nura.autograd.graph import Node
@@ -13,20 +13,20 @@ class Parameter(Tensor):
         data: ndarray,
         usegrad=True,
         grad: Optional["Tensor"] = None,
-        backfn: Optional[Node] = None,
+        gradfn: Optional[Node] = None,
         leaf=True,
     ) -> None:
-        super().__init__(data, usegrad, grad, backfn, leaf)
+        super().__init__(data, usegrad, grad, gradfn, leaf)
 
     def to(self, dtype: Type[dtype]):
         return parameter(super().to(dtype), self.usegrad, dtype)
 
     def __repr__(self) -> str:
-        return super().__repr__().replace("tensor", "param")
+        return super().__repr__().replace("tensor", "parameter")
 
 
 def parameter(a: Tensor, usegrad=True, dtype: Optional[Type[dtype]] = None):
-    validtypes = (nura.half, nura.float, nura.double)
+    validtypes = (types.half, types.float, types.double)
     if dtype is None:
         dtype = a.dtype
     if dtype not in validtypes:

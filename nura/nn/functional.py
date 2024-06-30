@@ -1,59 +1,60 @@
 import nura
-import nura.nn.functions as fn
+import nura.nn.functions as functions
+import nura.utils as utils
+from nura.types import dimlike
 from nura.tensors import Tensor
-from nura.utils import where
 from typing import Optional, Tuple
 
 
-def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None):
-    out = nura.matmul(x, w.T)
+def linear(x: Tensor, w: Tensor, b: Optional[Tensor] = None) -> Tensor:
+    out = nura.matmul(x, w.transpose())
     if b is not None:
         out = out + b
     return out
 
 
-def sigmoid(z: Tensor):
-    out = fn._Sigmoid.apply(z)
+def sigmoid(x: Tensor) -> Tensor:
+    out = functions.Sigmoid.apply(x)
     return out
 
 
-def tanh(z: Tensor):
-    out = fn._Tanh.apply(z)
+def tanh(x: Tensor) -> Tensor:
+    out = functions.Tanh.apply(x)
     return out
 
 
-def relu(z: Tensor):
-    out = fn._ReLU.apply(z)
+def relu(x: Tensor) -> Tensor:
+    out = functions.ReLU.apply(x)
     return out
 
 
-def relu6(z: Tensor):
-    out = fn._ReLU6.apply(z)
+def relu6(x: Tensor) -> Tensor:
+    out = functions.ReLU6.apply(x)
     return out
 
 
-def leakyrelu(z: Tensor, slope=0.01):
-    out = fn._LeakyReLU.apply(z, slope)
+def leakyrelu(x: Tensor, alpha: float = 0.01) -> Tensor:
+    out = functions.LeakyReLU.apply(x, alpha)
     return out
 
 
-def elu(z: Tensor, alpha=1.0):
-    out = fn._ELU.apply(z, alpha)
+def elu(x: Tensor, alpha: float = 1.0) -> Tensor:
+    out = functions.ELU.apply(x, alpha)
     return out
 
 
-def gelu(z: Tensor):
-    out = fn._GELU.apply(z)
+def gelu(x: Tensor) -> Tensor:
+    out = functions.GELU.apply(x)
     return out
 
 
-def celu(z: Tensor, alpha=1.0):
-    out = fn._CELU.apply(z, alpha)
+def celu(x: Tensor, alpha: float = 1.0) -> Tensor:
+    out = functions.CELU.apply(x, alpha)
     return out
 
 
-def softmax(a: Tensor, dim=-1):
-    out = fn._Softmax.apply(a, dim)
+def softmax(x: Tensor, dim: int = -1) -> Tensor:
+    out = functions.Softmax.apply(x, dim)
     return out
 
 
@@ -62,32 +63,120 @@ def attention(
     k: Tensor,
     v: Tensor,
     mask: Optional[Tensor] = None,
-    maskfill=-1e9,
+    maskfill: float = -1e9,
+    drop: Optional[float] = None,
 ) -> Tuple[Tensor, Tensor]:
-    dk = k.dim[-1]
-    simscore = nura.matmul(q, k.transpose(-1, -2)) / (dk**0.5)
+    norm = 1 / (k.dim[-1] ** 0.5)
+    simscore = nura.matmul(q, k.transpose(-1, -2)) * norm
     if mask is not None:
-        simscore = where(mask == True, simscore, maskfill)
+        simscore = utils.where(mask, simscore, maskfill)
     attn = softmax(simscore, -1)
+    if drop is not None:
+        attn = dropout(attn, drop)
     context = nura.matmul(attn, v)
     return context, attn
 
 
-def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None):
-    if x.dtype not in (nura.int, nura.long):
-        raise ValueError(
-            f"Expected 'x' to be of type 'int' or 'long' but got '{x.dtype.name()}'"
-        )
-    return fn._Embedding.apply(x, w, padid)
+def embedding(x: Tensor, w: Tensor, padid: Optional[int] = None) -> Tensor:
+    return functions.Embedding.apply(x, w, padid)
 
 
-def crossentropy(z: Tensor, y: Tensor, ignoreid: Optional[int] = None):
-    if z.ndim != 2:
-        raise ValueError(f"Expected 'z' to be 2D but got '{z.ndim}'D")
+def binarycrossentropy(
+    x: Tensor, y: Tensor, reduction: Optional[str] = "mean"
+) -> Tensor:
+    if y.ndim > 2:
+        raise ValueError(f"'y' cannot be more than 2D, received {y.ndim}D")
+    if x.ndim != y.ndim:
+        raise ValueError(f"'x' must have the same rank as 'y', {x.ndim} != {y.ndim}")
+    return functions.BinaryCrossEntropy.apply(x, y, reduction)
+
+
+def crossentropy(
+    x: Tensor,
+    y: Tensor,
+    ignoreid: Optional[int] = None,
+    reduction: Optional[str] = "mean",
+) -> Tensor:
+    if x.ndim != 2:
+        raise ValueError(f"'x' must be 2D, recieved {x.ndim}D")
     if y.ndim != 1:
-        raise ValueError(f"Expected 'y' to be 1D but got '{y.ndim}'D")
-    if y.dtype not in (nura.int, nura.long):
+        raise ValueError(f"'y' must be 1D, received {y.ndim}D")
+    return functions.CrossEntropy.apply(x, y, ignoreid, reduction)
+
+
+def mse(x: Tensor, y: Tensor, reduction: Optional[str] = "mean") -> Tensor:
+    if x.ndim != y.ndim:
         raise ValueError(
-            f"Expected 'y' to be of type 'int' or 'long' but got '{y.dtype.name()}'"
+            f"'x' must have the same dimensions as 'y', {x.ndim} != {y.ndim}"
         )
-    return fn._CrossEntropy.apply(z, y, ignoreid)
+    return functions.MSE.apply(x, y, reduction)
+
+
+def dropout(x: Tensor, p: float = 0.5) -> Tensor:
+    if p < 0 or p > 1:
+        raise ValueError(f"'p' must in the interval [0, 1], received {p}")
+    return functions.Dropout.apply(x, p)
+
+
+def layernorm(
+    x: Tensor,
+    gamma: Tensor,
+    beta: Tensor,
+    dim: dimlike = -1,
+    eps: float = 1e-5,
+) -> Tensor:
+    return functions.LayerNorm.apply(x, gamma, beta, dim, eps)
+
+
+def batchnorm(
+    x: Tensor,
+    gamma: Tensor,
+    beta: Tensor,
+    mean: Optional[Tensor] = None,
+    var: Optional[Tensor] = None,
+    eps: float = 1e-5,
+) -> Tensor:
+    if x.ndim < 1 or x.ndim > 5:
+        raise ValueError(f"Expected input to be 2D, 3D, 4D, or 5D, received {x.ndim}D")
+    dim = tuple(range(x.ndim))[:-1]
+    if mean is None:
+        mean = x.mean(dim=dim, keepdims=True)
+    if var is None:
+        var = x.var(dim=dim, keepdims=True)
+    return functions.BatchNorm.apply(x, gamma, beta, mean, var, dim, eps)
+
+
+def conv1d():
+    raise NotImplementedError
+
+
+def conv2d():
+    raise NotImplementedError
+
+
+def conv3d():
+    raise NotImplementedError
+
+
+def maxpool1d():
+    raise NotImplementedError
+
+
+def maxpool2d():
+    raise NotImplementedError
+
+
+def maxpool3d():
+    raise NotImplementedError
+
+
+def avgpool1d():
+    raise NotImplementedError
+
+
+def avgpool2d():
+    raise NotImplementedError
+
+
+def avgpool3d():
+    raise NotImplementedError

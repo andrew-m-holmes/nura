@@ -1,9 +1,9 @@
-from nura.nn import Module
 from nura.tensors import Tensor
+from nura.nn.modules.module import Module
 from nura.nn.modules.linear import Linear
-from nura.nn.activations import ScaledDotProductAttention
+from nura.nn.modules.activations import ScaledDotProductAttention
 from nura.types import dtype
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple, Callable, Type
 
 
 class MultiHeadAttention(Module):
@@ -14,8 +14,10 @@ class MultiHeadAttention(Module):
         dk: int,
         dv: int,
         heads: int,
-        maskfill=-1e9,
-        bias=False,
+        maskfill: float = -1e9,
+        bias: bool = False,
+        init: Optional[Callable[..., Tensor]] = None,
+        dropout: Optional[float] = None,
         dtype: Optional[Type[dtype]] = None,
     ) -> None:
 
@@ -28,41 +30,59 @@ class MultiHeadAttention(Module):
         self._heads = heads
         self._maskfill = maskfill
 
-        self._wq = Linear(dm, heads * dk, bias=bias, dtype=dtype)
-        self._wk = Linear(dm, heads * dk, bias=bias, dtype=dtype)
-        self._wv = Linear(dm, heads * dv, bias=bias, dtype=dtype)
-        self._wo = Linear(heads * dv, dm, bias=bias, dtype=dtype)
-        self._attn = ScaledDotProductAttention(maskfill=maskfill)
+        self._qweight = Linear(dm, heads * dk, bias=bias, init=init, dtype=dtype)
+        self._kweight = Linear(dm, heads * dk, bias=bias, init=init, dtype=dtype)
+        self._vweight = Linear(dm, heads * dv, bias=bias, init=init, dtype=dtype)
+        self._oweight = Linear(heads * dv, dm, bias=bias, init=init, dtype=dtype)
+        self._attn = ScaledDotProductAttention(maskfill=maskfill, dropout=dropout)
 
     @property
-    def dm(self):
+    def dm(self) -> int:
         return self._dm
 
     @property
-    def dk(self):
+    def dk(self) -> int:
         return self._dk
 
     @property
-    def dv(self):
+    def dv(self) -> int:
         return self._dv
 
     @property
-    def heads(self):
+    def heads(self) -> int:
         return self._heads
 
-    def forward(self, q, k, v, mask=None) -> Tuple[Tensor, Tensor]:
+    @property
+    def qweight(self) -> Linear:
+        return self._qweight
+
+    @property
+    def kweight(self) -> Linear:
+        return self._kweight
+
+    @property
+    def vweight(self) -> Linear:
+        return self._vweight
+
+    @property
+    def oweight(self) -> Linear:
+        return self._oweight
+
+    def forward(
+        self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
+    ) -> Tuple[Tensor, Tensor]:
         qlen = q.dim[1]
         klen = k.dim[1]
-        q = self._wq(q).reshape((-1, qlen, self._heads, self._dk)).transpose(1, 2)
-        k = self._wk(k).reshape((-1, klen, self._heads, self._dk)).transpose(1, 2)
-        v = self._wv(v).reshape((-1, klen, self._heads, self._dv)).transpose(1, 2)
+        q = self._qweight(q).reshape((-1, qlen, self._heads, self._dk)).transpose(1, 2)
+        k = self._kweight(k).reshape((-1, klen, self._heads, self._dk)).transpose(1, 2)
+        v = self._vweight(v).reshape((-1, klen, self._heads, self._dv)).transpose(1, 2)
 
         ctx, attn = self._attn(q, k, v, mask=mask)
         ctx = ctx.reshape((-1, qlen, self._heads * self._dv))
-        out = self._wo(ctx)
+        out = self._oweight(ctx)
         return out, attn
 
-    def xrepr(self):
+    def xrepr(self) -> str:
         dm, dk, dv = self.dm, self.dk, self.dv
         heads = self._heads
         return f"{self.name()}({dm=} {dk=} {dv=} {heads=})"

@@ -2,10 +2,12 @@ import numpy as np
 from .tensors import Tensor
 from .autograd.function import Context, Function
 from nura.types import dim, dimlike
-from typing import Any
+from typing import Any, Tuple, Union, Optional
+
+np._set_promotion_state("weak")
 
 
-class _Add(Function):
+class Add(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -23,7 +25,7 @@ class _Add(Function):
         return arr
 
 
-class _Sub(Function):
+class Sub(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -41,7 +43,7 @@ class _Sub(Function):
         return arr
 
 
-class _Mul(Function):
+class Mul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -63,31 +65,47 @@ class _Mul(Function):
         return arr
 
 
-class _Div(Function):
+class Div(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         context.save(a, b)
-        arr = a.data / b.data
+        arr = a.data * (1 / b.data)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr0 = grad.data / b.data
-        arr1 = np.negative(a.data) / b.data**2.0 * grad.data
+        arr0 = grad.data * (1 / b.data)
+        arr1 = np.negative(a.data) * (1 / np.square(b.data)) * grad.data
         return arr0, arr1
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
-        arr0 = agrad.data / b.data
-        arr1 = a.data * (np.negative(bgrad.data) / b.data**2)
+        arr0 = agrad.data * (1 / b.data)
+        arr1 = a.data * np.negative(1 / np.square(b.data)) * bgrad.data
         arr = arr0 + arr1
         return arr
 
 
-class _Dot(Function):
+class Floordiv(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor):
+        arr = a.data // b.data
+        return arr
+
+
+class Modulo(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor):
+        arr = a.data % b.data
+        return arr
+
+
+class Dot(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
@@ -98,15 +116,8 @@ class _Dot(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        if a.ndim == 1 and b.ndim > 1:
-            arr0 = np.dot(b.data, grad.data)
-            arr1 = np.outer(a.data, grad.data)
-        elif b.ndim == 1 and a.ndim > 1:
-            arr0 = np.outer(grad.data, b.data)
-            arr1 = np.dot(a.data.T, grad.data)
-        else:
-            arr0 = np.dot(grad.data, b.data.T)
-            arr1 = np.dot(a.data.T, grad.data)
+        arr0 = b.data * grad.data
+        arr1 = a.data * grad.data
         return arr0, arr1
 
     @staticmethod
@@ -118,19 +129,27 @@ class _Dot(Function):
         return arr
 
 
-class _Matmul(Function):
+class Matmul(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         context.save(a, b)
-        arr = np.matmul(a.data, b.data)
-        return arr
+        return np.matmul(a.data, b.data)
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr0 = np.matmul(grad.data, np.swapaxes(b.data, -2, -1))
-        arr1 = np.matmul(np.swapaxes(a.data, -2, -1), grad.data)
+        if a.ndim == 1:
+            axis = tuple(range(b.ndim - 2)) + (b.ndim - 1,)
+            arr0 = (b.data * np.expand_dims(grad.data, -2)).sum(axis=axis)
+            arr1 = np.einsum("...jl,k->...jkl", grad.data, a.data)
+        elif b.ndim == 1:
+            axis = tuple(range(a.ndim - 1))
+            arr0 = np.einsum("...,l->...l", grad.data, b.data)
+            arr1 = (a.data * np.expand_dims(grad.data, -1)).sum(axis=axis)
+        else:
+            arr1 = np.matmul(a.data.swapaxes(-2, -1), grad.data)
+            arr0 = np.matmul(grad.data, b.data.swapaxes(-2, -1))
         return arr0, arr1
 
     @staticmethod
@@ -142,53 +161,53 @@ class _Matmul(Function):
         return arr
 
 
-class _Pow(Function):
+class Pow(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, b: Tensor):
         arr = np.power(a.data, b.data)
         context.save(a, b)
-        context["arr"] = arr
+        context.arr = arr
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a, b = context.tensors()
-        arr = context["arr"]
-        arr0 = b.data * np.power(a.data, b.data - 1.0) * grad.data
+        arr = context.arr
+        arr0 = b.data * np.power(a.data, b.data - 1) * grad.data
         arr1 = arr * np.log(a.data) * grad.data
         return arr0, arr1
 
     @staticmethod
     def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
         a, b = context.tensors()
-        arr = context["arr"]
-        arr0 = b.data * np.power(a.data, b.data - 1.0) * agrad.data
+        arr = context.arr
+        arr0 = b.data * np.power(a.data, b.data - 1) * agrad.data
         arr1 = np.log(a.data) * arr * bgrad.data
         return arr0 + arr1
 
 
-class _Exp(Function):
+class Exp(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
         arr = np.exp(a.data)
         context.save(a)
-        context["arr"] = arr
+        context.arr = arr
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        arr = context["arr"]
+        arr = context.arr
         return arr * grad.data
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        arr = context["arr"]
-        return arr * agrad.data
+    def tangent(context: Context, grad: Tensor):
+        arr = context.arr
+        return arr * grad.data
 
 
-class _Log(Function):
+class Log(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -199,17 +218,17 @@ class _Log(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = 1.0 / a.data * grad.data
+        arr = (1 / a.data) * grad.data
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = 1.0 / a.data * agrad.data
+        arr = (1 / a.data) * grad.data
         return arr
 
 
-class _Sin(Function):
+class Sin(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -224,13 +243,13 @@ class _Sin(Function):
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = np.cos(a.data) * agrad.data
+        arr = np.cos(a.data) * grad.data
         return arr
 
 
-class _Cos(Function):
+class Cos(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -245,49 +264,49 @@ class _Cos(Function):
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        arr = agrad.data * np.negative(np.sin(a.data))
+        arr = grad.data * np.negative(np.sin(a.data))
         return arr
 
 
-class _Sum(Function):
+class Sum(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
-        context["dim"] = dim
-        context["keepdims"] = keepdims
+        context.dim = dim
+        context.keepdims = keepdims
         arr = np.sum(a.data, dim, keepdims=keepdims)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = context["dim"]
-        keepdims = context["keepdims"]
+        dim = context.dim
+        keepdims = context.keepdims
         graddata = grad.data
         if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
         return graddata + np.zeros_like(a.data)
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        dim = context["dim"]
-        keepdims = context["keepdims"]
-        arr = np.sum(agrad.data, axis=dim, keepdims=keepdims)
+    def tangent(context: Context, grad: Tensor):
+        dim = context.dim
+        keepdims = context.keepdims
+        arr = np.sum(grad.data, axis=dim, keepdims=keepdims)
         return arr
 
 
-class _Max(Function):
+class Max(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
-        context["dim"] = dim
-        context["keepdims"] = keepdims
         arr = np.max(a.data, dim, keepdims=True)
-        context["arr"] = arr
+        context.dim = dim
+        context.keepdims = keepdims
+        context.arr = arr
         if not keepdims:
             arr = np.squeeze(arr)
         return arr
@@ -295,9 +314,9 @@ class _Max(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = context["dim"]
-        keepdims = context["keepdims"]
-        arr = context["arr"]
+        dim = context.dim
+        keepdims = context.keepdims
+        arr = context.arr
         graddata = grad.data
         mask = a.data == arr
         if not keepdims and a.data.shape != graddata.shape:
@@ -305,25 +324,25 @@ class _Max(Function):
         return mask * (graddata + np.zeros_like(a.data))
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = context["dim"]
-        keepdims = context["keepdims"]
-        arr = context["arr"]
+        dim = context.dim
+        keepdims = context.keepdims
+        arr = context.arr
         mask = a.data == arr
-        graddata = np.where(mask, agrad.data, -np.inf)
+        graddata = np.where(mask, grad.data, -np.inf)
         return np.max(graddata, axis=dim, keepdims=keepdims)
 
 
-class _Min(Function):
+class Min(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
-        context["dim"] = dim
-        context["keepdims"] = keepdims
         arr = np.min(a.data, dim, keepdims=True)
-        context["arr"] = arr
+        context.dim = dim
+        context.keepdims = keepdims
+        context.arr = arr
         if not keepdims:
             arr = np.squeeze(arr)
         return arr
@@ -331,9 +350,9 @@ class _Min(Function):
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = context["dim"]
-        keepdims = context["keepdims"]
-        arr = context["arr"]
+        dim = context.dim
+        keepdims = context.keepdims
+        arr = context.arr
         graddata = grad.data
         mask = a.data == arr
         if not keepdims and a.data.shape != graddata.shape:
@@ -341,88 +360,120 @@ class _Min(Function):
         return mask * (graddata + np.zeros_like(a.data))
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        dim = context["dim"]
-        keepdims = context["keepdims"]
-        arr = context["arr"]
+        dim = context.dim
+        keepdims = context.keepdims
+        arr = context.arr
         mask = a.data == arr
-        graddata = np.where(mask, agrad.data, np.inf)
+        graddata = np.where(mask, grad.data, np.inf)
         return np.min(graddata, axis=dim, keepdims=keepdims)
 
 
-class _Squeeze(Function):
+class Mean(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, dim: dimlike):
+    def forward(context: Context, a: Tensor, dim: dimlike, keepdims: bool):
         context.save(a)
-        context["dim"] = dim
+        context.dim = dim
+        context.keepdims = keepdims
+        return a.data.mean(axis=dim, keepdims=keepdims)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        dim = context.dim
+        keepdims = context.keepdims
+        graddata = grad.data
+        n = np.prod(a.dim) if dim is None else np.prod(a.dim[dim])
+        if not keepdims and a.data.shape != graddata.shape:
+            graddata = np.expand_dims(graddata, axis=dim)
+        return graddata * (1 / n)
+
+
+class Var(Function):
+
+    @staticmethod
+    def forward(
+        context: Context, a: Tensor, correction: int, dim: dimlike, keepdims: bool
+    ):
+        context.save(a)
+        context.correction = correction
+        context.dim = dim
+        context.keepdims = keepdims
+        mean = a.data.mean(axis=dim, keepdims=keepdims)
+        context.mean = mean
+        return a.data.var(ddof=correction, axis=dim, keepdims=keepdims)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        correction = context.correction
+        dim = context.dim
+        keepdims = context.keepdims
+        mean = context.mean
+        graddata = grad.data
+
+        n = (
+            np.prod(a.dim)
+            if dim is None
+            else np.prod(tuple(a.dim[i] for i in range(a.ndim))) - correction
+        )
+        if not keepdims and a.data.shape != graddata.shape:
+            graddata = np.expand_dims(graddata, axis=dim)
+        return graddata * (2 / n) * -mean
+
+
+class Squeeze(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, dim: Optional[dimlike]):
+        context.save(a)
+        context.dim = dim
         arr = a.data.squeeze(axis=dim)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        dim = context["dim"]
+        dim = context.dim
         arr = np.expand_dims(grad.data, axis=dim)
         return arr
 
     @staticmethod
     def tangent(context: Context, grad: Tensor):
-        dim = context["dim"]
+        dim = context.dim
         arr = grad.data.squeeze(axis=dim)
         return arr
 
 
-class _Unsqueeze(Function):
+class Unsqueeze(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim: dimlike):
         context.save(a)
-        context["dim"] = dim
+        context.dim = dim
         arr = np.expand_dims(a.data, axis=dim)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        dim = context["dim"]
+        dim = context.dim
         arr = grad.data.squeeze(axis=dim)
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        dim = context["dim"]
-        arr = np.expand_dims(agrad.data, axis=dim)
+    def tangent(context: Context, grad: Tensor):
+        dim = context.dim
+        arr = np.expand_dims(grad.data, axis=dim)
         return arr
 
 
-class _View(Function):
+class Reshape(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, newdim: dim):
         context.save(a)
-        context["newdim"] = newdim
-        arr = a.data.reshape(newdim, order="C")
-        return arr
-
-    @staticmethod
-    def backward(context: Context, grad: Tensor):
-        a = context.tensors()[0]
-        arr = grad.data.reshape(a.dim, order="C")
-        return arr
-
-    @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        newdim = context["newdim"]
-        arr = agrad.data.reshape(newdim, order="C")
-        return arr
-
-
-class _Reshape(Function):
-
-    @staticmethod
-    def forward(context: Context, a: Tensor, newdim: dim):
-        context.save(a)
-        context["newdim"] = newdim
+        context.newdim = newdim
         arr = a.data.reshape(newdim)
         return arr
 
@@ -433,62 +484,63 @@ class _Reshape(Function):
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        newdim = context["newdim"]
-        arr = agrad.data.reshape(newdim)
+    def tangent(context: Context, grad: Tensor):
+        newdim = context.newdim
+        arr = grad.data.reshape(newdim)
         return arr
 
 
-class _Transpose(Function):
+class Transpose(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dim0: int, dim1: int):
         arr = a.data.swapaxes(dim0, dim1)
         context.save(a)
-        context["dim0"] = dim0
-        context["dim1"] = dim1
+        context.dim0 = dim0
+        context.dim1 = dim1
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        dim0 = context["dim0"]
-        dim1 = context["dim1"]
+        dim0 = context.dim0
+        dim1 = context.dim1
         arr = grad.data.swapaxes(dim0, dim1)
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        dim0 = context["dim0"]
-        dim1 = context["dim1"]
-        arr = agrad.data.swapaxes(dim0, dim1)
+    def tangent(context: Context, grad: Tensor):
+        dim0 = context.dim0
+        dim1 = context.dim1
+        arr = grad.data.swapaxes(dim0, dim1)
         return arr
 
 
-class _Permute(Function):
+class Permute(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor, dims: dim):
         context.save(a)
-        context["dims"] = dims
+        context.dims = dims
+        context.ndim = a.ndim
         arr = a.data.transpose(dims)
         return arr
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        a = context.tensors()[0]
-        dims = np.argsort(context["dims"])
-        arr = grad.data.reshape(a.data.shape).transpose(dims)
+        normed = tuple(i + context.ndim if i < 0 else i for i in (context.dims))
+        dims = np.argsort(normed)
+        arr = grad.data.transpose(dims)
         return arr
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        a = context.tensors()[0]
-        dims = context["dims"]
-        arr = agrad.data.reshape(a.data.shape).transpose(dims)
+    def tangent(context: Context, grad: Tensor):
+        normed = tuple(i + context.ndim if i < 0 else i for i in (context.dims))
+        dims = np.argsort(normed)
+        arr = grad.data.transpose(dims)
         return arr
 
 
-class _Abs(Function):
+class Abs(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -502,13 +554,13 @@ class _Abs(Function):
         return grad.data * mask
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
+    def tangent(context: Context, grad: Tensor):
         a = context.tensors()[0]
         mask = np.sign(a.data)
-        return agrad.data * mask
+        return grad.data * mask
 
 
-class _Pos(Function):
+class Pos(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -520,11 +572,11 @@ class _Pos(Function):
         return grad.data.copy()
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        return agrad.data.copy()
+    def tangent(context: Context, grad: Tensor):
+        return grad.data.copy()
 
 
-class _Neg(Function):
+class Neg(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -533,14 +585,16 @@ class _Neg(Function):
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
-        return grad.data * -1.0
+        a = context.tensors()[0]
+        return np.negative(grad.data)
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        return agrad.data * -1.0
+    def tangent(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        return np.negative(grad.data)
 
 
-class _Clone(Function):
+class Clone(Function):
 
     @staticmethod
     def forward(context: Context, a: Tensor):
@@ -553,29 +607,77 @@ class _Clone(Function):
         return grad.data.copy()
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        return agrad.data.copy()
+    def tangent(context: Context, grad: Tensor):
+        return grad.data.copy()
 
 
-class _Slice(Function):
+class Slice(Function):
 
     @staticmethod
-    def forward(context: Context, a: Tensor, slc: slice):
+    def forward(context: Context, a: Tensor, slice_: Union[Tuple[slice, ...], slice]):
         context.save(a)
-        context["slc"] = slc
-        arr = a.data[slc]
+        context.slice_ = slice_
+        arr = a.data[slice_]
         return arr.copy()
 
     @staticmethod
     def backward(context: Context, grad: Tensor):
         a = context.tensors()[0]
-        slc = context["slc"]
+        slice_ = context.slice_
         mask = np.zeros_like(a.data)
-        mask[slc] = grad.data
+        mask[slice_] = grad.data
         return mask
 
     @staticmethod
-    def tangent(context: Context, agrad: Tensor):
-        slc = context["slc"]
-        arr = agrad.data[slc]
+    def tangent(context: Context, grad: Tensor):
+        slice_ = context.slice_
+        arr = grad.data[slice_]
         return arr.copy()
+
+
+class Flatten(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, start: int, end: int):
+        context.save(a)
+        dim = a.dim
+        if end < 0:
+            end += a.ndim
+        newdim = dim[:start] + (np.prod(dim[start : end + 1]),)
+        if end < a.ndim - 1:
+            newdim += dim[end + 1 :]
+        context.dim = dim
+        context.newdim = newdim
+        return a.data.reshape(newdim)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        dim = context.dim
+        return grad.data.reshape(dim)
+
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
+        newdim = context.newdim
+        return grad.data.reshape(newdim)
+
+
+class Concat(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor, b: Tensor, dim: int):
+        context.save(a, b)
+        context.dim = dim
+        return np.concatenate((a.data, b.data), axis=dim)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a, b = context.tensors()
+        dim = context.dim
+        index = a.data.shape[dim]
+        output = tuple(np.split(grad.data, (index, index), axis=dim))
+        return (output[0].copy(), output[-1].copy())
+
+    @staticmethod
+    def tangent(context: Context, agrad: Tensor, bgrad: Tensor):
+        dim = context.dim
+        return np.concatenate((agrad.data, bgrad.data), axis=dim)

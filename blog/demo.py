@@ -1,8 +1,10 @@
 import nura
 from nura.autograd.functional import jacfwd
 
+
 def fn(a, b, c):
     return a * b + c
+
 
 a = nura.tensor([1.0, 2.0, 3.0, 4.0])
 b = nura.tensor([5.0, 6.0, 7.0, 8.0])

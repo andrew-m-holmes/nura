@@ -1,4 +1,4 @@
-from nura.nn.module import Module
-from nura.nn.parameter import parameter
-from nura.nn.activations import *
+from nura.nn.loss import *
 from nura.nn.modules import *
+from nura.nn.optimizers import *
+from nura.nn.parameter import Parameter, parameter

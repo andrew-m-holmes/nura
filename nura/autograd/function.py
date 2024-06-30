@@ -1,37 +1,38 @@
 import nura
 from nura.tensors import Tensor
-from nura.autograd.graph import genout
-from typing import Tuple, Any, Optional, Dict, Union
 from numpy import ndarray
+from typing import Tuple, Any, Optional, Union
 
 
 class Context:
 
     def __init__(self) -> None:
-        self._tensors: Optional[Tuple[Tensor, ...]] = None
-        self._dict: Optional[Dict[Any, Any]] = None
+        self._context: Optional[Tuple[Tuple[Tensor, int], ...]] = None
 
-    def save(self, *tensors: Tensor):
-        self._tensors = tensors
+    def save(self, *tensors: Tensor) -> None:
+        self._context = tuple((t, t.version) for t in tensors)
 
     def tensors(self) -> Tuple[Tensor, ...]:
-        return self._tensors if self._tensors else ()
+        if self._context is None:
+            return ()
+        if not all(t.version == v for t, v in self._context):
+            raise RuntimeError(
+                "Cannot retrieve tensors, one or more tensor's version(s) has changed between initial save and retrieval"
+            )
+        return tuple(t for t, _ in self._context)
 
     def usesgrad(self) -> bool:
-        if self._tensors is None:
+        if self._context is None:
             return False
-        return any(t.usegrad for t in self._tensors) and all(
-            t.gradtensor for t in self._tensors
+        return any(t.usegrad for t, _ in self._context) and all(
+            t.gradtensor for t, _ in self._context
         )
 
-    def __setitem__(self, key: Any, value: Any):
-        if self._dict is None:
-            self._dict = dict()
-        self._dict[key] = value
+    def __getattr__(self, name: str) -> Any:
+        return self.__dict__[name]
 
-    def __getitem__(self, key: Any) -> Any:
-        assert self._dict is not None
-        return self._dict[key]
+    def __setattr__(self, name: str, value: Any) -> None:
+        self.__dict__[name] = value
 
     def __repr__(self) -> str:
         return self.__class__.__name__
@@ -44,20 +45,26 @@ class Function:
         raise NotImplementedError
 
     @staticmethod
-    def backward(context: Context, grad: Tensor) -> Union[Tuple[ndarray, ...], ndarray]:
+    def backward(
+        context: Context, *args: Any, **kwargs: Any
+    ) -> Union[Tuple[ndarray, ...], ndarray]:
         raise NotImplementedError
 
     @staticmethod
-    def tangent(context: Context, *grad: Tensor) -> ndarray:
+    def tangent(context: Context, *args: Any, **kwargs: Any) -> ndarray:
         raise NotImplementedError
 
     @classmethod
-    def apply(cls, *args: Any, **kwargs: Any) -> Tensor:
+    def apply(cls, *args: Any, **kwargs: Any) -> Any:
         context = Context()
-        rawout = cls.forward(context, *args, **kwargs)
-        irout = nura.tensor(rawout)
-        out = genout(irout, cls, context)
-        return out
+        arr = cls.forward(context, *args, **kwargs)
+        output = nura.tensor(arr)
+        if context.usesgrad():
+            if nura.Autograd.forwardmode():
+                nura.forwardad.primalify(output, cls, context)
+            elif nura.Autograd.reversemode():
+                nura.graph.addtograph(output, cls, context)
+        return output
 
     @classmethod
     def name(cls) -> str:

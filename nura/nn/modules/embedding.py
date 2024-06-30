@@ -1,10 +1,10 @@
-import nura.types as types
 import nura.nn.functional as f
-from nura.utils import randn
-from nura.nn.module import Module
+import nura.utils as utils
+import nura.types as types
 from nura.types import dtype
+from nura.nn.modules.module import Module
+from nura.nn.parameter import Parameter, parameter
 from nura.tensors import Tensor
-from nura.nn import parameter
 from typing import Optional, Type
 
 
@@ -22,18 +22,18 @@ class Embedding(Module):
         self._vocab = vocab
         self._padid = padid
         self._dtype = types.float if dtype is None else dtype
-        self._weight = parameter(randn(vocab, emdim), dtype=dtype)
+        self._weight = parameter(utils.randn(vocab, emdim), dtype=dtype)
 
     @property
-    def emdim(self):
+    def emdim(self) -> int:
         return self._emdim
 
     @property
-    def vocab(self):
+    def vocab(self) -> int:
         return self._vocab
 
     @property
-    def padid(self):
+    def padid(self) -> Optional[int]:
         return self._padid
 
     @property
@@ -41,10 +41,10 @@ class Embedding(Module):
         return self._dtype
 
     @property
-    def weight(self) -> Tensor:
+    def weight(self) -> Parameter:
         return self._weight
 
-    def to(self, dtype: Type[types.dtype]):
+    def to(self, dtype: Type[types.dtype]) -> Module:
         mod = super().to(dtype)
         mod._dtype = dtype
         return mod
