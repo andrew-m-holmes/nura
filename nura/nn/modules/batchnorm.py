@@ -64,7 +64,7 @@ class BatchNorm(Module):
             dim = tuple(range(x.ndim))[:-1]
             mean = x.clone().detach().mean(dim=dim, keepdims=True)
             var = x.clone().detach().var(dim=dim, keepdims=True)
-            varunbiased = x.clone().detach().var(correction=1, dim=dim, keepdims=True)
+            varunbiased = x.clone().detach().var(dim=dim, keepdims=True, correction=1)
             self._mean = self.momentum * self._mean + (1 - self.momentum) * mean
             self._var = self.momentum * self._var + (1 - self.momentum) * varunbiased
             return f.batchnorm(x, self.gamma, self.beta, mean, var, self.eps)

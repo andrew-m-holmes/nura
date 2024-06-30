@@ -185,9 +185,9 @@ def mean(a: Tensor, dim: Optional[dimlike] = None, keepdims: bool = False) -> Te
 
 def var(
     a: Tensor,
-    correction: int = 0,
     dim: Optional[dimlike] = None,
     keepdims: bool = False,
+    correction: int = 0,
 ) -> Tensor:
     if correction < 0:
         raise ValueError("Cannot compute vairance with bias correct less than zero")
@@ -199,11 +199,11 @@ def var(
 
 def std(
     a: Tensor,
-    correction: int = 0,
     dim: Optional[dimlike] = None,
     keepdims: bool = False,
+    correction: int = 0,
 ) -> Tensor:
-    return sqrt(var(a, correction, dim, keepdims))
+    return sqrt(var(a, dim, keepdims, correction))
 
 
 def transpose(a: Tensor, dim0: int = -2, dim1: int = -1) -> Tensor:
@@ -265,7 +265,11 @@ def select(
 
 
 def flatten(a: Tensor, start: int = 0, end: int = -1) -> Tensor:
-    if a.ndim + end <= start:
+    start = a.ndim + start if start < 0 else start
+    end = a.ndim + end if end < 0 else end
+    if a.ndim < 2:
+        raise ValueError(f"Cannot flatten Tensor, Tensor is {a.ndim}D, require >= 2D")
+    if end < start:
         raise ValueError(
             "Cannot flatten Tensor, flatten ends at or before flatten starts"
         )
@@ -277,6 +281,8 @@ def concat(a: Tensor, b: Tensor, dim: int = 0) -> Tensor:
         raise ValueError(
             "Cannot concatenate Tensors, they don't have the same number of dimensions"
         )
+    if a.ndim < 1:
+        raise ValueError("Cannot concatenate Tensors, they are scalars")
     dim = dim + a.ndim if dim < 0 else dim
     if a.dim[:dim] + a.dim[dim + 1 :] != b.dim[:dim] + b.dim[dim + 1 :]:
         raise ValueError(

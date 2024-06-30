@@ -195,14 +195,14 @@ class Tensor:
         return nura.mean(self, dim, keepdims)
 
     def var(
-        self, correction: int = 0, dim: Optional[dimlike] = None, keepdims: bool = False
+        self, dim: Optional[dimlike] = None, keepdims: bool = False, correction: int = 0
     ) -> "Tensor":
-        return nura.var(self, correction, dim, keepdims)
+        return nura.var(self, dim, keepdims, correction)
 
     def std(
-        self, correction: int = 0, dim: Optional[dimlike] = None, keepdims: bool = False
+        self, dim: Optional[dimlike] = None, keepdims: bool = False, correction: int = 0
     ) -> "Tensor":
-        return nura.std(self, correction, dim, keepdims)
+        return nura.std(self, dim, keepdims, correction)
 
     def squeeze(self, dim: Optional[dimlike] = None) -> "Tensor":
         return nura.squeeze(self, dim)
@@ -218,6 +218,9 @@ class Tensor:
 
     def permute(self, dims: types.dim) -> "Tensor":
         return nura.permute(self, dims)
+
+    def flatten(self, start: int = 0, end: int = -1) -> "Tensor":
+        return nura.flatten(self, start, end)
 
     def abs(self) -> "Tensor":
         return nura.abs(self)

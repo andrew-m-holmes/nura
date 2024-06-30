@@ -2396,7 +2396,9 @@ def test_min_dim_3_shape_3_backward():
         a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
     )
 
+
 # TODO tests for mean var and std
+
 
 def test_transpose_matrix_backward():
     a = np.random.rand(3, 4)
@@ -3434,5 +3436,6 @@ def test_select_single_dimension_operator_backward():
     np.testing.assert_allclose(
         a_tensor.grad.data, expected_grad_a, rtol=1e-7, atol=1e-7
     )
+
 
 # TODO tests for flatten and concat

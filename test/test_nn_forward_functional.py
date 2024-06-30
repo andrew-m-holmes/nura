@@ -1645,4 +1645,3 @@ def test_layernorm_tensor_with_tuple_dim():
 
 
 # TODO add tests for batchnorm
-
