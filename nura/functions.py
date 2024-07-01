@@ -385,7 +385,11 @@ class Mean(Function):
         dim = context.dim
         keepdims = context.keepdims
         graddata = grad.data
-        n = np.prod(a.dim) if dim is None else np.prod(a.dim[dim])
+        n = (
+            a.data.shape[dim]
+            if isinstance(dim, int)
+            else np.prod([a.data.shape[d] for d in dim])
+        )
         if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
         return graddata * (1 / n)
@@ -401,7 +405,7 @@ class Var(Function):
         context.correction = correction
         context.dim = dim
         context.keepdims = keepdims
-        mean = a.data.mean(axis=dim, keepdims=keepdims)
+        mean = a.data.mean(axis=dim, keepdims=True)
         context.mean = mean
         return a.data.var(ddof=correction, axis=dim, keepdims=keepdims)
 
@@ -413,15 +417,15 @@ class Var(Function):
         keepdims = context.keepdims
         mean = context.mean
         graddata = grad.data
-
         n = (
-            np.prod(a.dim)
-            if dim is None
-            else np.prod(tuple(a.dim[i] for i in range(a.ndim))) - correction
-        )
+            a.data.shape[dim]
+            if isinstance(dim, int)
+            else np.prod([a.data.shape[d] for d in dim])
+        ) - correction
+
         if not keepdims and a.data.shape != graddata.shape:
             graddata = np.expand_dims(graddata, axis=dim)
-        return graddata * (2 / n) * -mean
+        return graddata * (2 / n) * (a.data - mean)
 
 
 class Squeeze(Function):

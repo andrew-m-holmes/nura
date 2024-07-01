@@ -2400,6 +2400,297 @@ def test_min_dim_3_shape_3_backward():
 # TODO tests for mean var and std
 
 
+def test_mean_backward_scalar():
+    x = np.array(5.0)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor)
+    result_tensor.backward()
+
+    expected_grad = np.ones_like(x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_vector():
+    x = np.random.rand(5)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor)
+    result_tensor.backward()
+
+    expected_grad = np.ones_like(x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_matrix():
+    x = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor)
+    result_tensor.backward()
+
+    expected_grad = np.ones_like(x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_tensor():
+    x = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor)
+    result_tensor.backward()
+
+    expected_grad = np.ones_like(x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_higher_order_tensor():
+    x = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor)
+    result_tensor.backward()
+
+    expected_grad = np.ones_like(x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_method():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = x_tensor.mean()
+    result_tensor.backward()
+
+    expected_grad = np.ones_like(x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_dim():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor, dim=1)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad = np.ones_like(x) / x.shape[1]
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_dim_keepdims():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor, dim=1, keepdims=True)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad = np.ones_like(x) / x.shape[1]
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_multiple_dims():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor, dim=(1, 2))
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad = np.ones_like(x) / (x.shape[1] * x.shape[2])
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_mean_backward_multiple_dims_keepdims():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.mean(x_tensor, dim=(1, 2), keepdims=True)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    expected_grad = np.ones_like(x) / (x.shape[1] * x.shape[2])
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_scalar():
+    x = np.array(5.0)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor)
+    result_tensor.backward()
+
+    expected_grad = np.zeros_like(x)
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_vector():
+    x = np.random.rand(5)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor)
+    result_tensor.backward()
+
+    mean_x = np.mean(x)
+    expected_grad = 2 * (x - mean_x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_matrix():
+    x = np.random.rand(3, 4)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor)
+    result_tensor.backward()
+
+    mean_x = np.mean(x)
+    expected_grad = 2 * (x - mean_x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_tensor():
+    x = np.random.rand(2, 3, 4)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor)
+    result_tensor.backward()
+
+    mean_x = np.mean(x)
+    expected_grad = 2 * (x - mean_x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_higher_order_tensor():
+    x = np.random.rand(2, 3, 4, 5)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor)
+    result_tensor.backward()
+
+    mean_x = np.mean(x)
+    expected_grad = 2 * (x - mean_x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_method():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = x_tensor.var()
+    result_tensor.backward()
+
+    mean_x = np.mean(x)
+    expected_grad = 2 * (x - mean_x) / x.size
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_dim():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor, dim=2)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=2, keepdims=True)
+    expected_grad = 2 * (x - mean_x) / x.shape[2]
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_dim_keepdims():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor, dim=2, keepdims=True)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=2, keepdims=True)
+    expected_grad = 2 * (x - mean_x) / x.shape[2]
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_multiple_dims():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor, dim=(0, 1))
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=(0, 1), keepdims=True)
+    expected_grad = 2 * (x - mean_x) / (x.shape[0] * x.shape[1])
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_multiple_dims_keepdims():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    result_tensor = f.var(x_tensor, dim=(0, 1), keepdims=True)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=(0, 1), keepdims=True)
+    expected_grad = 2 * (x - mean_x) / (x.shape[0] * x.shape[1])
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_dim_with_correction():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    correction = 1
+    result_tensor = f.var(x_tensor, dim=1, correction=correction)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=1, keepdims=True)
+    expected_grad = 2 * (x - mean_x) / (x.shape[1] - correction)
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_multiple_dims_with_correction():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    correction = 2
+    result_tensor = f.var(x_tensor, dim=(0, 2), correction=correction)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=(0, 2), keepdims=True)
+    expected_grad = 2 * (x - mean_x) / (x.shape[0] * x.shape[2] - correction)
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
+def test_var_backward_multiple_dims_keepdims_with_correction():
+    x = np.random.rand(4, 5, 6)
+    x_tensor = nura.tensor(x, usegrad=True)
+    correction = 3
+    result_tensor = f.var(x_tensor, dim=(1, 2), keepdims=True, correction=correction)
+    result_tensor.backward(nura.oneslike(result_tensor))
+
+    mean_x = np.mean(x, axis=(1, 2), keepdims=True)
+    expected_grad = 2 * (x - mean_x) / (x.shape[1] * x.shape[2] - correction)
+
+    assert x_tensor.grad is not None
+    np.testing.assert_allclose(x_tensor.grad.data, expected_grad, rtol=1e-7, atol=1e-7)
+
+
 def test_transpose_matrix_backward():
     a = np.random.rand(3, 4)
     a_tensor = nura.tensor(a, usegrad=True)
