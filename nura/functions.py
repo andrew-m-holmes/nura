@@ -187,6 +187,42 @@ class Pow(Function):
         return arr0 + arr1
 
 
+class Square(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save(a)
+        return np.square(a.data)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        return 2 * grad.data * a.data
+
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        return 2 * grad.data * a.data
+
+
+class Sqrt(Function):
+
+    @staticmethod
+    def forward(context: Context, a: Tensor):
+        context.save(a)
+        return np.sqrt(a.data)
+
+    @staticmethod
+    def backward(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        return grad.data * (0.5 / np.sqrt(a.data))
+
+    @staticmethod
+    def tangent(context: Context, grad: Tensor):
+        a = context.tensors()[0]
+        return grad.data * (0.5 / np.sqrt(a.data))
+
+
 class Exp(Function):
 
     @staticmethod
@@ -417,6 +453,7 @@ class Var(Function):
         keepdims = context.keepdims
         mean = context.mean
         graddata = grad.data
+
         n = (
             a.data.shape[dim]
             if isinstance(dim, int)

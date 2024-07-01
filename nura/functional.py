@@ -128,11 +128,11 @@ def ipow(a: Tensor, b: Union[Tensor, Scalar]) -> None:
 
 
 def square(a: Tensor) -> Tensor:
-    return functions.Pow.apply(a, tensor(2.0, dtype=a.dtype))
+    return functions.Square.apply(a)
 
 
 def sqrt(a: Tensor) -> Tensor:
-    return functions.Pow.apply(a, tensor(0.5, dtype=a.dtype))
+    return functions.Sqrt.apply(a)
 
 
 def exp(a: Tensor) -> Tensor:
